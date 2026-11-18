@@ -1,0 +1,236 @@
+{
+  "id": "01-course-assignment",
+  "title": "课程作业通知（黄金路径主角）",
+  "kind": "analysis",
+  "is_demo": true,
+  "depends_on": [],
+  "acceptance": [
+    "PRD 第 521 行：可从剪贴板、图片文件或文字创建原始资料",
+    "PRD 第 524 行：通知类便签能展示要求、时间及原文引用",
+    "PRD 第 526 行：重要事实字段可独立确认，便签整体可标记已审阅",
+    "PRD 第 76 行黄金路径第 3 步：用户修改一项识别错误（constraints 由 300 字改为 3000 字）",
+    "PRD 第 136 行：仅粘贴图片不自动编造来源，origin_url / origin_title 保持 null"
+  ],
+  "source": {
+    "id": "src-01",
+    "workspace_id": "demo-ml-report",
+    "kind": "image",
+    "image_ref": "assets/01-course-assignment.png",
+    "text": null,
+    "captured_at": "2026-11-17T09:12:00+08:00",
+    "origin_url": null,
+    "origin_title": null,
+    "is_demo": true
+  },
+  "analyze_request": {
+    "source_id": "src-01",
+    "kind": "image",
+    "image_base64": "__INJECT_IMAGE_BASE64__",
+    "text": null,
+    "captured_at": "2026-11-17T09:12:00+08:00",
+    "content_hint": null
+  },
+  "expected_analysis": {
+    "source_id": "src-01",
+    "content_type": "notice",
+    "fields": [
+      {
+        "key": "title",
+        "value": "机器学习课程报告",
+        "raw": "机器学习课程报告（占总评 30%）",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "机器学习课程报告（占总评 30%）",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "requirement",
+        "value": "提交 PDF 报告与可运行代码压缩包",
+        "raw": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-19",
+        "raw": "截止时间：2026年11月19日",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "截止时间：2026年11月19日",
+          "source_id": "src-01"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "constraints",
+        "value": "报告不少于 300 字，需包含实验对比",
+        "raw": "报告不少于3000字，须包含至少两组实验对比",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "报告不少于3000字，须包含至少两组实验对比",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "submit_to",
+        "value": "课程平台「作业」入口",
+        "raw": "通过课程平台「作业」入口提交",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "通过课程平台「作业」入口提交",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "reminder",
+        "value": "逾期提交按零分计",
+        "raw": "逾期提交按零分计",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "逾期提交按零分计",
+          "source_id": "src-01"
+        }
+      }
+    ],
+    "warnings": [
+      {
+        "code": "demo_data",
+        "message": "这是演示 fixture 的固定结果，不是真实模型实时识别（PRD F12 第 386 行）",
+        "field_key": null
+      },
+      {
+        "code": "origin_unknown",
+        "message": "截图未包含可识别的来源链接，未自动填写来源",
+        "field_key": null
+      }
+    ],
+    "analyzed_at": "2026-11-17T09:12:06+08:00",
+    "model_name": "fixture:01-course-assignment",
+    "schema_version": "0.1.0"
+  },
+  "confirmed_note": {
+    "id": "note-01",
+    "workspace_id": "demo-ml-report",
+    "source_id": "src-01",
+    "status": "reviewed",
+    "content_type": "notice",
+    "title": "机器学习课程报告",
+    "fields": [
+      {
+        "key": "title",
+        "value": "机器学习课程报告",
+        "raw": "机器学习课程报告（占总评 30%）",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "机器学习课程报告（占总评 30%）",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "requirement",
+        "value": "提交 PDF 报告与可运行代码压缩包",
+        "raw": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-19",
+        "raw": "截止时间：2026年11月19日",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "截止时间：2026年11月19日",
+          "source_id": "src-01"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "constraints",
+        "value": "报告不少于 3000 字，须包含至少两组实验对比",
+        "raw": "报告不少于3000字，须包含至少两组实验对比",
+        "origin": "user",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "报告不少于3000字，须包含至少两组实验对比",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "submit_to",
+        "value": "课程平台「作业」入口",
+        "raw": "通过课程平台「作业」入口提交",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "通过课程平台「作业」入口提交",
+          "source_id": "src-01"
+        }
+      },
+      {
+        "key": "reminder",
+        "value": "逾期提交按零分计",
+        "raw": "逾期提交按零分计",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "逾期提交按零分计",
+          "source_id": "src-01"
+        }
+      }
+    ],
+    "matter_id": "matter-ml",
+    "matter_role": "requirement",
+    "created_at": "2026-11-17T09:12:00+08:00",
+    "updated_at": "2026-11-17T09:20:00+08:00",
+    "reviewed_at": "2026-11-17T09:20:00+08:00",
+    "is_demo": true
+  },
+  "matter": {
+    "id": "matter-ml",
+    "workspace_id": "demo-ml-report",
+    "title": "机器学习课程报告",
+    "note_ids": [
+      "note-01",
+      "note-02",
+      "note-03",
+      "note-04"
+    ],
+    "created_at": "2026-11-17T09:21:00+08:00",
+    "is_demo": true
+  },
+  "task": null,
+  "action": null,
+  "focus_session": null,
+  "plan_items": [],
+  "change_proposal": null
+}

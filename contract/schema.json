@@ -1,0 +1,1762 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "截下来 API 与本地领域契约",
+  "schema_version": "0.2.0",
+  "source_of_truth": "contract/models.py",
+  "x-semantics": {
+    "fields": {
+      "notice": {
+        "title": "标题",
+        "requirement": "要做什么、提交什么材料；多条可用字符串数组",
+        "deadline": "行动时间节点：提交类取最早硬性提交/完成截止；活动/宣讲/培训类取最早开始时间；其余节点进 constraints；不要把多个日期拼进一个 value",
+        "constraints": "字数/格式/实验组数等硬性限制，以及带标签的时间窗口、地点、其余场次或截止节点；字符串或字符串数组",
+        "submit_to": "提交入口或提交对象",
+        "reminder": "逾期后果、提醒类语句；不要放进 constraints"
+      },
+      "tutorial": {
+        "title": "标题",
+        "deadline": "如有明确时间节点（提交/截止）则填；无则 missing",
+        "summary": "概括原文；可归纳但 quote 必须指向支撑片段",
+        "steps": "操作步骤；段落叙述也归纳成字符串数组",
+        "cautions": "注意事项；字符串数组"
+      },
+      "reference": {
+        "title": "标题",
+        "deadline": "如有明确时间节点（提交/截止）则填；无则 missing",
+        "summary": "概括原文；可归纳但 quote 必须指向支撑片段",
+        "keywords": "检索关键词；字符串数组"
+      }
+    },
+    "status": {
+      "candidate": "原文可确定的事实候选，待用户确认；value 不得为 null",
+      "unresolved": "仅用于原文时间或事实无法确定（相对时间、缺年份、模糊表述）；多场次/多选项是确定事实，用 candidate+数组，不得标 unresolved",
+      "missing": "原文没写；value=null、raw=\"\"；绝不推测补造",
+      "confirmed": "只能由用户标记，模型不得输出"
+    },
+    "time_rules": [
+      "相对时间（下周五/周日/明天等）：status=unresolved、value=null、raw 保留原文；不要自己换算成日期，换算由后端用保存时间完成",
+      "相对词同句或括号内另有明确日期（如「本周二（5.12）」）：以明确日期为准；带年份输出 candidate+value；只有月日没有年份输出 unresolved+value=null 由后端补年",
+      "原文明确绝对日期：value 用 YYYY-MM-DD；只有日期不补时刻（不补 23:59）；原文带时刻才用完整 ISO 日期时间",
+      "不要自行补年份或时区：原文没有的年份/时区后端会剥离并标推算；时区原文有才写",
+      "「24:00」表示当日结束：输出 date 精度（YYYY-MM-DD），不要输出 T24:00"
+    ],
+    "chat_rules": [
+      "聊天窗口截图只整理主消息气泡正文；忽略侧栏会话列表、群成员列表、与气泡无关的群公告",
+      "不得把成员昵称或老师姓名当作 submit_to / reminder",
+      "气泡内引用或转发的其它通知以气泡正文为准"
+    ],
+    "exclusion_rules": [
+      "礼貌语（请知悉/谢谢/收到请回复）、纯背景原因（如「因平台维护」）、宣传鼓励语不进任何字段；只有当原因构成限制或后果时才进 constraints / reminder",
+      "只输出原文事实候选，不输出行动建议，不把推测写成要求",
+      "每个 candidate/unresolved 字段必须带 raw 与 quote.text，逐字摘自原文不得改写；概括类字段（summary/keywords）的 quote 指向支撑片段"
+    ]
+  },
+  "endpoints": [
+    {
+      "path": "/api/analyze",
+      "method": "POST",
+      "phase": "P0",
+      "request": "AnalyzeRequest",
+      "response": "AnalyzeResponse",
+      "errors": {
+        "413": "图片超出体积上限；前端提示压缩后重试，原图已在本地",
+        "422": "模型输出不合 schema 或请求非法；前端落 Note.status=failed，保留原图，可重试",
+        "503": "模型不可用；前端隐藏 AI 入口但保留仅保存"
+      },
+      "idempotency": "source_id 由客户端生成；同一 source_id 重试不得产生第二份资料"
+    },
+    {
+      "path": "/api/healthz",
+      "method": "GET",
+      "phase": "P0",
+      "request": null,
+      "response": "HealthResponse",
+      "errors": {
+        "503": "服务不可达；前端进入离线态，本地功能全部照常"
+      },
+      "idempotency": "只读"
+    },
+    {
+      "path": "/api/match",
+      "method": "POST",
+      "phase": "P1",
+      "request": "MatchRequest",
+      "response": "MatchResponse",
+      "errors": {
+        "422": "请求非法",
+        "503": "模型不可用；静默跳过建议，不阻塞归组"
+      },
+      "idempotency": "只读建议，无副作用"
+    },
+    {
+      "path": "/api/suggest-action",
+      "method": "POST",
+      "phase": "P1",
+      "request": "SuggestActionRequest",
+      "response": "SuggestActionResponse",
+      "errors": {
+        "422": "请求非法或 basis=requirement 却无 evidence",
+        "503": "不可用；手动填写行动仍可开始专注"
+      },
+      "idempotency": "只读建议，无副作用"
+    },
+    {
+      "path": "/api/parse-tasks",
+      "method": "POST",
+      "phase": "P1",
+      "request": "ParseTasksRequest",
+      "response": "ParseTasksResponse",
+      "errors": {
+        "422": "请求非法",
+        "503": "不可用；退回结构化批量录入"
+      },
+      "idempotency": "只读解析，结果必须经用户确认才入库"
+    }
+  ],
+  "$defs": {
+    "Quote": {
+      "additionalProperties": false,
+      "description": "原文引用。引用存在不等于已核实（PRD 规则 4）。",
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "source_id"
+      ],
+      "title": "Quote",
+      "type": "object"
+    },
+    "FieldOrigin": {
+      "enum": [
+        "model",
+        "user"
+      ],
+      "title": "FieldOrigin",
+      "type": "string"
+    },
+    "FieldStatus": {
+      "enum": [
+        "candidate",
+        "confirmed",
+        "unresolved",
+        "missing"
+      ],
+      "title": "FieldStatus",
+      "type": "string"
+    },
+    "Field": {
+      "additionalProperties": false,
+      "description": "便签的每个重要字段。一个结构承载规则 2/4/7 与 F03 的字段级确认。",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        },
+        "raw": {
+          "default": "",
+          "title": "Raw",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/FieldOrigin",
+          "default": "model"
+        },
+        "status": {
+          "$ref": "#/$defs/FieldStatus",
+          "default": "candidate"
+        },
+        "derived": {
+          "default": false,
+          "title": "Derived",
+          "type": "boolean"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quote"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "precision": {
+          "anyOf": [
+            {
+              "enum": [
+                "date",
+                "datetime"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Precision"
+        },
+        "tz_known": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tz Known"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "Field",
+      "type": "object"
+    },
+    "Deadline": {
+      "additionalProperties": false,
+      "description": "只有日期就保持日期精度，不补 23:59（PRD F07 第 275 行）。",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "precision": {
+          "default": "none",
+          "enum": [
+            "none",
+            "date",
+            "datetime"
+          ],
+          "title": "Precision",
+          "type": "string"
+        },
+        "from_note_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Note Id"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmed At"
+        }
+      },
+      "title": "Deadline",
+      "type": "object"
+    },
+    "Warning": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "field_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field Key"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "Warning",
+      "type": "object"
+    },
+    "ContentType": {
+      "enum": [
+        "notice",
+        "tutorial",
+        "reference"
+      ],
+      "title": "ContentType",
+      "type": "string"
+    },
+    "SourceKind": {
+      "enum": [
+        "image",
+        "text"
+      ],
+      "title": "SourceKind",
+      "type": "string"
+    },
+    "AnalyzeRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "image_base64": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Base64"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "captured_at": {
+          "title": "Captured At",
+          "type": "string"
+        },
+        "content_hint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContentType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "source_id",
+        "kind",
+        "captured_at"
+      ],
+      "title": "AnalyzeRequest",
+      "type": "object"
+    },
+    "AnalyzeResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "content_type": {
+          "$ref": "#/$defs/ContentType"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/Field"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Warning"
+          },
+          "title": "Warnings",
+          "type": "array"
+        },
+        "analyzed_at": {
+          "title": "Analyzed At",
+          "type": "string"
+        },
+        "model_name": {
+          "title": "Model Name",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "0.2.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "content_type",
+        "fields",
+        "analyzed_at",
+        "model_name"
+      ],
+      "title": "AnalyzeResponse",
+      "type": "object"
+    },
+    "HealthResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "model_ready": {
+          "title": "Model Ready",
+          "type": "boolean"
+        },
+        "api_version": {
+          "default": "v1",
+          "title": "Api Version",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": "0.2.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_ready"
+      ],
+      "title": "HealthResponse",
+      "type": "object"
+    },
+    "MatterBrief": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "MatterBrief",
+      "type": "object"
+    },
+    "TaskBrief": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "deadline": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "TaskBrief",
+      "type": "object"
+    },
+    "MatchRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "note_id": {
+          "title": "Note Id",
+          "type": "string"
+        },
+        "note_summary": {
+          "title": "Note Summary",
+          "type": "string"
+        },
+        "matters": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MatterBrief"
+          },
+          "title": "Matters",
+          "type": "array"
+        },
+        "tasks": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TaskBrief"
+          },
+          "title": "Tasks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "note_id",
+        "note_summary"
+      ],
+      "title": "MatchRequest",
+      "type": "object"
+    },
+    "MatchSuggestion": {
+      "additionalProperties": false,
+      "properties": {
+        "matter_id": {
+          "title": "Matter Id",
+          "type": "string"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "matter_id",
+        "confidence",
+        "reason"
+      ],
+      "title": "MatchSuggestion",
+      "type": "object"
+    },
+    "MatchResponse": {
+      "additionalProperties": false,
+      "description": "不确定时返回空数组，不强行归组（F05 第 231 行）。",
+      "properties": {
+        "suggestions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MatchSuggestion"
+          },
+          "title": "Suggestions",
+          "type": "array"
+        }
+      },
+      "title": "MatchResponse",
+      "type": "object"
+    },
+    "SuggestActionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "confirmed_fields": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Field"
+          },
+          "title": "Confirmed Fields",
+          "type": "array"
+        },
+        "available_minutes": {
+          "title": "Available Minutes",
+          "type": "integer"
+        },
+        "note_summaries": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Note Summaries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "title",
+        "available_minutes"
+      ],
+      "title": "SuggestActionRequest",
+      "type": "object"
+    },
+    "ActionBasis": {
+      "enum": [
+        "requirement",
+        "suggestion",
+        "user"
+      ],
+      "title": "ActionBasis",
+      "type": "string"
+    },
+    "SuggestActionResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "minutes": {
+          "title": "Minutes",
+          "type": "integer"
+        },
+        "basis": {
+          "$ref": "#/$defs/ActionBasis"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        }
+      },
+      "required": [
+        "text",
+        "minutes",
+        "basis"
+      ],
+      "title": "SuggestActionResponse",
+      "type": "object"
+    },
+    "TaskDraft": {
+      "additionalProperties": false,
+      "description": "自然语言解析结果。任何不可靠项进 unresolved，绝不返回可直接入库的对象。",
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "due_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Due Raw"
+        },
+        "due_derived": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Due Derived"
+        },
+        "effort_raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effort Raw"
+        },
+        "effort_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effort Minutes"
+        },
+        "unresolved": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolved",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "TaskDraft",
+      "type": "object"
+    },
+    "ParseTasksRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "reference_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Date"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "ParseTasksRequest",
+      "type": "object"
+    },
+    "ParseTasksResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "tasks": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TaskDraft"
+          },
+          "title": "Tasks",
+          "type": "array"
+        },
+        "warnings": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Warning"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "title": "ParseTasksResponse",
+      "type": "object"
+    },
+    "ApiError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "default": false,
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "detail": {
+          "default": null,
+          "title": "Detail"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ApiError",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "image_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Image Ref"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "captured_at": {
+          "title": "Captured At",
+          "type": "string"
+        },
+        "origin_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Origin Url"
+        },
+        "origin_title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Origin Title"
+        },
+        "is_demo": {
+          "default": false,
+          "title": "Is Demo",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "kind",
+        "captured_at"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "MatterRole": {
+      "enum": [
+        "requirement",
+        "supplement",
+        "reference",
+        "outcome",
+        "other"
+      ],
+      "title": "MatterRole",
+      "type": "string"
+    },
+    "NoteStatus": {
+      "enum": [
+        "pending",
+        "draft",
+        "reviewed",
+        "failed"
+      ],
+      "title": "NoteStatus",
+      "type": "string"
+    },
+    "Note": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/NoteStatus"
+        },
+        "content_type": {
+          "$ref": "#/$defs/ContentType"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "fields": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Field"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "matter_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matter Id"
+        },
+        "matter_role": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MatterRole"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewed At"
+        },
+        "is_demo": {
+          "default": false,
+          "title": "Is Demo",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "source_id",
+        "status",
+        "content_type",
+        "title",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "Note",
+      "type": "object"
+    },
+    "Matter": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "note_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Note Ids",
+          "type": "array"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "is_demo": {
+          "default": false,
+          "title": "Is Demo",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "title",
+        "created_at"
+      ],
+      "title": "Matter",
+      "type": "object"
+    },
+    "TaskStatus": {
+      "enum": [
+        "todo",
+        "doing",
+        "blocked",
+        "done"
+      ],
+      "title": "TaskStatus",
+      "type": "string"
+    },
+    "Task": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "matter_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matter Id"
+        },
+        "note_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Note Ids",
+          "type": "array"
+        },
+        "deadline": {
+          "$ref": "#/$defs/Deadline",
+          "default": {
+            "value": null,
+            "precision": "none",
+            "from_note_id": null,
+            "confirmed_at": null
+          }
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus",
+          "default": "todo"
+        },
+        "completion_criteria": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completion Criteria"
+        },
+        "current_action_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Action Id"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        },
+        "is_demo": {
+          "default": false,
+          "title": "Is Demo",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "title",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "Task",
+      "type": "object"
+    },
+    "Action": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "minutes": {
+          "title": "Minutes",
+          "type": "integer"
+        },
+        "basis": {
+          "$ref": "#/$defs/ActionBasis",
+          "default": "user"
+        },
+        "done": {
+          "default": false,
+          "title": "Done",
+          "type": "boolean"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "task_id",
+        "text",
+        "minutes",
+        "created_at"
+      ],
+      "title": "Action",
+      "type": "object"
+    },
+    "FocusOutcome": {
+      "enum": [
+        "done",
+        "partial",
+        "blocked"
+      ],
+      "title": "FocusOutcome",
+      "type": "string"
+    },
+    "FocusSession": {
+      "additionalProperties": false,
+      "description": "墙上时钟：started_at + accumulated_ms + running，禁止用 setInterval 累加。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "action_id": {
+          "title": "Action Id",
+          "type": "string"
+        },
+        "plan_item_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Item Id"
+        },
+        "started_at": {
+          "title": "Started At",
+          "type": "string"
+        },
+        "accumulated_ms": {
+          "default": 0,
+          "title": "Accumulated Ms",
+          "type": "integer"
+        },
+        "running": {
+          "default": false,
+          "title": "Running",
+          "type": "boolean"
+        },
+        "draft_md": {
+          "default": "",
+          "title": "Draft Md",
+          "type": "string"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FocusOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "blocker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Blocker"
+        },
+        "ended_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ended At"
+        },
+        "is_demo": {
+          "default": false,
+          "title": "Is Demo",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "task_id",
+        "action_id",
+        "started_at"
+      ],
+      "title": "FocusSession",
+      "type": "object"
+    },
+    "PlanItemState": {
+      "enum": [
+        "planned",
+        "done",
+        "partial",
+        "moved",
+        "cancelled"
+      ],
+      "title": "PlanItemState",
+      "type": "string"
+    },
+    "PlanItem": {
+      "additionalProperties": false,
+      "description": "只引用 task_id，永不回写 Task（规则 11/12）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "planned_minutes": {
+          "title": "Planned Minutes",
+          "type": "integer"
+        },
+        "action_text": {
+          "title": "Action Text",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/PlanItemState",
+          "default": "planned"
+        },
+        "actual_minutes": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Actual Minutes"
+        },
+        "focus_session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Focus Session Id"
+        },
+        "order": {
+          "default": 0,
+          "title": "Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "task_id",
+        "date",
+        "planned_minutes",
+        "action_text"
+      ],
+      "title": "PlanItem",
+      "type": "object"
+    },
+    "Unscheduled": {
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "gap_minutes": {
+          "title": "Gap Minutes",
+          "type": "integer"
+        },
+        "reason": {
+          "enum": [
+            "no_capacity",
+            "no_due_date",
+            "not_splittable",
+            "before_start_date",
+            "outside_horizon"
+          ],
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task_id",
+        "gap_minutes",
+        "reason"
+      ],
+      "title": "Unscheduled",
+      "type": "object"
+    },
+    "PlanDraft": {
+      "additionalProperties": false,
+      "description": "未确认的草案。gap_total 必填，使「假装排完」无法表达（F13.3）。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "horizon_days": {
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "daily_budgets": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Daily Budgets",
+          "type": "object"
+        },
+        "buffer_pct": {
+          "default": 15,
+          "title": "Buffer Pct",
+          "type": "integer"
+        },
+        "items": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PlanItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "unscheduled": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Unscheduled"
+          },
+          "title": "Unscheduled",
+          "type": "array"
+        },
+        "gap_total": {
+          "default": 0,
+          "title": "Gap Total",
+          "type": "integer"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmed At"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "horizon_days",
+        "daily_budgets",
+        "created_at"
+      ],
+      "title": "PlanDraft",
+      "type": "object"
+    },
+    "ProposalStatus": {
+      "enum": [
+        "pending",
+        "accepted",
+        "dismissed"
+      ],
+      "title": "ProposalStatus",
+      "type": "string"
+    },
+    "ChangeProposal": {
+      "additionalProperties": false,
+      "description": "F06（P1）：只产生候选，用户确认前不得改动任务。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "task_id": {
+          "title": "Task Id",
+          "type": "string"
+        },
+        "old_note_id": {
+          "title": "Old Note Id",
+          "type": "string"
+        },
+        "new_note_id": {
+          "title": "New Note Id",
+          "type": "string"
+        },
+        "old_value": {
+          "title": "Old Value",
+          "type": "string"
+        },
+        "new_value": {
+          "title": "New Value",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/ProposalStatus",
+          "default": "pending"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "resolved_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolved At"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "task_id",
+        "old_note_id",
+        "new_note_id",
+        "old_value",
+        "new_value",
+        "evidence",
+        "created_at"
+      ],
+      "title": "ChangeProposal",
+      "type": "object"
+    },
+    "Fixture": {
+      "additionalProperties": false,
+      "description": "一份 fixture 同时服务三处：后端测试输入、前端 mock 响应、F12 演示空间。",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "analysis",
+            "workspace"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "is_demo": {
+          "default": true,
+          "title": "Is Demo",
+          "type": "boolean"
+        },
+        "depends_on": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Depends On",
+          "type": "array"
+        },
+        "acceptance": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Acceptance",
+          "type": "array"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Source"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "analyze_request": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalyzeRequest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expected_analysis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AnalyzeResponse"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "confirmed_note": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Note"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "matter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Matter"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "task": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Task"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "action": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Action"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "focus_session": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FocusSession"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "plan_items": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PlanItem"
+          },
+          "title": "Plan Items",
+          "type": "array"
+        },
+        "change_proposal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChangeProposal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "kind"
+      ],
+      "title": "Fixture",
+      "type": "object"
+    }
+  }
+}

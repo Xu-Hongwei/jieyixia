@@ -1,0 +1,92 @@
+{
+  "id": "05-task-and-focus",
+  "title": "课程报告任务 + 一段未完成的专注记录",
+  "kind": "workspace",
+  "is_demo": true,
+  "depends_on": ["01-course-assignment", "03-deadline-change"],
+  "acceptance": [
+    "PRD 第 529 行：可以从便签创建任务（deadline 出处 = note-01）",
+    "PRD 第 533 行：今天页面显示已确认的日计划，可从计划条目进入专注",
+    "PRD 第 535 行：暂停/退出/刷新后可恢复未完成专注会话——running=false 且 outcome=null 即中断态",
+    "PRD 第 344 行：从日程条目开始专注要保留条目关联，以便记录实际用时（plan_item_id 已带入）",
+    "PRD 第 542 行：cp-01 仍 pending，任务截止时间保持 2026-11-19 未被改写",
+    "PRD 规则 12：planned_minutes 是估计，actual_minutes 由专注记录产生，二者分离"
+  ],
+  "source": null,
+  "analyze_request": null,
+  "expected_analysis": null,
+  "confirmed_note": null,
+  "matter": null,
+  "task": {
+    "id": "task-ml",
+    "workspace_id": "demo-ml-report",
+    "title": "完成机器学习课程报告",
+    "description": "提交 PDF 报告 + 可运行代码压缩包，通过课程平台「作业」入口提交。",
+    "matter_id": "matter-ml",
+    "note_ids": ["note-01", "note-02", "note-03", "note-04"],
+    "deadline": {
+      "value": "2026-11-19",
+      "precision": "date",
+      "from_note_id": "note-01",
+      "confirmed_at": "2026-11-17T09:20:00+08:00"
+    },
+    "status": "doing",
+    "completion_criteria": "报告不少于 3000 字，含至少两组实验对比，代码可运行并附 README",
+    "current_action_id": "action-01",
+    "created_at": "2026-11-17T09:21:00+08:00",
+    "updated_at": "2026-11-17T19:12:00+08:00",
+    "is_demo": true
+  },
+  "action": {
+    "id": "action-01",
+    "workspace_id": "demo-ml-report",
+    "task_id": "task-ml",
+    "text": "列出报告提纲",
+    "minutes": 30,
+    "basis": "user",
+    "done": false,
+    "created_at": "2026-11-17T19:00:00+08:00"
+  },
+  "focus_session": {
+    "id": "focus-01",
+    "workspace_id": "demo-ml-report",
+    "task_id": "task-ml",
+    "action_id": "action-01",
+    "plan_item_id": "plan-01",
+    "started_at": "2026-11-17T19:00:00+08:00",
+    "accumulated_ms": 720000,
+    "running": false,
+    "draft_md": "## 报告提纲\n\n1. 引言与任务定义\n2. 数据集与预处理\n3. 对比实验（第二组 baseline 待定）\n4. 结果分析\n5. 结论与局限\n\n待办：查写作指南里关于消融实验的要求（note-04）。",
+    "outcome": null,
+    "blocker": null,
+    "ended_at": null,
+    "is_demo": true
+  },
+  "plan_items": [
+    {
+      "id": "plan-01",
+      "workspace_id": "demo-ml-report",
+      "task_id": "task-ml",
+      "date": "2026-11-17",
+      "planned_minutes": 30,
+      "action_text": "列出报告提纲",
+      "state": "planned",
+      "actual_minutes": null,
+      "focus_session_id": null,
+      "order": 0
+    },
+    {
+      "id": "plan-02",
+      "workspace_id": "demo-ml-report",
+      "task_id": "task-ml",
+      "date": "2026-11-18",
+      "planned_minutes": 60,
+      "action_text": "完成初稿第 1–2 节",
+      "state": "planned",
+      "actual_minutes": null,
+      "focus_session_id": null,
+      "order": 0
+    }
+  ],
+  "change_proposal": null
+}

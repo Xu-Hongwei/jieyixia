@@ -1,0 +1,177 @@
+{
+  "id": "02-grading-supplement",
+  "title": "评分要求补充通知（相对时间样例）",
+  "kind": "analysis",
+  "is_demo": true,
+  "depends_on": [
+    "01-course-assignment"
+  ],
+  "acceptance": [
+    "PRD 第 525 行：不确定时间不自动生成无依据的确定日期",
+    "PRD 第 157 行：相对时间以 captured_at 为参照换算，标 derived + unresolved，同屏显示原文",
+    "PRD 第 190 行：字段确认状态与便签整体状态不同——本便签整体 reviewed，但 deadline 仍 unresolved",
+    "PRD 第 528 行：手动把多张便签归到同一事项（角色 supplement）"
+  ],
+  "source": {
+    "id": "src-02",
+    "workspace_id": "demo-ml-report",
+    "kind": "image",
+    "image_ref": "assets/02-grading-supplement.png",
+    "text": null,
+    "captured_at": "2026-11-17T14:30:00+08:00",
+    "origin_url": null,
+    "origin_title": null,
+    "is_demo": true
+  },
+  "analyze_request": {
+    "source_id": "src-02",
+    "kind": "image",
+    "image_base64": "__INJECT_IMAGE_BASE64__",
+    "text": null,
+    "captured_at": "2026-11-17T14:30:00+08:00",
+    "content_hint": "notice"
+  },
+  "expected_analysis": {
+    "source_id": "src-02",
+    "content_type": "notice",
+    "fields": [
+      {
+        "key": "title",
+        "value": "课程报告评分标准补充说明",
+        "raw": "评分标准补充说明",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "评分标准补充说明",
+          "source_id": "src-02"
+        }
+      },
+      {
+        "key": "constraints",
+        "value": "实验对比 40% / 分析深度 30% / 写作规范 30%",
+        "raw": "评分构成：实验对比40%、分析深度30%、写作规范30%",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "评分构成：实验对比40%、分析深度30%、写作规范30%",
+          "source_id": "src-02"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-25",
+        "raw": "下周三课堂展示",
+        "origin": "model",
+        "status": "unresolved",
+        "derived": true,
+        "quote": {
+          "text": "下周三课堂展示",
+          "source_id": "src-02"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "requirement",
+        "value": "每组 5 分钟展示 + 3 分钟问答",
+        "raw": "每组展示5分钟，问答3分钟",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "每组展示5分钟，问答3分钟",
+          "source_id": "src-02"
+        }
+      }
+    ],
+    "warnings": [
+      {
+        "code": "demo_data",
+        "message": "这是演示 fixture 的固定结果，不是真实模型实时识别",
+        "field_key": null
+      },
+      {
+        "code": "relative_date_derived",
+        "message": "「下周三」以保存时间 2026-11-17（周二）为参照推算为 2026-11-25，属推测值，需用户确认具体日期",
+        "field_key": "deadline"
+      }
+    ],
+    "analyzed_at": "2026-11-17T14:30:05+08:00",
+    "model_name": "fixture:02-grading-supplement",
+    "schema_version": "0.1.0"
+  },
+  "confirmed_note": {
+    "id": "note-02",
+    "workspace_id": "demo-ml-report",
+    "source_id": "src-02",
+    "status": "reviewed",
+    "content_type": "notice",
+    "title": "课程报告评分标准补充说明",
+    "fields": [
+      {
+        "key": "title",
+        "value": "课程报告评分标准补充说明",
+        "raw": "评分标准补充说明",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "评分标准补充说明",
+          "source_id": "src-02"
+        }
+      },
+      {
+        "key": "constraints",
+        "value": "实验对比 40% / 分析深度 30% / 写作规范 30%",
+        "raw": "评分构成：实验对比40%、分析深度30%、写作规范30%",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "评分构成：实验对比40%、分析深度30%、写作规范30%",
+          "source_id": "src-02"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-25",
+        "raw": "下周三课堂展示",
+        "origin": "model",
+        "status": "unresolved",
+        "derived": true,
+        "quote": {
+          "text": "下周三课堂展示",
+          "source_id": "src-02"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "requirement",
+        "value": "每组 5 分钟展示 + 3 分钟问答",
+        "raw": "每组展示5分钟，问答3分钟",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "每组展示5分钟，问答3分钟",
+          "source_id": "src-02"
+        }
+      }
+    ],
+    "matter_id": "matter-ml",
+    "matter_role": "supplement",
+    "created_at": "2026-11-17T14:30:00+08:00",
+    "updated_at": "2026-11-17T14:36:00+08:00",
+    "reviewed_at": "2026-11-17T14:36:00+08:00",
+    "is_demo": true
+  },
+  "matter": null,
+  "task": null,
+  "action": null,
+  "focus_session": null,
+  "plan_items": [],
+  "change_proposal": null
+}
