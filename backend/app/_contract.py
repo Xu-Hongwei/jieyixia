@@ -27,6 +27,7 @@ from contract.models import (  # noqa: E402
     TimeNode,
     Warning,
     BACKEND_GENERATED_CODES,
+    DEADLINE_VALUE_RE,
     WARNING_CODES,
     WARNING_SYNONYMS,
 )

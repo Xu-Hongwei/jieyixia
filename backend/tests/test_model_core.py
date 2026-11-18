@@ -7,8 +7,6 @@ import pytest
 from app.model.base import ModelError
 from app.model.core import parse_model_output
 
-CAPTURED = "2026-11-17T09:12:00+08:00"  # 周二
-
 
 def nodes_field(nodes: list[dict]) -> dict:
     return {"key": "time_nodes", "value": nodes, "raw": "", "status": "candidate"}
@@ -16,14 +14,14 @@ def nodes_field(nodes: list[dict]) -> dict:
 
 def test_multi_nodes_primary_is_earliest_and_deterministic():
     nodes = [
-        {"label": "第二场", "raw": "2026年11月18日 19:00-20:00", "value": "2026-11-18T19:00:00", "basis": "explicit"},
-        {"label": "第一场", "raw": "2026年11月18日 14:30-15:30", "value": "2026-11-18T14:30:00", "basis": "explicit"},
+        {"label": "第二场", "raw": "2026年11月18日 19:00-20:00", "value": "2026-11-18T19:00:00", "basis": "explicit", "role": "event_start"},
+        {"label": "提交截止", "raw": "2026年11月18日 14:30前", "value": "2026-11-18T14:30:00", "basis": "explicit", "role": "submission_deadline"},
     ]
     text = model_json(fields=[nodes_field(nodes)])
     first = parse(text)
     second = parse(text)
     dl = next(f for f in first.fields if f.key == "deadline")
-    assert dl.value == "2026-11-18T14:30:00", "选最早节点，与输入顺序无关"
+    assert dl.value == "2026-11-18T14:30:00", "仅 submission_deadline 参与选主，活动开始不参与"
     assert dl.status.value == "candidate"
     assert [f.value for f in first.fields if f.key == "deadline"] == [f.value for f in second.fields if f.key == "deadline"]
     tn = next(f for f in first.fields if f.key == "time_nodes")
@@ -32,7 +30,9 @@ def test_multi_nodes_primary_is_earliest_and_deterministic():
 
 def test_relative_node_model_computed_marks_derived():
     text = model_json(fields=[nodes_field([
-        {"label": "提交", "raw": "下周五17:00", "value": "2026-11-27T17:00:00", "basis": "relative"},
+        {"label": "提交", "raw": "消息日期2026年11月17日，下周五17:00", "value": "2026-11-27T17:00:00", "basis": "relative",
+         "role": "submission_deadline", "reference_at": "2026-11-17", "reference_source": "message_date",
+         "message_date": "2026-11-17"},
     ])])
     response = parse(text)
     dl = next(f for f in response.fields if f.key == "deadline")
@@ -41,9 +41,31 @@ def test_relative_node_model_computed_marks_derived():
     assert dl.status.value == "unresolved"
 
 
+def test_same_day_capture_is_not_a_reliable_reference():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "明天17:00", "value": "2026-11-18T17:00:00", "basis": "relative",
+         "role": "submission_deadline", "reference_at": "2026-11-17", "reference_source": "captured"},
+    ])])
+    response = parse(text)  # 当天保存、无消息日期、无用户指定
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["value"] is None, "保存日永远不是可靠参照，当天也不行"
+    assert not any(f.key == "deadline" and f.value for f in response.fields)
+
+
+def test_relative_with_user_reference_from_request_kept():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "明天17:00", "value": "2026-11-18T17:00:00", "basis": "relative",
+         "role": "submission_deadline", "reference_at": "2026-11-17", "reference_source": "user"},
+    ])])
+    response = parse(text, user_reference_at="2026-11-17")
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-18T17:00:00"
+    assert dl.derived is True
+
+
 def test_node_missing_year_is_inferred_and_flagged():
     text = model_json(fields=[nodes_field([
-        {"label": "报名", "raw": "9月19日17:00", "value": "2026-09-19T17:00:00", "basis": "explicit"},
+        {"label": "报名", "raw": "9月19日17:00", "value": "2026-09-19T17:00:00", "basis": "explicit", "role": "submission_deadline"},
     ])])
     response = parse(text)
     dl = next(f for f in response.fields if f.key == "deadline")
@@ -87,8 +109,8 @@ def test_warning_codes_closed_and_backend_authoritative():
 
 def test_superseded_node_excluded_from_primary():
     text = model_json(fields=[nodes_field([
-        {"label": "旧截止", "raw": "由11月13日调整", "value": "2026-11-13T18:00:00", "basis": "superseded"},
-        {"label": "新截止", "raw": "调整至11月15日18:00", "value": "2026-11-15T18:00:00", "basis": "explicit"},
+        {"label": "旧截止", "raw": "由11月13日调整", "value": "2026-11-13T18:00:00", "basis": "superseded", "role": "submission_deadline"},
+        {"label": "新截止", "raw": "调整至11月15日18:00", "value": "2026-11-15T18:00:00", "basis": "explicit", "role": "submission_deadline"},
     ])])
     response = parse(text)
     dl = next(f for f in response.fields if f.key == "deadline")
@@ -117,7 +139,7 @@ def test_node_invalid_calendar_rejected():
 
 def test_node_2400_folds_to_date_precision():
     text = model_json(fields=[nodes_field([
-        {"label": "线上", "raw": "9月16日24:00", "value": "2026-09-16T24:00:00", "basis": "explicit"},
+        {"label": "线上", "raw": "9月16日24:00", "value": "2026-09-16T24:00:00", "basis": "explicit", "role": "submission_deadline"},
     ])])
     response = parse(text)
     dl = next(f for f in response.fields if f.key == "deadline")
@@ -208,7 +230,7 @@ def test_naive_datetime_keeps_no_timezone_and_warns():
     from app.model.core import canonical_datetime
 
     assert canonical_datetime("2026-11-13T18:00") == "2026-11-13T18:00:00"
-    text = model_json(fields=[{"key": "deadline", "value": "2026-11-13T18:00", "raw": "原文", "status": "candidate"}])
+    text = model_json(fields=[{"key": "deadline", "value": "2026-11-13T18:00", "raw": "2026年11月13日18:00", "status": "candidate"}])
     response = parse(text)
     assert response.fields[0].value == "2026-11-13T18:00:00"
     assert any(w.code == "timezone_unspecified" for w in response.warnings)
@@ -227,8 +249,8 @@ def model_json(**overrides) -> str:
     return json.dumps(base, ensure_ascii=False)
 
 
-def parse(text: str):
-    return parse_model_output(text, source_id="src-01", captured_at=CAPTURED, model_name="p1")
+def parse(text: str, user_reference_at: str | None = None):
+    return parse_model_output(text, source_id="src-01", model_name="p1", user_reference_at=user_reference_at)
 
 
 def test_parse_produces_contract_valid_response():
@@ -295,3 +317,167 @@ def test_parse_error_message_does_not_leak_user_content():
     with pytest.raises(ModelError) as info:
         parse(secret + " 不是 JSON")
     assert secret not in info.value.message
+
+
+def test_relative_claimed_user_reference_without_request_is_null():
+    text = model_json(fields=[nodes_field([
+        {"label": "填写", "raw": "本周二下午4点前", "value": "2026-11-24T16:00:00", "basis": "relative",
+         "role": "submission_deadline", "reference_at": "2026-11-17", "reference_source": "user"},
+    ])])
+    response = parse(text)  # 请求未带 reference_at
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["value"] is None, "不得借 user 名义在无用户指定时换算"
+
+
+def test_range_value_nulled_not_guessed():
+    text = model_json(fields=[nodes_field([
+        {"label": "放假", "raw": "9月25日至9月27日", "value": "2026-09-25至2026-09-27", "basis": "explicit", "role": "event_start"},
+    ])])
+    response = parse(text)
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["value"] is None, "区间不猜单值"
+
+
+def test_event_start_only_no_deadline():
+    text = model_json(fields=[nodes_field([
+        {"label": "放假开始", "raw": "2026年9月25日", "value": "2026-09-25", "basis": "explicit", "role": "event_start"},
+        {"label": "补班", "raw": "9月20日", "value": "2026-09-20", "basis": "explicit", "role": "other"},
+    ])])
+    response = parse(text)
+    assert not any(f.key == "deadline" for f in response.fields), "活动开始/补班不自动成为截止"
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert len(tn.value) == 2, "节点保留供用户选择"
+
+
+def test_old_screenshot_relative_not_converted_from_capture():
+    text = model_json(fields=[nodes_field([
+        {"label": "填写", "raw": "本周二（5.12）下午4点前", "value": "2026-11-17T16:00:00", "basis": "relative",
+         "role": "submission_deadline", "reference_at": "2026-11-17", "reference_source": "captured",
+         "message_date": "2026-05-13"},
+    ])])
+    response = parse(text)
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["value"] is None, "旧截图不得拿保存日换算相对日期"
+    assert not any(f.key == "deadline" and f.value for f in response.fields)
+
+
+def test_relative_with_message_date_reference_kept():
+    text = model_json(fields=[nodes_field([
+        {"label": "填写", "raw": "本周二（5.12）下午4点前", "value": "2026-05-12T16:00:00", "basis": "relative",
+         "role": "submission_deadline", "reference_at": "2026-05-13", "reference_source": "message_date",
+         "message_date": "2026-05-13"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-05-12T16:00:00"
+    assert dl.derived is True
+
+
+def test_ambiguous_precision_deadline_absent_with_warning():
+    text = model_json(fields=[nodes_field([
+        {"label": "a", "raw": "2026年11月20日", "value": "2026-11-20", "basis": "explicit", "role": "submission_deadline"},
+        {"label": "b", "raw": "2026年11月21日18:00", "value": "2026-11-21T18:00:00", "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    assert not any(f.key == "deadline" for f in response.fields), "精度/时区不可比较不猜"
+    assert any(w.code == "deadline_unselectable" for w in response.warnings)
+
+
+def test_manual_deadline_valid_and_note_source_required():
+    from contract.models import Deadline
+    manual = Deadline(value="2026-11-20", precision="date", source="manual", confirmed_at="2026-11-18T09:00:00+08:00")
+    assert manual.from_note_id is None
+    with pytest.raises(Exception):
+        Deadline(value="2026-11-20", precision="date", source="note", confirmed_at="2026-11-18T09:00:00+08:00")
+    with pytest.raises(Exception):
+        Deadline(value="2026-11-20", precision="date", source="manual", from_note_id="note-01", confirmed_at="2026-11-18T09:00:00+08:00")
+
+
+def test_confirmed_null_rejected():
+    from contract.models import Field
+    with pytest.raises(Exception):
+        Field(key="deadline", value=None, raw="原文", status="confirmed")
+
+
+def test_derived_confirmed_by_user_keeps_provenance():
+    from contract.models import Field
+    f = Field(key="deadline", value="2026-11-25", raw="下周三课堂展示", status="confirmed",
+              derived=True, origin="user", quote={"text": "下周三课堂展示", "source_id": "src-01"})
+    assert f.derived is True and f.status.value == "confirmed"
+    with pytest.raises(Exception):
+        Field(key="deadline", value="2026-11-25", raw="下周三课堂展示", status="confirmed",
+              derived=True, origin="model", quote={"text": "下周三课堂展示", "source_id": "src-01"})
+
+
+def test_deadline_only_explicit_goes_through_node_rules():
+    text = model_json(fields=[
+        {"key": "deadline", "value": "2026-11-20", "raw": "2026年11月20日", "status": "candidate"},
+    ])
+    response = parse(text)
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["role"] == "submission_deadline"
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-20"
+
+
+def test_deadline_only_relative_without_reference_is_nulled():
+    text = model_json(fields=[
+        {"key": "deadline", "value": "2026-11-18", "raw": "明天", "status": "candidate"},
+    ])
+    response = parse(text)  # 无 message_date、无用户参照
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["value"] is None, "只给 deadline 也绕不过参照诚实规则"
+    assert not any(f.key == "deadline" and f.value for f in response.fields)
+    assert any(w.code == "relative_date_derived" for w in response.warnings)
+
+
+def test_deadline_only_relative_with_user_reference_kept():
+    text = model_json(fields=[
+        {"key": "deadline", "value": "2026-11-18", "raw": "明天", "status": "candidate"},
+    ])
+    response = parse(text, user_reference_at="2026-11-17")
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-18"
+    assert dl.derived is True and dl.status.value == "unresolved"
+
+
+def test_deadline_only_tutorial_relative_without_reference_nulled():
+    text = model_json(content_type="tutorial", fields=[
+        {"key": "deadline", "value": "2026-11-18", "raw": "明天", "status": "candidate"},
+    ])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value is None and dl.status.value == "unresolved"
+
+
+def test_cross_offset_deadline_compared_by_absolute_instant():
+    text = model_json(fields=[nodes_field([
+        {"label": "甲", "raw": "2026年11月18日09:00+00:00", "value": "2026-11-18T09:00:00+00:00",
+         "basis": "explicit", "role": "submission_deadline"},
+        {"label": "乙", "raw": "2026年11月18日14:30+08:00", "value": "2026-11-18T14:30:00+08:00",
+         "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    # 14:30+08:00 = 06:30Z，早于 09:00Z；字符串比较会错选 09:00
+    assert dl.value == "2026-11-18T14:30:00+08:00"
+
+
+def test_deadline_calendar_illegal_rejected():
+    from contract.models import Deadline
+    with pytest.raises(Exception):
+        Deadline(value="2026-02-30", precision="date", source="manual",
+                 confirmed_at="2026-11-18T09:00:00+08:00")
+
+
+def test_user_prompt_carries_reference_and_demotes_capture():
+    from app.model.core import build_user_text
+    from contract.models import AnalyzeRequest
+    req = AnalyzeRequest(source_id="s", kind="text", text="明天交",
+                         captured_at="2026-11-17T09:12:00+08:00", reference_at="2026-11-17")
+    prompt = build_user_text(req)
+    assert "用户指定参照日期" in prompt and "2026-11-17" in prompt
+    assert "不得作为相对时间参照" in prompt
+    req2 = AnalyzeRequest(source_id="s", kind="text", text="明天交",
+                          captured_at="2026-11-17T09:12:00+08:00")
+    assert "用户指定参照日期" not in build_user_text(req2)

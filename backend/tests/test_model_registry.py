@@ -176,7 +176,7 @@ def test_router_honors_retries_on_server_error():
 
 
 def validator(text: str, name: str):
-    return parse_model_output(text, source_id="src-x", captured_at="2026-11-17T09:12:00+08:00", model_name=name)
+    return parse_model_output(text, source_id="src-x", model_name=name)
 
 
 def test_router_falls_back_when_model_output_is_invalid():

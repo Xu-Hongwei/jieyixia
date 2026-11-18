@@ -26,7 +26,7 @@ TYPE_DESC = {
 
 def _type_label(key: str) -> str:
     if key == "time_nodes":
-        return "时间节点数组（label/raw/value/precision/tz_known/basis）"
+        return "时间节点数组（label/raw/value/basis/role/reference_at/reference_source/message_date）"
     if key == "deadline":
         return "字符串（YYYY-MM-DD 或 ISO datetime）；由后端从 time_nodes 选主"
     if key in STR_OR_LIST_KEYS:

@@ -8,7 +8,7 @@
   ],
   "acceptance": [
     "PRD 第 525 行：不确定时间不自动生成无依据的确定日期",
-    "PRD 第 157 行：相对时间以 captured_at 为参照换算，标 derived + unresolved，同屏显示原文",
+    "定案 D6：相对时间只在可靠参照下换算——本例用户在请求里指定 reference_at=2026-11-17；保存日不作参照；标 derived + unresolved，同屏显示原文",
     "PRD 第 190 行：字段确认状态与便签整体状态不同——本便签整体 reviewed，但 deadline 仍 unresolved",
     "PRD 第 528 行：手动把多张便签归到同一事项（角色 supplement）"
   ],
@@ -29,7 +29,8 @@
     "image_base64": "__INJECT_IMAGE_BASE64__",
     "text": null,
     "captured_at": "2026-11-17T14:30:00+08:00",
-    "content_hint": "notice"
+    "content_hint": "notice",
+    "reference_at": "2026-11-17"
   },
   "expected_analysis": {
     "source_id": "src-02",
@@ -84,6 +85,26 @@
           "text": "每组展示5分钟，问答3分钟",
           "source_id": "src-02"
         }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "课堂展示",
+            "raw": "下周三课堂展示",
+            "value": "2026-11-25",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "relative",
+            "role": "submission_deadline",
+            "reference_at": "2026-11-17",
+            "reference_source": "user",
+            "message_date": null,
+            "derived": true
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
       }
     ],
     "warnings": [
@@ -94,13 +115,13 @@
       },
       {
         "code": "relative_date_derived",
-        "message": "「下周三」以保存时间 2026-11-17（周二）为参照推算为 2026-11-25，属推测值，需用户确认具体日期",
+        "message": "「下周三」以用户指定参照 2026-11-17（周二）换算为 2026-11-25，属推测值，需用户确认具体日期",
         "field_key": "deadline"
       }
     ],
     "analyzed_at": "2026-11-17T14:30:05+08:00",
     "model_name": "fixture:02-grading-supplement",
-    "schema_version": "0.1.0"
+    "schema_version": "0.3.0"
   },
   "confirmed_note": {
     "id": "note-02",
@@ -159,6 +180,26 @@
           "text": "每组展示5分钟，问答3分钟",
           "source_id": "src-02"
         }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "课堂展示",
+            "raw": "下周三课堂展示",
+            "value": "2026-11-25",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "relative",
+            "role": "submission_deadline",
+            "reference_at": "2026-11-17",
+            "reference_source": "user",
+            "message_date": null,
+            "derived": true
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
       }
     ],
     "matter_id": "matter-ml",

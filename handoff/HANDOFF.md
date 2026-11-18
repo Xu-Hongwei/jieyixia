@@ -1,7 +1,8 @@
-# 前端交接说明 · 契约 v0.1
+# 前端交接说明 · 契约 0.3.0
 
-> 交接日期：2026-11-17｜后端负责人整理｜**先读这一份，再翻其它文件**
-> 契约版本 **v0.2**（`schema_version 0.2.0`）：键集合与值类型是机器约束，越界即 422；定案见包内 `contract/REVIEW-v0.2.md`（待追认）。
+> 交接日期：2026-11-17（2026-11-18 返工修订）｜后端负责人整理｜**先读这一份，再翻其它文件**
+> 契约版本 **0.3.0**（`schema_version 0.3.0`，API 路径 v1）：键集合/值类型/节点角色/参照为机器约束，越界即 422。定案与追认见包内 `contract/DECISIONS-2026-11-18.md` 与 `REVIEW-v0.2.md`；**前端实际签收仍待办**。
+> **2026-11-18 返工已修（后端 + lab 实证）**：① 写库先脱代理深克隆、保存失败界面不变且编辑框不关；② derived+confirmed 放行（须 origin=user，保留推算来源）；③ 用户参照 reference_at 注入模型提示词；④ 保存日永不作相对时间参照（当天也不行）；⑤ 模型只给 deadline 也合成节点走选主/参照规则；⑥ 带时区截止按绝对时刻比较。另：TimeNode 已导出、删除便签解除任务关联、手动/节点日期日历校验、节点编辑器补齐 role/参照字段。
 > 结论：**你现在就可以完全脱离后端开工。** 5 份 fixture 可直接当 mock 响应和演示数据。
 
 ---
@@ -13,13 +14,13 @@
 | `HANDOFF.md` | 本文件 | 必读 |
 | `contract/README.md` | 端点表、错误语义、幂等、状态机、相对时间约定 | 必读 |
 | `contract/typedefs.d.ts` | 类型声明（生成物） | 直接用，不必读 |
-| `contract/schema.json` | 机器可读契约，40 个定义 | 需要时查 |
+| `contract/schema.json` | 机器可读契约，41 个定义 | 需要时查 |
 | `contract/models.py` | **契约的唯一手写来源** | 不必读；有争议时以它为准 |
 | `contract/generate.py`、`selftest.py` | 后端的生成与自测工具 | 不必读 |
 | `fixtures/*.json`、`index.json` | 5 份共用数据 | 必读 `index.json` |
 | `fixtures/assets/README.md` | 3 张演示截图的生成方案与脱敏要求 | 若你认领截图则读 |
 | `architecture/*.canvas.tsx` | 架构与领域模型评审基线（Qoder Canvas 打开） | 建议看，尤其第二节实体图与第五节排程 |
-| `PRD/*.md` | 需求草案 v0.2，**未冻结** | 必读第 4、6、9 章 |
+| `PRD/*.md` | 需求评审定案版 v0.3 | 必读第 4、6、9 章与定案附录 |
 | `devlog/README.md` | 比赛要求的每日记录规范 | 必读，你也要记 |
 | `devlog/2026-11-17.md` | 后端第 1 天日志，可当格式范例 | 参考 |
 
@@ -75,13 +76,16 @@
  * @param {string} sourceId
  * @param {string} imageBase64
  * @param {string} capturedAt
+ * @param {string} [referenceAt] 用户指定的相对时间参照日期 YYYY-MM-DD（可选）
  * @returns {Promise<AnalyzeResponse>}
  */
-export async function analyze(sourceId, imageBase64, capturedAt) {
+export async function analyze(sourceId, imageBase64, capturedAt, referenceAt) {
+  const body = { source_id: sourceId, kind: 'image', image_base64: imageBase64, captured_at: capturedAt }
+  if (referenceAt) body.reference_at = referenceAt
   const res = await fetch('/api/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ source_id: sourceId, kind: 'image', image_base64: imageBase64, captured_at: capturedAt }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) throw Object.assign(new Error('analyze failed'), { status: res.status })
   return res.json()
@@ -124,13 +128,19 @@ cd backend && python -m uvicorn app.main:app --reload --port 8000
 
 `index.json` 里的 `story_order` 是建议的演示叙事顺序：01 通知 → 02 评分补充 → 04 参考资料 → 05 任务与专注 → 03 改期候选。
 
-**键集合按类型封闭，v0.2 起是机器约束（schema 校验，越界即 422）**：通用键 `title, deadline`；notice 另加 `requirement, constraints, submit_to, reminder`；tutorial 另加 `summary, steps, cautions`；reference 另加 `summary, keywords`。日期一律走 `deadline` 或 `constraints`，不再有 `presentation_date` 之类的自创键。
+**键集合按类型封闭（0.3.0 机器约束，越界即 422）**：通用键 `title, deadline`；notice 另加 `requirement, constraints, submit_to, reminder, time_nodes`；tutorial 另加 `summary, steps, cautions`；reference 另加 `summary, keywords`。
 
-**多截止节点**：`deadline` 只放主提交截止（单一日期值）；其余节点以「事项：日期」形式进 `constraints`。
+**多时间节点（0.3.0）**：notice 的 `time_nodes` 为节点数组 `{label, raw, value, precision, tz_known, basis, role, reference_at, reference_source, message_date, derived}`（`TimeNode` 已在 typedefs 导出）。`role` ∈ submission_deadline/event_start/event_end/other/unknown；`basis` ∈ explicit/relative/inferred/superseded；`reference_source` ∈ message_date/user（**没有 captured**）。**`deadline` 由后端仅从 submission_deadline 且非 superseded 节点选主**；活动开始/补班/背景日期/被取代日期**不**自动成为截止；无有效截止或不可比较时 deadline 缺席、节点保留交用户选择。选主在可比候选内取最早：带时区时刻按**绝对时刻**比较（不同 UTC 偏移不能按字符串排序），精度/时区不一致的候选不可比较 → `deadline_unselectable`。模型只给 deadline 不给 time_nodes 时，后端会合成节点走同一套规则，前端无需特判。前端渲染全部节点并按角色标注，提供「选节点建任务」入口（把活动开始用作截止是用户选择，需明示）。
 
 **value 可能是字符串或字符串数组**（`constraints` / `steps` / `cautions` 常见数组），UI 需两种都渲染。
 
-仍建议遍历 `fields` 通用渲染、对未知键降级显示而非崩溃：**prompt 不是机器约束**，模型仍可能越界；键枚举的硬保证在契约 v0.2。
+仍建议遍历 `fields` 通用渲染、对未知键降级显示而非崩溃：prompt 不是机器约束，模型仍可能越界；键枚举/角色/参照的硬保证在契约 0.3.0。
+
+**确认与来源（0.3.0）**：实际带入任务的关键事实独立确认，整体「已审阅」不能替代；缺失值（value=null）不能点确认为事实；用户确认推算值时保留 `derived=true` 与原文引用，并把 `origin` 记为 `user`（契约要求 derived+confirmed 必须 origin=user，否则 422）。任务截止可来自便签（`source=note`+`from_note_id`）或用户手动（`source=manual`，不伪造便签），两者都记 `confirmed_at`；手动日期必须日历合法（2月30、25点这类形状合法但日历非法的值要拒绝）；任务可以无截止。行动/计划条目完成不自动完成任务。
+
+**时间比较（0.3.0）**：date 型当天不判逾期，自用户本地次日起算；带时区时刻按时间点比较；未知时区 naive 按用户本地解析，不得仅按字符串排序混合时区。
+
+**可靠性（C01）**：写 IndexedDB 前必须脱响应式代理再深克隆（`structuredClone(toRaw(doc))`），否则 Vue Proxy 触发 DataCloneError；所有本地写库失败必须明示、不伪成功——**失败时界面保持原样、编辑框不关闭**，成功才更新 UI。删除被 Task.deadline 引用的便签先阻止并列出受影响任务；删除其余便签要解除各任务 `note_ids` 里的关联，不留悬空引用。
 
 **三个刻意安排的反例，不要当成数据错误去「修好」：**
 
@@ -153,9 +163,9 @@ Note.status  : pending → draft → reviewed
                   ↘ failed（原图仍在，可重试）
 ```
 
-**相对时间的 UI 要求**：`derived: true` + `status: "unresolved"` 的字段，必须同屏显示「原文『下周三』 · 系统推算 2026-11-25 · 待确认」。只显示推算值等于伪造事实；只显示原文则「今天」页的截止提醒全是空。参照日期是 `captured_at`。
+**相对时间的 UI 要求**：`derived: true` + `status: "unresolved"` 的字段，必须同屏显示「原文『下周三』 · 系统推算 2026-11-25 · 待确认」。只显示推算值等于伪造事实；只显示原文则「今天」页的截止提醒全是空。**可靠参照只有两种**：消息自身明确日期（`reference_source=message_date`，`reference_at` 须等于 `message_date`）或用户指定（`reference_source=user`，请求 `reference_at`）。`captured_at` 是收集时间，**永远不作参照**（当天保存也不行）；无可靠参照时相对节点 `value=null`，展示原文待确认。
 
-**多时间节点（v0.3 V3-2）**：notice 含 `time_nodes` 数组，每节点 `{label, raw, value, precision, tz_known, basis, derived}`；`basis` ∈ explicit/relative/inferred/superseded。`deadline` 由后端从非 superseded 节点确定性选最早，**前端不要自己选主**；渲染全部节点（superseded 标「已取代」）。相对时间由模型换算并标 basis，后端不再用关键词解析。
+**多时间节点（v0.3 V3-2）**：notice 含 `time_nodes` 数组，每节点 `{label, raw, value, precision, tz_known, basis, role, reference_at, reference_source, message_date, derived}`；`basis` ∈ explicit/relative/inferred/superseded，`role` ∈ submission_deadline/event_start/event_end/other/unknown。`deadline` 由后端仅从 submission_deadline 且非 superseded 节点确定性选最早，**前端不要自己选主**；渲染全部节点（superseded 标「已取代」、按 role 标注）。相对时间由模型换算并标 basis，后端不再用关键词解析。
 
 **日期值的格式约定**：date-only 为 `YYYY-MM-DD`；带时刻的统一为 `YYYY-MM-DDTHH:MM:SS±HH:MM`（后端已规范化）。`tz_known=false` 表示时区未知、按用户本地时区解析；`precision` 决定显示粒度。前端不要猜字符串形状，按元数据渲染。
 
@@ -185,7 +195,7 @@ plan(tasks, { horizon, budgets, bufferPct }) -> {
 
 ## 8. 需要一起拍板的事（契约虽冻结，这些还没定）
 
-契约 v0.1 的状态是「已冻结，待团队评审确认」。冻结含义是**只增不改**：加字段可以，改语义或删字段必须升版本并同步 fixture。
+契约当前工作树版本 **0.3.0**（2026-11-18 整改后统一发布；v0.2/v0.2.1 与 V3-1～4 已获产品追认）。升版含义：改语义/删字段必须升版本并同步 schema/typedefs/fixtures/测试/交接包；**前端需对新版本做真实接收确认**，旧本地记录需兼容读取或显式迁移，不清空、不静默当新语义。
 
 架构 canvas 第八节列了 8 条待决策项，其中直接影响你页面结构的：
 

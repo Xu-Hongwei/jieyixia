@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.3.0",
   "workspace_id": "demo-ml-report",
   "purpose": "同一批 JSON 服务三处：后端 tests 的输入与断言基准、前端 src/mock 的 canned 响应、F12 演示空间的初始数据",
   "is_demo": true,
@@ -22,7 +22,7 @@
       "source_kind": "image",
       "image": "assets/02-grading-supplement.png",
       "image_status": "已生成（PIL 渲染，文字逐字取自本 fixture 的 raw）",
-      "demonstrates": ["相对时间 derived + unresolved", "便签 reviewed 但字段仍未确认"]
+      "demonstrates": ["相对时间仅在用户指定参照下换算（derived + unresolved）", "便签 reviewed 但字段仍未确认"]
     },
     {
       "id": "03-deadline-change",
@@ -58,6 +58,6 @@
   "story_order": ["01-course-assignment", "02-grading-supplement", "04-reference-paper", "05-task-and-focus", "03-deadline-change"],
   "pending": [
     "3 张通知截图均已生成（PIL 渲染）。02、03 已用真实模型做过视觉冒烟；鲁棒性摸底见 devlog 第 12 节。",
-    "F13 批量录入与规划草案的 fixture 留到 v0.2（本轮 5 份对应 PRD F12 第 373-379 行的清单）。"
+    "F13 批量录入与规划草案的 fixture 待产品 P0 闭环时补充。"
   ]
 }

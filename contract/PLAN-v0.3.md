@@ -80,3 +80,35 @@
 - 不改对外 API 路径/方法；不引入数据库/鉴权（PRD 非目标）。
 - 不把 date/datetime 抹成单一字符串形状（语义精度保留，元数据消歧）。
 - 不在 v0.3 做产品 UI（队友职责）。
+
+---
+
+## 五、实现状态同步（2026-11-18，Qoder 整改后）
+
+V3-1～V3-4 已完成并追认；V3-5 的产品决定（DECISIONS §4）已在后端/lab 落地可实现部分：
+- 节点 role 枚举 + 语义选主（不靠 label 关键词/任意最小值）；superseded/活动/补班不参与截止。
+- reference_at/reference_source/message_date 参照 honesty；旧截图不借保存日换算；无可靠参照 value=null。
+- 不新增 event_time 顶层键（活动节点留在 time_nodes 按角色展示）；不新增 source_region/OCR 依赖；不做未经验证的自动 redaction。
+- 手动截止 source=manual 合法；confirmed 非空；未知时区不补造；lab 本地日期逾期比较。
+- C01：lab 写库失败明示不伪成功；删除被引用便签先阻止。
+- 契约统一 **0.3.0**，生成物/样例/测试/交接包同步；119 单测 / 24 负向 / 5 fixture / golden 13/13 / 真模型 13/13。
+
+仍待办（非后端单方可完成）：前端 P0 闭环（备份导出/新空间恢复、示例隔离、规划、专注）、应用内裁剪（P1）、前端实际签收、独立语义测试、Qoder Sites 公网托管验证与发布。本轮不提交/不推送/不发布。
+
+---
+
+## 六、返工修订（2026-11-18，第二轮）
+
+第五节整改被退回「暂不通过」，6 项关键问题 + 4 缺口本轮全部修复，三重验证（单测 / 真 HTTP / 真浏览器）。**本节取代第五节中与之冲突的口径**：参照 honesty 收紧为「captured_at 永远不是可靠参照（当天也不行）」，可靠参照仅 message_date 自洽或请求级 user；用户确认推算值置 origin=user（不再「不改 origin」）。
+
+修复对照（详见 REVIEW-v0.2.md 返工节）：
+1. 本地保存：写库前 `structuredClone(toRaw)`；草稿先行，失败 UI 不变、编辑框不关。
+2. derived+confirmed 合法化：仅 origin=user，保留 derived/quote。
+3. reference_at 注入模型 user_text；captured_at 降级为仅记录。
+4. 无可靠参照不换算「明天」，relative 节点 value=null。
+5. notice 只给 deadline 无节点 → 合成节点走同一管线，规则不可绕过。
+6. 混合时区按绝对时刻（datetime.fromisoformat）选最早，不再字符串比较。
+缺口：TimeNode 导出 typedefs；删除解除 task.note_ids；手动/节点日期日历校验；lab 逐节点编辑器。
+
+验证：**129 单测 / 27 负向 / 5 fixture / golden 13/13 / 真模型 HTTP 对照 / 浏览器逐项证据**；schema 41 定义。生成物、fixture 02（user 参照）、HANDOFF、交接包已重建。
+仍待办：前端实际签收（不代签）、独立语义测试、产品 P0 前端闭环、Qoder Sites 公网验证与发布。本轮不提交/不推送/不发布。

@@ -182,7 +182,7 @@ def check_fixtures(fixtures: list[Fixture]) -> int:
                         field.quote.source_id == f.source.id,
                         f"{f.id}: 字段 {field.key} 的 quote 指向了别的 source",
                     )
-                need(field.raw != "" or field.status.value == "missing",
+                need(field.raw != "" or field.status.value == "missing" or field.key == "time_nodes",
                      f"{f.id}: 字段 {field.key} 既无原文也非 missing")
         if f.confirmed_note:
             need(f.confirmed_note.source_id in sources, f"{f.id}: confirmed_note 指向不存在的 source")

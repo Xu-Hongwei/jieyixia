@@ -7,12 +7,13 @@ schema.json 与 typedefs.d.ts 由 generate.py 从本文件导出，不要手改�
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-SCHEMA_VERSION = "0.2.0"
+SCHEMA_VERSION = "0.3.0"
 API_VERSION = "v1"
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -41,7 +42,7 @@ FIELD_SEMANTICS: dict[str, dict[str, str]] = {
         "constraints": "字数/格式/实验组数等硬性限制，以及带标签的时间窗口、地点、其余场次或截止节点；字符串或字符串数组",
         "submit_to": "提交入口或提交对象",
         "reminder": "逾期后果、提醒类语句；不要放进 constraints",
-        "time_nodes": "全部时间节点（多场次/多截止都列）：每节点 label+raw+value(ISO)+basis；deadline 由后端从中确定性选主",
+        "time_nodes": "全部时间节点（notice 必须输出，不得只给 deadline）：每节点 label/raw/value/basis/role/reference_at/reference_source/message_date；role 候选 submission_deadline/event_start/event_end/other/unknown；reference_source 只能 message_date/user；deadline 由后端仅从 submission_deadline 选主",
     },
     "tutorial": {
         "title": "标题",
@@ -62,18 +63,20 @@ STATUS_SEMANTICS: dict[str, str] = {
     "candidate": "原文可确定的事实候选，待用户确认；value 不得为 null",
     "unresolved": "仅用于原文时间或事实无法确定（相对时间、缺年份、模糊表述）；多场次/多选项是确定事实，用 candidate+数组，不得标 unresolved",
     "missing": "原文没写；value=null、raw=\"\"；绝不推测补造",
-    "confirmed": "只能由用户标记，模型不得输出",
+    "confirmed": "只能由用户标记，模型不得输出；用户确认推算值时保留 derived=true 与原文引用（origin=user）",
 }
 
 TIME_RULES: list[str] = [
-    "所有时间节点（含多场次、多截止）抽进 time_nodes：每节点给 label、raw（逐字原文）、value（ISO）、basis（explicit/relative/inferred）",
-    "相对时间（下周五/明天/月底/三天后/国庆前等）由你参照保存时间换算成 ISO，basis=relative；确实换算不出给 value=null",
-    "只有月日没有年份：参照保存时间补年份，basis=inferred",
+    "所有时间节点抽进 time_nodes，并给候选 role：submission_deadline（提交/完成截止）/event_start/event_end/other/unknown；basis 只能取 explicit（原文明确）/relative（相对换算）/inferred（补年）/superseded（被取代）；不得用 label 关键词代替 role",
+    "活动开始、结束、补班日、背景日期不是 submission_deadline；它们保留在 time_nodes 按角色展示，不自动成为任务截止",
+    "被新通知取代的旧日期标 basis=superseded，保留供溯源，不参与选主",
+    "相对时间由你换算并标 basis=relative，且必须给 reference_at 与 reference_source：可靠参照只有两种——消息自身明确的绝对日期（message_date，reference_at 必须等于它）或用户指定参照（user，请求里会给出）；保存/收集时间 captured_at 永远不是可靠参照，当天保存也不行",
+    "无可靠参照时相对节点 value=null、unresolved，展示原文；换算不出允许空，不硬算",
+    "只有月日没有年份：参照可靠 reference_at 补年，basis=inferred",
     "原文明确绝对日期：value 用 YYYY-MM-DD；只有日期不补时刻（不补 23:59）；原文带时刻才用完整 ISO 日期时间",
-    "「24:00」表示当日结束：输出 date 精度（YYYY-MM-DD），不要输出 T24:00",
+    "「24:00」表示当日结束：输出 date 精度，不要输出 T24:00",
     "不要自行补时区：原文没有的时区不要写进 value",
-    "deadline 由后端从 time_nodes 确定性选主（最早节点），你不必自己选主",
-    "被新通知取代的旧日期：标 basis=superseded，保留在 time_nodes 供溯源，但不参与选主",
+    "deadline 由后端仅从 role=submission_deadline 且非 superseded 的节点中、在可比较候选里取最早；无有效截止或角色/比较关系不明时 deadline 缺席或为空，交用户选择",
 ]
 
 CHAT_RULES: list[str] = [
@@ -178,7 +181,7 @@ class Quote(ContractModel):
 
 
 class TimeNode(ContractModel):
-    """v0.3 V3-2：一个时间节点。模型抽取全部节点，后端确定性选主。"""
+    """v0.3：一个时间节点。模型给候选角色与参照，后端按语义选主，不靠 label 关键词或任意最小值。"""
 
     label: str = ""
     raw: str = ""
@@ -186,6 +189,10 @@ class TimeNode(ContractModel):
     precision: Literal["date", "datetime"] | None = None
     tz_known: bool | None = None
     basis: Literal["explicit", "relative", "inferred", "superseded"] = "explicit"
+    role: Literal["submission_deadline", "event_start", "event_end", "other", "unknown"] = "unknown"
+    reference_at: str | None = None
+    reference_source: Literal["message_date", "user"] | None = None
+    message_date: str | None = None
     derived: bool = False
 
     @model_validator(mode="after")
@@ -194,6 +201,10 @@ class TimeNode(ContractModel):
             raise ValueError("time_node.value 必须是单一 date 或规范 datetime")
         if self.basis in ("relative", "inferred") and not self.derived:
             raise ValueError("relative/inferred 节点必须标 derived")
+        if self.reference_at is not None and not DATE_RE.match(self.reference_at):
+            raise ValueError("reference_at 必须是 YYYY-MM-DD")
+        if self.message_date is not None and not DATE_RE.match(self.message_date):
+            raise ValueError("message_date 必须是 YYYY-MM-DD")
         return self
 
 
@@ -219,16 +230,22 @@ class Field(ContractModel):
             raise ValueError("有原文的 candidate/unresolved 字段必须带 quote（规则 4）")
         if self.status is FieldStatus.unresolved and not self.raw and not self.derived:
             raise ValueError("unresolved 必须给出原文或标明是推算值（规则 7）")
-        if self.derived and self.status is not FieldStatus.unresolved:
+        if self.derived and self.status is FieldStatus.confirmed:
+            if self.origin is not FieldOrigin.user:
+                raise ValueError("derived 推算值只能由用户确认（origin=user），并保留推算标记与出处")
+        elif self.derived and self.status is not FieldStatus.unresolved:
             raise ValueError("v0.2：derived 推算值必须保持 unresolved，待用户确认")
+        if self.status is FieldStatus.confirmed and self.value is None:
+            raise ValueError("v0.3：confirmed 必须有有效值，不能确认 null（D5）")
         return self
 
 
 class Deadline(ContractModel):
-    """只有日期就保持日期精度，不补 23:59（PRD F07 第 275 行）。"""
+    """只有日期就保持日期精度，不补 23:59（PRD F07）。来源可为便签或用户手动（P05）。"""
 
     value: str | None = None
     precision: Literal["none", "date", "datetime"] = "none"
+    source: Literal["note", "manual"] = "note"
     from_note_id: str | None = None
     confirmed_at: str | None = None
 
@@ -243,8 +260,19 @@ class Deadline(ContractModel):
         pattern = DATE_RE if self.precision == "date" else DATETIME_RE
         if not pattern.match(self.value):
             raise ValueError(f"value 与 precision={self.precision} 不符：{self.value}")
-        if self.from_note_id is None:
-            raise ValueError("截止时间必须记录来自哪条已确认便签（决策项 5）")
+        probe = self.value.replace("Z", "+00:00")
+        if re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$", probe):
+            probe += ":00"
+        try:
+            datetime.fromisoformat(probe)
+        except ValueError as exc:
+            raise ValueError(f"value 含非法日历日期：{self.value}") from exc
+        if self.source == "note" and self.from_note_id is None:
+            raise ValueError("source=note 时必须记录已确认出处便签")
+        if self.source == "manual" and self.from_note_id is not None:
+            raise ValueError("source=manual 时不得伪造便签出处")
+        if self.confirmed_at is None:
+            raise ValueError("截止无论来源都必须记录确认时间（P05）")
         return self
 
 
@@ -258,6 +286,7 @@ class Warning(ContractModel):
         "timezone_unspecified",
         "possible_deadline_change",
         "no_deadline_in_source",
+        "deadline_unselectable",
     ]
     message: str
     field_key: str | None = None
@@ -291,11 +320,14 @@ class AnalyzeRequest(ContractModel):
     text: str | None = None
     captured_at: str
     content_hint: ContentType | None = None
+    reference_at: str | None = None  # 用户指定参照日期（可选）；无则相对时间不得借 user 名义换算
 
     @model_validator(mode="after")
     def _check(self) -> AnalyzeRequest:
         if not DATETIME_RE.match(self.captured_at):
-            raise ValueError("captured_at 必须是 ISO 日期时间；它是相对时间换算的参照")
+            raise ValueError("captured_at 必须是 ISO 日期时间；它是收集时间，不等于消息发布时间")
+        if self.reference_at is not None and not DATE_RE.match(self.reference_at):
+            raise ValueError("reference_at 必须是 YYYY-MM-DD")
         if self.kind is SourceKind.image and not self.image_base64:
             raise ValueError("kind=image 必须带 image_base64")
         if self.kind is SourceKind.text and not self.text:
@@ -704,7 +736,7 @@ class Fixture(ContractModel):
 # ---------------------------------------------------------------- 端点登记
 
 ALL_MODELS: list[type[ContractModel]] = [
-    Quote, Field, Deadline, Warning,
+    Quote, TimeNode, Field, Deadline, Warning,
     AnalyzeRequest, AnalyzeResponse, HealthResponse,
     MatterBrief, TaskBrief, MatchRequest, MatchSuggestion, MatchResponse,
     SuggestActionRequest, SuggestActionResponse, TaskDraft,

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, toRaw } from 'vue'
 import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { AlertTriangle, Check, Clock, Pencil, RefreshCw, Sparkles, Upload } from 'lucide-vue-next'
 import Badge from '@/components/ui/Badge.vue'
@@ -8,7 +8,7 @@ import Card from '@/components/ui/Card.vue'
 import Input from '@/components/ui/Input.vue'
 import Separator from '@/components/ui/Separator.vue'
 import Textarea from '@/components/ui/Textarea.vue'
-import { allDocs, allSources, getSource, putDoc, putSource } from '@/lib/db'
+import { allDocs, allSources, deleteDoc, getSource, putDoc, putSource } from '@/lib/db'
 import { analyze, blobToBase64, healthz } from '@/lib/api'
 
 const tab = ref('collect')
@@ -38,6 +38,18 @@ const pendingSource = computed(() => sources.value.find((s) => s.id === pendingI
 
 const say = (tone, msg) => (banner.value = { tone, msg })
 const now = () => new Date().toISOString()
+const clone = (v) => structuredClone(toRaw(v))
+
+// 日历合法性：正则只查形状，2月30/25点这类必须真构造日期验证
+function isValidTimeValue(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})(T(\d{2}):(\d{2})(:(\d{2}))?([+-]\d{2}:\d{2}|Z)?)?$/.exec(v)
+  if (!m) return false
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))
+  if (d.getUTCFullYear() !== +m[1] || d.getUTCMonth() !== +m[2] - 1 || d.getUTCDate() !== +m[3]) return false
+  if (m[4] && (+m[5] > 23 || +m[6] > 59 || (m[8] && +m[8] > 59))) return false
+  return true
+}
+const isValidDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v) && isValidTimeValue(v)
 
 async function reload() {
   sources.value = await allSources()
@@ -62,7 +74,12 @@ async function addFiles(files) {
       continue
     }
     const source = { id: crypto.randomUUID(), kind: 'image', captured_at: now(), blob: file, name: file.name }
-    await putSource(source)
+    try {
+      await putSource(source)
+    } catch (err) {
+      say('destructive', `保存失败（${err.message}）：原图未写入本地，请重试`)
+      continue
+    }
     sources.value.push(source)
     pendingId.value = source.id
     if (pendingUrl.value) URL.revokeObjectURL(pendingUrl.value)
@@ -75,7 +92,11 @@ async function saveTextOnly() {
   const text = textDraft.value.trim()
   if (!text) return say('warning', '先粘贴或输入文字')
   const source = { id: crypto.randomUUID(), kind: 'text', captured_at: now(), text }
-  await putSource(source)
+  try {
+    await putSource(source)
+  } catch (err) {
+    return say('destructive', `保存失败（${err.message}）：文字未写入本地`)
+  }
   sources.value.push(source)
   pendingId.value = source.id
   textDraft.value = ''
@@ -88,6 +109,14 @@ async function runAI(fail = null) {
   busy.value = true
   try {
     const payload = { source_id: source.id, kind: source.kind, captured_at: source.captured_at }
+    const refDate = referenceAt.value.trim()
+    if (refDate) {
+      if (!isValidDate(refDate)) {
+        busy.value = false
+        return say('warning', '参照日期须为合法的 YYYY-MM-DD')
+      }
+      payload.reference_at = refDate
+    }
     if (source.kind === 'image') payload.image_base64 = await blobToBase64(source.blob)
     else payload.text = source.text
     const { status, body } = await analyze(payload, fail)
@@ -105,7 +134,11 @@ async function runAI(fail = null) {
         created_at: now(),
         updated_at: now(),
       }
-      await putDoc(note)
+      try {
+        await putDoc(note)
+      } catch (err) {
+        return say('destructive', `保存失败（${err.message}）：草稿未持久化`)
+      }
       docs.value.push(note)
       pendingId.value = null
       await selectNote(note.id)
@@ -117,7 +150,11 @@ async function runAI(fail = null) {
         content_type: 'reference', title: '分析失败（原图保留）', fields: [], warnings: [],
         created_at: now(), updated_at: now(), error: body && body.code,
       }
-      await putDoc(note)
+      try {
+        await putDoc(note)
+      } catch (err) {
+        return say('destructive', `保存失败（${err.message}）：失败记录未持久化`)
+      }
       docs.value.push(note)
       await selectNote(note.id)
       tab.value = 'notes'
@@ -138,15 +175,27 @@ async function runAI(fail = null) {
 }
 
 async function mutateNote(note, fn) {
-  fn(note)
-  note.updated_at = now()
-  await putDoc(note)
+  const draft = clone(note)
+  fn(draft)
+  draft.updated_at = now()
+  try {
+    await putDoc(draft)
+  } catch (err) {
+    say('destructive', `保存失败（${err.message}）：修改未持久化，界面保持原样`)
+    return false
+  }
+  const idx = docs.value.findIndex((d) => d.id === note.id)
+  if (idx >= 0) docs.value[idx] = draft
+  return true
 }
 
 const confirmField = (note, key) =>
   mutateNote(note, (n) => {
     const f = n.fields.find((x) => x.key === key)
-    if (f) f.status = 'confirmed'
+    if (f) {
+      f.status = 'confirmed'
+      if (f.derived) f.origin = 'user' // 推算值由用户确认：保留 derived 与原文，来源记 user
+    }
   })
 
 function startEdit(note, key) {
@@ -156,12 +205,12 @@ function startEdit(note, key) {
 
 async function saveEdit(note) {
   const { key, value } = editing.value
-  await mutateNote(note, (n) => {
+  const ok = await mutateNote(note, (n) => {
     const f = n.fields.find((x) => x.key === key)
     f.value = Array.isArray(f.value) ? value.split('\n').filter(Boolean) : value
     f.origin = 'user'
   })
-  editing.value = null
+  if (ok) editing.value = null // 保存失败时编辑框保持打开，内容不丢
 }
 
 const reviewNote = (note) => mutateNote(note, (n) => { n.status = 'reviewed'; n.reviewed_at = now() })
@@ -171,17 +220,135 @@ async function createTask(note) {
   if (!dl || !dl.value) return say('warning', '先独立确认 deadline 字段，才能把它带进任务（出处可追溯）')
   const task = {
     id: crypto.randomUUID(), kind: 'task', title: note.title, note_ids: [note.id],
-    deadline: { value: dl.value, precision: dl.precision || (String(dl.value).includes('T') ? 'datetime' : 'date'), from_note_id: note.id, confirmed_at: now() },
+    deadline: { value: dl.value, precision: dl.precision || (String(dl.value).includes('T') ? 'datetime' : 'date'), source: 'note', from_note_id: note.id, confirmed_at: now() },
     status: 'todo', created_at: now(), updated_at: now(),
   }
-  await putDoc(task)
+  try {
+    await putDoc(task)
+  } catch (err) {
+    return say('destructive', `保存失败（${err.message}）：任务未持久化`)
+  }
   docs.value.push(task)
   tab.value = 'tasks'
   say('success', `任务已创建，截止时间来自便签 ${note.id.slice(0, 8)}…`)
 }
 
-const isOverdue = (task) => Boolean(task.deadline && task.deadline.value && task.status !== 'done' && new Date(task.deadline.value) < new Date())
-const finishTask = async (task) => { task.status = 'done'; task.updated_at = now(); await putDoc(task) }
+const isOverdue = (task) => {
+  const dl = task.deadline
+  if (!dl || !dl.value || task.status === 'done') return false
+  const nowD = new Date()
+  if (dl.precision === 'date') {
+    const today = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate())
+    return new Date(dl.value + 'T00:00:00') < today // 日期型当天不判逾期，本地次日起算
+  }
+  return new Date(dl.value) < nowD // naive 按本地时区；带时区按时间点
+}
+const finishTask = async (task) => {
+  const draft = clone(task)
+  draft.status = 'done'
+  draft.updated_at = now()
+  try {
+    await putDoc(draft)
+  } catch (err) {
+    return say('destructive', `保存失败（${err.message}）：状态未持久化，界面保持原样`)
+  }
+  const idx = docs.value.findIndex((d) => d.id === task.id)
+  if (idx >= 0) docs.value[idx] = draft
+}
+
+async function deleteNote(note) {
+  const affected = tasks.value.filter((t) => t.deadline && t.deadline.from_note_id === note.id)
+  if (affected.length) {
+    return say('destructive', `不能删除：${affected.length} 个任务的截止引用此便签（${affected.map((t) => t.title).join('、')}）。请先更换/清空截止来源或改为用户输入`)
+  }
+  try {
+    await deleteDoc(note.id)
+  } catch (err) {
+    return say('destructive', `删除失败（${err.message}）`)
+  }
+  // 解除其余任务对本便签的 note_ids 关联，不留悬空引用
+  let unlinkFailed = false
+  for (const t of tasks.value.filter((t) => (t.note_ids || []).includes(note.id))) {
+    const draft = clone(t)
+    draft.note_ids = draft.note_ids.filter((id) => id !== note.id)
+    draft.updated_at = now()
+    try {
+      await putDoc(draft)
+      const idx = docs.value.findIndex((d) => d.id === t.id)
+      if (idx >= 0) docs.value[idx] = draft
+    } catch {
+      unlinkFailed = true
+    }
+  }
+  docs.value = docs.value.filter((d) => d.id !== note.id)
+  selectedId.value = null
+  say(unlinkFailed ? 'warning' : 'success', unlinkFailed ? '便签已删除，但部分任务的关联清理失败，请刷新检查' : '便签已删除；任务关联已解除，原始资料保留')
+}
+
+const manualDeadline = ref('')
+async function createTaskManual(note) {
+  const v = manualDeadline.value.trim()
+  if (!isValidTimeValue(v)) {
+    return say('warning', '手动截止须为合法的 YYYY-MM-DD 或 ISO datetime（日历与时钟都要合法）')
+  }
+  const task = {
+    id: crypto.randomUUID(), kind: 'task', title: note.title, note_ids: [note.id],
+    deadline: { value: v, precision: v.includes('T') ? 'datetime' : 'date', source: 'manual', confirmed_at: now() },
+    status: 'todo', created_at: now(), updated_at: now(),
+  }
+  try {
+    await putDoc(task)
+  } catch (err) {
+    return say('destructive', `保存失败（${err.message}）：任务未持久化`)
+  }
+  docs.value.push(task)
+  manualDeadline.value = ''
+  tab.value = 'tasks'
+  say('success', '任务已创建（截止为用户手动输入，已记录确认时间）')
+}
+
+const referenceAt = ref('')
+const editingNode = ref(null)
+
+function startNodeEdit(note, index) {
+  const f = note.fields.find((x) => x.key === 'time_nodes')
+  const n = f.value[index]
+  editingNode.value = {
+    noteId: note.id, index,
+    label: n.label || '', value: n.value || '', role: n.role || 'unknown', basis: n.basis || 'explicit',
+    reference_at: n.reference_at || '', reference_source: n.reference_source || '', message_date: n.message_date || '',
+  }
+}
+
+async function saveNodeEdit(note) {
+  const e = editingNode.value
+  const v = e.value.trim()
+  if (v && !isValidTimeValue(v)) return say('warning', '节点值须为合法的 YYYY-MM-DD 或 ISO datetime；留空表示待确认')
+  for (const k of ['reference_at', 'message_date']) {
+    if (e[k] && !isValidDate(e[k])) return say('warning', `${k} 须为合法的 YYYY-MM-DD`)
+  }
+  if (e.reference_source && !['message_date', 'user'].includes(e.reference_source)) {
+    return say('warning', 'reference_source 只能是 message_date 或 user（保存日不是可靠参照）')
+  }
+  const ok = await mutateNote(note, (n) => {
+    const f = n.fields.find((x) => x.key === 'time_nodes')
+    const old = f.value[e.index]
+    f.value[e.index] = {
+      ...old,
+      label: e.label.trim(),
+      value: v || null,
+      basis: e.basis,
+      role: e.role,
+      reference_at: e.reference_at || null,
+      reference_source: e.reference_source || null,
+      message_date: e.message_date || null,
+      precision: v ? (v.includes('T') ? 'datetime' : 'date') : null,
+      tz_known: v && v.includes('T') ? /([+-]\d{2}:\d{2}|Z)$/.test(v) : null,
+      derived: e.basis === 'relative' || e.basis === 'inferred',
+    }
+  })
+  if (ok) editingNode.value = null
+}
 
 function onPaste(e) {
   if (e.target.closest('textarea, input')) return
@@ -257,6 +424,10 @@ const bannerClass = {
               <Button :disabled="aiDown || busy" @click="runAI()"><Sparkles />{{ busy ? '分析中…' : 'AI 整理' }}</Button>
             </div>
             <Textarea v-model="textDraft" placeholder="或粘贴 / 输入纯文字…" class="min-h-24" />
+            <div class="flex items-center gap-2">
+              <Input v-model="referenceAt" placeholder="参照日期（可选 YYYY-MM-DD）" class="max-w-xs" />
+              <span class="text-xs text-muted-foreground">相对时间（明天/下周三）的换算参照；不填则无可靠参照时留空。保存日不作参照。</span>
+            </div>
             <div v-if="pendingSource" class="rounded-md border p-3 space-y-2">
               <div class="text-sm text-muted-foreground">待处理：{{ pendingSource.kind === 'image' ? pendingSource.name : '文字资料' }} · {{ pendingSource.captured_at }}</div>
               <img v-if="pendingSource.kind === 'image'" :src="pendingUrl" alt="" class="max-h-64 rounded-md border" />
@@ -297,17 +468,51 @@ const bannerClass = {
                 <Badge v-if="f.precision === 'datetime' && f.tz_known === false" variant="warning">时区未知</Badge>
                 <Badge v-if="f.origin === 'user'" variant="secondary">user 修改</Badge>
                 <span class="flex-1" />
-                <Button v-if="f.status !== 'confirmed' && f.status !== 'missing'" size="sm" variant="outline" @click="confirmField(selectedNote, f.key)"><Check />确认</Button>
-                <Button size="sm" variant="ghost" @click="startEdit(selectedNote, f.key)"><Pencil />编辑</Button>
+                <Button v-if="f.status !== 'confirmed' && f.status !== 'missing' && f.value != null" size="sm" variant="outline" @click="confirmField(selectedNote, f.key)"><Check />确认</Button>
+                <Button v-if="f.key !== 'time_nodes'" size="sm" variant="ghost" @click="startEdit(selectedNote, f.key)"><Pencil />编辑</Button>
               </div>
               <Input v-if="editing && editing.noteId === selectedNote.id && editing.key === f.key" v-model="editing.value" @keyup.enter="saveEdit(selectedNote)" />
               <div v-else-if="f.key === 'time_nodes' && Array.isArray(f.value)" class="space-y-1">
-                <div v-for="(n, i) in f.value" :key="i" class="flex flex-wrap items-center gap-2 text-sm">
-                  <Badge variant="secondary">{{ n.label || '节点' + (i + 1) }}</Badge>
-                  <span>{{ n.value || '（待确认）' }}</span>
-                  <Badge v-if="n.basis === 'superseded'" variant="muted">已取代</Badge>
-                  <Badge v-else-if="n.basis !== 'explicit'" variant="outline">{{ n.basis }}</Badge>
-                  <span class="text-xs text-muted-foreground">{{ n.raw }}</span>
+                <div v-for="(n, i) in f.value" :key="i" class="rounded-md border p-2 space-y-1">
+                  <div class="flex flex-wrap items-center gap-2 text-sm">
+                    <Badge variant="secondary">{{ n.label || '节点' + (i + 1) }}</Badge>
+                    <span>{{ n.value || '（待确认）' }}</span>
+                    <Badge v-if="n.basis === 'superseded'" variant="muted">已取代</Badge>
+                    <Badge v-else-if="n.basis !== 'explicit'" variant="outline">{{ n.basis }}</Badge>
+                    <Badge variant="outline">{{ n.role || 'unknown' }}</Badge>
+                    <span class="text-xs text-muted-foreground">{{ n.raw }}</span>
+                    <span class="flex-1" />
+                    <Button size="sm" variant="ghost" @click="startNodeEdit(selectedNote, i)"><Pencil />编辑节点</Button>
+                  </div>
+                  <div v-if="n.reference_at" class="text-xs text-muted-foreground">参照 {{ n.reference_at }}（{{ n.reference_source }}）<template v-if="n.message_date"> · 消息日期 {{ n.message_date }}</template></div>
+                  <div v-if="editingNode && editingNode.noteId === selectedNote.id && editingNode.index === i" class="grid gap-2 sm:grid-cols-2">
+                    <Input v-model="editingNode.label" placeholder="标签" />
+                    <Input v-model="editingNode.value" placeholder="值 YYYY-MM-DD 或 ISO datetime（可空）" />
+                    <select v-model="editingNode.role" class="rounded-md border bg-background px-2 py-1 text-sm">
+                      <option value="submission_deadline">submission_deadline</option>
+                      <option value="event_start">event_start</option>
+                      <option value="event_end">event_end</option>
+                      <option value="other">other</option>
+                      <option value="unknown">unknown</option>
+                    </select>
+                    <select v-model="editingNode.basis" class="rounded-md border bg-background px-2 py-1 text-sm">
+                      <option value="explicit">explicit</option>
+                      <option value="relative">relative</option>
+                      <option value="inferred">inferred</option>
+                      <option value="superseded">superseded</option>
+                    </select>
+                    <Input v-model="editingNode.reference_at" placeholder="参照日期 YYYY-MM-DD（可空）" />
+                    <select v-model="editingNode.reference_source" class="rounded-md border bg-background px-2 py-1 text-sm">
+                      <option value="">无参照</option>
+                      <option value="message_date">message_date</option>
+                      <option value="user">user</option>
+                    </select>
+                    <Input v-model="editingNode.message_date" placeholder="消息日期 YYYY-MM-DD（可空）" />
+                    <div class="flex gap-2">
+                      <Button size="sm" @click="saveNodeEdit(selectedNote)">保存节点</Button>
+                      <Button size="sm" variant="ghost" @click="editingNode = null">取消</Button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div v-else class="text-sm">{{ f.value == null ? '（空）' : Array.isArray(f.value) ? f.value.join('；') : f.value }}</div>
@@ -328,6 +533,11 @@ const bannerClass = {
               <Button v-if="selectedNote.status === 'draft'" variant="outline" @click="reviewNote(selectedNote)">标记已审阅</Button>
               <Button variant="outline" @click="pendingId = selectedNote.source_id; runAI()"><RefreshCw />{{ selectedNote.status === 'failed' ? '重试分析' : '重新分析' }}</Button>
               <Button @click="createTask(selectedNote)">从便签建任务</Button>
+              <Button variant="destructive" @click="deleteNote(selectedNote)">删除便签</Button>
+            </div>
+            <div class="flex gap-2 items-center">
+              <Input v-model="manualDeadline" placeholder="手动截止 YYYY-MM-DD（用户输入来源）" class="max-w-xs" />
+              <Button variant="outline" @click="createTaskManual(selectedNote)">手动截止建任务</Button>
             </div>
             <div v-if="imageUrl" class="space-y-1">
               <div class="text-sm text-muted-foreground">原始截图（不可被编辑覆盖）</div>
@@ -349,7 +559,7 @@ const bannerClass = {
               <div class="flex-1">
                 <div class="text-sm font-medium">{{ t.title }}</div>
                 <div class="text-xs text-muted-foreground">
-                  截止 {{ t.deadline ? t.deadline.value : '无' }} · 来自便签 {{ t.deadline && t.deadline.from_note_id ? t.deadline.from_note_id.slice(0, 8) + '…' : '—' }}
+                  截止 {{ t.deadline ? t.deadline.value : '无' }} · {{ t.deadline && t.deadline.from_note_id ? '来自便签 ' + t.deadline.from_note_id.slice(0, 8) + '…' : t.deadline && t.deadline.source === 'manual' ? '用户手动输入' : '—' }}
                 </div>
               </div>
               <Badge v-if="isOverdue(t)" variant="destructive">已逾期</Badge>

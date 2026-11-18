@@ -107,6 +107,23 @@
           "text": "逾期提交按零分计",
           "source_id": "src-01"
         }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "提交截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
       }
     ],
     "warnings": [
@@ -123,7 +140,7 @@
     ],
     "analyzed_at": "2026-11-17T09:12:06+08:00",
     "model_name": "fixture:01-course-assignment",
-    "schema_version": "0.1.0"
+    "schema_version": "0.3.0"
   },
   "confirmed_note": {
     "id": "note-01",
@@ -206,6 +223,23 @@
           "text": "逾期提交按零分计",
           "source_id": "src-01"
         }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "提交截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
       }
     ],
     "matter_id": "matter-ml",

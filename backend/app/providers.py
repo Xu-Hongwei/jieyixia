@@ -122,8 +122,8 @@ class ModelProvider:
             return parse_model_output(
                 text,
                 source_id=request.source_id,
-                captured_at=request.captured_at,
                 model_name=profile_name,
+                user_reference_at=request.reference_at,
             )
 
         try:

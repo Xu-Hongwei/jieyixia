@@ -22,6 +22,7 @@ from models import (
     PlanItem,
     SuggestActionRequest,
     SuggestActionResponse,
+    TimeNode,
 )
 
 FAILURES: list[str] = []
@@ -134,6 +135,14 @@ def main() -> int:
                        value="2026-11-17T12:00:00+08:00 (登记); 2026-11-20T18:00:00+08:00 (测验)")]))
     expect_reject("v0.2 derived 却标 candidate", AnalyzeResponse,
                   dict(good, fields=[dict(good["fields"][2], derived=True)]))
+    expect_reject("derived 确认却非用户来源（推算值确认必须 origin=user）", Field,
+                  dict(field, status="confirmed", derived=True, origin="model"))
+    expect_reject("手动截止非法日历日期（2月30）", Deadline,
+                  {"value": "2026-02-30", "precision": "date", "source": "manual",
+                   "confirmed_at": "2026-11-18T09:00:00+08:00"})
+    expect_reject("节点谎称保存日为参照来源（captured 不在枚举）", TimeNode,
+                  {"label": "x", "raw": "明天", "value": "2026-11-18", "basis": "relative",
+                   "derived": True, "reference_at": "2026-11-17", "reference_source": "captured"})
     expect_reject("v0.2 candidate 无值（契约级）", AnalyzeResponse,
                   dict(good, fields=[dict(good["fields"][0], value=None)]))
     expect_reject("v0.2 submit_to 给数组（单值键）", AnalyzeResponse,

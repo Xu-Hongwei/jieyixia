@@ -1,10 +1,25 @@
-// 生成物，请勿手改。来源：contract/models.py（schema_version 0.2.0）
+// 生成物，请勿手改。来源：contract/models.py（schema_version 0.3.0）
 // 供 Vue 3 + JavaScript 项目在 jsconfig.json 开启 checkJs 后做编辑器与 CI 校验。
 
 /** 原文引用。引用存在不等于已核实（PRD 规则 4）。 */
 export interface Quote {
   text: string;
   source_id: string;
+}
+
+/** v0.3：一个时间节点。模型给候选角色与参照，后端按语义选主，不靠 label 关键词或任意最小值。 */
+export interface TimeNode {
+  label?: string;
+  raw?: string;
+  value?: string | null;
+  precision?: "date" | "datetime" | null;
+  tz_known?: boolean | null;
+  basis?: "explicit" | "relative" | "inferred" | "superseded";
+  role?: "submission_deadline" | "event_start" | "event_end" | "other" | "unknown";
+  reference_at?: string | null;
+  reference_source?: "message_date" | "user" | null;
+  message_date?: string | null;
+  derived?: boolean;
 }
 
 export type FieldOrigin = "model" | "user";
@@ -24,16 +39,17 @@ export interface Field {
   tz_known?: boolean | null;
 }
 
-/** 只有日期就保持日期精度，不补 23:59（PRD F07 第 275 行）。 */
+/** 只有日期就保持日期精度，不补 23:59（PRD F07）。来源可为便签或用户手动（P05）。 */
 export interface Deadline {
   value?: string | null;
   precision?: "none" | "date" | "datetime";
+  source?: "note" | "manual";
   from_note_id?: string | null;
   confirmed_at?: string | null;
 }
 
 export interface Warning {
-  code: "demo_data" | "origin_unknown" | "relative_date_derived" | "date_year_inferred" | "candidate_without_value" | "timezone_unspecified" | "possible_deadline_change" | "no_deadline_in_source";
+  code: "demo_data" | "origin_unknown" | "relative_date_derived" | "date_year_inferred" | "candidate_without_value" | "timezone_unspecified" | "possible_deadline_change" | "no_deadline_in_source" | "deadline_unselectable";
   message: string;
   field_key?: string | null;
 }
@@ -49,6 +65,7 @@ export interface AnalyzeRequest {
   text?: string | null;
   captured_at: string;
   content_hint?: ContentType | null;
+  reference_at?: string | null;
 }
 
 export interface AnalyzeResponse {

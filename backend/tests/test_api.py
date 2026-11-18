@@ -48,7 +48,7 @@ def test_healthz_reports_model_ready(client):
     assert response.status_code == 200
     body = response.json()
     assert body["model_ready"] is True
-    assert body["schema_version"] == "0.2.0"
+    assert body["schema_version"] == "0.3.0"
 
 
 @pytest.mark.parametrize("fixture_id", ["01-course-assignment", "02-grading-supplement", "03-deadline-change", "04-reference-paper"])

@@ -61,7 +61,8 @@ def main() -> int:
         try:
             d = parse_model_output(
                 g["raw_model_output"], source_id=g["source_id"],
-                captured_at=g["captured_at"], model_name=g["model_name"],
+                model_name=g["model_name"],
+                user_reference_at=g.get("reference_at"),
             ).model_dump(mode="json")
         except ModelError as e:
             print(f"{p.stem:<22} PARSE-FAIL {e.message}")

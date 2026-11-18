@@ -1,7 +1,13 @@
+import { toRaw } from 'vue'
+
 const DB_NAME = 'jxl-lab'
 const DB_VERSION = 1
 
 let dbPromise = null
+
+// IndexedDB 结构化克隆不接受 Vue 响应式 Proxy；写库前先脱代理再深克隆，
+// 同时保证库内快照与界面状态解耦（保存失败不会留下半截修改）。
+const snapshot = (value) => structuredClone(toRaw(value))
 
 function open() {
   if (dbPromise) return dbPromise
@@ -31,9 +37,10 @@ function tx(store, mode, fn) {
   )
 }
 
-export const putSource = (source) => tx('sources', 'readwrite', (s) => s.put(source))
+export const putSource = (source) => tx('sources', 'readwrite', (s) => s.put(snapshot(source)))
 export const getSource = (id) => tx('sources', 'readonly', (s) => s.get(id))
 export const allSources = () => tx('sources', 'readonly', (s) => s.getAll())
 
-export const putDoc = (doc) => tx('docs', 'readwrite', (s) => s.put(doc))
+export const putDoc = (doc) => tx('docs', 'readwrite', (s) => s.put(snapshot(doc)))
+export const deleteDoc = (id) => tx('docs', 'readwrite', (s) => s.delete(id))
 export const allDocs = () => tx('docs', 'readonly', (s) => s.getAll())

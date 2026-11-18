@@ -24,6 +24,7 @@ from .._contract import (
     TimeNode,
     Warning,
     BACKEND_GENERATED_CODES,
+    DEADLINE_VALUE_RE,
     WARNING_CODES,
     WARNING_SYNONYMS,
 )
@@ -69,7 +70,9 @@ def canonical_datetime(value: str) -> str:
 
 
 def build_user_text(request: AnalyzeRequest) -> str:
-    lines = [f"保存时间（相对时间的参照）：{request.captured_at}"]
+    lines = [f"收集时间（仅记录，不是消息发布时间，不得作为相对时间参照）：{request.captured_at}"]
+    if request.reference_at:
+        lines.append(f"用户指定参照日期（reference_source=user）：{request.reference_at}；相对时间可以以此为参照换算")
     if request.content_hint:
         lines.append(f"用户初判的内容类型（可推翻）：{request.content_hint.value}")
     if request.kind.value == "text":
@@ -79,35 +82,76 @@ def build_user_text(request: AnalyzeRequest) -> str:
     return "\n\n".join(lines)
 
 
-def _normalize_node(node: Any, captured_at: str) -> dict:
-    """V3-2：规范化单个时间节点。模型负责 NL→ISO，后端只校验+诚实性核对。"""
+def _normalize_node(node: Any, user_reference_at: str | None = None) -> dict:
+    """v0.3：规范化时间节点。模型负责 NL→ISO 与候选角色/参照；后端校验格式/日历/参照边界。
+
+    可靠参照只有消息自身日期与用户指定两种；保存日（captured_at）一律不参与换算。
+    """
     if not isinstance(node, dict):
         raise ModelError("invalid_output", "time_nodes 中存在非对象项", True)
     n = dict(node)
+    n["basis"] = {"absolute": "explicit", "exact": "explicit", "explicit_date": "explicit",
+                  "derived": "inferred", "computed": "relative", "relative_date": "relative"}.get(n.get("basis"), n.get("basis"))
+    # 参照/角色归一；精度与时区不信模型，由 value 形状计算
+    for key in ("reference_at", "message_date"):
+        v = n.get(key)
+        if isinstance(v, str):
+            n[key] = v[:10] if re.match(r"^\d{4}-\d{2}-\d{2}", v) else None
+    rs = n.get("reference_source")
+    n["reference_source"] = {"message": "message_date", "doc": "message_date", "document": "message_date"}.get(rs, rs)
+    if n.get("reference_source") not in ("message_date", "user", None):
+        n["reference_source"] = None
+    if n.get("role") not in ("submission_deadline", "event_start", "event_end", "other", "unknown"):
+        n["role"] = "unknown"
+    n.pop("precision", None)
+    n.pop("tz_known", None)
     raw = n.get("raw") or ""
     value = n.get("value")
-    derived = n.get("basis") in ("relative", "inferred")
+    basis = n.get("basis", "explicit")
+    derived = basis in ("relative", "inferred")
+    ref = n.get("reference_at")
+    src = n.get("reference_source")
+    msg = n.get("message_date")
+
+    if basis == "relative":
+        reliable = False
+        if ref and src == "message_date" and msg == ref:
+            reliable = True  # 消息自身绝对日期依据
+        elif ref and src == "user" and user_reference_at == ref:
+            reliable = True  # 用户确实在请求里指定了该参照
+        if not reliable:
+            value = None  # 旧截图/保存日/无可靠参照/谎称参照：不补造确定日期
+        elif isinstance(value, str) and value[:4] != ref[:4]:
+            value = None
+    elif basis == "inferred":
+        if isinstance(value, str) and ref and value[:4] != ref[:4]:
+            value = None
+
     precision = None
     tz_known = None
     if isinstance(value, str):
         value = canonical_datetime(value)
         value = _fold_end_of_day(value)
-        _check_calendar(value, "time_nodes")
-        year = re.match(r"^(\d{4})-\d{2}-\d{2}", value)
-        if year and year.group(1) not in raw:
-            derived = True
-        if re.match(r"^\d{4}-\d{2}-\d{2}$", value):
-            precision = "date"
+        if not DEADLINE_VALUE_RE.match(value):
+            value = None  # 区间/非法表述不猜，置空待确认
         else:
-            shape = _DATETIME_SHAPE.match(value)
-            if shape:
-                precision = "datetime"
-                tz_known = shape.group(5) is not None
-                if shape.group(5):
-                    tz = shape.group(5)
-                    if tz not in raw and not (tz == "+00:00" and "Z" in raw):
-                        value = value[: -len(tz)]
-                        tz_known = False
+            _check_calendar(value, "time_nodes")
+        if value is not None:
+            year = re.match(r"^(\d{4})-\d{2}-\d{2}", value)
+            if basis == "explicit" and year and year.group(1) not in raw:
+                derived = True
+            if re.match(r"^\d{4}-\d{2}-\d{2}$", value):
+                precision = "date"
+            else:
+                shape = _DATETIME_SHAPE.match(value)
+                if shape:
+                    precision = "datetime"
+                    tz_known = shape.group(5) is not None
+                    if shape.group(5):
+                        tz = shape.group(5)
+                        if tz not in raw and not (tz == "+00:00" and "Z" in raw):
+                            value = value[: -len(tz)]
+                            tz_known = False
     n.update(value=value, precision=precision, tz_known=tz_known, derived=derived)
     try:
         return TimeNode.model_validate(n).model_dump(mode="json")
@@ -132,7 +176,7 @@ def _extract_json(text: str) -> dict[str, Any]:
     return parsed
 
 
-def _build_field(raw_field: Any, source_id: str, captured_at: str) -> tuple[Field, bool, bool]:
+def _build_field(raw_field: Any, source_id: str, user_reference_at: str | None = None) -> tuple[Field, bool, bool]:
     if not isinstance(raw_field, dict):
         raise ModelError("invalid_output", "fields 中存在非对象项", True)
     key = raw_field.get("key")
@@ -156,7 +200,7 @@ def _build_field(raw_field: Any, source_id: str, captured_at: str) -> tuple[Fiel
     if key == "time_nodes":
         if not isinstance(value, list):
             raise ModelError("invalid_output", "time_nodes 必须是数组", True)
-        value = [_normalize_node(n, captured_at) for n in value]
+        value = [_normalize_node(n, user_reference_at) for n in value]
 
     downgraded = False
     if status is FieldStatus.candidate and value is None:
@@ -217,8 +261,8 @@ def parse_model_output(
     text: str,
     *,
     source_id: str,
-    captured_at: str,
     model_name: str,
+    user_reference_at: str | None = None,
 ) -> AnalyzeResponse:
     payload = _extract_json(text)
 
@@ -236,7 +280,7 @@ def parse_model_output(
     downgraded: list[str] = []
     naive_tz: list[str] = []
     for item in raw_fields:
-        field, derived, was_downgraded = _build_field(item, source_id, captured_at)
+        field, derived, was_downgraded = _build_field(item, source_id, user_reference_at)
         fields.append(field)
         if derived:
             normalized.append(field.key)
@@ -251,12 +295,52 @@ def parse_model_output(
         dedup[f.key] = f
     fields = list(dedup.values())
 
-    # V3-2：后端从 time_nodes 确定性选主（最早节点），消除模型选主 nondeterminism
+    # v0.3：模型可能只给 deadline 不给 time_nodes——合成节点走同一套参照诚实与选主规则，
+    # 不允许绕过。纯相对表述（raw 无任何数字）没有参照元数据，按 relative 对待。
+    unreliable_relative = False
     nodes_field = next((f for f in fields if f.key == "time_nodes"), None)
+    dl_field = next((f for f in fields if f.key == "deadline"), None)
+    if dl_field is not None and dl_field.value is not None:
+        pure_relative = dl_field.derived and not re.search(r"\d", dl_field.raw or "")
+        if content_type is ContentType.notice and nodes_field is None:
+            node = {
+                "label": "deadline",
+                "raw": dl_field.raw or "",
+                "value": dl_field.value,
+                "basis": "relative" if pure_relative else ("inferred" if dl_field.derived else "explicit"),
+                "role": "submission_deadline",
+                "reference_at": user_reference_at if pure_relative else None,
+                "reference_source": "user" if pure_relative and user_reference_at else None,
+            }
+            normalized_node = _normalize_node(node, user_reference_at)
+            nodes_field = Field(
+                key="time_nodes", value=[normalized_node], raw="",
+                origin=FieldOrigin.model, status=FieldStatus.candidate,
+            )
+            fields.append(nodes_field)
+            unreliable_relative = pure_relative and normalized_node["value"] is None
+        elif content_type is not ContentType.notice and pure_relative and not user_reference_at:
+            fields[fields.index(dl_field)] = dl_field.model_copy(update={
+                "value": None, "status": FieldStatus.unresolved, "precision": None, "tz_known": None,
+            })
+            unreliable_relative = True
+
+    # v0.3：仅从 role=submission_deadline 且非 superseded 的节点选主；
+    # 活动开始/补班/背景日期不参与；角色或比较关系不明时 deadline 缺席，交用户选择。
+    ambiguous = False
     if nodes_field and isinstance(nodes_field.value, list):
-        valued = [n for n in nodes_field.value if n.get("value") and n.get("basis") != "superseded"]
-        if valued:
-            primary = min(valued, key=lambda n: n["value"])
+        candidates = [
+            n for n in nodes_field.value
+            if n.get("value") and n.get("basis") != "superseded" and n.get("role") == "submission_deadline"
+        ]
+        groups = {(n.get("precision"), n.get("tz_known")) for n in candidates}
+        existing = next((f for f in fields if f.key == "deadline"), None)
+        if candidates and len(groups) == 1:
+            # 带时区的 datetime 必须按绝对时刻比较：不同 UTC 偏移下字符串序不等于时间序
+            if next(iter(groups)) == ("datetime", True):
+                primary = min(candidates, key=lambda n: datetime.fromisoformat(n["value"]))
+            else:
+                primary = min(candidates, key=lambda n: n["value"])
             p_derived = bool(primary.get("derived"))
             p_raw = primary.get("raw") or ""
             new_dl = Field(
@@ -270,11 +354,14 @@ def parse_model_output(
                 precision=primary.get("precision"),
                 tz_known=primary.get("tz_known"),
             )
-            existing = next((f for f in fields if f.key == "deadline"), None)
             if existing:
                 fields[fields.index(existing)] = new_dl
             else:
                 fields.append(new_dl)
+        else:
+            if existing:
+                fields.remove(existing)
+            ambiguous = bool(candidates) and len(groups) > 1
     normalized = [f.key for f in fields if f.derived]
     naive_tz = [f.key for f in fields if f.precision == "datetime" and f.tz_known is False]
 
@@ -297,7 +384,7 @@ def parse_model_output(
             warnings.append(
                 Warning(
                     code="date_year_inferred",
-                    message=f"「{key}」原文只有月日没有年份，年份参照保存时间补全，属推测值，需用户确认",
+                    message=f"「{key}」原文只有月日没有年份，年份系参照可靠日期补全，属推测值，需用户确认",
                     field_key=key,
                 )
             )
@@ -305,7 +392,7 @@ def parse_model_output(
             warnings.append(
                 Warning(
                     code="relative_date_derived",
-                    message=f"「{key}」由保存时间换算得到，属推测值，需用户确认具体日期",
+                    message=f"「{key}」由相对时间换算得到，属推测值，需用户确认具体日期",
                     field_key=key,
                 )
             )
@@ -323,6 +410,24 @@ def parse_model_output(
                 code="timezone_unspecified",
                 message=f"「{key}」原文未写时区，保留为本地 naive 时间，由前端按用户时区解析；如需精确请用户确认",
                 field_key=key,
+            )
+        )
+
+    if unreliable_relative:
+        warnings.append(
+            Warning(
+                code="relative_date_derived",
+                message="相对时间无可靠参照（消息自身日期或用户指定），不换算，值留空待用户确认",
+                field_key="deadline",
+            )
+        )
+
+    if ambiguous:
+        warnings.append(
+            Warning(
+                code="deadline_unselectable",
+                message="存在多个不可比较的提交截止候选（精度/时区不一致），deadline 留空交用户选择",
+                field_key="deadline",
             )
         )
 

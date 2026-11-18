@@ -72,6 +72,33 @@
           "text": "因课程平台维护，截止时间顺延两天",
           "source_id": "src-03"
         }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "原截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "superseded",
+            "role": "submission_deadline",
+            "derived": false
+          },
+          {
+            "label": "新截止",
+            "raw": "截止时间由11月19日调整至11月21日",
+            "value": "2026-11-21",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
       }
     ],
     "warnings": [
@@ -88,7 +115,7 @@
     ],
     "analyzed_at": "2026-11-17T18:05:04+08:00",
     "model_name": "fixture:03-deadline-change",
-    "schema_version": "0.1.0"
+    "schema_version": "0.3.0"
   },
   "confirmed_note": {
     "id": "note-03",
@@ -135,6 +162,33 @@
           "text": "因课程平台维护，截止时间顺延两天",
           "source_id": "src-03"
         }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "原截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "superseded",
+            "role": "submission_deadline",
+            "derived": false
+          },
+          {
+            "label": "新截止",
+            "raw": "截止时间由11月19日调整至11月21日",
+            "value": "2026-11-21",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
       }
     ],
     "matter_id": "matter-ml",

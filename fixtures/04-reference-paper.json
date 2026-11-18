@@ -84,7 +84,7 @@
     ],
     "analyzed_at": "2026-11-16T21:40:03+08:00",
     "model_name": "fixture:04-reference-paper",
-    "schema_version": "0.1.0"
+    "schema_version": "0.3.0"
   },
   "confirmed_note": {
     "id": "note-04",

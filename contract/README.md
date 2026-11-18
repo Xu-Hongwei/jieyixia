@@ -65,13 +65,13 @@ Note.status  : pending → draft → reviewed
                   ↘ failed（原图仍在，可重试）
 ```
 
-`note-02` 是刻意构造的反例：便签整体 `reviewed`，但 `presentation_date` 仍是 `unresolved`。这正是 PRD 第 190 行「字段确认状态与便签整体状态不同，不能互相替代」。
+`note-02` 是刻意构造的反例：便签整体 `reviewed`，但 `deadline` 仍是 `unresolved`。这正是 PRD 第 190 行「字段确认状态与便签整体状态不同，不能互相替代」。
 
 ## 相对时间约定
 
-`AnalyzeRequest.captured_at` 是换算参照，必填。模型可换算时输出 `value` + `derived: true` + `status: "unresolved"`，并保留 `raw` 原文与 `quote`。前端同屏显示「原文『下周三』 · 系统推算 2026-11-25 · 待确认」。
+`AnalyzeRequest.captured_at` 是**收集时间**，必填，但**永远不是换算参照**（当天保存也不行）。可靠参照只有两种：消息自身明确绝对日期（节点 `reference_source=message_date`，`reference_at` 须等于 `message_date`），或用户在请求里指定的 `reference_at`（`reference_source=user`）。有可靠参照时模型换算并输出 `value` + `derived: true` + `status: "unresolved"`，保留 `raw` 原文与 `quote`；无可靠参照时 `value=null`，不硬算。前端同屏显示「原文『下周三』 · 系统推算 2026-11-25 · 待确认」。用户确认推算值后 `status=confirmed` 且 `origin=user`、保留 `derived`。
 
-`02-grading-supplement` 就是这个样例：保存时间 2026-11-17 是周二，「下周三」推算为 11-25。
+`02-grading-supplement` 就是这个样例：用户在请求里指定 `reference_at=2026-11-17`（周二），「下周三」推算为 11-25，标 derived + unresolved。
 
 ## 本地领域模型
 

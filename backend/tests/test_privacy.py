@@ -58,7 +58,7 @@ def test_analyze_logs_carry_metadata_only(capsys, client, payload):
     assert IMAGE_MARKER not in captured
     assert '"event": "analyze"' in captured
     assert '"source_id": "src-01"' in captured
-    assert '"field_count": 6' in captured
+    assert '"field_count": 7' in captured
 
 
 def test_logger_does_not_propagate_to_root():
