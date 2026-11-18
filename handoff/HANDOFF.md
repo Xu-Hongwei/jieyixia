@@ -155,7 +155,9 @@ Note.status  : pending → draft → reviewed
 
 **相对时间的 UI 要求**：`derived: true` + `status: "unresolved"` 的字段，必须同屏显示「原文『下周三』 · 系统推算 2026-11-25 · 待确认」。只显示推算值等于伪造事实；只显示原文则「今天」页的截止提醒全是空。参照日期是 `captured_at`。
 
-**日期值的格式约定**：date-only 为 `YYYY-MM-DD`；带时刻的统一为 `YYYY-MM-DDTHH:MM:SS±HH:MM`（后端已规范化，模型产出与推算产出同形状）。前端可直接 `new Date(value)`；不要假设存在不带时区或不带秒的变体。
+**多时间节点（v0.3 V3-2）**：notice 含 `time_nodes` 数组，每节点 `{label, raw, value, precision, tz_known, basis, derived}`；`basis` ∈ explicit/relative/inferred/superseded。`deadline` 由后端从非 superseded 节点确定性选最早，**前端不要自己选主**；渲染全部节点（superseded 标「已取代」）。相对时间由模型换算并标 basis，后端不再用关键词解析。
+
+**日期值的格式约定**：date-only 为 `YYYY-MM-DD`；带时刻的统一为 `YYYY-MM-DDTHH:MM:SS±HH:MM`（后端已规范化）。`tz_known=false` 表示时区未知、按用户本地时区解析；`precision` 决定显示粒度。前端不要猜字符串形状，按元数据渲染。
 
 ---
 

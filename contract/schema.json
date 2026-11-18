@@ -11,7 +11,8 @@
         "deadline": "行动时间节点：提交类取最早硬性提交/完成截止；活动/宣讲/培训类取最早开始时间；其余节点进 constraints；不要把多个日期拼进一个 value",
         "constraints": "字数/格式/实验组数等硬性限制，以及带标签的时间窗口、地点、其余场次或截止节点；字符串或字符串数组",
         "submit_to": "提交入口或提交对象",
-        "reminder": "逾期后果、提醒类语句；不要放进 constraints"
+        "reminder": "逾期后果、提醒类语句；不要放进 constraints",
+        "time_nodes": "全部时间节点（多场次/多截止都列）：每节点 label+raw+value(ISO)+basis；deadline 由后端从中确定性选主"
       },
       "tutorial": {
         "title": "标题",
@@ -34,11 +35,14 @@
       "confirmed": "只能由用户标记，模型不得输出"
     },
     "time_rules": [
-      "相对时间（下周五/周日/明天等）：status=unresolved、value=null、raw 保留原文；不要自己换算成日期，换算由后端用保存时间完成",
-      "相对词同句或括号内另有明确日期（如「本周二（5.12）」）：以明确日期为准；带年份输出 candidate+value；只有月日没有年份输出 unresolved+value=null 由后端补年",
+      "所有时间节点（含多场次、多截止）抽进 time_nodes：每节点给 label、raw（逐字原文）、value（ISO）、basis（explicit/relative/inferred）",
+      "相对时间（下周五/明天/月底/三天后/国庆前等）由你参照保存时间换算成 ISO，basis=relative；确实换算不出给 value=null",
+      "只有月日没有年份：参照保存时间补年份，basis=inferred",
       "原文明确绝对日期：value 用 YYYY-MM-DD；只有日期不补时刻（不补 23:59）；原文带时刻才用完整 ISO 日期时间",
-      "不要自行补年份或时区：原文没有的年份/时区后端会剥离并标推算；时区原文有才写",
-      "「24:00」表示当日结束：输出 date 精度（YYYY-MM-DD），不要输出 T24:00"
+      "「24:00」表示当日结束：输出 date 精度（YYYY-MM-DD），不要输出 T24:00",
+      "不要自行补时区：原文没有的时区不要写进 value",
+      "deadline 由后端从 time_nodes 确定性选主（最早节点），你不必自己选主",
+      "被新通知取代的旧日期：标 basis=superseded，保留在 time_nodes 供溯源，但不参与选主"
     ],
     "chat_rules": [
       "聊天窗口截图只整理主消息气泡正文；忽略侧栏会话列表、群成员列表、与气泡无关的群公告",
@@ -286,6 +290,16 @@
       "additionalProperties": false,
       "properties": {
         "code": {
+          "enum": [
+            "demo_data",
+            "origin_unknown",
+            "relative_date_derived",
+            "date_year_inferred",
+            "candidate_without_value",
+            "timezone_unspecified",
+            "possible_deadline_change",
+            "no_deadline_in_source"
+          ],
           "title": "Code",
           "type": "string"
         },

@@ -1,14 +1,14 @@
-"""厂家无关的核心：prompt、输出解析、相对日期规范化。
+"""厂家无关的核心：prompt 渲染、输出解析、时间节点规范化与确定性选主。
 
-换厂家只换适配器，这里不动。相对日期由后端确定性换算，不交给模型自由发挥
-（PRD 规则 7：未知日期不伪造，换算值必须标 derived + unresolved）。
+V3-2：自然语言→ISO 由模型完成（标 basis），后端只做格式/日历/诚实性校验与选主，
+不再用关键词正则解析自然语言。推算值必须标 derived + unresolved（PRD 规则 7）。
 """
 
 from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any
 
 from pydantic import ValidationError
@@ -21,7 +21,11 @@ from .._contract import (
     FieldOrigin,
     FieldStatus,
     Quote,
+    TimeNode,
     Warning,
+    BACKEND_GENERATED_CODES,
+    WARNING_CODES,
+    WARNING_SYNONYMS,
 )
 from .base import ModelError
 from .render_prompt import render_system_prompt
@@ -29,13 +33,6 @@ from .render_prompt import render_system_prompt
 SYSTEM_PROMPT = render_system_prompt()
 
 _ALLOWED_STATUS = {FieldStatus.candidate, FieldStatus.unresolved, FieldStatus.missing}
-_WEEKDAY = {"一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6, "天": 6}
-_RELATIVE_WEEK = re.compile(r"(下下|下|本|这)?(?:周|星期)([一二三四五六日天])")
-_FULL_DATE = re.compile(r"(\d{4})\s*[年./-]\s*(\d{1,2})\s*[月./-]\s*(\d{1,2})\s*日?")
-_MONTH_DAY = re.compile(r"(\d{1,2})\s*月\s*(\d{1,2})\s*日")
-_MONTH_DAY_DOT = re.compile(r"(?<!\d)(\d{1,2})[./](\d{1,2})(?!\d)")
-_CLOCK = re.compile(r"(\d{1,2}):(\d{2})")
-_CN_CLOCK = re.compile(r"(下午|晚上|上午|中午)?\s*(\d{1,2})\s*点")
 _DATETIME_SHAPE = re.compile(r"^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?([+-]\d{2}:\d{2}|Z)?$")
 
 
@@ -71,35 +68,6 @@ def canonical_datetime(value: str) -> str:
     return f"{date}T{hour}:{minute}:{second}{tz}" if tz else f"{date}T{hour}:{minute}:{second}"
 
 
-def extract_explicit_date(raw: str, captured_at: str) -> tuple[str, bool] | None:
-    """从原文抽明确日期。带年份 → derived=False；只有月日 → 参照保存时间补年份，derived=True。
-
-    真实样本教训：「本周二（5.12）」这类相对词+括号明确日期，必须让明确日期赢；
-    「9月19日17:00」这类缺年份月日不能整条丢掉。
-    """
-    try:
-        base = datetime.fromisoformat(captured_at)
-    except ValueError:
-        return None
-    match = _FULL_DATE.search(raw)
-    if match:
-        year, month, day = (int(x) for x in match.groups())
-        derived = False
-    else:
-        match = _MONTH_DAY.search(raw) or _MONTH_DAY_DOT.search(raw)
-        if not match:
-            return None
-        year = base.year
-        month, day = (int(x) for x in match.groups())
-        derived = True
-    try:
-        date = datetime(year, month, day)
-    except ValueError:
-        return None
-
-    return date.strftime("%Y-%m-%d") + _clock_suffix(raw), derived
-
-
 def build_user_text(request: AnalyzeRequest) -> str:
     lines = [f"保存时间（相对时间的参照）：{request.captured_at}"]
     if request.content_hint:
@@ -111,52 +79,40 @@ def build_user_text(request: AnalyzeRequest) -> str:
     return "\n\n".join(lines)
 
 
-def _clock_suffix(raw: str) -> str:
-    """从原文抽时刻后缀；没有则空串。相对日期与明确日期共用。"""
-    hm = _CLOCK.search(raw)
-    if hm:
-        return f"T{int(hm.group(1)):02d}:{hm.group(2)}"
-    cn = _CN_CLOCK.search(raw)
-    if cn:
-        hour = int(cn.group(2))
-        if cn.group(1) in ("下午", "晚上") and hour < 12:
-            hour += 12
-        return f"T{hour:02d}:00"
-    return ""
-
-
-def resolve_relative_date(raw: str, captured_at: str) -> str | None:
-    """把相对时间换算成 ISO 日期（原文带时刻则组合时刻）。换算不出就返回 None，绝不猜。"""
-    try:
-        base = datetime.fromisoformat(captured_at).date()
-    except ValueError:
-        return None
-    text = raw.strip()
-    if "大后天" in text:
-        day = base + timedelta(days=3)
-    elif "后天" in text:
-        day = base + timedelta(days=2)
-    elif "明天" in text:
-        day = base + timedelta(days=1)
-    elif "今天" in text or "今日" in text:
-        day = base
-    else:
-        match = _RELATIVE_WEEK.search(text)
-        if not match:
-            return None
-        prefix, target = match.group(1), _WEEKDAY[match.group(2)]
-        if prefix in ("本", "这"):
-            delta = target - base.weekday()
-        elif prefix == "下":
-            delta = target - base.weekday() + 7
-        elif prefix == "下下":
-            delta = target - base.weekday() + 14
+def _normalize_node(node: Any, captured_at: str) -> dict:
+    """V3-2：规范化单个时间节点。模型负责 NL→ISO，后端只校验+诚实性核对。"""
+    if not isinstance(node, dict):
+        raise ModelError("invalid_output", "time_nodes 中存在非对象项", True)
+    n = dict(node)
+    raw = n.get("raw") or ""
+    value = n.get("value")
+    derived = n.get("basis") in ("relative", "inferred")
+    precision = None
+    tz_known = None
+    if isinstance(value, str):
+        value = canonical_datetime(value)
+        value = _fold_end_of_day(value)
+        _check_calendar(value, "time_nodes")
+        year = re.match(r"^(\d{4})-\d{2}-\d{2}", value)
+        if year and year.group(1) not in raw:
+            derived = True
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", value):
+            precision = "date"
         else:
-            delta = (target - base.weekday()) % 7
-            if delta == 0:
-                delta = 7
-        day = base + timedelta(days=delta)
-    return day.isoformat() + _clock_suffix(text)
+            shape = _DATETIME_SHAPE.match(value)
+            if shape:
+                precision = "datetime"
+                tz_known = shape.group(5) is not None
+                if shape.group(5):
+                    tz = shape.group(5)
+                    if tz not in raw and not (tz == "+00:00" and "Z" in raw):
+                        value = value[: -len(tz)]
+                        tz_known = False
+    n.update(value=value, precision=precision, tz_known=tz_known, derived=derived)
+    try:
+        return TimeNode.model_validate(n).model_dump(mode="json")
+    except ValidationError as exc:
+        raise ModelError("invalid_output", "time_node 不符合契约", True) from exc
 
 
 def _extract_json(text: str) -> dict[str, Any]:
@@ -197,16 +153,10 @@ def _build_field(raw_field: Any, source_id: str, captured_at: str) -> tuple[Fiel
 
     value = raw_field.get("value")
     derived = False
-    if status is FieldStatus.unresolved and value is None:
-        explicit = extract_explicit_date(raw, captured_at)
-        if explicit:
-            value, derived = explicit
-            if not derived:
-                status = FieldStatus.candidate
-        else:
-            resolved = resolve_relative_date(raw, captured_at)
-            if resolved:
-                value, derived = resolved, True
+    if key == "time_nodes":
+        if not isinstance(value, list):
+            raise ModelError("invalid_output", "time_nodes 必须是数组", True)
+        value = [_normalize_node(n, captured_at) for n in value]
 
     downgraded = False
     if status is FieldStatus.candidate and value is None:
@@ -295,19 +245,55 @@ def parse_model_output(
         if field.precision == "datetime" and field.tz_known is False:
             naive_tz.append(field.key)
 
+    # 模型可能输出重复键：按键去重（保留最后一次），避免重复字段/重复 warning
+    dedup: dict[str, Field] = {}
+    for f in fields:
+        dedup[f.key] = f
+    fields = list(dedup.values())
+
+    # V3-2：后端从 time_nodes 确定性选主（最早节点），消除模型选主 nondeterminism
+    nodes_field = next((f for f in fields if f.key == "time_nodes"), None)
+    if nodes_field and isinstance(nodes_field.value, list):
+        valued = [n for n in nodes_field.value if n.get("value") and n.get("basis") != "superseded"]
+        if valued:
+            primary = min(valued, key=lambda n: n["value"])
+            p_derived = bool(primary.get("derived"))
+            p_raw = primary.get("raw") or ""
+            new_dl = Field(
+                key="deadline",
+                value=primary["value"],
+                raw=p_raw,
+                origin=FieldOrigin.model,
+                status=FieldStatus.unresolved if p_derived else FieldStatus.candidate,
+                derived=p_derived,
+                quote=Quote(text=p_raw, source_id=source_id) if p_raw else None,
+                precision=primary.get("precision"),
+                tz_known=primary.get("tz_known"),
+            )
+            existing = next((f for f in fields if f.key == "deadline"), None)
+            if existing:
+                fields[fields.index(existing)] = new_dl
+            else:
+                fields.append(new_dl)
+    normalized = [f.key for f in fields if f.derived]
+    naive_tz = [f.key for f in fields if f.precision == "datetime" and f.tz_known is False]
+
     warnings: list[Warning] = []
     for item in payload.get("warnings") or []:
         if isinstance(item, dict) and item.get("code") and item.get("message"):
+            code = WARNING_SYNONYMS.get(str(item["code"]), str(item["code"]))
+            if code not in WARNING_CODES or code in BACKEND_GENERATED_CODES:
+                continue  # V3-3：码表封闭；后端权威码忽略模型自报
             warnings.append(
                 Warning(
-                    code=str(item["code"])[:64],
+                    code=code,
                     message=str(item["message"])[:500],
                     field_key=item.get("field_key") if isinstance(item.get("field_key"), str) else None,
                 )
             )
     for key in normalized:
         field = next(x for x in fields if x.key == key)
-        if extract_explicit_date(field.raw, captured_at):
+        if not re.search(r"\d{4}", field.raw):
             warnings.append(
                 Warning(
                     code="date_year_inferred",
@@ -339,6 +325,12 @@ def parse_model_output(
                 field_key=key,
             )
         )
+
+    # 模型自报与后端生成可能同码同字段：去重，后端版本优先
+    seen_warnings: dict[tuple, Warning] = {}
+    for w in warnings:
+        seen_warnings[(w.code, w.field_key)] = w
+    warnings = list(seen_warnings.values())
 
     try:
         return AnalyzeResponse(

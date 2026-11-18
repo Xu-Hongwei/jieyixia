@@ -25,3 +25,6 @@ Thumbs.db
 .idea/
 .vscode/
 samples/golden/
+
+# 原始桌面截图与规则附件：公开前需逐份检查
+devlog/private-evidence/

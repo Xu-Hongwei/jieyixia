@@ -14,6 +14,7 @@ from contract.models import (
     TIME_RULES,
     TYPE_KEYS,
     UNIVERSAL_KEYS,
+    WARNING_CODES,
 )
 
 TYPE_DESC = {
@@ -24,8 +25,10 @@ TYPE_DESC = {
 
 
 def _type_label(key: str) -> str:
+    if key == "time_nodes":
+        return "时间节点数组（label/raw/value/precision/tz_known/basis）"
     if key == "deadline":
-        return "字符串（YYYY-MM-DD 或 ISO datetime）"
+        return "字符串（YYYY-MM-DD 或 ISO datetime）；由后端从 time_nodes 选主"
     if key in STR_OR_LIST_KEYS:
         return "字符串或字符串数组"
     return "字符串"
@@ -75,4 +78,5 @@ def render_system_prompt() -> str:
     lines.append('1. 原文没写的信息一律 status="missing"、value=null、raw=""。绝不推测，绝不补造事实。')
     lines.append("2. candidate 字段必须给出非 null 的 value；给不出值就标 missing。")
     lines.append('3. 不要输出 status="confirmed"，确认只能由用户做。')
+    lines.append("4. warnings.code 只能取：" + "、".join(sorted(WARNING_CODES)) + "；不要自造码。")
     return "\n".join(lines)

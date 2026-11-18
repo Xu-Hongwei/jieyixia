@@ -301,6 +301,15 @@ const bannerClass = {
                 <Button size="sm" variant="ghost" @click="startEdit(selectedNote, f.key)"><Pencil />编辑</Button>
               </div>
               <Input v-if="editing && editing.noteId === selectedNote.id && editing.key === f.key" v-model="editing.value" @keyup.enter="saveEdit(selectedNote)" />
+              <div v-else-if="f.key === 'time_nodes' && Array.isArray(f.value)" class="space-y-1">
+                <div v-for="(n, i) in f.value" :key="i" class="flex flex-wrap items-center gap-2 text-sm">
+                  <Badge variant="secondary">{{ n.label || '节点' + (i + 1) }}</Badge>
+                  <span>{{ n.value || '（待确认）' }}</span>
+                  <Badge v-if="n.basis === 'superseded'" variant="muted">已取代</Badge>
+                  <Badge v-else-if="n.basis !== 'explicit'" variant="outline">{{ n.basis }}</Badge>
+                  <span class="text-xs text-muted-foreground">{{ n.raw }}</span>
+                </div>
+              </div>
               <div v-else class="text-sm">{{ f.value == null ? '（空）' : Array.isArray(f.value) ? f.value.join('；') : f.value }}</div>
               <div v-if="f.quote" class="text-xs text-muted-foreground">原文引用：{{ f.quote.text }}</div>
               <div v-if="editing && editing.noteId === selectedNote.id && editing.key === f.key" class="flex gap-2">

@@ -33,7 +33,7 @@ export interface Deadline {
 }
 
 export interface Warning {
-  code: string;
+  code: "demo_data" | "origin_unknown" | "relative_date_derived" | "date_year_inferred" | "candidate_without_value" | "timezone_unspecified" | "possible_deadline_change" | "no_deadline_in_source";
   message: string;
   field_key?: string | null;
 }

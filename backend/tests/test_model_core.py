@@ -5,88 +5,124 @@ import json
 import pytest
 
 from app.model.base import ModelError
-from app.model.core import parse_model_output, resolve_relative_date
+from app.model.core import parse_model_output
 
 CAPTURED = "2026-11-17T09:12:00+08:00"  # 周二
 
 
-@pytest.mark.parametrize(
-    "raw,expected",
-    [
-        ("下周三课堂展示", "2026-11-25"),
-        ("下周五17:00前提交", "2026-11-27T17:00"),
-        ("明天下午4点前", "2026-11-18T16:00"),
-        ("明天交", "2026-11-18"),
-        ("后天", "2026-11-19"),
-        ("大后天", "2026-11-20"),
-        ("今天", "2026-11-17"),
-        ("本周五", "2026-11-20"),
-        ("周五交作业", "2026-11-20"),
-        ("周二交作业", "2026-11-24"),
-        ("下下周一", "2026-11-30"),
-        ("星期天", "2026-11-22"),
-        ("2026年11月19日", None),
-        ("", None),
-    ],
-)
-def test_resolve_relative_date(raw, expected):
-    assert resolve_relative_date(raw, CAPTURED) == expected
+def nodes_field(nodes: list[dict]) -> dict:
+    return {"key": "time_nodes", "value": nodes, "raw": "", "status": "candidate"}
 
 
-def test_resolve_relative_date_bad_reference_returns_none():
-    assert resolve_relative_date("明天", "不是日期") is None
+def test_multi_nodes_primary_is_earliest_and_deterministic():
+    nodes = [
+        {"label": "第二场", "raw": "2026年11月18日 19:00-20:00", "value": "2026-11-18T19:00:00", "basis": "explicit"},
+        {"label": "第一场", "raw": "2026年11月18日 14:30-15:30", "value": "2026-11-18T14:30:00", "basis": "explicit"},
+    ]
+    text = model_json(fields=[nodes_field(nodes)])
+    first = parse(text)
+    second = parse(text)
+    dl = next(f for f in first.fields if f.key == "deadline")
+    assert dl.value == "2026-11-18T14:30:00", "选最早节点，与输入顺序无关"
+    assert dl.status.value == "candidate"
+    assert [f.value for f in first.fields if f.key == "deadline"] == [f.value for f in second.fields if f.key == "deadline"]
+    tn = next(f for f in first.fields if f.key == "time_nodes")
+    assert len(tn.value) == 2, "全部节点保留"
 
 
-@pytest.mark.parametrize(
-    "raw,expected,derived",
-    [
-        ("本周二（5.12）下午4点前完成填写", "2026-05-12T16:00", True),
-        ("请于9月19日17:00前登录官网完成报名", "2026-09-19T17:00", True),
-        ("最终提交时间为2026年11月13日18:00前", "2026-11-13T18:00", False),
-        ("2026.5.13 师生培训", "2026-05-13", False),
-        ("12月1日上午9:00-11:00", "2026-12-01T09:00", True),
-        ("下周三课堂展示", None, False),
-    ],
-)
-def test_extract_explicit_date(raw, expected, derived):
-    from app.model.core import extract_explicit_date
-
-    result = extract_explicit_date(raw, CAPTURED)
-    if expected is None:
-        assert result is None
-    else:
-        assert result == (expected, derived)
-
-
-def test_explicit_date_in_parentheses_beats_relative_word():
-    text = model_json(fields=[
-        {"key": "deadline", "value": None, "raw": "本周二（5.12）下午4点前完成填写", "status": "unresolved"}
-    ])
-    field = parse(text).fields[0]
-    assert field.value == "2026-05-12T16:00:00", "括号里的明确日期必须赢过相对词"
-    assert field.derived is True
-    assert field.status.value == "unresolved"
-
-
-def test_month_day_without_year_is_recovered_not_dropped():
-    text = model_json(fields=[
-        {"key": "deadline", "value": None, "raw": "请于9月19日17:00前登录官网完成报名", "status": "unresolved"}
-    ])
+def test_relative_node_model_computed_marks_derived():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "下周五17:00", "value": "2026-11-27T17:00:00", "basis": "relative"},
+    ])])
     response = parse(text)
-    field = response.fields[0]
-    assert field.value == "2026-09-19T17:00:00"
-    assert field.derived is True
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-27T17:00:00"
+    assert dl.derived is True
+    assert dl.status.value == "unresolved"
+
+
+def test_node_missing_year_is_inferred_and_flagged():
+    text = model_json(fields=[nodes_field([
+        {"label": "报名", "raw": "9月19日17:00", "value": "2026-09-19T17:00:00", "basis": "explicit"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.derived is True
+    assert dl.status.value == "unresolved"
     assert any(w.code == "date_year_inferred" for w in response.warnings)
 
 
-def test_full_date_with_year_becomes_candidate():
+def test_model_and_backend_same_warning_deduped():
+    text = model_json(
+        fields=[{"key": "deadline", "value": "2026-11-19T18:00", "raw": "2026年11月19日18:00", "status": "candidate"}],
+        warnings=[{"code": "timezone_unspecified", "message": "模型自报", "field_key": "deadline"}],
+    )
+    response = parse(text)
+    tz = [w for w in response.warnings if w.code == "timezone_unspecified"]
+    assert len(tz) == 1
+
+
+def test_duplicate_keys_deduped():
     text = model_json(fields=[
-        {"key": "deadline", "value": None, "raw": "最终提交时间为2026年11月13日18:00前", "status": "unresolved"}
+        {"key": "deadline", "value": "2026-11-20", "raw": "2026年11月20日", "status": "candidate"},
+        {"key": "deadline", "value": "2026-11-21", "raw": "2026年11月21日", "status": "candidate"},
     ])
-    field = parse(text).fields[0]
-    assert field.value == "2026-11-13T18:00:00"
-    assert field.derived is False
-    assert field.status.value == "candidate"
+    response = parse(text)
+    dls = [f for f in response.fields if f.key == "deadline"]
+    assert len(dls) == 1
+    assert dls[0].value == "2026-11-21"
+
+
+def test_warning_codes_closed_and_backend_authoritative():
+    text = model_json(warnings=[
+        {"code": "relative_date_unresolved", "message": "模型自造同义码", "field_key": "deadline"},
+        {"code": "totally_made_up", "message": "应被丢弃", "field_key": None},
+        {"code": "timezone_unspecified", "message": "后端权威码，模型自报忽略", "field_key": "deadline"},
+        {"code": "no_deadline_in_source", "message": "非后端码保留", "field_key": None},
+    ])
+    response = parse(text)
+    codes = [w.code for w in response.warnings]
+    assert codes == ["no_deadline_in_source"]
+
+
+def test_superseded_node_excluded_from_primary():
+    text = model_json(fields=[nodes_field([
+        {"label": "旧截止", "raw": "由11月13日调整", "value": "2026-11-13T18:00:00", "basis": "superseded"},
+        {"label": "新截止", "raw": "调整至11月15日18:00", "value": "2026-11-15T18:00:00", "basis": "explicit"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-15T18:00:00", "被取代的旧日期不参与选主"
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert len(tn.value) == 2, "旧节点仍保留供溯源"
+
+
+def test_node_null_value_preserved_not_fabricated():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "月底前", "value": None, "basis": "relative"},
+    ])])
+    response = parse(text)
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["value"] is None
+    assert not any(f.key == "deadline" and f.value for f in response.fields), "换算不出不编造"
+
+
+def test_node_invalid_calendar_rejected():
+    text = model_json(fields=[nodes_field([
+        {"label": "x", "raw": "2026年2月30日", "value": "2026-02-30", "basis": "explicit"},
+    ])])
+    with pytest.raises(ModelError):
+        parse(text)
+
+
+def test_node_2400_folds_to_date_precision():
+    text = model_json(fields=[nodes_field([
+        {"label": "线上", "raw": "9月16日24:00", "value": "2026-09-16T24:00:00", "basis": "explicit"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-09-16"
+    assert dl.precision == "date"
 
 
 @pytest.mark.parametrize(
@@ -207,18 +243,6 @@ def test_parse_produces_contract_valid_response():
 
 def test_parse_strips_markdown_fence():
     assert parse("```json\n" + model_json() + "\n```").content_type.value == "notice"
-
-
-def test_parse_normalizes_relative_date_and_warns():
-    text = model_json(fields=[
-        {"key": "deadline", "value": None, "raw": "下周三课堂展示", "status": "unresolved"}
-    ])
-    response = parse(text)
-    field = response.fields[0]
-    assert field.value == "2026-11-25"
-    assert field.derived is True
-    assert field.status.value == "unresolved", "换算后仍待用户确认，不得自动 confirmed"
-    assert any(w.code == "relative_date_derived" for w in response.warnings)
 
 
 def test_parse_keeps_missing_field_null():

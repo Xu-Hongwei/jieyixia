@@ -18,7 +18,7 @@ def test_prompt_covers_all_closed_keys():
 
 
 def test_prompt_covers_critical_rules():
-    for fragment in ("不得自创键", "24:00", "不要自行补年份或时区", "unresolved", "missing", "confirmed"):
+    for fragment in ("不得自创键", "24:00", "不要自行补时区", "time_nodes", "unresolved", "missing", "confirmed"):
         assert fragment in SYSTEM_PROMPT
 
 

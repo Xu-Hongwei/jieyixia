@@ -1,11 +1,14 @@
-# 契约 v0.3 修改计划（草案 · 待评审）
+# 契约 v0.3 修改计划（产品范围已定 · 实现待验收）
 
-> 日期：2026-11-18｜状态：草案，待团队拍板后实施
+> 日期：2026-11-18｜状态：**本轮产品/范围已定，已实施方向获追认；整改与发布待验收**。
+> 执行基线：[产品范围定案与契约变更追认](DECISIONS-2026-11-18.md)。下文历史执行记录保留；“已完成”是当时报告，不自动表示满足本轮新规则。源版本目前仍为 0.2.0，目标统一发布为 0.3.0。
 > 中心目标：**消除「prompt / validators / schema 三处规则重复」导致的来回修改**，改为 schema 单一来源 + 提示词自动生成 + 后端同 schema 校验。
 
 ---
 
 ## 一、当前不足清单（按危害排序）
+
+以下为 v0.3 启动前的问题清单，包含后续已修复或已定案的条目；当前执行状态以第三节及最新决策记录为准。
 
 | # | 不足 | 证据 | 危害 |
 | --- | --- | --- | --- |
@@ -25,46 +28,52 @@
 ### V3-1（中心）schema 单一来源 + 提示词自动生成
 - 把**字段语义、类型、枚举、status 语义、时间规则、聊天窗规则**全部进 schema（machine-readable：per-key `description`/`x-semantics`/enum）。
 - 新增 `contract/render_prompt.py`：从 schema 渲染 SYSTEM_PROMPT（字段表+类型+规则），**删除手写散文**。
-- 后端 validators 继续从同一 models.py 生成（现状保留）。
-- 效果：改规则只改 schema 一次；prompt/typedefs/fixtures/校验同步再生成。**消除不足 1/2/3。**
+- 后端可执行 validators 继续写在 models.py，schema 从模型生成；散文语义不会自动生成 validator，需显式对齐。
+- 目标：统一定义入口并同步生成 prompt/typedefs/schema。语义描述不自动成为可执行 validator；fixtures、解析行为及前端状态机仍需显式对齐和测试，不能把集中描述等同于消除全部语义漂移。
 - 性质：内部重构，对外 API 形状不变（additive）。
 
 ### V3-2 模型抽取时间节点列表 + 后端确定性选主
-- 模型输出 `time_nodes: [{raw, iso, precision, tz, basis}]`（**所有**节点，含相对词换算由模型做，basis 标记 explicit/relative/inferred）。
-- 后端**确定性**选主：提交类=最早硬性提交/完成节点；活动类=最早开始节点；其余进 constraints。
-- **删除 NL 正则 resolver**（不足 4）；**消除选主 nondeterminism**（不足 5，选择变成确定性代码）。
+- 当前实际形状为 fields 中 key=time_nodes，其 value 为 `[{label, raw, value, precision, tz_known, basis, derived}]`；basis 含 explicit/relative/inferred/superseded。本轮决定后续补 role，且相对时间只在有可靠参照时换算。
+- 本轮修订：deadline 仅作提交/完成截止；先按节点 role 筛有效截止，再在可比较候选中选主。活动时间全部保留 time_nodes，不自动充当任务截止；superseded/背景/补班排除，无可靠候选时允许空。
+- 追认删除 NL 正则 resolver；模型节点抽取仍存在不确定性，确定性仅指相同结构化输入的选主结果，不能用双跑一致证明所有同图输入稳定。
 - 诚实性：basis=relative/inferred ⇒ derived+unresolved；年份/时区不在 raw ⇒ 剥离/标推算（保留为交叉校验）。
-- 性质：Field 加 `time_nodes`（additive）；deadline 仍单值输出，消费端不变。
+- 实际形状：notice 的 Field.key 增加 time_nodes，其 value 为 TimeNode 数组。旧客户端的封闭键/字符串渲染需要升级；不得宣称消费端完全不变。
 
 ### V3-3 warning 码枚举
 - schema 定义 warning code enum；模型自造码丢弃或归一；后端产生的码不变。
 - 消除不足 6。additive（收紧输入侧，输出侧码表固定）。
 
 ### V3-4 离线 golden 回归
-- 录制 13 张真实样本 + 5 fixture 的**模型原始输出**存 `tests/golden/`（含 PII 的样本 golden 需脱敏或仅存结构）。
+- 当前已录 13 张真实样本的模型原始输出，实际目录为 `samples/golden/`（私有隔离）；5 份 fixture 为另一套结构/关联校验，不混称为 18 份模型原始输出。后续补可提交的脱敏语义回归。
 - 回归 = golden 输出 → parse/validate → 断言字段/元数据/警告，**不打真模型**。
 - 消除不足 7；prompt/schema 改动可离线秒级回归。
 
-### V3-5（评审决定）裁剪 UI / PII / event_time
-- 整窗歧义：产品 F01 加裁剪 UI；schema 可选 `source_region`。
-- PII：后端可选 redaction pass（人名/校名/链接模式）或仅前端提示；需产品拍板。
-- 活动类是否独立 `event_time` 键 vs 复用 deadline：评审定。
-- 消除不足 8/9（部分）。
+### V3-5（已定案）裁剪 / PII / 活动时间与相对日期参照
+- 应用内裁剪 P1；P0 为预览、正文区域提示和外部裁剪引导。保留原图，未来裁剪另存分析副本；不新增 source_region/OCR 坐标依赖。
+- P0 做分析发送告知、真实素材隔离、公开材料检查及日志脱敏；V1 不承诺自动 PII 检测，不引入未经验证的自动 redaction。
+- 不新增独立 event_time 顶层键；活动节点在 time_nodes 中按 role 展示。deadline 不自动等于活动开始或任意最早日期。
+- captured_at 仅为收集时间；补可选 reference_at 及参照来源，旧截图相对词无可靠参照时保持空值和 unresolved。精度/时区与人工选择规则见最新决策第 4 节。
 
 ## 三、实施顺序与验收
 
 > 状态更新（2026-11-18）：**V3-4 已提前完成**（安全网先行）：13 条真实样本模型原始输出录于 `samples/golden/`（gitignore），`backend/regress_golden.py` 离线回归 13/13。检查口径：deadline 键可缺席（契约允许），存在才校验。
+> **V3-1 已完成**：语义单一来源进 `contract/models.py`（FIELD_SEMANTICS/STATUS_SEMANTICS/TIME_RULES/CHAT_RULES/EXCLUSION_RULES）；`backend/app/model/render_prompt.py` 从 schema 渲染提示词，core.py 手写散文已删；schema.json 增加 `x-semantics`；新增 4 条渲染一致性测试。验证：126 单测 + 24 负向 + 5 fixture + golden 13/13 + **生成提示词真模型复测 13/13**。
 > 顺序调整为 V3-4 → V3-1 → V3-2 → V3-3 → V3-5（先有安全网再重构）。
+> 剩余：主节点选择 nondeterminism 仍在（放假 missing vs 9-25；开题 09:00 vs 11:00）→ V3-2 解决。
+> **V3-2 已完成**：`TimeNode` + `time_nodes` 键（notice）；模型抽全部节点并自换相对时间（basis=explicit/relative/inferred/superseded）；后端确定性选主（最早非 superseded 节点）；**NL 正则 resolver 已删除**。改期通知旧日期标 superseded 不参与选主（双跑验证 11-15 一致）。108 单测 + golden 13/13 + 真模型 13/13 + 多节点双跑一致。
+> 已知语义局限：① 旧截图的相对词以保存时间参照会算错（已标 unresolved 待确认）；② _schedule 类通知（放假）选主=最早节点含补班日，语义锚点待产品定义（已标 unresolved）。
+> **V3-3 已完成**：Warning.code 枚举化（8 码）；模型自造码丢弃、同义码归一；**后端权威码（relative_date_derived/date_year_inferred/candidate_without_value/timezone_unspecified）忽略模型自报**，消除跨来源重复；字段按键去重。码表进 schema 并渲染进提示词。111 单测 + golden 13/13 + 真模型验证字段/warning 均唯一。
+> 最新状态：V3-5 产品选项已在本轮定案；现行字符串 min 选主、旧截图参照、共享 Field 确认限制、手动截止来源及版本标识需要整改。不得把此前通过数当作本轮新增规则的通过数。
 
-1. 评审拍板 V3-1..V3-5 范围 + 追认 v0.2/v0.2.1（不足 10）。
+1. 产品范围与 v0.2/v0.2.1、V3-1..4 实施方向已追认；以 DECISIONS-2026-11-18.md 为准，不再等待产品拍板。
 2. V3-1：schema 扩语义 + render_prompt + 删散文；跑现有 122 测试 + 24 负向 + 5 fixture 全绿。
 3. V3-4：录 golden；建立离线回归。
 4. V3-2：time_nodes + 确定性选主 + 删 resolver；golden 回归 + 真模型 13 案例复测 13/13。
 5. V3-3：码枚举；回归。
-6. V3-5：按评审结论实施。
-7. 升 schema_version 0.3.0；重发交接包；追认。
+6. 先修本地保存与领域规则，再按最新 V3-5 结论整改；不开展新增 P1。
+7. 统一 schema_version 0.3.0、schema/typedefs/fixtures/测试/HANDOFF/交接包；前端实际签收后验收，不代签。
 
-**验收标准**：改一条规则只改 schema 一处；prompt 与 validators 无手工重复；13 真实案例离线 golden 回归 + 真模型复测均 13/13；多节点同图重复跑主 deadline 一致。
+**验收标准**：定义、生成物和版本一致；新增规则有语义测试；旧日期/活动/补班不误选截止；用户可确认推算值并手动设置截止；无可靠参照不硬算旧截图相对词；隐私边界及前端签收成立。保留历史 golden 与真实案例复测作为补充，不能仅凭格式通过或双跑一致代替正确性验收。
 
 ## 四、不做（明确排除）
 

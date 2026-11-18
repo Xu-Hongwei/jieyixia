@@ -23,7 +23,7 @@ DEADLINE_VALUE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}([+-]\d{2}
 # v0.2：键集合按内容类型封闭。title/deadline 通用；其余按类型。
 UNIVERSAL_KEYS = {"title", "deadline"}
 TYPE_KEYS = {
-    "notice": {"requirement", "constraints", "submit_to", "reminder"},
+    "notice": {"requirement", "constraints", "submit_to", "reminder", "time_nodes"},
     "tutorial": {"summary", "steps", "cautions"},
     "reference": {"summary", "keywords"},
 }
@@ -41,6 +41,7 @@ FIELD_SEMANTICS: dict[str, dict[str, str]] = {
         "constraints": "字数/格式/实验组数等硬性限制，以及带标签的时间窗口、地点、其余场次或截止节点；字符串或字符串数组",
         "submit_to": "提交入口或提交对象",
         "reminder": "逾期后果、提醒类语句；不要放进 constraints",
+        "time_nodes": "全部时间节点（多场次/多截止都列）：每节点 label+raw+value(ISO)+basis；deadline 由后端从中确定性选主",
     },
     "tutorial": {
         "title": "标题",
@@ -65,11 +66,14 @@ STATUS_SEMANTICS: dict[str, str] = {
 }
 
 TIME_RULES: list[str] = [
-    "相对时间（下周五/周日/明天等）：status=unresolved、value=null、raw 保留原文；不要自己换算成日期，换算由后端用保存时间完成",
-    "相对词同句或括号内另有明确日期（如「本周二（5.12）」）：以明确日期为准；带年份输出 candidate+value；只有月日没有年份输出 unresolved+value=null 由后端补年",
+    "所有时间节点（含多场次、多截止）抽进 time_nodes：每节点给 label、raw（逐字原文）、value（ISO）、basis（explicit/relative/inferred）",
+    "相对时间（下周五/明天/月底/三天后/国庆前等）由你参照保存时间换算成 ISO，basis=relative；确实换算不出给 value=null",
+    "只有月日没有年份：参照保存时间补年份，basis=inferred",
     "原文明确绝对日期：value 用 YYYY-MM-DD；只有日期不补时刻（不补 23:59）；原文带时刻才用完整 ISO 日期时间",
-    "不要自行补年份或时区：原文没有的年份/时区后端会剥离并标推算；时区原文有才写",
     "「24:00」表示当日结束：输出 date 精度（YYYY-MM-DD），不要输出 T24:00",
+    "不要自行补时区：原文没有的时区不要写进 value",
+    "deadline 由后端从 time_nodes 确定性选主（最早节点），你不必自己选主",
+    "被新通知取代的旧日期：标 basis=superseded，保留在 time_nodes 供溯源，但不参与选主",
 ]
 
 CHAT_RULES: list[str] = [
@@ -173,6 +177,26 @@ class Quote(ContractModel):
     source_id: str
 
 
+class TimeNode(ContractModel):
+    """v0.3 V3-2：一个时间节点。模型抽取全部节点，后端确定性选主。"""
+
+    label: str = ""
+    raw: str = ""
+    value: str | None = None
+    precision: Literal["date", "datetime"] | None = None
+    tz_known: bool | None = None
+    basis: Literal["explicit", "relative", "inferred", "superseded"] = "explicit"
+    derived: bool = False
+
+    @model_validator(mode="after")
+    def _check(self) -> TimeNode:
+        if self.value is not None and not DEADLINE_VALUE_RE.match(self.value):
+            raise ValueError("time_node.value 必须是单一 date 或规范 datetime")
+        if self.basis in ("relative", "inferred") and not self.derived:
+            raise ValueError("relative/inferred 节点必须标 derived")
+        return self
+
+
 class Field(ContractModel):
     """便签的每个重要字段。一个结构承载规则 2/4/7 与 F03 的字段级确认。"""
 
@@ -225,9 +249,36 @@ class Deadline(ContractModel):
 
 
 class Warning(ContractModel):
-    code: str
+    code: Literal[
+        "demo_data",
+        "origin_unknown",
+        "relative_date_derived",
+        "date_year_inferred",
+        "candidate_without_value",
+        "timezone_unspecified",
+        "possible_deadline_change",
+        "no_deadline_in_source",
+    ]
     message: str
     field_key: str | None = None
+
+
+# V3-3：模型自造码的同义归一；不在码表且无同义的丢弃
+WARNING_SYNONYMS = {
+    "relative_date_unresolved": "relative_date_derived",
+    "date_derived": "relative_date_derived",
+    "year_inferred": "date_year_inferred",
+    "tz_unknown": "timezone_unspecified",
+    "timezone_unknown": "timezone_unspecified",
+}
+WARNING_CODES = set(Warning.model_fields["code"].annotation.__args__)
+# 这些码由后端权威生成；模型自报的同码忽略，避免跨来源重复
+BACKEND_GENERATED_CODES = {
+    "relative_date_derived",
+    "date_year_inferred",
+    "candidate_without_value",
+    "timezone_unspecified",
+}
 
 
 # ---------------------------------------------------------------- API：P0
@@ -275,6 +326,12 @@ class AnalyzeResponse(ContractModel):
             if value is None:
                 if f.status not in (FieldStatus.unresolved, FieldStatus.missing):
                     raise ValueError(f"v0.2：字段 {f.key} 为 candidate 却无值")
+                continue
+            if f.key == "time_nodes":
+                if not isinstance(value, list):
+                    raise ValueError("v0.3：time_nodes 必须是数组")
+                for node in value:
+                    TimeNode.model_validate(node)
                 continue
             if f.key in STR_OR_LIST_KEYS:
                 if not (isinstance(value, str) or (isinstance(value, list) and all(isinstance(x, str) for x in value))):
