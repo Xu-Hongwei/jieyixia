@@ -1,0 +1,29 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-5b1b-r3-2026-11-24/review.test.js > R8 fixed: explicit no-deadline permits ready
+R8 fixed: no-deadline ready succeeds
+
+stdout | ../output/review-5b1b-r3-2026-11-24/review.test.js > remaining R8: new deadline decision disagrees with computed input yet ready succeeds
+DEFECT deadline binding: {
+  computedDeadline: '2026-11-30',
+  currentConfirmedDeadline: '2026-11-23',
+  firstSegment: '2026-11-24',
+  status: 'ready'
+}
+
+ ✓ ../output/review-5b1b-r3-2026-11-24/review.test.js > R5 fixed: new requirements invalidate old computation and block ready 214ms
+ ✓ ../output/review-5b1b-r3-2026-11-24/review.test.js > R6 fixed: proposed date is not mistaken for external drift 29ms
+ ✓ ../output/review-5b1b-r3-2026-11-24/review.test.js > R7 fixed: text fingerprint uses UTF8 and changes invalidate ready 23ms
+ ✓ ../output/review-5b1b-r3-2026-11-24/review.test.js > R8 fixed: explicit no-deadline permits ready 28ms
+stdout | ../output/review-5b1b-r3-2026-11-24/review.test.js > R9 fixed: same-size image replacement after hash blocks ready
+R9 fixed: same-size image replacement blocked before ready
+
+ ✓ ../output/review-5b1b-r3-2026-11-24/review.test.js > remaining R8: new deadline decision disagrees with computed input yet ready succeeds 27ms
+ ✓ ../output/review-5b1b-r3-2026-11-24/review.test.js > R9 fixed: same-size image replacement after hash blocks ready 25ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  19:52:26
+   Duration  1.23s (transform 88ms, setup 0ms, collect 69ms, tests 346ms, environment 0ms, prepare 83ms)
+

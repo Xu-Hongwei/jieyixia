@@ -1,0 +1,48 @@
+const L = require('./accept-lib.cjs');
+const fs = require('node:fs');
+(async () => {
+ const b = await L.launch(); const checks = [];
+ const check = (name, pass, detail) => { checks.push({name,pass:!!pass,detail}); if(!pass) throw new Error(name+': '+JSON.stringify(detail)); };
+ let errors = [];
+ try {
+  const setup = await L.newPage(b); const {p,c} = setup; errors=setup.errors;
+  await L.openApp(p); await L.seed(p); await p.reload(); await L.openApp(p);
+  await p.goto(L.BASE+'/#/tasks/t1'); await p.getByRole('button',{name:'开始执行',exact:true}).click();
+  await p.waitForURL(/#\/work\//); const editor=p.getByRole('textbox',{name:'本次成果正文'}); await editor.waitFor();
+  const sid=(await L.docs(p)).find(d=>d.kind==='focus_session').id;
+  const row=async()=>(await L.docs(p)).find(d=>d.id===sid);
+  const switchBad=async n=>p.evaluate(n=>{location.hash='/work/review-invalid-'+n},n);
+  const leaveDialog=()=>p.getByRole('dialog');
+  await editor.fill('取消后应保留的成果'); await switchBad(1); await leaveDialog().waitFor();
+  await leaveDialog().getByRole('button',{name:'留在这里',exact:true}).click();
+  await p.waitForURL(new RegExp('/work/'+sid));
+  check('取消参数切换保留原会话、运行状态及输入', (await row()).running && await editor.inputValue()==='取消后应保留的成果', {url:p.url()});
+  await p.evaluate(()=>{window.__reviewPut=IDBObjectStore.prototype.put; window.__reviewFail=true; IDBObjectStore.prototype.put=function(value,...rest){if(window.__reviewFail && value && value.kind==='focus_session')throw new DOMException('审查注入写入失败','QuotaExceededError'); return window.__reviewPut.call(this,value,...rest)};});
+  await editor.fill('失败时不能丢失的成果'); await switchBad(2); await leaveDialog().waitFor();
+  await leaveDialog().getByRole('button',{name:'保存并暂停后离开',exact:true}).click();
+  await p.getByText('离开前保存失败',{exact:false}).waitFor();
+  const failed=await row();
+  check('保存失败取消导航且数据库未半暂停',p.url().includes('/work/'+sid) && failed.running && failed.draft_md!=='失败时不能丢失的成果',failed);
+  check('失败后编辑输入仍在',await editor.inputValue()==='失败时不能丢失的成果');
+  await p.evaluate(()=>{window.__reviewFail=false});
+  await switchBad(3); await leaveDialog().waitFor();
+  await leaveDialog().getByRole('button',{name:'保存并暂停后离开',exact:true}).click();
+  await p.getByText('会话不存在或不属于当前空间。',{exact:false}).waitFor();
+  const saved=await row();
+  check('确认后先保存暂停原会话再显示无效目标',!saved.running && saved.draft_md==='失败时不能丢失的成果',saved);
+  await p.evaluate(sid=>{location.hash='/work/'+sid},sid); await editor.waitFor();
+  await p.getByRole('button',{name:'继续计时',exact:true}).click();
+  await p.getByRole('button',{name:'暂停',exact:true}).waitFor();
+  await editor.fill('第二次切换也必须保存'); await switchBad(4); await leaveDialog().waitFor();
+  check('连续参数切换不残留放行令牌',await leaveDialog().count()===1);
+  await leaveDialog().getByRole('button',{name:'保存并暂停后离开',exact:true}).click();
+  await p.getByText('会话不存在或不属于当前空间。',{exact:false}).waitFor();
+  const second=await row();
+  check('第二次切换正文落库且已暂停',!second.running && second.draft_md==='第二次切换也必须保存',second);
+  await p.getByRole('button',{name:'返回日程',exact:true}).click(); await p.waitForURL(/#\/today/);
+  await p.reload(); await L.openApp(p,'/work/'+sid); await editor.waitFor();
+  check('真实刷新后正文恢复',await editor.inputValue()==='第二次切换也必须保存');
+  check('浏览器无运行时错误',errors.length===0,errors);
+  await c.close();
+ } finally {await b.close(); const result={checks,errors}; fs.writeFileSync('E:/qoder/output/playwright/stage3b2-recheck-2026-11-21/result.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));}
+})().catch(e=>{console.error(e);process.exitCode=1});

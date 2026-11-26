@@ -1,0 +1,24 @@
+{
+  "id": "f-planitem-actual-not-null",
+  "title": "新 PlanItem actual_minutes 必须 null",
+  "layer": "application",
+  "mode": "reject",
+  "target": "PreparedPlanItemCreate",
+  "acceptance": [
+    "B0-13"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "formal_id": "p",
+    "workspace_id": "ws-fixture",
+    "task_id": "t",
+    "date": "2026-11-24",
+    "planned_minutes": 30,
+    "action_text": "x",
+    "order": 1,
+    "actual_minutes": 5
+  },
+  "expected_error": "None",
+  "expected": null,
+  "notes": ""
+}

@@ -1,0 +1,25 @@
+{
+  "id": "s-call-budget-over",
+  "title": "propose 3次尝试超限",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-17"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "scenario": "call_budget",
+    "analyze_calls": 0,
+    "analyze_attempts_total": 0,
+    "propose_attempts": 3
+  },
+  "expected_error": null,
+  "expected": {
+    "allowed": false,
+    "total_vendor_attempts": 3,
+    "all_attempts_consume_daily_quota": true,
+    "propose_budget_covers_all_its_attempts": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

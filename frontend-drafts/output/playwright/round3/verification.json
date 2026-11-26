@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-18",
+  "browser": "Microsoft Edge isolated session",
+  "widths": [
+    360,
+    768,
+    1440
+  ],
+  "layoutChecks": 36,
+  "changedLayoutChecks": 6,
+  "failures": [],
+  "pageErrors": [],
+  "flowsPerConcept": [
+    "field confirmation gate",
+    "unplanned task creation",
+    "daily item toggle",
+    "timer start and pause",
+    "focus draft across navigation",
+    "temporary capture",
+    "long text narrow layout",
+    "empty search",
+    "refresh reset"
+  ],
+  "extraStates": [
+    "matrix simulated recognition failure",
+    "gallery 3 page switches",
+    "gallery deep links",
+    "actual screenshot loading",
+    "grayscale toggle",
+    "mobile gallery"
+  ],
+  "scope": "temporary interactive visual drafts; no backend, persistence or independent reviewers"
+}

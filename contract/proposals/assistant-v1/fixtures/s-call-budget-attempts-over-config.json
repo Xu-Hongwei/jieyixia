@@ -1,0 +1,33 @@
+{
+  "id": "s-call-budget-attempts-over-config",
+  "title": "实际尝试不得超配置上界",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-17"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "scenario": "call_budget",
+    "analyze_calls": 1,
+    "analyze_attempts_total": 5,
+    "propose_attempts": 0,
+    "analyze_profile_retries": [
+      [
+        1,
+        1
+      ]
+    ]
+  },
+  "expected_error": null,
+  "expected": {
+    "allowed": false,
+    "total_vendor_attempts": 5,
+    "all_attempts_consume_daily_quota": true,
+    "propose_budget_covers_all_its_attempts": true,
+    "analyze_configured_attempt_upper": 4,
+    "analyze_attempts_within_configured_upper": false
+  },
+  "notes": "R5：单analyze配置上界=Σ(1+retries)=4；声称5次实际尝试与设计不符"
+}

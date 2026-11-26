@@ -1,0 +1,47 @@
+{
+  "at": "2026-11-24T05:39:02.057Z",
+  "results": [
+    {
+      "item": "PROBE",
+      "name": "positional-selection: page displays exact stored body",
+      "pass": true,
+      "detail": "{\"id\":\"9aff6f54-ba41-465c-970c-1a4c5a74a891\",\"draft\":\"第二段成果：材料整理完成，可进入初稿。\"}"
+    },
+    {
+      "item": "PROBE",
+      "name": "positional-selection: readonly marker",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "PROBE",
+      "name": "positional-selection: no business write",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "PROBE",
+      "name": "first-p1-segment: page displays exact stored body",
+      "pass": true,
+      "detail": "{\"id\":\"cf42b38b-9782-4833-be76-5152ed432a38\",\"draft\":\"第一段成果：材料清单已梳理出三节提纲。\"}"
+    },
+    {
+      "item": "PROBE",
+      "name": "first-p1-segment: readonly marker",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "PROBE",
+      "name": "first-p1-segment: no business write",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "PROBE",
+      "name": "positional record is second segment; first segment explicitly identified",
+      "pass": true,
+      "detail": "{\"wrong\":\"9aff6f54-ba41-465c-970c-1a4c5a74a891\",\"first\":\"cf42b38b-9782-4833-be76-5152ed432a38\"}"
+    }
+  ]
+}

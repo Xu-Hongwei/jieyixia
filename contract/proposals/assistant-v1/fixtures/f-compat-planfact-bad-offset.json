@@ -1,0 +1,23 @@
+{
+  "id": "f-compat-planfact-bad-offset",
+  "title": "排程任务事实：非法偏移仍拒绝",
+  "layer": "planning",
+  "mode": "reject",
+  "target": "PlanningTaskFact",
+  "acceptance": [
+    "B0-06"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "task_ref": {
+      "kind": "existing",
+      "id": "t-1"
+    },
+    "title": "虚构目标",
+    "deadline_value": "2026-11-26T09:00+08:75",
+    "deadline_precision": "datetime"
+  },
+  "expected_error": "非法时区偏移",
+  "expected": null,
+  "notes": ""
+}

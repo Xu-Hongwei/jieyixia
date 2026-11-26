@@ -1,0 +1,133 @@
+[
+  {
+    "probe": "R1_legacy_deadline",
+    "value": "2026-11-26T09:00+08:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal_existing": {
+      "accepted": true
+    },
+    "proposal_plan_fact": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "R1_legacy_deadline",
+    "value": "2026-11-26T09:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal_existing": {
+      "accepted": true
+    },
+    "proposal_plan_fact": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "R1_legacy_deadline",
+    "value": "2026-11-26T09:00:00.123+08:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal_existing": {
+      "accepted": true
+    },
+    "proposal_plan_fact": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "R1_negatives_and_strict_candidate",
+    "bad_date": {
+      "accepted": false,
+      "error": "1 validation error for ExistingDeadline\n  Value error, deadline.value 含非法日历日期或时刻：2026-02-30T09:00 [type=value_error, input_value={'value': '2026-02-30T09:...6-11-24T10:00:00+08:00'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+    },
+    "bad_offset": {
+      "accepted": false,
+      "error": "1 validation error for ExistingDeadline\n  Value error, deadline.value 含非法时区偏移：2026-11-26T09:00+08:75 [type=value_error, input_value={'value': '2026-11-26T09:...6-11-24T10:00:00+08:00'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+    },
+    "candidate_no_seconds": {
+      "accepted": false,
+      "error": "1 validation error for DeadlineCandidate\n  Value error, deadline_candidate.value 必须是单一 date 或规范 datetime：2026-11-26T09:00+08:00 [type=value_error, input_value={'value': '2026-11-26T09:...erpt': '虚构截止'}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+    }
+  },
+  {
+    "probe": "R2_typescript_union",
+    "model": "AssistantModelProposal",
+    "field": "task_proposals",
+    "generated_type": "Array<TaskProposalCreate | TaskProposalLink | TaskProposalUpdate>"
+  },
+  {
+    "probe": "R2_typescript_union",
+    "model": "AssistantModelProposal",
+    "field": "action_proposals",
+    "generated_type": "Array<ActionProposalCreate | ActionProposalReuse>"
+  },
+  {
+    "probe": "R2_typescript_union",
+    "model": "AssistantProposeResponse",
+    "field": "payload",
+    "generated_type": "ClarificationPayload | ProposalPayload | ExplanationPayload"
+  },
+  {
+    "probe": "R3_completed_action",
+    "direct_done": {
+      "accepted": false,
+      "error": "已完成 Action 只能作为已满足前置的事实引用，不能重新排为未完成步骤"
+    },
+    "reuse_done": {
+      "accepted": false,
+      "error": "已完成 Action 只能作为已满足前置的事实引用，不能重新排为未完成步骤"
+    },
+    "direct_undone": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "R4_update_deadline_evidence",
+    "origin": "model",
+    "update": {
+      "accepted": false,
+      "error": "task t-update 截止候选 证据指向未选定 source：unselected-source"
+    },
+    "create_control": {
+      "accepted": false,
+      "error": "task t-new 截止候选 证据指向未选定 source：unselected-source"
+    }
+  },
+  {
+    "probe": "R4_update_deadline_evidence",
+    "origin": "user",
+    "update": {
+      "accepted": false,
+      "error": "origin=user 的截止候选必须有用户消息证据"
+    },
+    "create_control": {
+      "accepted": false,
+      "error": "origin=user 的截止候选必须有用户消息证据"
+    }
+  },
+  {
+    "probe": "R4_legal_update",
+    "update": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "R5_multi_profile_budget",
+    "router_attempts": [
+      "a",
+      "a",
+      "b",
+      "b"
+    ],
+    "count": 4,
+    "single_analyze_configured_upper": 4,
+    "scenario_check": {
+      "accepted": true
+    }
+  }
+]
+All remediation expectations verified; no production files changed.

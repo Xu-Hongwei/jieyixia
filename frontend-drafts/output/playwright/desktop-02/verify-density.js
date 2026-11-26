@@ -1,0 +1,12 @@
+async(page)=>{
+ const failures=[],errors=[];page.on('pageerror',e=>errors.push(e.message));const settle=()=>page.evaluate(async()=>{await document.fonts.ready;await Promise.all(document.getAnimations().filter(a=>a.effect.getTiming().iterations!==Infinity).map(a=>a.finished.catch(()=>{})));});
+ await page.goto('http://127.0.0.1:5188/desk.html');await page.setViewportSize({width:1440,height:1000});
+ for(let i=0;i<9;i++){await page.locator('[data-pn-add]').click();await page.locator('#pn-title').fill('同日多任务验证 '+(i+1)+'：核对资料并整理进度');await page.locator('#pn-new-start').fill(String(8+i).padStart(2,'0')+':00');await page.locator('#pn-add-form button[type=submit]').click();}
+ if(await page.locator('.pn-note').count()!==12)failures.push('12-note board count');await page.locator('.pn-nav [data-view=inbox]').click();await settle();
+ if(await page.locator('.pn-weekday-column.is-today .pn-week-task').count()!==12)failures.push('12 tasks in a single day');
+ for(const width of [1440,360]){await page.setViewportSize({width,height:1000});await page.locator('.pn-weekday-column.is-today .pn-week-task').last().scrollIntoViewIfNeeded();if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))failures.push('Dense week overflow '+width);await page.screenshot({path:`output/playwright/desktop-02/many-tasks-${width}.png`});}
+ await page.setViewportSize({width:1440,height:1000});await page.goto('http://127.0.0.1:5188/index.html');await settle();
+ for(const view of ['inbox','today','focus']){await page.locator('[data-compare='+view+']').click();await page.waitForFunction(()=>[...document.querySelectorAll('.preview img')].every(i=>i.complete));const bad=await page.locator('.preview img').evaluateAll(es=>es.filter(e=>!e.naturalWidth).map(e=>e.src));if(bad.length)failures.push({gallery:view,bad});}
+ await page.screenshot({path:'output/playwright/desktop-02/gallery-1440.png',fullPage:true});await page.setViewportSize({width:360,height:1000});if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1))failures.push('Gallery overflow');
+ await page.setViewportSize({width:1440,height:1000});await page.goto('http://127.0.0.1:5188/desk.html?view=inbox');await settle();return {failures,errors,checks:['12 tasks on the same day visible in board and weekly view','No horizontal overflow at 1440 and 360 in dense week','Gallery entry and all three preview selections load','Final browser at default weekly schedule']};
+}

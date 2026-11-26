@@ -1,0 +1,11 @@
+START_IMPORTS
+{"probe": "malformed_data_url", "accepted": false, "kind": "IndexError", "status": null}
+{"probe": "truncated_png", "bytes": 24, "accepted": true, "mime": "image/png", "missing": "IHDR remainder, CRC, IDAT, IEND"}
+{"probe": "truncated_png_provider", "calls": 1, "success": true}
+{"probe": "offset_minutes_75", "accepted": true}
+{"probe": "node_offset_minutes_75", "accepted": true, "value": "2026-11-18T12:00:00+08:75"}
+{"probe": "nan_budget", "accepted": true, "value": "nan"}
+{"probe": "body_limit_config", "input": "-1", "accepted": true, "value": -1}
+{"probe": "body_limit_config", "input": "abc", "accepted": true, "value": 8388608}
+{"probe": "numeric_base_url", "accepted": true}
+{"probe": "real_http_drip", "budget_s": 0.3, "elapsed_s": 1.14, "success": true, "result_chars": 108}

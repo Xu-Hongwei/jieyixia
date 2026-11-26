@@ -1,0 +1,90 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/qoder/frontend[39m
+
+ [32m✓[39m src/tests/db.v3migration.test.js [2m([22m[2m10 tests[22m[2m)[22m[32m 254[2mms[22m[39m
+ [32m✓[39m src/tests/db.workspace.test.js [2m([22m[2m10 tests[22m[2m)[22m[32m 246[2mms[22m[39m
+ [32m✓[39m src/tests/store.test.js [2m([22m[2m32 tests[22m[2m)[22m[32m 178[2mms[22m[39m
+ [32m✓[39m src/tests/planning.rules.test.js [2m([22m[2m53 tests[22m[2m)[22m[33m 342[2mms[22m[39m
+   [33m[2m✓[22m[39m B1-07 北京时间/跨午夜/闰月/跨年/宿主时区独立[2m > [22m宿主时区 America/New_York 与 Pacific/Kiritimati 下输出逐字节一致 [33m 318[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.adoption.backup.test.js [2m([22m[2m1 test[22m[2m)[22m[33m 419[2mms[22m[39m
+   [33m[2m✓[22m[39m M1.3 真实采用 → v2 备份 → 恢复新空间[2m > [22m全量往返：逐对象真实映射比对；applied 只读去授权；0 ops；不重放；原空间不变 [33m 417[2mms[22m[39m
+ [32m✓[39m src/tests/plan.service.test.js [2m([22m[2m19 tests[22m[2m)[22m[33m 665[2mms[22m[39m
+ [32m✓[39m src/tests/plan.backup.test.js [2m([22m[2m7 tests[22m[2m)[22m[33m 562[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.receive.test.js [2m([22m[2m9 tests[22m[2m)[22m[33m 918[2mms[22m[39m
+ [32m✓[39m src/tests/backup.format.test.js [2m([22m[2m11 tests[22m[2m)[22m[32m 82[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.draft.test.js [2m([22m[2m44 tests[22m[2m)[22m[32m 55[2mms[22m[39m
+ [32m✓[39m src/tests/backup.import.test.js [2m([22m[2m17 tests[22m[2m)[22m[32m 146[2mms[22m[39m
+ [32m✓[39m src/tests/focus.store.test.js [2m([22m[2m13 tests[22m[2m)[22m[32m 83[2mms[22m[39m
+ [32m✓[39m src/tests/backup.restore.test.js [2m([22m[2m19 tests[22m[2m)[22m[33m 902[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.generate.store.test.js [2m([22m[2m21 tests[22m[2m)[22m[33m 961[2mms[22m[39m
+ [32m✓[39m src/tests/focus.plan.service.test.js [2m([22m[2m38 tests[22m[2m)[22m[33m 1453[2mms[22m[39m
+ [32m✓[39m src/tests/planning.refs.test.js [2m([22m[2m97 tests[22m[2m)[22m[32m 44[2mms[22m[39m
+ [32m✓[39m src/tests/backup.recovery.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 45[2mms[22m[39m
+ [32m✓[39m src/tests/focus.protection.test.js [2m([22m[2m27 tests[22m[2m)[22m[32m 95[2mms[22m[39m
+ [32m✓[39m src/tests/usePlanWorkStart.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 154[2mms[22m[39m
+ [32m✓[39m src/tests/planning.golden.test.js [2m([22m[2m24 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/tests/backup.compat.test.js [2m([22m[2m13 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+ [32m✓[39m src/tests/plan.store.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+ [32m✓[39m src/tests/backup.validate.test.js [2m([22m[2m26 tests[22m[2m)[22m[32m 106[2mms[22m[39m
+ [32m✓[39m src/tests/focus.plan.test.js [2m([22m[2m40 tests[22m[2m)[22m[32m 34[2mms[22m[39m
+ [32m✓[39m src/tests/backup.export.test.js [2m([22m[2m23 tests[22m[2m)[22m[33m 1922[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-1 导出：生产链下载前完整校验（P2 整改）[2m > [22mJSON 限额边界值：sources.json 恰为 25MiB 仍合法导出（不误拒） [33m 733[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-1 导出：生产链下载前完整校验（P2 整改）[2m > [22m图片限额边界值：单图恰为 25MiB 仍合法导出，原图字节与类型保留 [33m 579[2mms[22m[39m
+ [32m✓[39m src/tests/backup.remap.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/tests/planning.validate.test.js [2m([22m[2m48 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32m✓[39m src/tests/focus.test.js [2m([22m[2m33 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/tests/useWorkDraft.test.js [2m([22m[2m14 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m src/tests/review-stage2.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m src/tests/action.test.js [2m([22m[2m35 tests[22m[2m)[22m[32m 30[2mms[22m[39m
+ [32m✓[39m src/tests/plan.test.js [2m([22m[2m47 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.application.test.js [2m([22m[2m55 tests[22m[2m)[22m[32m 23[2mms[22m[39m
+ [32m✓[39m src/tests/focus.service.test.js [2m([22m[2m40 tests[22m[2m)[22m[33m 2392[2mms[22m[39m
+   [33m[2m✓[22m[39m F5 信封协议反例（原始公开服务入口：淘汰/实例重建/缺签发信息）[2m > [22m≥201 条墓碑淘汰后：裸旧 ID 与原信封都不新建会话；实例重建后仍拒；新信封正常下一段 [33m 339[2mms[22m[39m
+ [32m✓[39m src/tests/matter.test.js [2m([22m[2m24 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32m✓[39m src/tests/plan.protection.test.js [2m([22m[2m16 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.refs.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+ [32m✓[39m src/tests/focus.runtime.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/tests/organize.test.js [2m([22m[2m22 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/tests/db.test.js [2m([22m[2m8 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+ [32m✓[39m src/tests/workNavigation.test.js [2m([22m[2m22 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/tests/backup.adapt.test.js [2m([22m[2m8 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/tests/time.test.js [2m([22m[2m39 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/tests/contractSchema.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/tests/backup.smoke.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.requests.test.js [2m([22m[2m22 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+ [32m✓[39m src/tests/db.migration.test.js [2m([22m[2m1 test[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/tests/workLeave.test.js [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/tests/work.test.js [2m([22m[2m8 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/tests/note.test.js [2m([22m[2m12 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.clarification.test.js [2m([22m[2m9 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/tests/week.test.js [2m([22m[2m14 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/tests/plan.review.test.js [2m([22m[2m59 tests[22m[2m)[22m[33m 3456[2mms[22m[39m
+ [32m✓[39m src/tests/restore.wiring.test.js [2m([22m[2m15 tests[22m[2m)[22m[33m 3622[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R3a 恢复控制器：检查/预览/取消（零写入零目录零切空间）[2m > [22msetRestoreName 仅预览阶段有效 [33m 317[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R3a 恢复控制器：确认/提交/完成/重试[2m > [22m提交失败可同意图重试：复用冻结 prepared（同 operationId），修复后成功只一份 [33m 383[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R3a 恢复控制器：确认/提交/完成/重试[2m > [22m提交进行中禁止重置/换文件（写入阶段不可取消） [33m 469[2mms[22m[39m
+ [32m✓[39m src/tests/planStartEntry.test.js [2m([22m[2m15 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/tests/backup.zipdecode.test.js [2m([22m[2m24 tests[22m[2m)[22m[33m 3737[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R1a 受限解码：容器级拒绝（解压前）[2m > [22m条目数超上限 → ZIP_ENTRY_LIMIT [33m 671[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R1a 受限解码：实际输出限额（zip bomb 防护）[2m > [22m高压缩比 JSON 超单文件上限：按实际输出停止，不全量分配 [33m 649[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R1a 受限解码：实际输出限额（zip bomb 防护）[2m > [22m尺寸谎报（声明极小）但实际展开超限：仍按实际输出停止 [33m 467[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R1a 受限解码：实际输出限额（zip bomb 防护）[2m > [22m图片超单文件上限 → ZIP_OUTPUT_LIMIT [33m 625[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R1a 受限解码：实际输出限额（zip bomb 防护）[2m > [22m单文件恰为上限不误拒（边界） [33m 920[2mms[22m[39m
+   [33m[2m✓[22m[39m 4-2 R1a 受限解码：可取消与资源释放[2m > [22m解压途中 abort → ZIP_CANCELLED，不再产出后续条目 [33m 370[2mms[22m[39m
+ [32m✓[39m src/tests/backup.assistant.test.js [2m([22m[2m21 tests[22m[2m)[22m[33m 3884[2mms[22m[39m
+   [33m[2m✓[22m[39m B1B-16 损坏包拒绝（容器归属/版本组合/载荷形状/计数）[2m > [22m线程不在同一空间 → 拒绝（B 层归属 + C 层容器） [33m 411[2mms[22m[39m
+   [33m[2m✓[22m[39m B1B-10 历史宽容与活引用守卫分开校验[2m > [22m历史快照缺失来源/done 占用断引用/applied 缺失 formal_id → 保留内容通过校验 [33m 455[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.adoption.service.test.js [2m([22m[2m28 tests[22m[2m)[22m[33m 4149[2mms[22m[39m
+   [33m[2m✓[22m[39m prepare：固定快照冻结，零写入[2m > [22mready 草案 prepare 成功且不写任何库；editing 拒绝 NOT_READY [33m 309[2mms[22m[39m
+   [33m[2m✓[22m[39m 缺口/过载独立确认后才可采用[2m > [22m既有过载日 + 未排工作：逐项确认后 envelope 双确认标记为真；采用保留未排事实 [33m 437[2mms[22m[39m
+   [33m[2m✓[22m[39m M1 审查回归：提交内容必须与冻结草案一致[2m > [22mR4：真实保存的排除草案 → prepare 显式 NO_ADOPTABLE_CHANGES，零写入 [33m 379[2mms[22m[39m
+   [33m[2m✓[22m[39m M1 复验 F1：截止出处必须是已确认且匹配的具体便签字段[2m > [22mF1：便签 fields=[] → prepare DEADLINE_PROVENANCE_REQUIRED，零写入（复验原反例） [33m 442[2mms[22m[39m
+ [32m✓[39m src/tests/assistant.service.test.js [2m([22m[2m65 tests[22m[2m)[22m[33m 4902[2mms[22m[39m
+   [33m[2m✓[22m[39m R1 事实新鲜度（服务 get / setStatus 事务内再核对）[2m > [22m新增窗口占用后 get 返回 factFreshness 漂移且 ready=false（旧内容保留） [33m 415[2mms[22m[39m
+   [33m[2m✓[22m[39m R4 写入边界完整契约校验（非法形状整体不写）[2m > [22m非法嵌套未知字段 create → SHAPE_INVALID，线程与草案都不落库 [33m 318[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m59 passed[39m[22m[90m (59)[39m
+[2m      Tests [22m [1m[32m1319 passed[39m[22m[90m (1319)[39m
+[2m   Start at [22m 22:34:32
+[2m   Duration [22m 5.92s[2m (transform 3.00s, setup 0ms, collect 14.05s, tests 36.39s, environment 10ms, prepare 8.28s)[22m
+

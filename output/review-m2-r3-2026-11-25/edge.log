@@ -1,0 +1,64 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+MULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：报告交给谁？
+答：交给张老师
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+stdout | ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+RELOAD_CLARIFICATION {"status":"needs_clarification","gen":{"phase":"clarification","requestId":null,"turnId":null,"clientSeq":1,"threadId":"284c2811-22e0-464e-b22b-ca4ea2bed697","draftId":"903123b7-a60b-4a03-b6c1-a5195e4a615c","userMessage":"保留我的要求","originalMessage":"保留我的要求","history":[],"isContinuation":true,"questions":[{"blocking_reason":"虚构：影响交付对象","options":["导师","班长"],"question":"报告交给谁？","question_id":"q1","related_requirement_key":null}],"error":null,"retained":null,"pendingAnalysis":null,"frozen":null,"progress":""},"input":{"userText":"保留我的要求","sourceIds":["3af406ee-f575-4de5-8b69-581ccdfa6d9c"],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+ ✓ ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer 37ms
+ ✓ ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry 17ms
+stdout | ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+SWITCH_DRAFT {"oldId":"dd07e243-5782-4539-9f2b-db0e233a6694","pendingId":"448134db-d50f-47dd-ae7d-9c2564210d9d","activeId":"dd07e243-5782-4539-9f2b-db0e233a6694"}
+
+stdout | ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+FORGED_PROVENANCE_ADOPTION {"prepare":false}
+
+stdout | ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence
+QUESTION_AS_USER {"userMessage":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：是否把截止设为2026-11-30？\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","prepared":false}
+
+stdout | ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload
+SUCCESS_RELOAD {"status":"needs_review","input":{"userText":"保留预算45","sourceIds":["2538d3bd-161b-4dde-b16a-10db18575407"],"taskIds":[],"actionIds":[],"budgets":{"2026-11-25":45},"unavailable":[],"startDate":null,"excerpts":{}}}
+
+stdout | ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW R1 multiline: example answer inside model question is not user evidence
+MODEL_EXAMPLE_AS_USER {"message":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：请确认截止日期。\n参考回答：\n答：截止设为2026-11-30\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","userSegments":["请拆解报告，截止还没有决定","截止设为2026-11-30","不要设截止日期"],"prepared":true,"adopted":true,"deadline":{"value":"2026-11-30","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-25T13:54:45.579Z"}}
+
+ ✓ ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation 61ms
+ ✓ ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance 28ms
+ ✓ ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence 23ms
+ ✓ ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload 9ms
+ × ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW R1 multiline: example answer inside model question is not user evidence 35ms
+   → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../output/review-m2-r3-2026-11-25/edge.test.js > REVIEW R1 multiline: example answer inside model question is not user evidence
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../output/review-m2-r3-2026-11-25/edge.test.js:185:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  21:54:44
+   Duration  1.31s (transform 166ms, setup 0ms, collect 364ms, tests 210ms, environment 0ms, prepare 59ms)
+
+JSON report written to E:/qoder/output/review-m2-r3-2026-11-25/edge-results.json

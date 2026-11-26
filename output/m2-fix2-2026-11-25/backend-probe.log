@@ -1,0 +1,4 @@
+RELATED_KEYS ['w1'] accepted
+RELATED_KEYS ['a1'] invalid_output
+RELATED_KEYS ['w-ghost'] invalid_output
+FORGED_USER_DEADLINE rejected invalid_output

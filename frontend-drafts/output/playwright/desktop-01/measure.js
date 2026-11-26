@@ -1,0 +1,1 @@
+async(page)=>{ await page.setViewportSize({width:1440,height:1000});await page.goto('http://127.0.0.1:5188/desk.html');return await page.locator('.desk-stage,.desk-action,.desk-bottom,.r3-build,.desk-progress,.r3-build>small').evaluateAll(es=>es.map(e=>({class:e.className,rect:e.getBoundingClientRect().toJSON(),style:getComputedStyle(e).display})));}

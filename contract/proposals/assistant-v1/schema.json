@@ -1,0 +1,5326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "截下来 工作助手协议提案 assistant-v1（历史提案；A 批已并入正式契约 0.5.0）",
+  "assistant_protocol_version": "1.1",
+  "target_schema_version": "0.5.0",
+  "target_db_version": 4,
+  "target_backup_format_version": 2,
+  "source_of_truth": "contract/proposals/assistant-v1/models.py（A 批再导出自 contract/assistant_models.py）",
+  "x-limits": {
+    "max_targets": {
+      "value": 20,
+      "unit": "count",
+      "scope": "一次 propose：新建+已有 Task 目标合计",
+      "future_config": "backend propose 校验 + 前端选择器"
+    },
+    "max_work_items": {
+      "value": 100,
+      "unit": "count",
+      "scope": "一次 propose / 一份草案的工作项",
+      "future_config": "backend propose 校验 + domains/planning"
+    },
+    "max_new_actions": {
+      "value": 100,
+      "unit": "count",
+      "scope": "一次 propose 新建 Action 建议",
+      "future_config": "backend propose 校验"
+    },
+    "max_selected_sources": {
+      "value": 20,
+      "unit": "count",
+      "scope": "一次 propose 选定资料",
+      "future_config": "前端选择器 + backend 校验"
+    },
+    "max_new_images_per_batch": {
+      "value": 3,
+      "unit": "count",
+      "scope": "一批新截图；逐份走既有 analyze",
+      "future_config": "前端附件区"
+    },
+    "max_user_message_chars": {
+      "value": 16000,
+      "unit": "chars",
+      "scope": "本轮用户文字 / 单条线程消息",
+      "future_config": "前后端同值校验"
+    },
+    "max_source_excerpt_chars": {
+      "value": 2000,
+      "unit": "chars",
+      "scope": "单来源片段；超限提示缩小范围，不静默删约束",
+      "future_config": "前端截断提示 + backend 校验"
+    },
+    "max_propose_body_bytes": {
+      "value": 524288,
+      "unit": "bytes",
+      "scope": "propose 请求体 UTF-8 实际字节，分块累计；不得放宽全局 max_body_bytes",
+      "future_config": "backend BodyLimit 按路径覆盖（5B-3）"
+    },
+    "max_model_output_bytes": {
+      "value": 131072,
+      "unit": "bytes",
+      "scope": "propose 模型输出解码文本",
+      "future_config": "backend 输出读取上限（5B-3）"
+    },
+    "propose_profile_max_tokens": {
+      "value": 8192,
+      "unit": "tokens",
+      "scope": "propose 专用 profile；不改旧 analyze profile 默认值",
+      "future_config": "backend model registry 新 profile（5B-3）"
+    },
+    "propose_budget_s": {
+      "value": 120,
+      "unit": "seconds",
+      "scope": "一次 propose 整体预算；含重试/结构修复/fallback",
+      "future_config": "backend propose 编排（5B-3）"
+    },
+    "propose_max_vendor_attempts": {
+      "value": 2,
+      "unit": "attempts",
+      "scope": "一次 propose 全部实际厂家 HTTP 尝试合计；额度耗尽禁止 fallback 绕过",
+      "future_config": "backend attempt_gate 共享每日额度（5B-3）"
+    },
+    "daily_budget_minutes_min": {
+      "value": 0,
+      "unit": "minutes",
+      "scope": "单日预算下界",
+      "future_config": "约束卡 + PlanningInput"
+    },
+    "daily_budget_minutes_max": {
+      "value": 1440,
+      "unit": "minutes",
+      "scope": "单日预算上界；未指定为 null 并澄清，不默认 0",
+      "future_config": "约束卡 + PlanningContext"
+    },
+    "buffer_pct_min": {
+      "value": 0,
+      "unit": "percent",
+      "scope": "缓冲比例下界",
+      "future_config": "约束卡"
+    },
+    "buffer_pct_max": {
+      "value": 50,
+      "unit": "percent",
+      "scope": "缓冲比例上界",
+      "future_config": "约束卡"
+    },
+    "buffer_pct_default": {
+      "value": 15,
+      "unit": "percent",
+      "scope": "缓冲比例默认",
+      "future_config": "约束卡"
+    },
+    "min_segment_minutes_default": {
+      "value": 25,
+      "unit": "minutes",
+      "scope": "默认最小工作段",
+      "future_config": "约束卡 + domains/planning"
+    },
+    "min_segment_minutes_min": {
+      "value": 1,
+      "unit": "minutes",
+      "scope": "最小工作段下界",
+      "future_config": "约束卡"
+    },
+    "min_segment_minutes_max": {
+      "value": 240,
+      "unit": "minutes",
+      "scope": "最小工作段上界",
+      "future_config": "约束卡"
+    },
+    "horizon_days": {
+      "value": 7,
+      "unit": "days",
+      "scope": "首版固定连续 7 个北京时间自然日",
+      "future_config": "PlanningInput/PlanningContext"
+    },
+    "max_clarification_questions": {
+      "value": 3,
+      "unit": "count",
+      "scope": "每轮集中澄清问题数",
+      "future_config": "backend propose + 助手卡片"
+    },
+    "max_thread_messages": {
+      "value": 200,
+      "unit": "count",
+      "scope": "单线程消息数；达到上限提示新建线程",
+      "future_config": "assistant store（5B-1）"
+    },
+    "max_draft_bytes": {
+      "value": 1048576,
+      "unit": "bytes",
+      "scope": "单条草案序列化（含 revision_history）；达到上限提示基于当前内容新建草案",
+      "future_config": "assistant store（5B-1）"
+    },
+    "max_draft_revisions": {
+      "value": 20,
+      "unit": "count",
+      "scope": "每草案版本数含当前；旧版只读",
+      "future_config": "assistant store（5B-1）"
+    },
+    "max_occupancy_entries": {
+      "value": 2000,
+      "unit": "count",
+      "scope": "PlanningInput 完整窗口占用条目",
+      "future_config": "domains/planning（5B-1）"
+    },
+    "max_segments": {
+      "value": 700,
+      "unit": "count",
+      "scope": "PlanningResult 段数上界（100 项 × 7 天）",
+      "future_config": "domains/planning（5B-1）"
+    },
+    "js_safe_int_max": {
+      "value": 9007199254740991,
+      "unit": "int",
+      "scope": "分钟/order 等数值安全上界；超出拒绝不溢出",
+      "future_config": "前后端数值校验"
+    }
+  },
+  "endpoints": [
+    {
+      "path": "/api/assistant/propose",
+      "method": "POST",
+      "phase": "M2",
+      "request": "AssistantProposeRequest",
+      "response": "AssistantProposeResponse",
+      "errors": {
+        "400": "协议版本不支持（PROTOCOL_UNSUPPORTED）；明确拒绝，不猜字段",
+        "401": "鉴权失败；与 analyze 同一 guard 口径",
+        "413": "请求体超出 512KiB（按 UTF-8 实际字节分块累计）；提示缩小范围",
+        "422": "结构/引用非法：未知字段、未知 ID、跨空间/跨任务引用、非法日期数值、重复 key",
+        "429": "限流或每日额度不足；额度耗尽禁止 fallback 继续绕过额度",
+        "502": "模型输出非法（两次尝试后仍不合 schema）；保留输入，不伪造计划",
+        "503": "模型/并发不可用；本地手动功能照常",
+        "504": "整体 120 秒预算超时（含全部重试/修复/fallback）"
+      },
+      "idempotency": "request_id 仅关联定位，不是计费去重凭证；采用幂等由本地 application_id 保证。取消不保证免除已发生费用",
+      "attempt_budget": "一次 propose 最多 2 次实际厂家 HTTP 尝试，共享 120 秒预算与每日额度；不含此前最多 3 次独立 analyze",
+      "replan": "replan_task 自协议 1.1 起支持；1.0 请求携带 replan_context/replan_task 一律 422；重试/额度/超时策略与 new_plan 相同"
+    }
+  ],
+  "$defs": {
+    "DraftRef": {
+      "additionalProperties": false,
+      "description": "临时引用：key 只在一个草案版本内有效；正式 ID 由客户端采用时产生。",
+      "properties": {
+        "kind": {
+          "const": "draft",
+          "default": "draft",
+          "title": "Kind",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "DraftRef",
+      "type": "object"
+    },
+    "ExistingRef": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "existing",
+          "default": "existing",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "ExistingRef",
+      "type": "object"
+    },
+    "ObjectRef": {
+      "additionalProperties": false,
+      "description": "线程/草案对正式对象或草案的只读关联。",
+      "properties": {
+        "object_type": {
+          "enum": [
+            "source",
+            "note",
+            "task",
+            "action",
+            "plan_item",
+            "draft"
+          ],
+          "title": "Object Type",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_type",
+        "id"
+      ],
+      "title": "ObjectRef",
+      "type": "object"
+    },
+    "SourceExcerptEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "source_excerpt",
+          "default": "source_excerpt",
+          "title": "Kind",
+          "type": "string"
+        },
+        "source_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "excerpt": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "locator": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Locator"
+        }
+      },
+      "required": [
+        "source_id",
+        "excerpt"
+      ],
+      "title": "SourceExcerptEvidence",
+      "type": "object"
+    },
+    "NoteFieldEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "note_field",
+          "default": "note_field",
+          "title": "Kind",
+          "type": "string"
+        },
+        "note_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Note Id",
+          "type": "string"
+        },
+        "field_key": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Field Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "note_id",
+        "field_key"
+      ],
+      "title": "NoteFieldEvidence",
+      "type": "object"
+    },
+    "UserMessageEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "user_message",
+          "default": "user_message",
+          "title": "Kind",
+          "type": "string"
+        },
+        "turn_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Turn Id",
+          "type": "string"
+        },
+        "excerpt": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Excerpt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "turn_id",
+        "excerpt"
+      ],
+      "title": "UserMessageEvidence",
+      "type": "object"
+    },
+    "ExistingFactEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "existing_fact",
+          "default": "existing_fact",
+          "title": "Kind",
+          "type": "string"
+        },
+        "object_type": {
+          "enum": [
+            "task",
+            "action",
+            "plan_item",
+            "focus_session",
+            "note",
+            "source"
+          ],
+          "title": "Object Type",
+          "type": "string"
+        },
+        "object_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "field_path": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Field Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "field_path"
+      ],
+      "title": "ExistingFactEvidence",
+      "type": "object"
+    },
+    "FieldOrigin": {
+      "enum": [
+        "model",
+        "user"
+      ],
+      "title": "FieldOrigin",
+      "type": "string"
+    },
+    "DeadlineCandidate": {
+      "additionalProperties": false,
+      "description": "截止候选。模型不得输出 confirmed_at；确认发生在本地 Note/Task 字段。",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "precision": {
+          "default": "none",
+          "enum": [
+            "none",
+            "date",
+            "datetime"
+          ],
+          "title": "Precision",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/FieldOrigin",
+          "default": "model"
+        },
+        "derived": {
+          "default": false,
+          "title": "Derived",
+          "type": "boolean"
+        },
+        "basis": {
+          "default": "explicit",
+          "enum": [
+            "explicit",
+            "relative",
+            "inferred"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "title": "DeadlineCandidate",
+      "type": "object"
+    },
+    "TaskProposalCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "create",
+          "default": "create",
+          "title": "Op",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 4000,
+          "title": "Description",
+          "type": "string"
+        },
+        "completion_criteria": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completion Criteria"
+        },
+        "deadline_candidates": {
+          "items": {
+            "$ref": "#/$defs/DeadlineCandidate"
+          },
+          "maxItems": 10,
+          "title": "Deadline Candidates",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "title"
+      ],
+      "title": "TaskProposalCreate",
+      "type": "object"
+    },
+    "TaskProposalLink": {
+      "additionalProperties": false,
+      "description": "关联已有 Task：不改对象；必须选中明确 ID，不按名字自动合并。",
+      "properties": {
+        "op": {
+          "const": "link",
+          "default": "link",
+          "title": "Op",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "target_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Target Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "target_id"
+      ],
+      "title": "TaskProposalLink",
+      "type": "object"
+    },
+    "TaskUpdateFields": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "completion_criteria": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completion Criteria"
+        },
+        "deadline_candidates": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/DeadlineCandidate"
+              },
+              "maxItems": 10,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline Candidates"
+        }
+      },
+      "title": "TaskUpdateFields",
+      "type": "object"
+    },
+    "TaskProposalUpdate": {
+      "additionalProperties": false,
+      "description": "更新只允许 title/description/completion_criteria/deadline 四类字段。\n\n不能改 status/current_action_id/空间/历史；重要字段更新须逐字段确认（见 UserConfirmation）。",
+      "properties": {
+        "op": {
+          "const": "update",
+          "default": "update",
+          "title": "Op",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "target_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Target Id",
+          "type": "string"
+        },
+        "changes": {
+          "$ref": "#/$defs/TaskUpdateFields"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "target_id",
+        "changes"
+      ],
+      "title": "TaskProposalUpdate",
+      "type": "object"
+    },
+    "ActionProposalCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "create",
+          "default": "create",
+          "title": "Op",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "task_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Task Ref"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Minutes",
+          "type": "integer"
+        },
+        "basis": {
+          "default": "suggestion",
+          "enum": [
+            "requirement",
+            "suggestion"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "task_ref",
+        "text",
+        "minutes"
+      ],
+      "title": "ActionProposalCreate",
+      "type": "object"
+    },
+    "ActionProposalReuse": {
+      "additionalProperties": false,
+      "description": "复用既有 Action：必须属于明确 Task；首版不批量修改或完成既有 Action。",
+      "properties": {
+        "op": {
+          "const": "reuse",
+          "default": "reuse",
+          "title": "Op",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "target_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Target Id",
+          "type": "string"
+        },
+        "task_ref": {
+          "$ref": "#/$defs/ExistingRef"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "target_id",
+        "task_ref"
+      ],
+      "title": "ActionProposalReuse",
+      "type": "object"
+    },
+    "Priority": {
+      "enum": [
+        "high",
+        "normal",
+        "low"
+      ],
+      "title": "Priority",
+      "type": "string"
+    },
+    "WorkItemProposal": {
+      "additionalProperties": false,
+      "description": "本次剩余工作，不是历史投入换算。估时未知用 null，不能用 0。",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "task_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Task Ref"
+        },
+        "action_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Action Ref"
+        },
+        "deliverable": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Deliverable",
+          "type": "string"
+        },
+        "remaining_minutes": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Remaining Minutes"
+        },
+        "estimate_origin": {
+          "$ref": "#/$defs/FieldOrigin",
+          "default": "model"
+        },
+        "splittable": {
+          "default": true,
+          "title": "Splittable",
+          "type": "boolean"
+        },
+        "min_segment_minutes": {
+          "default": 25,
+          "maximum": 240,
+          "minimum": 1,
+          "title": "Min Segment Minutes",
+          "type": "integer"
+        },
+        "earliest_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Earliest Date"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": "normal"
+        }
+      },
+      "required": [
+        "key",
+        "task_ref",
+        "action_ref",
+        "deliverable"
+      ],
+      "title": "WorkItemProposal",
+      "type": "object"
+    },
+    "PriorityRequirementValue": {
+      "additionalProperties": false,
+      "properties": {
+        "task_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Task Ref"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority"
+        }
+      },
+      "required": [
+        "task_ref",
+        "priority"
+      ],
+      "title": "PriorityRequirementValue",
+      "type": "object"
+    },
+    "SplittableRequirementValue": {
+      "additionalProperties": false,
+      "properties": {
+        "work_item_key": {
+          "title": "Work Item Key",
+          "type": "string"
+        },
+        "splittable": {
+          "title": "Splittable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "work_item_key",
+        "splittable"
+      ],
+      "title": "SplittableRequirementValue",
+      "type": "object"
+    },
+    "OrderingRequirementValue": {
+      "additionalProperties": false,
+      "properties": {
+        "before_key": {
+          "title": "Before Key",
+          "type": "string"
+        },
+        "after_key": {
+          "title": "After Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "before_key",
+        "after_key"
+      ],
+      "title": "OrderingRequirementValue",
+      "type": "object"
+    },
+    "Strength": {
+      "enum": [
+        "hard",
+        "soft"
+      ],
+      "title": "Strength",
+      "type": "string"
+    },
+    "RequirementCandidate": {
+      "additionalProperties": false,
+      "description": "约束候选白名单。confirmed 状态只能由本地交互产生，模型只建议。",
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "daily_budget",
+            "unavailable_days",
+            "start_date",
+            "task_priority",
+            "min_segment_minutes",
+            "splittable",
+            "ordering"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        },
+        "strength": {
+          "$ref": "#/$defs/Strength",
+          "default": "hard"
+        },
+        "provenance": {
+          "default": "model",
+          "enum": [
+            "user",
+            "source",
+            "model"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "type"
+      ],
+      "title": "RequirementCandidate",
+      "type": "object"
+    },
+    "Assumption": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "related_keys": {
+          "description": "只能引用本版 work_items[].key（如 w1）；不得使用行动 key（如 a1）、任务 key 或正式 ID。",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Related Keys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Assumption",
+      "type": "object"
+    },
+    "ProposalWarning": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "estimate_is_suggestion",
+            "deadline_ambiguous",
+            "capacity_unknown",
+            "soft_preference_unmet",
+            "source_parse_partial",
+            "possible_duplicate_task",
+            "extra_work_needs_confirmation"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "related_key": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Related Key"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ProposalWarning",
+      "type": "object"
+    },
+    "AssistantModelProposal": {
+      "additionalProperties": false,
+      "description": "模型只能建议；无授权、无持久化状态、无数据库命令。",
+      "properties": {
+        "task_proposals": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "create": "#/$defs/TaskProposalCreate",
+                "link": "#/$defs/TaskProposalLink",
+                "update": "#/$defs/TaskProposalUpdate"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TaskProposalCreate"
+              },
+              {
+                "$ref": "#/$defs/TaskProposalLink"
+              },
+              {
+                "$ref": "#/$defs/TaskProposalUpdate"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Task Proposals",
+          "type": "array"
+        },
+        "action_proposals": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "create": "#/$defs/ActionProposalCreate",
+                "reuse": "#/$defs/ActionProposalReuse"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ActionProposalCreate"
+              },
+              {
+                "$ref": "#/$defs/ActionProposalReuse"
+              }
+            ]
+          },
+          "maxItems": 100,
+          "title": "Action Proposals",
+          "type": "array"
+        },
+        "work_items": {
+          "items": {
+            "$ref": "#/$defs/WorkItemProposal"
+          },
+          "maxItems": 100,
+          "title": "Work Items",
+          "type": "array"
+        },
+        "requirement_candidates": {
+          "items": {
+            "$ref": "#/$defs/RequirementCandidate"
+          },
+          "maxItems": 50,
+          "title": "Requirement Candidates",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 100,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "$ref": "#/$defs/Assumption"
+          },
+          "maxItems": 50,
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/ProposalWarning"
+          },
+          "maxItems": 50,
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "title": "AssistantModelProposal",
+      "type": "object"
+    },
+    "ClarificationQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "question_id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Question Id",
+          "type": "string"
+        },
+        "question": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Options",
+          "type": "array"
+        },
+        "blocking_reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Blocking Reason",
+          "type": "string"
+        },
+        "related_requirement_key": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Related Requirement Key"
+        }
+      },
+      "required": [
+        "question_id",
+        "question",
+        "blocking_reason"
+      ],
+      "title": "ClarificationQuestion",
+      "type": "object"
+    },
+    "ContentFingerprint": {
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes"
+      ],
+      "title": "ContentFingerprint",
+      "type": "object"
+    },
+    "FieldStatus": {
+      "enum": [
+        "candidate",
+        "confirmed",
+        "unresolved",
+        "missing"
+      ],
+      "title": "FieldStatus",
+      "type": "string"
+    },
+    "NoteFieldCandidate": {
+      "additionalProperties": false,
+      "description": "本地 Note 字段只读快照（含已确认状态）；模型不得在响应中输出 confirmed。",
+      "properties": {
+        "note_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Note Id",
+          "type": "string"
+        },
+        "field_key": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Field Key",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        },
+        "raw": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Raw",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/FieldOrigin",
+          "default": "model"
+        },
+        "status": {
+          "$ref": "#/$defs/FieldStatus",
+          "default": "candidate"
+        },
+        "derived": {
+          "default": false,
+          "title": "Derived",
+          "type": "boolean"
+        },
+        "quote_text": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote Text"
+        },
+        "precision": {
+          "anyOf": [
+            {
+              "enum": [
+                "date",
+                "datetime"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Precision"
+        }
+      },
+      "required": [
+        "note_id",
+        "field_key"
+      ],
+      "title": "NoteFieldCandidate",
+      "type": "object"
+    },
+    "SelectedSource": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "image",
+            "text"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "fingerprint": {
+          "$ref": "#/$defs/ContentFingerprint"
+        },
+        "excerpt": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excerpt"
+        },
+        "note_candidates": {
+          "items": {
+            "$ref": "#/$defs/NoteFieldCandidate"
+          },
+          "maxItems": 30,
+          "title": "Note Candidates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_id",
+        "kind",
+        "fingerprint"
+      ],
+      "title": "SelectedSource",
+      "type": "object"
+    },
+    "ExistingDeadline": {
+      "additionalProperties": false,
+      "description": "既有 Task 截止事实快照（镜像 0.4.0 Deadline；confirmed_at 是本地事实，不是模型输出）。",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "precision": {
+          "default": "none",
+          "enum": [
+            "none",
+            "date",
+            "datetime"
+          ],
+          "title": "Precision",
+          "type": "string"
+        },
+        "source": {
+          "default": "note",
+          "enum": [
+            "note",
+            "manual"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "from_note_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Note Id"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmed At"
+        }
+      },
+      "title": "ExistingDeadline",
+      "type": "object"
+    },
+    "TaskStatus": {
+      "enum": [
+        "todo",
+        "doing",
+        "blocked",
+        "done"
+      ],
+      "title": "TaskStatus",
+      "type": "string"
+    },
+    "SelectedTask": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus",
+          "default": "todo"
+        },
+        "deadline": {
+          "$ref": "#/$defs/ExistingDeadline"
+        },
+        "current_action_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Action Id"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "updated_at"
+      ],
+      "title": "SelectedTask",
+      "type": "object"
+    },
+    "SelectedAction": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Minutes",
+          "type": "integer"
+        },
+        "basis": {
+          "default": "user",
+          "enum": [
+            "requirement",
+            "suggestion",
+            "user"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "done": {
+          "default": false,
+          "title": "Done",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "task_id",
+        "text",
+        "minutes"
+      ],
+      "title": "SelectedAction",
+      "type": "object"
+    },
+    "ContextDayBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "budget_minutes": {
+          "anyOf": [
+            {
+              "maximum": 1440,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Minutes"
+        },
+        "committed_minutes": {
+          "default": 0,
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Committed Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date"
+      ],
+      "title": "ContextDayBudget",
+      "type": "object"
+    },
+    "PlanItemState": {
+      "enum": [
+        "planned",
+        "done",
+        "partial",
+        "moved",
+        "cancelled"
+      ],
+      "title": "PlanItemState",
+      "type": "string"
+    },
+    "ProtectedPlanSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "plan_item_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Plan Item Id",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "planned_minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Planned Minutes",
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/$defs/PlanItemState"
+        }
+      },
+      "required": [
+        "plan_item_id",
+        "task_id",
+        "date",
+        "planned_minutes",
+        "state"
+      ],
+      "title": "ProtectedPlanSummary",
+      "type": "object"
+    },
+    "PlanningContext": {
+      "additionalProperties": false,
+      "properties": {
+        "timezone": {
+          "const": "Asia/Shanghai",
+          "default": "Asia/Shanghai",
+          "title": "Timezone",
+          "type": "string"
+        },
+        "today": {
+          "title": "Today",
+          "type": "string"
+        },
+        "start_date": {
+          "title": "Start Date",
+          "type": "string"
+        },
+        "horizon_days": {
+          "const": 7,
+          "default": 7,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "days": {
+          "items": {
+            "$ref": "#/$defs/ContextDayBudget"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "title": "Days",
+          "type": "array"
+        },
+        "protected_plans": {
+          "items": {
+            "$ref": "#/$defs/ProtectedPlanSummary"
+          },
+          "maxItems": 500,
+          "title": "Protected Plans",
+          "type": "array"
+        }
+      },
+      "required": [
+        "today",
+        "start_date",
+        "days"
+      ],
+      "title": "PlanningContext",
+      "type": "object"
+    },
+    "ConfirmedRequirement": {
+      "additionalProperties": false,
+      "description": "本地经用户确认的约束；服务端接收到它也不获得数据库权限。",
+      "properties": {
+        "requirement_id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Requirement Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "type": {
+          "enum": [
+            "daily_budget",
+            "unavailable_days",
+            "start_date",
+            "task_priority",
+            "min_segment_minutes",
+            "splittable",
+            "ordering"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        },
+        "strength": {
+          "$ref": "#/$defs/Strength",
+          "default": "hard"
+        },
+        "confirmed_at": {
+          "title": "Confirmed At",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 20,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "requirement_id",
+        "version",
+        "type",
+        "confirmed_at"
+      ],
+      "title": "ConfirmedRequirement",
+      "type": "object"
+    },
+    "PreviousDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "draft_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Draft Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "scope_keys": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Scope Keys",
+          "type": "array"
+        },
+        "proposal": {
+          "$ref": "#/$defs/AssistantModelProposal"
+        },
+        "modification_summary": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Modification Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "draft_id",
+        "revision",
+        "proposal"
+      ],
+      "title": "PreviousDraft",
+      "type": "object"
+    },
+    "ClarificationTurnRecord": {
+      "additionalProperties": false,
+      "description": "一轮澄清的结构化记录。user_answer 由客户端按用户实际提交填写，绝不来自模型输出；\nassistant_question 无论含什么标记（包括「答：…」）都始终属于问题字段，不取得用户身份。",
+      "properties": {
+        "assistant_question": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Assistant Question",
+          "type": "string"
+        },
+        "user_answer": {
+          "maxLength": 16000,
+          "minLength": 1,
+          "title": "User Answer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assistant_question",
+        "user_answer"
+      ],
+      "title": "ClarificationTurnRecord",
+      "type": "object"
+    },
+    "Intent": {
+      "enum": [
+        "new_plan",
+        "revise_draft",
+        "explain_today",
+        "replan_task"
+      ],
+      "title": "Intent",
+      "type": "string"
+    },
+    "ProgressInput": {
+      "additionalProperties": false,
+      "description": "用户本轮进展说明与待安排清单；由前端实际提交形成，与模型建议分开。\n\n保留安排工作范围确认走 UserConfirmation(object_type=replan_scope)，绑定草案版本。",
+      "properties": {
+        "statement": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Statement",
+          "type": "string"
+        },
+        "work_items": {
+          "items": {
+            "$ref": "#/$defs/ProgressWorkItem"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Work Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "work_items"
+      ],
+      "title": "ProgressInput",
+      "type": "object"
+    },
+    "ProgressWorkItem": {
+      "additionalProperties": false,
+      "description": "用户明确填入/确认的本次待安排工作行；不是模型建议，不从模型文字解析。",
+      "properties": {
+        "key": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "reuse_action_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reuse Action Id"
+        },
+        "minutes": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minutes"
+        },
+        "splittable": {
+          "default": true,
+          "title": "Splittable",
+          "type": "boolean"
+        },
+        "min_segment_minutes": {
+          "anyOf": [
+            {
+              "maximum": 240,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Segment Minutes"
+        }
+      },
+      "required": [
+        "key",
+        "text"
+      ],
+      "title": "ProgressWorkItem",
+      "type": "object"
+    },
+    "ReplanContext": {
+      "additionalProperties": false,
+      "description": "replan_task 专属受限上下文：单任务 + 用户进展/清单 + 待替换/保留摘要。\n\nreplacement_ids 只由本地用户选择产生；本上下文不携带取消授权。",
+      "properties": {
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "progress": {
+          "$ref": "#/$defs/ProgressInput"
+        },
+        "replacements": {
+          "items": {
+            "$ref": "#/$defs/ReplanPlanSummary"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Replacements",
+          "type": "array"
+        },
+        "kept": {
+          "items": {
+            "$ref": "#/$defs/ReplanPlanSummary"
+          },
+          "maxItems": 500,
+          "title": "Kept",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "progress",
+        "replacements"
+      ],
+      "title": "ReplanContext",
+      "type": "object"
+    },
+    "ReplanPlanSummary": {
+      "additionalProperties": false,
+      "description": "改排上下文里的旧安排摘要（待替换/保留共用）；机器快照，不是用户回答。",
+      "properties": {
+        "plan_item_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Plan Item Id",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "planned_minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Planned Minutes",
+          "type": "integer"
+        },
+        "action_text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Action Text",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/PlanItemState"
+        }
+      },
+      "required": [
+        "plan_item_id",
+        "date",
+        "planned_minutes",
+        "action_text",
+        "state"
+      ],
+      "title": "ReplanPlanSummary",
+      "type": "object"
+    },
+    "UserAuthoredInput": {
+      "additionalProperties": false,
+      "description": "真实用户输入的结构化记录：核验「用户明确要求」只读 original_user_request 与各 user_answer，\n不从拼接文本解析角色。模型读到的合成上下文由 render_user_authored_text 从本记录渲染（单一来源）。",
+      "properties": {
+        "original_user_request": {
+          "maxLength": 16000,
+          "minLength": 1,
+          "title": "Original User Request",
+          "type": "string"
+        },
+        "clarifications": {
+          "items": {
+            "$ref": "#/$defs/ClarificationTurnRecord"
+          },
+          "maxItems": 50,
+          "title": "Clarifications",
+          "type": "array"
+        }
+      },
+      "required": [
+        "original_user_request"
+      ],
+      "title": "UserAuthoredInput",
+      "type": "object"
+    },
+    "AssistantProposeRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "protocol_version": {
+          "default": "1.0",
+          "enum": [
+            "1.0",
+            "1.1"
+          ],
+          "title": "Protocol Version",
+          "type": "string"
+        },
+        "request_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "thread_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Thread Id",
+          "type": "string"
+        },
+        "turn_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Turn Id",
+          "type": "string"
+        },
+        "client_seq": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Client Seq",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/Intent"
+        },
+        "user_message": {
+          "default": "",
+          "maxLength": 16000,
+          "title": "User Message",
+          "type": "string"
+        },
+        "user_input": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UserAuthoredInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "selected_sources": {
+          "items": {
+            "$ref": "#/$defs/SelectedSource"
+          },
+          "maxItems": 20,
+          "title": "Selected Sources",
+          "type": "array"
+        },
+        "selected_tasks": {
+          "items": {
+            "$ref": "#/$defs/SelectedTask"
+          },
+          "maxItems": 20,
+          "title": "Selected Tasks",
+          "type": "array"
+        },
+        "selected_actions": {
+          "items": {
+            "$ref": "#/$defs/SelectedAction"
+          },
+          "maxItems": 100,
+          "title": "Selected Actions",
+          "type": "array"
+        },
+        "planning_context": {
+          "$ref": "#/$defs/PlanningContext"
+        },
+        "confirmed_requirements": {
+          "items": {
+            "$ref": "#/$defs/ConfirmedRequirement"
+          },
+          "maxItems": 50,
+          "title": "Confirmed Requirements",
+          "type": "array"
+        },
+        "pending_requirements": {
+          "items": {
+            "$ref": "#/$defs/RequirementCandidate"
+          },
+          "maxItems": 50,
+          "title": "Pending Requirements",
+          "type": "array"
+        },
+        "previous_draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PreviousDraft"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "replan_context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReplanContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "request_id",
+        "thread_id",
+        "turn_id",
+        "client_seq",
+        "workspace_id",
+        "intent",
+        "planning_context"
+      ],
+      "title": "AssistantProposeRequest",
+      "type": "object"
+    },
+    "ClarificationPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "clarification",
+          "default": "clarification",
+          "title": "Kind",
+          "type": "string"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/ClarificationQuestion"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Questions",
+          "type": "array"
+        },
+        "ready": {
+          "const": false,
+          "default": false,
+          "title": "Ready",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "questions"
+      ],
+      "title": "ClarificationPayload",
+      "type": "object"
+    },
+    "ProposalPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "proposal",
+          "default": "proposal",
+          "title": "Kind",
+          "type": "string"
+        },
+        "proposal": {
+          "$ref": "#/$defs/AssistantModelProposal"
+        }
+      },
+      "required": [
+        "proposal"
+      ],
+      "title": "ProposalPayload",
+      "type": "object"
+    },
+    "ExplanationPayload": {
+      "additionalProperties": false,
+      "description": "基于请求中已存在的事实说明；不携带隐式新建、删除或开始命令。",
+      "properties": {
+        "kind": {
+          "const": "explanation",
+          "default": "explanation",
+          "title": "Kind",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "fact_refs": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "existing_fact": "#/$defs/ExistingFactEvidence",
+                "note_field": "#/$defs/NoteFieldEvidence",
+                "source_excerpt": "#/$defs/SourceExcerptEvidence",
+                "user_message": "#/$defs/UserMessageEvidence"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SourceExcerptEvidence"
+              },
+              {
+                "$ref": "#/$defs/NoteFieldEvidence"
+              },
+              {
+                "$ref": "#/$defs/UserMessageEvidence"
+              },
+              {
+                "$ref": "#/$defs/ExistingFactEvidence"
+              }
+            ]
+          },
+          "maxItems": 50,
+          "title": "Fact Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "explanation"
+      ],
+      "title": "ExplanationPayload",
+      "type": "object"
+    },
+    "AssistantProposeResponse": {
+      "additionalProperties": false,
+      "description": "关联字段由服务端从请求复制，不让模型填写。协议版本=被接受请求版本。",
+      "properties": {
+        "protocol_version": {
+          "default": "1.0",
+          "enum": [
+            "1.0",
+            "1.1"
+          ],
+          "title": "Protocol Version",
+          "type": "string"
+        },
+        "request_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "thread_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Thread Id",
+          "type": "string"
+        },
+        "turn_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Turn Id",
+          "type": "string"
+        },
+        "client_seq": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Client Seq",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Summary",
+          "type": "string"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "clarification": "#/$defs/ClarificationPayload",
+              "explanation": "#/$defs/ExplanationPayload",
+              "proposal": "#/$defs/ProposalPayload"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ClarificationPayload"
+            },
+            {
+              "$ref": "#/$defs/ProposalPayload"
+            },
+            {
+              "$ref": "#/$defs/ExplanationPayload"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "request_id",
+        "thread_id",
+        "turn_id",
+        "client_seq",
+        "workspace_id",
+        "payload"
+      ],
+      "title": "AssistantProposeResponse",
+      "type": "object"
+    },
+    "ProposalApiError": {
+      "additionalProperties": false,
+      "description": "复用现有 ApiError 外形；code 仍为开放字符串。",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "default": false,
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "detail": {
+          "default": null,
+          "title": "Detail"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "ProposalApiError",
+      "type": "object"
+    },
+    "PlanningTaskFact": {
+      "additionalProperties": false,
+      "description": "排程所需的任务事实：截止与逾期补做授权。截止不等于安排日。",
+      "properties": {
+        "task_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Task Ref"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "deadline_value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Deadline Value"
+        },
+        "deadline_precision": {
+          "default": "none",
+          "enum": [
+            "none",
+            "date",
+            "datetime"
+          ],
+          "title": "Deadline Precision",
+          "type": "string"
+        },
+        "overdue_consent": {
+          "default": false,
+          "title": "Overdue Consent",
+          "type": "boolean"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus",
+          "default": "todo"
+        }
+      },
+      "required": [
+        "task_ref",
+        "title"
+      ],
+      "title": "PlanningTaskFact",
+      "type": "object"
+    },
+    "DayBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "budget_minutes": {
+          "maximum": 1440,
+          "minimum": 0,
+          "title": "Budget Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date",
+        "budget_minutes"
+      ],
+      "title": "DayBudget",
+      "type": "object"
+    },
+    "RefState": {
+      "description": "v0.4：活引用状态。deleted 后原 id 只是历史标识，禁止当活链接使用。",
+      "enum": [
+        "active",
+        "deleted"
+      ],
+      "title": "RefState",
+      "type": "string"
+    },
+    "OccupancyEntry": {
+      "additionalProperties": false,
+      "description": "按唯一 PlanItem ID 计占用。planned/partial/done 保守计入；cancelled/moved 不占用。\n\n历史断引用的 partial/done 合法保留；planned 断引用属于不可信占用，阻断并引导核对，不按 0 计算。",
+      "properties": {
+        "plan_item_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Plan Item Id",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "planned_minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Planned Minutes",
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/$defs/PlanItemState"
+        },
+        "task_ref_state": {
+          "$ref": "#/$defs/RefState",
+          "default": "active"
+        }
+      },
+      "required": [
+        "plan_item_id",
+        "task_id",
+        "date",
+        "planned_minutes",
+        "state"
+      ],
+      "title": "OccupancyEntry",
+      "type": "object"
+    },
+    "PlanningWorkItem": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "task_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Task Ref"
+        },
+        "action_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Action Ref"
+        },
+        "deliverable": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Deliverable",
+          "type": "string"
+        },
+        "remaining_minutes": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Remaining Minutes"
+        },
+        "estimate_origin": {
+          "$ref": "#/$defs/FieldOrigin",
+          "default": "model"
+        },
+        "splittable": {
+          "default": true,
+          "title": "Splittable",
+          "type": "boolean"
+        },
+        "min_segment_minutes": {
+          "default": 25,
+          "maximum": 240,
+          "minimum": 1,
+          "title": "Min Segment Minutes",
+          "type": "integer"
+        },
+        "earliest_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Earliest Date"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority",
+          "default": "normal"
+        }
+      },
+      "required": [
+        "key",
+        "task_ref",
+        "action_ref",
+        "deliverable"
+      ],
+      "title": "PlanningWorkItem",
+      "type": "object"
+    },
+    "PlanningInput": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm_version": {
+          "const": "daily-v1",
+          "default": "daily-v1",
+          "title": "Algorithm Version",
+          "type": "string"
+        },
+        "timezone": {
+          "const": "Asia/Shanghai",
+          "default": "Asia/Shanghai",
+          "title": "Timezone",
+          "type": "string"
+        },
+        "today": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Today"
+        },
+        "start_date": {
+          "title": "Start Date",
+          "type": "string"
+        },
+        "horizon_days": {
+          "const": 7,
+          "default": 7,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "buffer_pct": {
+          "default": 15,
+          "maximum": 50,
+          "minimum": 0,
+          "title": "Buffer Pct",
+          "type": "integer"
+        },
+        "days": {
+          "items": {
+            "$ref": "#/$defs/DayBudget"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "title": "Days",
+          "type": "array"
+        },
+        "task_facts": {
+          "items": {
+            "$ref": "#/$defs/PlanningTaskFact"
+          },
+          "maxItems": 20,
+          "title": "Task Facts",
+          "type": "array"
+        },
+        "work_items": {
+          "items": {
+            "$ref": "#/$defs/PlanningWorkItem"
+          },
+          "maxItems": 100,
+          "title": "Work Items",
+          "type": "array"
+        },
+        "occupancy": {
+          "items": {
+            "$ref": "#/$defs/OccupancyEntry"
+          },
+          "maxItems": 2000,
+          "title": "Occupancy",
+          "type": "array"
+        },
+        "replacement_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Replacement Ids",
+          "type": "array"
+        },
+        "extra_work_acknowledged": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Extra Work Acknowledged",
+          "type": "array"
+        }
+      },
+      "required": [
+        "start_date",
+        "days"
+      ],
+      "title": "PlanningInput",
+      "type": "object"
+    },
+    "Segment": {
+      "additionalProperties": false,
+      "description": "建议段。不含真实计时或完成结果；order 是当日明确顺序，不保证具体小时。",
+      "properties": {
+        "segment_key": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Segment Key",
+          "type": "string"
+        },
+        "work_item_key": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Work Item Key",
+          "type": "string"
+        },
+        "task_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Task Ref"
+        },
+        "suggested_action_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Suggested Action Ref"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Minutes",
+          "type": "integer"
+        },
+        "order": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Order",
+          "type": "integer"
+        },
+        "action_text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Action Text",
+          "type": "string"
+        },
+        "deliverable": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Deliverable",
+          "type": "string"
+        }
+      },
+      "required": [
+        "segment_key",
+        "work_item_key",
+        "task_ref",
+        "suggested_action_ref",
+        "date",
+        "minutes",
+        "order",
+        "action_text",
+        "deliverable"
+      ],
+      "title": "Segment",
+      "type": "object"
+    },
+    "DaySummary": {
+      "additionalProperties": false,
+      "description": "allocatable=floor(budget×(100-buffer_pct)/100)；free=max(0,allocatable-committed-allocated)。",
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "budget_minutes": {
+          "maximum": 1440,
+          "minimum": 0,
+          "title": "Budget Minutes",
+          "type": "integer"
+        },
+        "buffer_minutes": {
+          "minimum": 0,
+          "title": "Buffer Minutes",
+          "type": "integer"
+        },
+        "committed_minutes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Committed Minutes",
+          "type": "integer"
+        },
+        "allocated_minutes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Allocated Minutes",
+          "type": "integer"
+        },
+        "free_minutes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Free Minutes",
+          "type": "integer"
+        },
+        "overbooked_minutes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Overbooked Minutes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date",
+        "budget_minutes",
+        "buffer_minutes",
+        "committed_minutes",
+        "allocated_minutes",
+        "free_minutes",
+        "overbooked_minutes"
+      ],
+      "title": "DaySummary",
+      "type": "object"
+    },
+    "UnscheduledReason": {
+      "enum": [
+        "no_capacity",
+        "not_splittable",
+        "dependency_blocked",
+        "outside_horizon",
+        "deadline_window",
+        "needs_deadline_day_window",
+        "overdue_requires_consent"
+      ],
+      "title": "UnscheduledReason",
+      "type": "string"
+    },
+    "UnscheduledEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "work_item_key": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Work Item Key",
+          "type": "string"
+        },
+        "remaining_minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Remaining Minutes",
+          "type": "integer"
+        },
+        "reason": {
+          "$ref": "#/$defs/UnscheduledReason"
+        }
+      },
+      "required": [
+        "work_item_key",
+        "remaining_minutes",
+        "reason"
+      ],
+      "title": "UnscheduledEntry",
+      "type": "object"
+    },
+    "UnknownItem": {
+      "additionalProperties": false,
+      "properties": {
+        "work_item_key": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Work Item Key",
+          "type": "string"
+        },
+        "reason": {
+          "const": "estimate_missing",
+          "default": "estimate_missing",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "work_item_key"
+      ],
+      "title": "UnknownItem",
+      "type": "object"
+    },
+    "ExcludedItem": {
+      "additionalProperties": false,
+      "properties": {
+        "work_item_key": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Work Item Key",
+          "type": "string"
+        },
+        "excluded_by": {
+          "const": "user",
+          "default": "user",
+          "title": "Excluded By",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "work_item_key",
+        "reason"
+      ],
+      "title": "ExcludedItem",
+      "type": "object"
+    },
+    "PlanningConflict": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "hard_constraint_violation",
+            "invalid_occupancy",
+            "dependency_cycle",
+            "unknown_predecessor",
+            "cross_workspace_ref",
+            "overdue_without_consent"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "related_keys": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Related Keys",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "PlanningConflict",
+      "type": "object"
+    },
+    "PlanningWarning": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "existing_overbook",
+            "datetime_deadline_conservative",
+            "overdue_scheduled",
+            "heuristic_incomplete",
+            "unrecorded_calendar_notice",
+            "window_end_not_deadline"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "related_key": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Related Key"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "PlanningWarning",
+      "type": "object"
+    },
+    "PlanningResult": {
+      "additionalProperties": false,
+      "properties": {
+        "segments": {
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "maxItems": 700,
+          "title": "Segments",
+          "type": "array"
+        },
+        "days": {
+          "items": {
+            "$ref": "#/$defs/DaySummary"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "title": "Days",
+          "type": "array"
+        },
+        "unscheduled": {
+          "items": {
+            "$ref": "#/$defs/UnscheduledEntry"
+          },
+          "maxItems": 100,
+          "title": "Unscheduled",
+          "type": "array"
+        },
+        "unknown_items": {
+          "items": {
+            "$ref": "#/$defs/UnknownItem"
+          },
+          "maxItems": 100,
+          "title": "Unknown Items",
+          "type": "array"
+        },
+        "excluded_items": {
+          "items": {
+            "$ref": "#/$defs/ExcludedItem"
+          },
+          "maxItems": 100,
+          "title": "Excluded Items",
+          "type": "array"
+        },
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/PlanningConflict"
+          },
+          "maxItems": 50,
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "warnings": {
+          "items": {
+            "$ref": "#/$defs/PlanningWarning"
+          },
+          "maxItems": 50,
+          "title": "Warnings",
+          "type": "array"
+        },
+        "complete": {
+          "default": false,
+          "title": "Complete",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "days"
+      ],
+      "title": "PlanningResult",
+      "type": "object"
+    },
+    "ThreadMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "user",
+            "assistant",
+            "system"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "content": {
+          "maxLength": 16000,
+          "title": "Content",
+          "type": "string"
+        },
+        "type": {
+          "default": "text",
+          "enum": [
+            "text",
+            "understanding",
+            "clarification",
+            "proposal_card",
+            "schedule_card",
+            "change_summary",
+            "conflict_card",
+            "adoption_result"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "refs": {
+          "items": {
+            "$ref": "#/$defs/ObjectRef"
+          },
+          "maxItems": 20,
+          "title": "Refs",
+          "type": "array"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "user_input": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UserAuthoredInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "role",
+        "content",
+        "created_at"
+      ],
+      "title": "ThreadMessage",
+      "type": "object"
+    },
+    "AssistantThread": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "record_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Record Version",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Title",
+          "type": "string"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/ThreadMessage"
+          },
+          "maxItems": 200,
+          "title": "Messages",
+          "type": "array"
+        },
+        "selected_refs": {
+          "items": {
+            "$ref": "#/$defs/ObjectRef"
+          },
+          "maxItems": 40,
+          "title": "Selected Refs",
+          "type": "array"
+        },
+        "confirmed_requirements": {
+          "items": {
+            "$ref": "#/$defs/ConfirmedRequirement"
+          },
+          "maxItems": 50,
+          "title": "Confirmed Requirements",
+          "type": "array"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "AssistantThread",
+      "type": "object"
+    },
+    "PlanItemSnapshot": {
+      "additionalProperties": false,
+      "description": "所选旧安排的完整语义快照（M3 §6.1）；历史字段无 updated_at，复核比内容不比时间戳。",
+      "properties": {
+        "plan_item_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Plan Item Id",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "planned_minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Planned Minutes",
+          "type": "integer"
+        },
+        "action_text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Action Text",
+          "type": "string"
+        },
+        "state": {
+          "const": "planned",
+          "default": "planned",
+          "title": "State",
+          "type": "string"
+        },
+        "order": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Order",
+          "type": "integer"
+        },
+        "actual_minutes": {
+          "default": null,
+          "title": "Actual Minutes",
+          "type": "null"
+        },
+        "focus_session_id": {
+          "default": null,
+          "title": "Focus Session Id",
+          "type": "null"
+        },
+        "task_ref_state": {
+          "const": "active",
+          "default": "active",
+          "title": "Task Ref State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plan_item_id",
+        "task_id",
+        "date",
+        "planned_minutes",
+        "action_text",
+        "order"
+      ],
+      "title": "PlanItemSnapshot",
+      "type": "object"
+    },
+    "ReplacementBaseline": {
+      "additionalProperties": false,
+      "description": "替换基线：逐条完整快照 + 捕获时全空间 FocusSession 扫描清单（无引用前提的记录）。\n\nprepare/apply 都基于活快照复核资格与内容；本基线不证明当前仍无会话引用。",
+      "properties": {
+        "captured_at": {
+          "title": "Captured At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/PlanItemSnapshot"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        },
+        "focus_session_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5000,
+          "title": "Focus Session Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "captured_at",
+        "items"
+      ],
+      "title": "ReplacementBaseline",
+      "type": "object"
+    },
+    "ReplanScope": {
+      "additionalProperties": false,
+      "description": "一次只调整一个任务；替换集只由本地用户逐条勾选产生，模型不得产生。",
+      "properties": {
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "start_date": {
+          "title": "Start Date",
+          "type": "string"
+        },
+        "replacement_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Replacement Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "task_id",
+        "start_date",
+        "replacement_ids"
+      ],
+      "title": "ReplanScope",
+      "type": "object"
+    },
+    "DraftRevisionSnapshot": {
+      "additionalProperties": false,
+      "description": "旧版本只读快照；不能采用。整体受单草案 1MiB 约束。",
+      "properties": {
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "proposal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistantModelProposal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "planning_input": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanningInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "planning_result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanningResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/RequirementCandidate"
+          },
+          "maxItems": 50,
+          "title": "Requirements",
+          "type": "array"
+        },
+        "replan_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReplanScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "progress_input": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProgressInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "replacement_baseline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReplacementBaseline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "created_at"
+      ],
+      "title": "DraftRevisionSnapshot",
+      "type": "object"
+    },
+    "UserConfirmation": {
+      "additionalProperties": false,
+      "description": "确认绑定草案版本+字段+值；改值使旧确认失效。确认≠改值。",
+      "properties": {
+        "confirmation_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Confirmation Id",
+          "type": "string"
+        },
+        "draft_revision": {
+          "minimum": 1,
+          "title": "Draft Revision",
+          "type": "integer"
+        },
+        "object_type": {
+          "enum": [
+            "task",
+            "note_field",
+            "requirement",
+            "gap",
+            "overbook",
+            "extra_work",
+            "replan_scope"
+          ],
+          "title": "Object Type",
+          "type": "string"
+        },
+        "object_id_or_key": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Object Id Or Key",
+          "type": "string"
+        },
+        "id_scope": {
+          "anyOf": [
+            {
+              "enum": [
+                "draft",
+                "formal"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id Scope"
+        },
+        "field_path": {
+          "default": "",
+          "maxLength": 120,
+          "title": "Field Path",
+          "type": "string"
+        },
+        "old_value": {
+          "default": null,
+          "title": "Old Value"
+        },
+        "new_value": {
+          "default": null,
+          "title": "New Value"
+        },
+        "confirmed_at": {
+          "title": "Confirmed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "confirmation_id",
+        "draft_revision",
+        "object_type",
+        "object_id_or_key",
+        "confirmed_at"
+      ],
+      "title": "UserConfirmation",
+      "type": "object"
+    },
+    "SourceFingerprint": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "source_id",
+        "sha256",
+        "bytes"
+      ],
+      "title": "SourceFingerprint",
+      "type": "object"
+    },
+    "NoteFieldBaseline": {
+      "additionalProperties": false,
+      "properties": {
+        "note_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Note Id",
+          "type": "string"
+        },
+        "field_key": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Field Key",
+          "type": "string"
+        },
+        "value": {
+          "default": null,
+          "title": "Value"
+        },
+        "status": {
+          "$ref": "#/$defs/FieldStatus",
+          "default": "candidate"
+        },
+        "origin": {
+          "$ref": "#/$defs/FieldOrigin",
+          "default": "model"
+        },
+        "derived": {
+          "default": false,
+          "title": "Derived",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "note_id",
+        "field_key"
+      ],
+      "title": "NoteFieldBaseline",
+      "type": "object"
+    },
+    "PlanningActionFact": {
+      "additionalProperties": false,
+      "description": "复用行动的内容基线（M1 审查 R5）：预览/采用依赖的归属、正文、估时与完成状态。\n\nAction 无 updated_at，存在性+done 不足以发现正文/估时/归属漂移；重排时冻结，提交重读核对。",
+      "properties": {
+        "action_ref": {
+          "discriminator": {
+            "mapping": {
+              "draft": "#/$defs/DraftRef",
+              "existing": "#/$defs/ExistingRef"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DraftRef"
+            },
+            {
+              "$ref": "#/$defs/ExistingRef"
+            }
+          ],
+          "title": "Action Ref"
+        },
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "minutes": {
+          "minimum": 1,
+          "title": "Minutes",
+          "type": "integer"
+        },
+        "done": {
+          "default": false,
+          "title": "Done",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "action_ref",
+        "task_id",
+        "text",
+        "minutes"
+      ],
+      "title": "PlanningActionFact",
+      "type": "object"
+    },
+    "FactBaseline": {
+      "additionalProperties": false,
+      "description": "事务外冻结的事实快照；内容哈希只用于前置快照与证据，不在活事务内读 Blob 计算。",
+      "properties": {
+        "captured_at": {
+          "title": "Captured At",
+          "type": "string"
+        },
+        "task_facts": {
+          "items": {
+            "$ref": "#/$defs/PlanningTaskFact"
+          },
+          "maxItems": 20,
+          "title": "Task Facts",
+          "type": "array"
+        },
+        "action_facts": {
+          "items": {
+            "$ref": "#/$defs/PlanningActionFact"
+          },
+          "maxItems": 100,
+          "title": "Action Facts",
+          "type": "array"
+        },
+        "source_fingerprints": {
+          "items": {
+            "$ref": "#/$defs/SourceFingerprint"
+          },
+          "maxItems": 20,
+          "title": "Source Fingerprints",
+          "type": "array"
+        },
+        "note_field_baselines": {
+          "items": {
+            "$ref": "#/$defs/NoteFieldBaseline"
+          },
+          "maxItems": 200,
+          "title": "Note Field Baselines",
+          "type": "array"
+        },
+        "occupancy": {
+          "items": {
+            "$ref": "#/$defs/OccupancyEntry"
+          },
+          "maxItems": 2000,
+          "title": "Occupancy",
+          "type": "array"
+        }
+      },
+      "required": [
+        "captured_at"
+      ],
+      "title": "FactBaseline",
+      "type": "object"
+    },
+    "IdMapEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "draft_key": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Draft Key",
+          "type": "string"
+        },
+        "formal_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Formal Id",
+          "type": "string"
+        },
+        "object_type": {
+          "enum": [
+            "task",
+            "action",
+            "plan_item"
+          ],
+          "title": "Object Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "draft_key",
+        "formal_id",
+        "object_type"
+      ],
+      "title": "IdMapEntry",
+      "type": "object"
+    },
+    "ApplicationCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "tasks_created": {
+          "maximum": 20,
+          "minimum": 0,
+          "title": "Tasks Created",
+          "type": "integer"
+        },
+        "tasks_updated": {
+          "maximum": 20,
+          "minimum": 0,
+          "title": "Tasks Updated",
+          "type": "integer"
+        },
+        "actions_created": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Actions Created",
+          "type": "integer"
+        },
+        "plan_items_created": {
+          "maximum": 700,
+          "minimum": 0,
+          "title": "Plan Items Created",
+          "type": "integer"
+        },
+        "plan_items_cancelled": {
+          "default": 0,
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Plan Items Cancelled",
+          "type": "integer"
+        },
+        "source_fields_confirmed": {
+          "maximum": 200,
+          "minimum": 0,
+          "title": "Source Fields Confirmed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tasks_created",
+        "tasks_updated",
+        "actions_created",
+        "plan_items_created",
+        "source_fields_confirmed"
+      ],
+      "title": "ApplicationCounts",
+      "type": "object"
+    },
+    "AppliedSummary": {
+      "additionalProperties": false,
+      "description": "已应用草案的历史结果摘要；展示用，不是可执行回执。",
+      "properties": {
+        "application_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Application Id",
+          "type": "string"
+        },
+        "counts": {
+          "$ref": "#/$defs/ApplicationCounts"
+        },
+        "id_map": {
+          "items": {
+            "$ref": "#/$defs/IdMapEntry"
+          },
+          "maxItems": 820,
+          "title": "Id Map",
+          "type": "array"
+        },
+        "unscheduled_kept": {
+          "items": {
+            "$ref": "#/$defs/UnscheduledEntry"
+          },
+          "maxItems": 100,
+          "title": "Unscheduled Kept",
+          "type": "array"
+        },
+        "cancelled_plan_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Cancelled Plan Item Ids",
+          "type": "array"
+        },
+        "replan_task_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replan Task Id"
+        },
+        "applied_at": {
+          "title": "Applied At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "application_id",
+        "counts",
+        "applied_at"
+      ],
+      "title": "AppliedSummary",
+      "type": "object"
+    },
+    "DraftStatus": {
+      "enum": [
+        "editing",
+        "generating",
+        "needs_clarification",
+        "ready",
+        "needs_review",
+        "applying",
+        "applied",
+        "result_unknown",
+        "discarded"
+      ],
+      "title": "DraftStatus",
+      "type": "string"
+    },
+    "AssistantDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "record_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Record Version",
+          "type": "integer"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "thread_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Thread Id",
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "revision_history": {
+          "items": {
+            "$ref": "#/$defs/DraftRevisionSnapshot"
+          },
+          "maxItems": 19,
+          "title": "Revision History",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/DraftStatus",
+          "default": "editing"
+        },
+        "mode": {
+          "default": "create",
+          "enum": [
+            "create",
+            "replan"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "proposal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistantModelProposal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "planning_input": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanningInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "planning_result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PlanningResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "fact_baseline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FactBaseline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "replan_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReplanScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "progress_input": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProgressInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "replacement_baseline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReplacementBaseline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "assumptions": {
+          "items": {
+            "$ref": "#/$defs/Assumption"
+          },
+          "maxItems": 50,
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "user_confirmations": {
+          "items": {
+            "$ref": "#/$defs/UserConfirmation"
+          },
+          "maxItems": 200,
+          "title": "User Confirmations",
+          "type": "array"
+        },
+        "excluded_items": {
+          "items": {
+            "$ref": "#/$defs/ExcludedItem"
+          },
+          "maxItems": 100,
+          "title": "Excluded Items",
+          "type": "array"
+        },
+        "source_refs": {
+          "items": {
+            "$ref": "#/$defs/ObjectRef"
+          },
+          "maxItems": 40,
+          "title": "Source Refs",
+          "type": "array"
+        },
+        "applied_summary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AppliedSummary"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "workspace_id",
+        "thread_id",
+        "revision",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "AssistantDraft",
+      "type": "object"
+    },
+    "SourceFieldConfirmation": {
+      "additionalProperties": false,
+      "description": "采用时写入 Note 字段确认；保留 origin/derived/quote，确认≠改值。",
+      "properties": {
+        "note_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Note Id",
+          "type": "string"
+        },
+        "field_key": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Field Key",
+          "type": "string"
+        },
+        "confirmed_value": {
+          "default": null,
+          "title": "Confirmed Value"
+        },
+        "origin": {
+          "$ref": "#/$defs/FieldOrigin",
+          "default": "model"
+        },
+        "derived": {
+          "default": false,
+          "title": "Derived",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "note_id",
+        "field_key"
+      ],
+      "title": "SourceFieldConfirmation",
+      "type": "object"
+    },
+    "Deadline": {
+      "additionalProperties": false,
+      "description": "只有日期就保持日期精度，不补 23:59（PRD F07）。来源可为便签或用户手动（P05）。",
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "precision": {
+          "default": "none",
+          "enum": [
+            "none",
+            "date",
+            "datetime"
+          ],
+          "title": "Precision",
+          "type": "string"
+        },
+        "source": {
+          "default": "note",
+          "enum": [
+            "note",
+            "manual"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "from_note_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Note Id"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmed At"
+        }
+      },
+      "title": "Deadline",
+      "type": "object"
+    },
+    "PreparedTaskCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "formal_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Formal Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 4000,
+          "title": "Description",
+          "type": "string"
+        },
+        "completion_criteria": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completion Criteria"
+        },
+        "deadline": {
+          "$ref": "#/$defs/Deadline"
+        },
+        "note_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Note Ids",
+          "type": "array"
+        },
+        "matter_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Matter Id"
+        },
+        "status": {
+          "const": "todo",
+          "default": "todo",
+          "title": "Status",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "formal_id",
+        "workspace_id",
+        "title",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "PreparedTaskCreate",
+      "type": "object"
+    },
+    "PreparedTaskUpdate": {
+      "additionalProperties": false,
+      "properties": {
+        "target_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Target Id",
+          "type": "string"
+        },
+        "expected_updated_at": {
+          "title": "Expected Updated At",
+          "type": "string"
+        },
+        "changes": {
+          "$ref": "#/$defs/TaskUpdateFields"
+        }
+      },
+      "required": [
+        "target_id",
+        "expected_updated_at",
+        "changes"
+      ],
+      "title": "PreparedTaskUpdate",
+      "type": "object"
+    },
+    "PreparedActionCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "formal_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Formal Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Minutes",
+          "type": "integer"
+        },
+        "basis": {
+          "default": "suggestion",
+          "enum": [
+            "requirement",
+            "suggestion",
+            "user"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "done": {
+          "const": false,
+          "default": false,
+          "title": "Done",
+          "type": "boolean"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "formal_id",
+        "workspace_id",
+        "task_id",
+        "text",
+        "minutes",
+        "created_at"
+      ],
+      "title": "PreparedActionCreate",
+      "type": "object"
+    },
+    "PreparedPlanItemCreate": {
+      "additionalProperties": false,
+      "description": "新 PlanItem 初始 planned、actual_minutes=null、focus_session_id=null、task_ref_state=active。\n\n不携带 action_id：草案建议行动引用不升级为正式安排的隐式绑定。",
+      "properties": {
+        "formal_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Formal Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "task_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "planned_minutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Planned Minutes",
+          "type": "integer"
+        },
+        "action_text": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Action Text",
+          "type": "string"
+        },
+        "state": {
+          "const": "planned",
+          "default": "planned",
+          "title": "State",
+          "type": "string"
+        },
+        "actual_minutes": {
+          "default": null,
+          "title": "Actual Minutes",
+          "type": "null"
+        },
+        "focus_session_id": {
+          "default": null,
+          "title": "Focus Session Id",
+          "type": "null"
+        },
+        "order": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Order",
+          "type": "integer"
+        },
+        "task_ref_state": {
+          "const": "active",
+          "default": "active",
+          "title": "Task Ref State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "formal_id",
+        "workspace_id",
+        "task_id",
+        "date",
+        "planned_minutes",
+        "action_text",
+        "order"
+      ],
+      "title": "PreparedPlanItemCreate",
+      "type": "object"
+    },
+    "PlannedCancellation": {
+      "additionalProperties": false,
+      "description": "受限取消写集唯一形状（M3 §7）：预期内容全等 + 仅 planned→cancelled，其余字段保留。",
+      "properties": {
+        "plan_item_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Plan Item Id",
+          "type": "string"
+        },
+        "expected": {
+          "$ref": "#/$defs/PlanItemSnapshot"
+        },
+        "new_state": {
+          "const": "cancelled",
+          "default": "cancelled",
+          "title": "New State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "plan_item_id",
+        "expected"
+      ],
+      "title": "PlannedCancellation",
+      "type": "object"
+    },
+    "PreparedWriteSet": {
+      "additionalProperties": false,
+      "description": "完整准备写集。M3 增加受限取消分支；tasks_update/字段确认写入仍由前端领域层拒绝。",
+      "properties": {
+        "source_field_confirmations": {
+          "items": {
+            "$ref": "#/$defs/SourceFieldConfirmation"
+          },
+          "maxItems": 200,
+          "title": "Source Field Confirmations",
+          "type": "array"
+        },
+        "tasks_create": {
+          "items": {
+            "$ref": "#/$defs/PreparedTaskCreate"
+          },
+          "maxItems": 20,
+          "title": "Tasks Create",
+          "type": "array"
+        },
+        "tasks_update": {
+          "items": {
+            "$ref": "#/$defs/PreparedTaskUpdate"
+          },
+          "maxItems": 20,
+          "title": "Tasks Update",
+          "type": "array"
+        },
+        "actions_create": {
+          "items": {
+            "$ref": "#/$defs/PreparedActionCreate"
+          },
+          "maxItems": 100,
+          "title": "Actions Create",
+          "type": "array"
+        },
+        "plan_items_create": {
+          "items": {
+            "$ref": "#/$defs/PreparedPlanItemCreate"
+          },
+          "maxItems": 700,
+          "title": "Plan Items Create",
+          "type": "array"
+        },
+        "plan_items_cancel": {
+          "items": {
+            "$ref": "#/$defs/PlannedCancellation"
+          },
+          "maxItems": 100,
+          "title": "Plan Items Cancel",
+          "type": "array"
+        },
+        "thread_result_update": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ThreadMessage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "PreparedWriteSet",
+      "type": "object"
+    },
+    "ApplicationEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "application_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Application Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "draft_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Draft Id",
+          "type": "string"
+        },
+        "draft_revision": {
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Draft Revision",
+          "type": "integer"
+        },
+        "mode": {
+          "default": "create",
+          "enum": [
+            "create",
+            "replan"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "input_signature": {
+          "title": "Input Signature",
+          "type": "string"
+        },
+        "id_map": {
+          "items": {
+            "$ref": "#/$defs/IdMapEntry"
+          },
+          "maxItems": 820,
+          "title": "Id Map",
+          "type": "array"
+        },
+        "write_set": {
+          "$ref": "#/$defs/PreparedWriteSet"
+        },
+        "fact_baseline": {
+          "$ref": "#/$defs/FactBaseline"
+        },
+        "replan_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReplanScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "replacement_baseline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReplacementBaseline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "capacity_baseline": {
+          "items": {
+            "$ref": "#/$defs/DaySummary"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "title": "Capacity Baseline",
+          "type": "array"
+        },
+        "user_confirmations": {
+          "items": {
+            "$ref": "#/$defs/UserConfirmation"
+          },
+          "maxItems": 200,
+          "title": "User Confirmations",
+          "type": "array"
+        },
+        "planned_gaps": {
+          "items": {
+            "$ref": "#/$defs/UnscheduledEntry"
+          },
+          "maxItems": 100,
+          "title": "Planned Gaps",
+          "type": "array"
+        },
+        "gap_acknowledged": {
+          "default": false,
+          "title": "Gap Acknowledged",
+          "type": "boolean"
+        },
+        "overbook_acknowledged": {
+          "default": false,
+          "title": "Overbook Acknowledged",
+          "type": "boolean"
+        },
+        "existing_overbook_dates": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 7,
+          "title": "Existing Overbook Dates",
+          "type": "array"
+        },
+        "issued_at": {
+          "title": "Issued At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "application_id",
+        "workspace_id",
+        "draft_id",
+        "draft_revision",
+        "input_signature",
+        "write_set",
+        "fact_baseline",
+        "capacity_baseline",
+        "issued_at"
+      ],
+      "title": "ApplicationEnvelope",
+      "type": "object"
+    },
+    "ApplicationReceipt": {
+      "additionalProperties": false,
+      "description": "只能由本地成功事务产生。",
+      "properties": {
+        "application_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Application Id",
+          "type": "string"
+        },
+        "draft_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Draft Id",
+          "type": "string"
+        },
+        "draft_revision": {
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Draft Revision",
+          "type": "integer"
+        },
+        "input_signature": {
+          "title": "Input Signature",
+          "type": "string"
+        },
+        "id_map": {
+          "items": {
+            "$ref": "#/$defs/IdMapEntry"
+          },
+          "maxItems": 820,
+          "title": "Id Map",
+          "type": "array"
+        },
+        "counts": {
+          "$ref": "#/$defs/ApplicationCounts"
+        },
+        "unscheduled_kept": {
+          "items": {
+            "$ref": "#/$defs/UnscheduledEntry"
+          },
+          "maxItems": 100,
+          "title": "Unscheduled Kept",
+          "type": "array"
+        },
+        "cancelled_plan_item_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Cancelled Plan Item Ids",
+          "type": "array"
+        },
+        "replan_task_id": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replan Task Id"
+        },
+        "committed_at": {
+          "title": "Committed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "application_id",
+        "draft_id",
+        "draft_revision",
+        "input_signature",
+        "counts",
+        "committed_at"
+      ],
+      "title": "ApplicationReceipt",
+      "type": "object"
+    },
+    "AssistantOpRecord": {
+      "additionalProperties": false,
+      "description": "assistant_ops 台账：pending 保留冻结信封，committed 保留回执。首版不自动清理。",
+      "properties": {
+        "application_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Application Id",
+          "type": "string"
+        },
+        "workspace_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Workspace Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "pending",
+            "committed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "envelope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicationEnvelope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicationReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "application_id",
+        "workspace_id",
+        "state",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "AssistantOpRecord",
+      "type": "object"
+    },
+    "AssistantThreadsPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "0.6.0",
+          "enum": [
+            "0.5.0",
+            "0.6.0"
+          ],
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "threads": {
+          "items": {
+            "$ref": "#/$defs/AssistantThread"
+          },
+          "title": "Threads",
+          "type": "array"
+        }
+      },
+      "title": "AssistantThreadsPayload",
+      "type": "object"
+    },
+    "AssistantDraftsPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "0.6.0",
+          "enum": [
+            "0.5.0",
+            "0.6.0"
+          ],
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "drafts": {
+          "items": {
+            "$ref": "#/$defs/AssistantDraft"
+          },
+          "title": "Drafts",
+          "type": "array"
+        }
+      },
+      "title": "AssistantDraftsPayload",
+      "type": "object"
+    },
+    "PayloadEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "bytes",
+        "sha256"
+      ],
+      "title": "PayloadEntry",
+      "type": "object"
+    },
+    "BackupManifestV2": {
+      "additionalProperties": false,
+      "description": "v2 必需 payload 含助手两文件（即使为空）。不导出 assistant_ops/在途请求/owner/租约/可重放写集。\n\nD-3（已批准）：补回 v1 容器字段 format/source_count/image_count，与 v1 容器校验同口径。",
+      "properties": {
+        "format": {
+          "const": "jxl-backup",
+          "title": "Format",
+          "type": "string"
+        },
+        "backup_format_version": {
+          "const": 2,
+          "default": 2,
+          "title": "Backup Format Version",
+          "type": "integer"
+        },
+        "schema_version": {
+          "default": "0.6.0",
+          "enum": [
+            "0.5.0",
+            "0.6.0"
+          ],
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "backup_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Backup Id",
+          "type": "string"
+        },
+        "exported_at": {
+          "title": "Exported At",
+          "type": "string"
+        },
+        "source_workspace": {
+          "title": "Source Workspace",
+          "type": "object"
+        },
+        "counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Counts",
+          "type": "object"
+        },
+        "source_count": {
+          "minimum": 0,
+          "title": "Source Count",
+          "type": "integer"
+        },
+        "image_count": {
+          "minimum": 0,
+          "title": "Image Count",
+          "type": "integer"
+        },
+        "payloads": {
+          "items": {
+            "$ref": "#/$defs/PayloadEntry"
+          },
+          "title": "Payloads",
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "backup_id",
+        "exported_at",
+        "source_workspace",
+        "counts",
+        "source_count",
+        "image_count",
+        "payloads"
+      ],
+      "title": "BackupManifestV2",
+      "type": "object"
+    },
+    "FixtureCase": {
+      "additionalProperties": false,
+      "description": "一份样本：正向接受 / 负向拒绝 / 场景预期（设计验证）。全部虚构。",
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "layer": {
+          "enum": [
+            "http",
+            "model",
+            "planning",
+            "draft",
+            "application",
+            "backup",
+            "scenario"
+          ],
+          "title": "Layer",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "accept",
+            "reject",
+            "expect"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        },
+        "acceptance": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "Acceptance",
+          "type": "array"
+        },
+        "implement_batch": {
+          "maxLength": 20,
+          "minLength": 1,
+          "title": "Implement Batch",
+          "type": "string"
+        },
+        "payload": {
+          "default": null,
+          "title": "Payload"
+        },
+        "expected_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Error"
+        },
+        "expected": {
+          "default": null,
+          "title": "Expected"
+        },
+        "notes": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "layer",
+        "mode",
+        "target",
+        "implement_batch"
+      ],
+      "title": "FixtureCase",
+      "type": "object"
+    }
+  }
+}

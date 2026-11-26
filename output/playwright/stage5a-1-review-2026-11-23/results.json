@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "probe": "live-snapshot-overwrites-newer-minutes",
+      "before": 60,
+      "after": 30,
+      "afterText": "本页草稿说明",
+      "conflictDialogShown": 0
+    },
+    {
+      "probe": "replace-dirty-editor",
+      "remainingText": "",
+      "discardDialogShown": 0,
+      "existingRecord": "虚构安排原说明"
+    },
+    {
+      "probe": "fixed-task-can-be-replaced",
+      "offeredChange": true,
+      "pageUrl": "http://127.0.0.1:5173/#/tasks/review-task-a",
+      "savedTaskIds": [
+        "review-task-b"
+      ]
+    },
+    {
+      "probe": "mobile-overflow",
+      "viewport": 360,
+      "bodyWidth": 360
+    }
+  ],
+  "errors": []
+}

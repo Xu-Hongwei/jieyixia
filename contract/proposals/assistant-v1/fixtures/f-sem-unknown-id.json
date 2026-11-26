@@ -1,0 +1,52 @@
+{
+  "id": "f-sem-unknown-id",
+  "title": "link 指向未知 ID",
+  "layer": "model",
+  "mode": "reject",
+  "target": "model_semantics",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "proposal": {
+      "task_proposals": [
+        {
+          "op": "link",
+          "key": "t-link",
+          "target_id": "t-ghost",
+          "evidence_refs": []
+        }
+      ]
+    },
+    "context": {
+      "workspace_id": "ws-fixture",
+      "tasks": [
+        {
+          "id": "t-1",
+          "workspace_id": "ws-fixture",
+          "title": "虚构任务",
+          "status": "todo"
+        }
+      ],
+      "actions": [
+        {
+          "id": "a-1",
+          "task_id": "t-1",
+          "workspace_id": "ws-fixture",
+          "done": false
+        }
+      ],
+      "source_ids": [
+        "s-1"
+      ],
+      "note_ids": [
+        "n-1"
+      ],
+      "turn_id": "turn-1"
+    }
+  },
+  "expected_error": "未知既有 Task",
+  "expected": null,
+  "notes": ""
+}

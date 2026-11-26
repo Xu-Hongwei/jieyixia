@@ -1,0 +1,116 @@
+// Review-only browser probes. Private browser contexts, synthetic data, own localhost Vite.
+import { createRequire } from 'node:module'
+import { pathToFileURL } from 'node:url'
+import { mkdir, writeFile } from 'node:fs/promises'
+const require = createRequire('E:/qoder/frontend/package.json')
+const { createServer } = await import(pathToFileURL(require.resolve('vite')).href)
+const { chromium } = await import('file:///E:/qoder/frontend/node_modules/playwright-core/index.mjs')
+const OUT = 'E:/qoder/output/playwright/stage5a-1-multifield-review-2026-11-23'
+await mkdir(OUT, { recursive: true })
+const server = await createServer({ root: 'E:/qoder/frontend', configFile: 'E:/qoder/frontend/vite.config.js',
+  server: { host: '127.0.0.1', port: 0, strictPort: false, hmr: { port: 0 } } })
+let browser
+try {
+  await server.listen()
+  const address = server.httpServer.address()
+  const base = `http://127.0.0.1:${address.port}`
+  browser = await chromium.launch({ executablePath: 'C:/Users/Administrator/AppData/Local/ms-playwright/chromium-1232/chrome-win64/chrome.exe', headless: true })
+  const seed = [
+    { kind: 'task', id: 'review-task-a', workspace_id: 'personal', title: '虚构任务甲', status: 'todo', matter_id: null, note_ids: [], current_action_id: null, deadline: { value: '2026-11-27', precision: 'date', source: 'manual', from_note_id: null, confirmed_at: '2026-11-23T09:00:00+08:00' }, created_at: '2026-11-23T09:00:00+08:00', updated_at: '2026-11-23T09:00:00+08:00' },
+    { kind: 'task', id: 'review-task-b', workspace_id: 'personal', title: '虚构任务乙', status: 'todo', matter_id: null, note_ids: [], current_action_id: null, deadline: { value: null, precision: 'none' }, created_at: '2026-11-23T09:00:00+08:00', updated_at: '2026-11-23T09:00:00+08:00' },
+    { kind: 'plan_item', id: 'review-plan-a', workspace_id: 'personal', task_id: 'review-task-a', date: '2026-11-23', action_text: '虚构安排原说明', planned_minutes: 30, state: 'planned', task_ref_state: 'active', actual_minutes: null, focus_session_id: null, order: 1 },
+  ]
+  const results = []
+  const errors = []
+  async function scene(hash = '#/today?date=2026-11-23&plan=review-plan-a') {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+    await context.route(url => url.pathname.startsWith('/api/'), route => route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }))
+    const page = await context.newPage()
+    page.setDefaultTimeout(12000)
+    page.on('pageerror', err => { errors.push(err.message); console.log('PAGE_ERROR', err.message) })
+    await page.goto(base + '/#/today')
+    await page.getByRole('button', { name: '安排工作', exact: true }).waitFor()
+    await page.evaluate(async (seed) => {
+      const db = await import('/src/services/storage/db.js')
+      db.configureWorkspace('personal')
+      for (const d of seed) await db.putDoc(d)
+    }, seed)
+    await page.goto(base + '/' + hash)
+    await page.reload()
+    await page.getByRole('button', { name: '安排工作', exact: true }).first().waitFor()
+    await page.waitForTimeout(150)
+    return { context, page }
+  }
+  const read = page => page.evaluate(async () => (await (await import('/src/services/storage/db.js')).allDocs()).records)
+  const assert = (ok, msg) => { if (!ok) throw new Error(msg) }
+  for(const sync of [false,true]) {
+    for(const op of ['edit','move','cancel','progress']) {
+      const {context,page}=await scene()
+      const other=await context.newPage()
+      await other.goto(base+'/#/today')
+      await other.getByRole('button',{name:'安排工作',exact:true}).waitFor()
+      const current=async()=>(await read(page)).find(d=>d.id==='review-plan-a')
+      const patch=async(minutes,version)=>{
+        await other.evaluate(async({minutes,version,op})=>{
+          const db=await import('/src/services/storage/db.js')
+          const p=(await db.allDocs()).records.find(d=>d.id==='review-plan-a')
+          await db.putDoc({...p,planned_minutes:minutes,...(op==='move'?{date:`2026-11-${version===1?'25':'26'}`}:{action_text:`另一页修改说明${version}`})})
+        },{minutes,version,op})
+        if(sync) await page.evaluate(async()=>{await (await import('/src/stores/app.js')).useAppStore().reloadDocs()})
+      }
+      const btn=name=>page.getByRole('button',{name,exact:true})
+      const editor=['edit','move'].includes(op)
+      await btn({edit:'编辑',move:'改期',cancel:'取消安排',progress:'确认进度'}[op]).click()
+      if(op==='edit') await page.getByLabel('工作说明',{exact:true}).fill('本页草稿')
+      if(op==='move') {await btn('安排日期').click(); await btn('2026-11-24').click()}
+      await patch(90,1)
+      if(editor) await btn(op==='edit'?'保存修改':'确认改期').click()
+      else await page.getByRole('alertdialog').getByRole('button',{name:op==='cancel'?'取消安排':'确认进度',exact:true}).click()
+      const confirm=editor?'按最新事实重新提交':'按最新事实重新确认'
+      await btn(confirm).waitFor()
+      const firstText=await page.getByRole('alertdialog').innerText()
+      assert(await page.getByRole('alertdialog').locator('li').count()===2,`missing first fields ${op}/${sync}`)
+      assert(firstText.includes('预计分钟') && firstText.includes('90 分钟') && firstText.includes(op==='move'?'安排日期':'工作说明'),`missing first values ${op}/${sync}`)
+      if(editor) assert(firstText.includes('将覆盖当前最新值') && firstText.includes(op==='edit'?'30 分钟':'2026-11-24'),`missing overwrite warning ${op}/${sync}`)
+      if(op==='edit' && sync) {
+        await page.setViewportSize({width:360,height:800})
+        await page.screenshot({path:OUT+'/mobile-full-diff.png',fullPage:true})
+        const box=await btn(confirm).boundingBox()
+        assert(box.y>=0 && box.y+box.height<=800,'mobile confirm inaccessible')
+        await page.setViewportSize({width:1440,height:900})
+        await page.screenshot({path:OUT+'/desktop-full-diff.png',fullPage:true})
+      }
+      await patch(120,2)
+      assert(await page.getByRole('alertdialog').innerText()===firstText,`display followed live ${op}/${sync}`)
+      await btn(confirm).click()
+      await page.waitForTimeout(180)
+      const protectedRecord=await current()
+      assert(protectedRecord.planned_minutes===120 && protectedRecord.state==='planned',`unreviewed update ${op}/${sync}`)
+      assert(op==='move'?protectedRecord.date==='2026-11-26':protectedRecord.action_text==='另一页修改说明2',`unreviewed fields overwritten ${op}/${sync}`)
+      const secondText=await page.getByRole('alertdialog').innerText()
+      assert(await page.getByRole('alertdialog').locator('li').count()===2 && secondText.includes('120 分钟'),`missing second fields ${op}/${sync}`)
+      // Cancelling the second difference must not write any business record.
+      const beforeCancel=JSON.stringify(await read(page))
+      await page.getByRole('alertdialog').getByRole('button',{name:'取消',exact:true}).click()
+      await page.waitForTimeout(100)
+      assert(JSON.stringify(await read(page))===beforeCancel,`cancel wrote records ${op}/${sync}`)
+      // Editor retry retains the old input; detail reopening captures current facts and needs a new explicit confirmation.
+      if(editor) await btn(op==='edit'?'保存修改':'确认改期').click()
+      else {
+        await btn(op==='cancel'?'取消安排':'确认进度').click()
+        await page.getByRole('alertdialog').getByRole('button',{name:op==='cancel'?'取消安排':'确认进度',exact:true}).click()
+      }
+      if(editor) {await btn(confirm).waitFor(); await btn(confirm).click()}
+      await page.waitForTimeout(180)
+      const saved=await current()
+      assert(op==='edit'?saved.action_text==='本页草稿' && saved.planned_minutes===30:op==='move'?saved.date==='2026-11-24' && saved.planned_minutes===120:op==='cancel'?saved.state==='cancelled' && saved.planned_minutes===120:saved.state==='partial' && saved.planned_minutes===120,`final operation failed ${op}/${sync}`)
+      results.push({op,sync,pass:true,firstText,secondText,protectedRecord,saved,cancelNoWrites:true})
+      console.log(`PASS ${op} sync=${sync}`)
+      await context.close()
+    }
+  }
+  await writeFile(OUT+'/matrix-results.json',JSON.stringify({results,errors},null,2))
+  assert(errors.length===0,'runtime errors')
+  console.log(JSON.stringify({passed:results.length,errors}))
+} finally {if(browser) await browser.close(); await server.close()}
+

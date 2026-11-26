@@ -1,0 +1,1073 @@
+{
+  "requests": [
+    {
+      "url": "http://[::1]:5185/",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246535
+    },
+    {
+      "url": "http://[::1]:5185/@vite/client",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246562
+    },
+    {
+      "url": "http://[::1]:5185/src/main.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246562
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/vue.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246568
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/pinia.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246569
+    },
+    {
+      "url": "http://[::1]:5185/src/App.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246569
+    },
+    {
+      "url": "http://[::1]:5185/src/app/router.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246569
+    },
+    {
+      "url": "http://[::1]:5185/src/styles/main.css",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246569
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/chunk-GDOR7JZR.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246642
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/chunk-PZ5AY32C.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246642
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/vite/dist/client/env.mjs",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246642
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/vue-router.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/lucide-vue-next.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Alert.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Badge.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WorkspaceSwitcher.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WorkProtectionDialog.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/src/stores/app.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/@id/__x00__plugin-vue:export-helper",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246646
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/TodayPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/CollectPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/NotesPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/TaskDetailPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/WorkPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/WorkRecordsPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/WorkRecordDetailPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/DataPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500246649
+    },
+    {
+      "url": "http://[::1]:5185/src/lib/utils.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247009
+    },
+    {
+      "url": "http://[::1]:5185/src/composables/workLeave.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247009
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/time.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247009
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/reka-ui.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247023
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Button.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247023
+    },
+    {
+      "url": "http://[::1]:5185/src/services/storage/db.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247030
+    },
+    {
+      "url": "http://[::1]:5185/src/services/api/client.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247031
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/note.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247031
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/organize.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247031
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/action.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247031
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/matter.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247031
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/focus.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247031
+    },
+    {
+      "url": "http://[::1]:5185/src/stores/focus.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247031
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Card.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247034
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/DateInput.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247034
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Input.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247034
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/ContinueBar.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/NodeSelect.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/PlanDetail.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/PlanEditor.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/TaskListsPanel.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WeekView.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/plan.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/labels.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/workNavigation.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247035
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/week.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247036
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/ConfirmDialog.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247043
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Separator.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247043
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/FieldCard.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247043
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DeleteImpact.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247043
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/work.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247048
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Textarea.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247049
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/EndSessionForm.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247049
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WorkMaterials.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247049
+    },
+    {
+      "url": "http://[::1]:5185/src/composables/useWorkDraft.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247049
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/TaskRow.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247054
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/PlanCard.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247054
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/StartPlanWorkDialog.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247054
+    },
+    {
+      "url": "http://[::1]:5185/src/composables/usePlanWorkStart.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247054
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/clsx.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247214
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/tailwind-merge.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247214
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/export.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247214
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/adapt.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247214
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/restore.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247214
+    },
+    {
+      "url": "http://[::1]:5185/src/services/focus/service.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247271
+    },
+    {
+      "url": "http://[::1]:5185/src/services/focus/runtime.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247271
+    },
+    {
+      "url": "http://[::1]:5185/src/stores/plan.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247300
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DayWorkZone.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247304
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DayDeadlineZone.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247304
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DayTwoZones.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247304
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/format.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247325
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/zip.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247325
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/validate.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247325
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/import.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247327
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/recovery.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247327
+    },
+    {
+      "url": "http://[::1]:5185/src/services/plan/service.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247331
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DeadlineChip.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247332
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/fflate.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247333
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/contractSchema.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247337
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/remap.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247338
+    },
+    {
+      "url": "http://[::1]:5185/@fs/E:/qoder/contract/schema.json?import",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247343
+    },
+    {
+      "url": "http://[::1]:5185/api/healthz",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500247443
+    },
+    {
+      "url": "http://[::1]:5185/",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248659
+    },
+    {
+      "url": "http://[::1]:5185/@vite/client",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248673
+    },
+    {
+      "url": "http://[::1]:5185/src/main.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248673
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/vue.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248680
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/pinia.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248680
+    },
+    {
+      "url": "http://[::1]:5185/src/App.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248680
+    },
+    {
+      "url": "http://[::1]:5185/src/app/router.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248680
+    },
+    {
+      "url": "http://[::1]:5185/src/styles/main.css",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248681
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/vite/dist/client/env.mjs",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248681
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/chunk-GDOR7JZR.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248683
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/chunk-PZ5AY32C.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248683
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/vue-router.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248686
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/lucide-vue-next.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Alert.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Badge.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WorkspaceSwitcher.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WorkProtectionDialog.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/stores/app.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/@id/__x00__plugin-vue:export-helper",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/TodayPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/CollectPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/NotesPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248687
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/TaskDetailPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248688
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/WorkPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248688
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/WorkRecordsPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248688
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/WorkRecordDetailPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248688
+    },
+    {
+      "url": "http://[::1]:5185/src/pages/DataPage.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248688
+    },
+    {
+      "url": "http://[::1]:5185/src/lib/utils.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248696
+    },
+    {
+      "url": "http://[::1]:5185/src/composables/workLeave.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248697
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/time.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248697
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/reka-ui.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248697
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Button.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248697
+    },
+    {
+      "url": "http://[::1]:5185/src/services/storage/db.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248701
+    },
+    {
+      "url": "http://[::1]:5185/src/services/api/client.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248702
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/note.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/organize.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/action.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/matter.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/focus.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/stores/focus.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Card.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/DateInput.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Input.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248703
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/ContinueBar.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/NodeSelect.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/PlanDetail.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/PlanEditor.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/TaskListsPanel.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WeekView.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/plan.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/labels.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/workNavigation.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/week.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248704
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/ConfirmDialog.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248706
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/TaskRow.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248706
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Textarea.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248706
+    },
+    {
+      "url": "http://[::1]:5185/src/components/ui/Separator.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248708
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/FieldCard.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248708
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DeleteImpact.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248708
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/PlanCard.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248709
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/StartPlanWorkDialog.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248709
+    },
+    {
+      "url": "http://[::1]:5185/src/composables/usePlanWorkStart.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248711
+    },
+    {
+      "url": "http://[::1]:5185/src/domains/work.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248711
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/EndSessionForm.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248714
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/WorkMaterials.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248714
+    },
+    {
+      "url": "http://[::1]:5185/src/composables/useWorkDraft.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248714
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/export.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248714
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/adapt.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248715
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/restore.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248715
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/clsx.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248715
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/tailwind-merge.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248715
+    },
+    {
+      "url": "http://[::1]:5185/src/services/focus/runtime.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248736
+    },
+    {
+      "url": "http://[::1]:5185/src/services/focus/service.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248737
+    },
+    {
+      "url": "http://[::1]:5185/src/stores/plan.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248741
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DayWorkZone.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248747
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DayDeadlineZone.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248747
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DayTwoZones.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248747
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/format.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248761
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/zip.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248761
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/validate.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248761
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/import.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248763
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/recovery.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248763
+    },
+    {
+      "url": "http://[::1]:5185/src/services/plan/service.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248767
+    },
+    {
+      "url": "http://[::1]:5185/src/components/domain/DeadlineChip.vue",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248768
+    },
+    {
+      "url": "http://[::1]:5185/node_modules/.vite/deps/fflate.js?v=7d65d34e",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248770
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/contractSchema.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248774
+    },
+    {
+      "url": "http://[::1]:5185/src/services/backup/remap.js",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248775
+    },
+    {
+      "url": "http://[::1]:5185/@fs/E:/qoder/contract/schema.json?import",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248778
+    },
+    {
+      "url": "http://[::1]:5185/api/healthz",
+      "method": "GET",
+      "offline": false,
+      "t": 1795500248822
+    }
+  ],
+  "failed": []
+}

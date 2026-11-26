@@ -1,0 +1,22 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "41F7F4274E2FC3E9AACD2FD4C35EFA85F69F6822CE0A794886706F490A3CA767",
+    "Path": "E:\\qoder\\devlog\\private-evidence\\stage5a-2c\\c14-anomaly.mjs"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "7970E9879DAD21948CD9237D7FEDFB10FF2E90AB98535153DA072508A71662A3",
+    "Path": "E:\\qoder\\devlog\\private-evidence\\stage5a-2c\\c01-inventory.json"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "15DB18442EE6A2AC8E2F68A72AF829C1E5408B55DFBBBE6EEBB7E64EE3481CC4",
+    "Path": "E:\\qoder\\devlog\\private-evidence\\stage5a-2c\\c01-docs-snapshot.json"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "B799EFA211E13AA4BBD2392281BB4BF42F3D4994A6169CC03DD4CE1F8052F85F",
+    "Path": "E:\\qoder\\devlog\\private-evidence\\stage5a-2c\\zip\\paused-source.zip"
+  }
+]

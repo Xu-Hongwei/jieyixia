@@ -1,0 +1,22 @@
+{
+  "id": "s-remap-body-text",
+  "title": "正文ID字符串不替换",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-16"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "typed_ref_remap",
+    "ref_path": "body_text_id_strings"
+  },
+  "expected_error": null,
+  "expected": {
+    "semantics": "content",
+    "missing": "keep_as_is",
+    "remap": false
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

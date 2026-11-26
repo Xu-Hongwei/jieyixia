@@ -1,0 +1,32 @@
+[
+  {
+    "file": "baseline-normal.zip",
+    "bytesMatch": true,
+    "hashMatch": true
+  },
+  {
+    "file": "deleted-history.zip",
+    "bytesMatch": true,
+    "hashMatch": true
+  },
+  {
+    "file": "legacy-compat.zip",
+    "bytesMatch": true,
+    "hashMatch": true
+  },
+  {
+    "file": "offline-loop.zip",
+    "bytesMatch": true,
+    "hashMatch": true
+  },
+  {
+    "file": "paused-source.zip",
+    "bytesMatch": true,
+    "hashMatch": true
+  },
+  {
+    "file": "running-source.zip",
+    "bytesMatch": true,
+    "hashMatch": true
+  }
+]

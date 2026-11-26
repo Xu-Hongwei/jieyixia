@@ -1,0 +1,158 @@
+{
+  "at": "2026-11-24T12:16:15.031Z",
+  "base": "http://127.0.0.1:5176/",
+  "total": 25,
+  "failed": 0,
+  "results": [
+    {
+      "item": "B1B-02",
+      "name": "v3→v4 后版本=4，旧 docs 逐字段不变",
+      "pass": true,
+      "detail": "{\"version\":4,\"docsUnchanged\":true}"
+    },
+    {
+      "item": "B1B-02",
+      "name": "图片 Blob SHA-256 迁移前后一致",
+      "pass": true,
+      "detail": "c414cd0e204de974f73753c7e28d7638e7b3691bb8b1a2bab6b25bb7fed7ce77 → c414cd0e204de974f73753c7e28d7638e7b3691bb8b1a2bab6b25bb7fed7ce77"
+    },
+    {
+      "item": "B1B-02",
+      "name": "focus_runtime 旧记录不变；仅增 3 个助手 store 及索引且为空",
+      "pass": true,
+      "detail": "{\"assistant_threads\":[\"by_workspace\"],\"assistant_drafts\":[\"by_thread\",\"by_workspace\"],\"assistant_ops\":[\"by_workspace\"]}"
+    },
+    {
+      "item": "B1B-03",
+      "name": "旧标签占用 → DB_UPGRADE_BLOCKED 可解释错误，不无限等待，版本仍 3",
+      "pass": true,
+      "detail": "{\"code\":\"DB_UPGRADE_BLOCKED\",\"msg\":\"数据库升级被其它标签页占用，请关闭其它页面后重试\",\"elapsed\":1,\"ver\":3}"
+    },
+    {
+      "item": "B1B-03",
+      "name": "关闭占用后重试成功升级到 v4",
+      "pass": true,
+      "detail": "{\"retryOk\":true,\"ver\":4}"
+    },
+    {
+      "item": "B1B-03",
+      "name": "versionchange 让位：旧连接主动 close；此后按旧版本打开报 VersionError 不误报成功",
+      "pass": true,
+      "detail": "{\"closes\":2,\"yieldErr\":\"VersionError\"}"
+    },
+    {
+      "item": "B1B-06",
+      "name": "两标签同读种子 rev2；A 页修改+确认成功 bump rev3",
+      "pass": true,
+      "detail": "{\"b0\":{\"ok\":true,\"revision\":2},\"a1\":{\"editOk\":true,\"rev\":3,\"confirmOk\":true}}"
+    },
+    {
+      "item": "B1B-06",
+      "name": "B 页陈旧基线的确认/放弃/修改全部 CONFLICT",
+      "pass": true,
+      "detail": "{\"confirmCode\":\"CONFLICT\",\"discardCode\":\"CONFLICT\",\"editCode\":\"CONFLICT\"}"
+    },
+    {
+      "item": "B1B-06",
+      "name": "B 页重读最新后放弃成功；A 页陈旧写被拒不复活 discarded，确认不丢",
+      "pass": true,
+      "detail": "{\"b2\":{\"freshRevision\":3,\"ok\":true,\"status\":\"discarded\"},\"a2\":{\"code\":\"CONFLICT\",\"status\":\"discarded\",\"confirmations\":[\"c1\",\"cA\"],\"history\":2}}"
+    },
+    {
+      "item": "B1B-13",
+      "name": "真实浏览器导出 v2/0.5.0：助手载荷齐全、无 ops 文件、检查通过",
+      "pass": true,
+      "detail": "{\"format\":2,\"schema\":\"0.5.0\",\"threads\":1,\"drafts\":4,\"insOk\":true,\"errors\":[]}"
+    },
+    {
+      "item": "B1B-13",
+      "name": "预览：线程/草案计数 + 原状态分布 + 重新核对提示",
+      "pass": true,
+      "detail": "{\"applied\":1,\"editing\":1,\"discarded\":1,\"generating\":1}"
+    },
+    {
+      "item": "B1B-13",
+      "name": "v2 恢复提交 + verifyCommittedRestore 实读核对通过",
+      "pass": true,
+      "detail": "{\"receipt\":[1,4],\"problems\":[]}"
+    },
+    {
+      "item": "B1B-17",
+      "name": "恢复状态：未应用→needs_review 去授权；applied 只读保留且 formal_id 已映射；discarded 保持",
+      "pass": true,
+      "detail": "{\"a\":\"needs_review\",\"b\":\"discarded\",\"d\":\"needs_review\",\"c\":\"applied\",\"cFormalRemapped\":true}"
+    },
+    {
+      "item": "B1B-21",
+      "name": "目标 0 ops、0 新 PlanItem；正文/归属正确；原空间不变",
+      "pass": true,
+      "detail": "{\"ops\":0,\"planItemsSame\":true}"
+    },
+    {
+      "item": "B1B-13",
+      "name": "空 v2 往返：检查/提交/实读核对通过，助手计数 0",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1B-12",
+      "name": "v1 旧包继续可恢复：助手为空、旧 Focus 暂停语义保留、实读核对通过",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1B-18",
+      "name": "assistant_drafts 写入失败 → 六 store + 目录零半份残留",
+      "pass": true,
+      "detail": "{\"failCode\":\"RESTORE_WRITE_FAILED\",\"residue\":{\"sources\":0,\"docs\":0,\"focus_runtime\":0,\"assistant_threads\":0,\"assistant_drafts\":0,\"assistant_ops\":0,\"workspaces\":0}}"
+    },
+    {
+      "item": "B1B-18",
+      "name": "修复后同意图重试成功且实读核对通过；原空间逐字段不变",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1B-19",
+      "name": "同意图再次重试返回原结果（committed_at 一致，不重复写入）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B1B-20",
+      "name": "断网刷新后读取：草案 revision 与断网前编辑一致",
+      "pass": true,
+      "detail": "{\"before\":{\"ok\":true,\"rev\":3},\"after\":{\"readRev\":3,\"hadAssumption\":true,\"editOk\":true,\"newRev\":4,\"offlineAssumption\":true,\"msgOk\":true}}"
+    },
+    {
+      "item": "B1B-20",
+      "name": "断网中编辑保存/追加消息成功（本地草案功能正常）",
+      "pass": true,
+      "detail": "{\"readRev\":3,\"hadAssumption\":true,\"editOk\":true,\"newRev\":4,\"offlineAssumption\":true,\"msgOk\":true}"
+    },
+    {
+      "item": "B1B-20",
+      "name": "全程零模型/后端请求",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1B-13",
+      "name": "UI 导出：真实下载落盘 + 成功态显示助手线程 1 · 草案 4",
+      "pass": true,
+      "detail": "summaryHits=1"
+    },
+    {
+      "item": "B1B-13",
+      "name": "UI 预览：线程·草案计数 + 原状态分布 + 重新核对提示",
+      "pass": true,
+      "detail": "{\"pvCounts\":1,\"recheck\":1,\"statusLine\":1}"
+    },
+    {
+      "item": "B1B-13",
+      "name": "UI 恢复完成：新空间 1 线程 4 草案，状态 needs_review×2/applied/discarded",
+      "pass": true,
+      "detail": "{\"found\":true,\"threads\":1,\"drafts\":4,\"statuses\":[\"applied\",\"discarded\",\"needs_review\",\"needs_review\"]}"
+    }
+  ]
+}

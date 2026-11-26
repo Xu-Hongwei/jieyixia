@@ -1,8 +1,8 @@
-"""从 models.py 导出 schema.json 与 typedefs.d.ts，并校验 fixtures。
+"""从 models.py（含 assistant_models.py）导出 schema.json / typedefs.d.ts / limits.json，并校验 fixtures。
 
 用法：
     python contract/generate.py            生成 + 校验
-    python contract/generate.py --check    只校验
+    python contract/generate.py --check    只校验生成物一致 + fixtures
 """
 
 from __future__ import annotations
@@ -19,11 +19,14 @@ from models import (
     CHAT_RULES,
     ENDPOINTS,
     EXCLUSION_RULES,
+    FIELD_SCHEMA_LINKS,
     FIELD_SEMANTICS,
+    LIMITS,
     SCHEMA_VERSION,
     STATUS_SEMANTICS,
     TIME_RULES,
     Fixture,
+    RefState,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -40,6 +43,10 @@ def build_schema() -> dict[str, Any]:
         schema = model.model_json_schema(ref_template="#/$defs/{model}")
         defs.update(schema.pop("$defs", {}))
         defs[model.__name__] = schema
+    # 嵌套 $defs 会覆盖同名定义，机器关联必须在全部定义合并后再并入
+    for name, link in FIELD_SCHEMA_LINKS.items():
+        if name in defs:
+            defs[name].update(link)
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "截下来 API 与本地领域契约",
@@ -52,8 +59,18 @@ def build_schema() -> dict[str, Any]:
             "chat_rules": CHAT_RULES,
             "exclusion_rules": EXCLUSION_RULES,
         },
+        "x-limits": LIMITS,
         "endpoints": ENDPOINTS,
         "$defs": defs,
+    }
+
+
+def build_limits() -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "source_of_truth": "contract/assistant_models.py LIMITS（经 contract/models.py 再导出）",
+        "note": "更低的已配置上限优先；单接口不得放宽全局保护。future_config 是 5B-1/3 接入映射，不是当前配置。",
+        "limits": LIMITS,
     }
 
 
@@ -73,6 +90,10 @@ def ts_type(node: dict[str, Any]) -> str:
         return json.dumps(node["const"], ensure_ascii=False)
     if "anyOf" in node:
         parts = [ts_type(x) for x in node["anyOf"]]
+        return " | ".join(dict.fromkeys(parts))
+    if "oneOf" in node:
+        # Pydantic 判别联合（discriminator）导出 oneOf；必须生成联合类型，不能落 unknown。
+        parts = [ts_type(x) for x in node["oneOf"]]
         return " | ".join(dict.fromkeys(parts))
     if "allOf" in node and len(node["allOf"]) == 1:
         return ts_type(node["allOf"][0])
@@ -206,16 +227,56 @@ def check_fixtures(fixtures: list[Fixture]) -> int:
                              f"{f.id}: task.deadline 与出处便签的已确认值不一致")
         if f.action:
             need(f.action.task_id in tasks, f"{f.id}: action 指向不存在的 task")
+            owner = tasks.get(f.action.task_id)
+            if owner:
+                need(owner.workspace_id == f.action.workspace_id,
+                     f"{f.id}: action 与所属 task 不在同一工作区")
         if f.focus_session:
-            need(f.focus_session.task_id in tasks, f"{f.id}: focus 指向不存在的 task")
-            need(f.focus_session.action_id in actions, f"{f.id}: focus 指向不存在的 action")
-            if f.focus_session.plan_item_id:
-                need(any(p.id == f.focus_session.plan_item_id for p in plan_items),
-                     f"{f.id}: focus 指向不存在的 plan_item")
+            s = f.focus_session
+            # v0.4：active（含 v0 缺省）必须解析到存在对象；deleted 是历史标识，必须解析不到
+            if s.task_ref_state is RefState.deleted:
+                need(s.task_id not in tasks, f"{f.id}: task_ref_state=deleted 但任务仍存在（假删除数据）")
+            else:
+                need(s.task_id in tasks, f"{f.id}: focus 指向不存在的 task")
+                task = tasks.get(s.task_id)
+                if task:
+                    need(task.workspace_id == s.workspace_id,
+                         f"{f.id}: focus 与 task 不在同一工作区")
+            if s.action_ref_state is RefState.deleted:
+                need(s.action_id not in actions, f"{f.id}: action_ref_state=deleted 但行动仍存在（假删除数据）")
+            else:
+                need(s.action_id in actions, f"{f.id}: focus 指向不存在的 action")
+                action = actions.get(s.action_id)
+                if action:
+                    need(action.workspace_id == s.workspace_id,
+                         f"{f.id}: focus 与 action 不在同一工作区")
+                    need(action.task_id == s.task_id,
+                         f"{f.id}: focus 的 action 不属于其 task")
+            if s.plan_item_id:
+                item = next((p for p in plan_items if p.id == s.plan_item_id), None)
+                need(item is not None, f"{f.id}: focus 指向不存在的 plan_item")
+                if item:
+                    need(item.workspace_id == s.workspace_id and item.task_id == s.task_id,
+                         f"{f.id}: focus.plan_item_id 必须属于同工作区、同任务")
         for p in f.plan_items:
-            need(p.task_id in tasks, f"{f.id}: plan_item 指向不存在的 task")
+            if p.task_ref_state is RefState.deleted:
+                need(p.task_id not in tasks, f"{f.id}: plan_item task_ref_state=deleted 但任务仍存在")
+            else:
+                need(p.task_id in tasks, f"{f.id}: plan_item 指向不存在的 task")
+                task = tasks.get(p.task_id)
+                if task:
+                    need(task.workspace_id == p.workspace_id,
+                         f"{f.id}: plan_item 与 task 不在同一工作区")
             if p.focus_session_id:
                 need(p.focus_session_id in sessions, f"{f.id}: plan_item 指向不存在的 focus")
+                target = sessions.get(p.focus_session_id)
+                if target:
+                    need(target.ended_at is not None,
+                         f"{f.id}: focus_session_id 快捷引用只能指向已结束会话")
+                    need(target.workspace_id == p.workspace_id and target.task_id == p.task_id,
+                         f"{f.id}: plan_item 快捷会话必须同工作区、同任务")
+                    need(target.plan_item_id == p.id,
+                         f"{f.id}: plan_item 快捷会话必须反向关联本条目（focus.plan_item_id）")
         if f.change_proposal:
             cp = f.change_proposal
             need(cp.task_id in tasks, f"{f.id}: proposal 指向不存在的 task")
@@ -228,6 +289,14 @@ def check_fixtures(fixtures: list[Fixture]) -> int:
 
     running = [s for s in sessions.values() if s.running]
     need(len(running) <= 1, f"同时存在 {len(running)} 个运行中专注会话（规则 8 只允许 1 个）")
+
+    # v0.4：同一工作区至多一份未结束会话（ended_at 为空，含暂停）
+    unfinished_by_ws: dict[str, int] = {}
+    for s in sessions.values():
+        if s.ended_at is None:
+            unfinished_by_ws[s.workspace_id] = unfinished_by_ws.get(s.workspace_id, 0) + 1
+    for ws, count in unfinished_by_ws.items():
+        need(count <= 1, f"工作区 {ws} 有 {count} 份未结束会话（含暂停，只允许 1 份）")
 
     for cp in proposals:
         if cp.status.value == "pending":
@@ -253,15 +322,26 @@ def check_fixtures(fixtures: list[Fixture]) -> int:
 
 def main() -> int:
     check_only = "--check" in sys.argv
-    if not check_only:
-        schema = build_schema()
-        (CONTRACT_DIR / "schema.json").write_text(
-            json.dumps(schema, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
-        (CONTRACT_DIR / "typedefs.d.ts").write_text(
-            emit_typedefs(schema["$defs"]), encoding="utf-8"
-        )
-        print(f"[OK] 已生成 schema.json（{len(schema['$defs'])} 个定义）与 typedefs.d.ts")
+    schema = build_schema()
+    artifacts = {
+        "schema.json": json.dumps(schema, ensure_ascii=False, indent=2) + "\n",
+        "typedefs.d.ts": emit_typedefs(schema["$defs"]),
+        "limits.json": json.dumps(build_limits(), ensure_ascii=False, indent=2) + "\n",
+    }
+    if check_only:
+        bad = []
+        for name, text in artifacts.items():
+            path = CONTRACT_DIR / name
+            if not path.exists() or path.read_text(encoding="utf-8") != text:
+                bad.append(name)
+        if bad:
+            print(f"[FAIL] 生成物与 models.py 不一致：{bad}；请重新运行 generate.py")
+            return 1
+        print(f"[OK] 生成物一致（{len(schema['$defs'])} 个定义，{len(LIMITS)} 项限额）")
+    else:
+        for name, text in artifacts.items():
+            (CONTRACT_DIR / name).write_text(text, encoding="utf-8")
+        print(f"[OK] 已生成 schema.json（{len(schema['$defs'])} 个定义）、typedefs.d.ts、limits.json")
 
     if not FIXTURE_DIR.exists():
         print("[SKIP] fixtures/ 尚不存在")

@@ -1,0 +1,62 @@
+{
+  "base": "http://127.0.0.1:5175",
+  "seed": "与 visual-review-2026-11-19/capture.cjs 完全相同的虚构数据",
+  "errors": [],
+  "overflow": [
+    {
+      "label": "desktop-today",
+      "sw": 1440,
+      "iw": 1440,
+      "ok": true
+    },
+    {
+      "label": "desktop-collect",
+      "sw": 1440,
+      "iw": 1440,
+      "ok": true
+    },
+    {
+      "label": "desktop-notes",
+      "sw": 1440,
+      "iw": 1440,
+      "ok": true
+    },
+    {
+      "label": "mobile-today",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-collect",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-notes",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-notes-evidence",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-notes-json",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "tablet-notes",
+      "sw": 820,
+      "iw": 820,
+      "ok": true
+    }
+  ],
+  "scope": "isolated headless context, no API analyze calls, no product source changes during capture"
+}

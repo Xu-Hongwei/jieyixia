@@ -1,0 +1,319 @@
+{
+  "at": "2026-11-25T06:53:15.868Z",
+  "base": "http://127.0.0.1:5177/",
+  "port": 5177,
+  "mutate": null,
+  "onlyMain": false,
+  "total": 51,
+  "passed": 51,
+  "failed": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "item": "B1C-01",
+      "name": "round1 真实排程 总排133/未排67，complete=false",
+      "pass": true,
+      "detail": "{\"total\":133,\"unsched\":67,\"complete\":false}"
+    },
+    {
+      "item": "B1C-01",
+      "name": "buffer15%+未选中20占用计入；逐日预算/占用/新增/剩余与手算一致",
+      "pass": true,
+      "detail": "{\"daysMatch1\":true,\"segments\":[[\"w-course#1\",\"2026-11-24\",51],[\"w-course#2\",\"2026-11-25\",31],[\"w-course#3\",\"2026-11-27\",51]]}"
+    },
+    {
+      "item": "B1C-02",
+      "name": "未确认缺口阻断 ready（GAP_UNCONFIRMED），持久状态仍 editing",
+      "pass": true,
+      "detail": "{\"ready\":false,\"blockers\":[\"GAP_UNCONFIRMED\"],\"status\":\"editing\",\"complete\":false}"
+    },
+    {
+      "item": "B1C-02",
+      "name": "当前版确认缺口后 ready=true 但 complete=false、未排仍67（R3）",
+      "pass": true,
+      "detail": "{\"ready1\":{\"ok\":true,\"ready\":true,\"complete\":false,\"status\":\"ready\"},\"g2\":{\"unsched\":67,\"complete\":false}}"
+    },
+    {
+      "item": "B1C-03",
+      "name": "确认预算90使旧计算失效：fact_baseline清空、ready阻断、revision不增、旧结果仍可读",
+      "pass": true,
+      "detail": "{\"ok\":true,\"invalidatedDrafts\":[\"ws-1c-main-id-2\"],\"factBaselineNull\":true,\"ready\":false,\"blockers\":[\"FACT_BASELINE_MISSING\"],\"revision\":2,\"status\":\"ready\"}"
+    },
+    {
+      "item": "B1C-03",
+      "name": "重排 round2 总排200/未排0，complete=true，逐日与手算一致",
+      "pass": true,
+      "detail": "{\"total\":200,\"unsched\":0,\"segments\":[[\"w-course#1\",\"2026-11-24\",76],[\"w-course#2\",\"2026-11-25\",56],[\"w-course#3\",\"2026-11-27\",68]]}"
+    },
+    {
+      "item": "B1C-03",
+      "name": "round2 ready=true；历史可读、旧版缺口确认不自动继承到当前版",
+      "pass": true,
+      "detail": "{\"ready2\":true,\"hist\":{\"rev\":3,\"histLen\":2,\"histReadable\":true,\"oldGapConfStale\":true,\"currentGapConf\":false}}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "仅时钟变化同输入重排不消耗 revision（R2）",
+      "pass": true,
+      "detail": "{\"before\":3,\"after\":3}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "硬刷新后从IDB重建读取：revision/状态/历史/可用性/分段逐项一致",
+      "pass": true,
+      "detail": "{\"preRefresh\":{\"rev\":3,\"status\":\"ready\",\"histLen\":2,\"ready\":true,\"segments\":[[\"w-course#1\",\"2026-11-24\",76],[\"w-course#2\",\"2026-11-25\",56],[\"w-course#3\",\"2026-11-27\",68]],\"total\":200},\"postRefresh\":{\"ok\":true,\"rev\":3,\"status\":\"ready\",\"histLen\":2,\"ready\":true,\"segments\":[[\"w-course#1\",\"2026-11-24\",76],[\"w-course#2\",\"2026-11-25\",56],[\"w-course#3\",\"2026-11-27\",68]],\"total\":200}}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "刷新后展示页真实绑定既有草案（非 init 重建）：revision/状态与IDB读回一致",
+      "pass": true,
+      "detail": "{\"ws\":\"ws-1c-main\",\"draftId\":\"ws-1c-main-id-2\",\"threadId\":\"ws-1c-main-id-1\",\"revision\":3,\"status\":\"ready\",\"ready\":true}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "截图 04-refresh-read.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"草案信息\",\"revision（内容版本）：3\",\"草案分段\",\"已排合计 200 分\"]}"
+    },
+    {
+      "item": "B1C-16",
+      "name": "主链路前后业务 docs 全字段（含正文/分钟/便签字段/描述）+sources 全字段+图片SHA一致、ops不增",
+      "pass": true,
+      "detail": "{\"opsBefore\":0,\"opsAfter\":0,\"docsBefore\":5,\"docsAfter\":5,\"draftsBefore\":1,\"draftsAfter\":1}"
+    },
+    {
+      "item": "B1C-16",
+      "name": "主链路全程零模型/后端请求",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1C-05",
+      "name": "真实 DataPage 下载落盘 ZIP（可检视字节>0）",
+      "pass": true,
+      "detail": "bytes=3975"
+    },
+    {
+      "item": "B1C-05",
+      "name": "上传后真实预览：重新核对提示可见",
+      "pass": true,
+      "detail": "recheckHits=1"
+    },
+    {
+      "item": "B1C-05",
+      "name": "恢复到新空间：1线程1草案、业务对象复制、无新PlanItem/ops",
+      "pass": true,
+      "detail": "{\"wsId\":\"ws-restore-ab204217-30ca-4c39-a656-072610b62f0f\",\"threads\":1,\"drafts\":1,\"bizDocs\":5,\"planItems\":1,\"ops\":0}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "生产提交后核对 verifyCommittedRestore 真实运行且零问题（逐记录 canonical 内容/引用/状态/基线/确认/ops）",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复后未应用草案 needs_review、fact_baseline清空、旧确认无执行效力、正文/历史/旧计算可读、新ID",
+      "pass": true,
+      "detail": "{\"status\":\"needs_review\",\"baselineNull\":true,\"confCleared\":true,\"rev\":3}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "恢复 ID 映射与准备阶段冻结签名逐字符一致（实际映射，非猜测）",
+      "pass": true,
+      "detail": "{\"signatureMatch\":true,\"seqLen\":10,\"used\":8,\"liveCount\":8,\"historyCount\":0}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "恢复语义逐项核对：sources字节SHA+全字段、docs全字段、线程消息正文、草案proposal/计算/历史/引用（实际映射，声明对象全部遍历）",
+      "pass": true,
+      "detail": "{\"problems\":[],\"checked\":{\"sources\":1,\"docs\":5,\"threads\":1,\"drafts\":1},\"docDiffs\":[]}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "原空间恢复前后完整快照一致（docs全字段+sources字节SHA+线程/草案全字段+目录，非仅数量）",
+      "pass": true,
+      "detail": "{\"docs\":5,\"threads\":1,\"drafts\":1,\"ops\":0}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复空间真实重排200/0+当前版就绪+继续编辑保存（映射后业务对象，引用已重映射）",
+      "pass": true,
+      "detail": "{\"stage\":\"done\",\"ok\":true,\"draftId\":\"2dfcd452-26bd-4557-922d-20515ba6be38\",\"total\":200,\"unsched\":0,\"readyOk\":true,\"ready\":true,\"editBumped\":true,\"editRev\":5,\"assumptionSaved\":true,\"refMapped\":true,\"mappedTaskId\":\"23e85351-22c6-477d-ad01-fe3f8d57857a\"}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复后继续编辑硬刷新不丢（真实IDB读回）",
+      "pass": true,
+      "detail": "{\"assumptionSaved\":true,\"rev\":5}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复空间展示页真实绑定：revision 与继续编辑后一致",
+      "pass": true,
+      "detail": "{\"ws\":\"ws-restore-ab204217-30ca-4c39-a656-072610b62f0f\",\"draftId\":\"2dfcd452-26bd-4557-922d-20515ba6be38\",\"threadId\":\"0fdfe755-d047-481b-a9e5-9545499bfc30\",\"revision\":5,\"status\":\"editing\",\"ready\":true}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "截图 10-restored-continue-edit.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"ws-restore-ab204217-30ca-4c39-a656-072610b62f0f\",\"revision（内容版本）：5\",\"恢复后继续编辑\",\"已排合计 200 分\"]}"
+    },
+    {
+      "item": "B1C-07",
+      "name": "一致闭环：按11-30确认→计算采用11-30→当前版再确认→就绪成功",
+      "pass": true,
+      "detail": "{\"computed\":\"2026-11-30\",\"ready\":true,\"commitOk\":true}"
+    },
+    {
+      "item": "B1C-07",
+      "name": "改确认11-23后旧计算(11-30)绑定不一致：DEADLINE_RECOMPUTE_REQUIRED + ready提交READY_BLOCKED，状态不被强改",
+      "pass": true,
+      "detail": "{\"id\":\"dl-4\",\"computed\":\"2026-11-30\",\"blockers\":[\"DEADLINE_RECOMPUTE_REQUIRED\"],\"commitCode\":\"READY_BLOCKED\",\"commitBlockers\":[\"DEADLINE_RECOMPUTE_REQUIRED\"],\"statusAfter\":\"generating\"}"
+    },
+    {
+      "item": "B1C-07",
+      "name": "阻断当时展示页真实绑定：同一草案、持久状态与真实服务一致",
+      "pass": true,
+      "detail": "{\"ws\":\"ws-1c-deadline\",\"draftId\":\"dl-4\",\"threadId\":\"dl-3\",\"revision\":2,\"status\":\"generating\",\"ready\":false}"
+    },
+    {
+      "item": "B1C-07",
+      "name": "截图 08-deadline-blocked.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"截止决定 vs 计算采用\",\"DEADLINE_RECOMPUTE_REQUIRED\",\"READY_BLOCKED\",\"2026-11-23\",\"2026-11-30\"]}"
+    },
+    {
+      "item": "B1C-07",
+      "name": "恢复闭环：改用可排日期11-26重排+当前版再确认→就绪成功；全程未预创建正式Task",
+      "pass": true,
+      "detail": "{\"c\":{\"blockedBefore\":[\"DEADLINE_RECOMPUTE_REQUIRED\"],\"reschedOk\":true,\"computed\":\"2026-11-26\",\"readyAfter\":true,\"commitOk\":true},\"formalTaskCount\":0}"
+    },
+    {
+      "item": "B1C-09",
+      "name": "计算后就绪后新增未选中占用：get 检出 OCCUPANCY_ADDED、ready 提交 READY_BLOCKED，持久状态不被强改",
+      "pass": true,
+      "detail": "{\"occ\":{\"ready\":false,\"blockers\":[\"OCCUPANCY_ADDED\"],\"diffs\":[\"OCCUPANCY_ADDED\"],\"status\":\"ready\"},\"occCommit\":{\"ok\":false,\"code\":\"READY_BLOCKED\",\"blockers\":[{\"code\":\"OCCUPANCY_ADDED\",\"message\":\"事实已变化：窗口新增占用 p-drift-new（2026-11-25 30 分钟），旧草案未计入\"}]}}"
+    },
+    {
+      "item": "B1C-09",
+      "name": "完成关联行动后 get 检出 ACTION_DONE（具体码非仅计数）、ready 提交 READY_BLOCKED，状态不被强改",
+      "pass": true,
+      "detail": "{\"ready\":false,\"blockers\":[\"OCCUPANCY_ADDED\",\"ACTION_DONE\"],\"fresh\":false,\"diffs\":[\"OCCUPANCY_ADDED\",\"ACTION_DONE\"],\"commitCode\":\"READY_BLOCKED\",\"statusAfter\":\"generating\"}"
+    },
+    {
+      "item": "B1C-09",
+      "name": "截图 09-fact-drift.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"OCCUPANCY_ADDED\",\"ACTION_DONE\"]}"
+    },
+    {
+      "item": "B1C-10",
+      "name": "受控时钟23:59→00:01：旧窗口草案 WINDOW_STALE 阻断，不能直接就绪（须按新today重排）",
+      "pass": true,
+      "detail": "{\"ready\":false,\"blockers\":[\"WINDOW_STALE\",\"GAP_UNCONFIRMED\"],\"status\":\"editing\"}"
+    },
+    {
+      "item": "B1C-10",
+      "name": "北京日期由注入时刻显式计算，不随宿主时区漂移（16:00Z→北京11-25）",
+      "pass": true,
+      "detail": "{\"beijing\":\"2026-11-25\",\"hostTZ\":\"Asia/Shanghai\"}"
+    },
+    {
+      "item": "B1C-10",
+      "name": "截图 11-tz-shanghai.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"Asia/Shanghai\",\"北京日期 2026-11-25\",\"当地日期 2026-11-25\",\"已排合计 133 分\"]}"
+    },
+    {
+      "item": "B1C-10",
+      "name": "截图 12-tz-los-angeles.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"America/Los_Angeles\",\"北京日期 2026-11-25\",\"当地日期 2026-11-24\",\"已排合计 133 分\"]}"
+    },
+    {
+      "item": "B1C-10",
+      "name": "双独立上下文真实时区注入：实际解析时区分别为 Asia/Shanghai 与 America/Los_Angeles",
+      "pass": true,
+      "detail": "{\"sh\":\"Asia/Shanghai\",\"la\":\"America/Los_Angeles\"}"
+    },
+    {
+      "item": "B1C-10",
+      "name": "同一输入时刻(16:00Z)双时区对照：北京日期均11-25、当地日期不同（11-25 vs 11-24），同夹具排程语义逐段/逐日一致",
+      "pass": true,
+      "detail": "{\"sh\":{\"total\":133,\"segments\":[[\"w-course#1\",\"2026-11-24\",51],[\"w-course#2\",\"2026-11-25\",31],[\"w-course#3\",\"2026-11-27\",51]]},\"la\":{\"total\":133,\"segments\":[[\"w-course#1\",\"2026-11-24\",51],[\"w-course#2\",\"2026-11-25\",31],[\"w-course#3\",\"2026-11-27\",51]]}}"
+    },
+    {
+      "item": "B1C-11",
+      "name": "两标签同读；A页修改bump；B页陈旧基线确认/放弃/修改全CONFLICT",
+      "pass": true,
+      "detail": "{\"b0\":{\"ok\":true,\"rev\":2},\"a1\":{\"ok\":true,\"rev\":3},\"b1\":{\"confirmCode\":\"CONFLICT\",\"discardCode\":\"CONFLICT\",\"editCode\":\"CONFLICT\"}}"
+    },
+    {
+      "item": "B1C-11",
+      "name": "B页重读最新后放弃成功（真实共享IDB）",
+      "pass": true,
+      "detail": "{\"freshRev\":3,\"ok\":true,\"status\":\"discarded\"}"
+    },
+    {
+      "item": "B1C-11",
+      "name": "在途 ready 提交于真实重摘要异步点暂停后切空间：提交被拒绝（NOT_FOUND/WORKSPACE_CHANGED），不静默写入任一空间",
+      "pass": true,
+      "detail": "{\"commit\":{\"ok\":false,\"code\":\"NOT_FOUND\",\"workspace_id\":\"ws-1c-sw-a\"},\"digestCalls\":1,\"afterA\":{\"rev\":2,\"status\":\"generating\"}}"
+    },
+    {
+      "item": "B1C-11",
+      "name": "切空间后两空间完整快照逐字段不变（A草案仍 generating 同 revision，B无助手记录，无串写）",
+      "pass": true,
+      "detail": "{\"afterA\":{\"rev\":2,\"status\":\"generating\"},\"draftsA\":1,\"draftsB\":0}"
+    },
+    {
+      "item": "B1C-12",
+      "name": "离线硬刷新后读取一致+本地编辑保存成功（缓存回放，非首次离线打开）",
+      "pass": true,
+      "detail": "{\"before\":{\"ok\":true,\"bumped\":true,\"revision\":3},\"off\":{\"readRev\":3,\"had\":true,\"editOk\":true,\"saved\":true}}"
+    },
+    {
+      "item": "B1C-12",
+      "name": "离线全程零模型/后端请求",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1C-13",
+      "name": "注入 assistant_drafts 写失败→新空间六store+目录零半残留、原空间不变",
+      "pass": true,
+      "detail": "{\"failCode\":\"RESTORE_WRITE_FAILED\",\"residue\":{\"sources\":0,\"docs\":0,\"focus_runtime\":0,\"assistant_threads\":0,\"assistant_drafts\":0,\"assistant_ops\":0,\"workspaces\":0}}"
+    },
+    {
+      "item": "B1C-13",
+      "name": "移除故障同意图重试成功+实读核对通过；再次重试幂等不重复创建",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1C-15",
+      "name": "未知估时不当0：unknown_items保留、全案无分段、complete=false、ESTIMATE_UNKNOWN+GAP_UNCONFIRMED阻断ready",
+      "pass": true,
+      "detail": "{\"ok\":true,\"draftId\":\"al-2\",\"editOk\":true,\"editRev\":3,\"unknown\":[\"w-unk\"],\"complete\":false,\"ready\":false,\"blockers\":[\"ESTIMATE_UNKNOWN\",\"GAP_UNCONFIRMED\",\"GAP_UNCONFIRMED\"],\"segmentsTotal\":0,\"dep\":{\"work_item_key\":\"w-dep\",\"remaining_minutes\":60,\"reason\":\"dependency_blocked\"},\"big\":{\"work_item_key\":\"w-big\",\"remaining_minutes\":200,\"reason\":\"not_splittable\"}}"
+    },
+    {
+      "item": "B1C-15",
+      "name": "依赖缺口：w-dep 依赖未排 w-unk → dependency_blocked 保留剩余60；不可拆：w-big 200分>单日可用102 → not_splittable 保留剩余200",
+      "pass": true,
+      "detail": "{\"dep\":{\"work_item_key\":\"w-dep\",\"remaining_minutes\":60,\"reason\":\"dependency_blocked\"},\"big\":{\"work_item_key\":\"w-big\",\"remaining_minutes\":200,\"reason\":\"not_splittable\"}}"
+    },
+    {
+      "item": "B1C-15",
+      "name": "硬刷新后读回：依赖阻断/不可拆/未知估时与继续编辑逐项一致（真实保存非内存态）",
+      "pass": true,
+      "detail": "{\"ok\":true,\"rev\":3,\"unknown\":[\"w-unk\"],\"dep\":{\"work_item_key\":\"w-dep\",\"remaining_minutes\":60,\"reason\":\"dependency_blocked\"},\"big\":{\"work_item_key\":\"w-big\",\"remaining_minutes\":200,\"reason\":\"not_splittable\"},\"assumptionSaved\":true,\"blockers\":[\"ESTIMATE_UNKNOWN\",\"GAP_UNCONFIRMED\",\"GAP_UNCONFIRMED\"]}"
+    },
+    {
+      "item": "B1C-08",
+      "name": "既有+草案同名key不串绑：草案截止11-28/既有截止11-27分别采用，三步闭环后就绪",
+      "pass": true,
+      "detail": "{\"confOk\":true,\"reschedOk\":true,\"draftDeadline\":\"2026-11-28\",\"existingDeadline\":\"2026-11-27\",\"readyOk\":true,\"readyBlockers\":[]}"
+    }
+  ]
+}

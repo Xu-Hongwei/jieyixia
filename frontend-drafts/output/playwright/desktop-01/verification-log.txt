@@ -1,0 +1,54 @@
+### Result
+{"layoutChecks":9,"layouts":[{"view":"inbox","width":360,"scroll":360},{"view":"today","width":360,"scroll":360},{"view":"focus","width":360,"scroll":360},{"view":"inbox","width":768,"scroll":768},{"view":"today","width":768,"scroll":768},{"view":"focus","width":768,"scroll":768},{"view":"inbox","width":1440,"scroll":1440},{"view":"today","width":1440,"scroll":1440},{"view":"focus","width":1440,"scroll":1440}],"failures":[],"errors":[],"actions":["Next focuses without confirming; three confirmations preserve focus; revoke restores gate; citation focuses exact source.","Create → Today unplanned task → toggle plan → Focus → start/pause timer → leave/return preserves draft and time.","Open source folder → empty search → switch sources → keyboard move/reset → reject empty capture → long text and local image remain unprocessed.","Mobile top progress jumps to visible submit button without confirmation; reduced-motion drawer uses no animation; refresh clears temporary state."],"scope":"DESK-01; local prototype only; no performance or backend claim"}
+### Ran Playwright code
+```js
+await (async(page)=>{
+ const failures=[],errors=[],layouts=[],actions=[];page.on('pageerror',e=>errors.push(e.message));
+ const check=(ok,message)=>{if(!ok)failures.push(message);};
+ const settle=()=>page.evaluate(async()=>{await document.fonts.ready;await Promise.all(document.getAnimations().filter(a=>a.effect.getTiming().iterations!==Infinity).map(a=>a.finished.catch(()=>{})));});
+ for(const width of [360,768,1440]){
+  await page.setViewportSize({width,height:1000});
+  await page.goto('http://127.0.0.1:5188/desk.html');
+  for(const view of ['inbox','today','focus']){
+   await page.locator('.r3-nav[data-view='+view+']').click();await settle();
+   const data=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth}));layouts.push({view,...data});check(data.scroll<=width+1,`${width}/${view}: overflow`);
+   if(width===1440)await page.screenshot({path:`output/playwright/desktop-01/desktop${view==='inbox'?'':'-'+view}.png`});
+   if(view==='inbox'){
+    await page.screenshot({path:`output/playwright/desktop-01/after-${width}.png`,fullPage:true});
+    check(await page.locator('.desk-action').evaluate(e=>e.getBoundingClientRect().bottom<=document.querySelector('.desk-bottom').getBoundingClientRect().top),'Action overlaps bottom / '+width);
+   }
+  }
+ }
+ await page.setViewportSize({width:1440,height:1000});await page.goto('http://127.0.0.1:5188/desk.html');await settle();
+ check(await page.locator('body').evaluate(e=>e.classList.contains('collage-maintained')),'Direct entry failed');
+ const build=page.locator('[data-action=create-task]');check(await build.isDisabled(),'Initial gate');
+ await page.locator('.desk-next').click();check(await page.evaluate(()=>document.activeElement.dataset.confirm)==='requirements','Next does not focus requirement');check(await page.locator('[data-confirm=requirements]').getAttribute('aria-pressed')==='false','Jump confirmed field automatically');
+ for(const key of ['requirements','deadline','submit']){
+  await page.locator('[data-confirm='+key+']').click();await settle();
+  check(await page.evaluate(()=>document.activeElement.dataset.confirm)===key,'Confirmation focus lost '+key);
+  check(await page.locator('[data-confirm='+key+']').getAttribute('aria-pressed')==='true','Confirmation state '+key);
+ }
+ check(!await build.isDisabled(),'Gate remains blocked');
+ await page.locator('[data-confirm=deadline]').click();check(await build.isDisabled(),'Revoke failed');await page.locator('[data-confirm=deadline]').click();
+ await page.locator('[data-desk-source=deadline]').click();check(await page.locator('[data-quote=deadline]').evaluate(e=>e.classList.contains('active')&&document.activeElement===e),'Source citation focus/highlight failed');
+ actions.push('Next focuses without confirming; three confirmations preserve focus; revoke restores gate; citation focuses exact source.');
+ await build.click();await settle();await page.screenshot({path:'output/playwright/desktop-01/confirmed.png',fullPage:true});await page.locator('.next-step-link').click();check(await page.locator('.r3-unplanned').count()===1,'Created task missing');
+ await page.locator('[data-done="0"]').click();check(await page.locator('[data-done="0"]').getAttribute('aria-pressed')==='true','Plan toggle');
+ await page.locator('[data-start="0"]').click();await page.locator('#focus-notes').fill('核对之后，先写方法部分。');await page.locator('[data-action=timer]').click();await page.waitForFunction(()=>document.getElementById('time').textContent!=='25:00');await page.locator('[data-action=timer]').click();const clock=await page.locator('#time').textContent();await page.locator('.r3-nav[data-view=today]').click();await page.locator('.r3-nav[data-view=focus]').click();check(await page.locator('#focus-notes').inputValue()==='核对之后，先写方法部分。','Draft lost');check(await page.locator('#time').textContent()===clock,'Paused timer changed');
+ actions.push('Create → Today unplanned task → toggle plan → Focus → start/pause timer → leave/return preserves draft and time.');
+ await page.locator('.r3-nav[data-view=inbox]').click();await page.locator('[data-r3-library]').click();await page.locator('#note-search').fill('不存在的资料');check(await page.locator('.r3-source-option').count()===0&&await page.locator('.r3-empty').isVisible(),'Empty search');await page.locator('#note-search').fill('');await page.locator('[data-note="1"]').click();check(await page.locator('.desk-library-toggle strong').textContent()!=='机器学习课程报告','Switch source failed');await page.locator('[data-note="0"]').click();await page.screenshot({path:'output/playwright/desktop-01/library.png',fullPage:true});await page.locator('[data-r3-library]').click();
+ const grip=page.locator('[data-paper=source] .paper-grip');await grip.focus();await page.keyboard.press('ArrowRight');check(await page.locator('[data-paper=source]').evaluate(e=>e.style.translate.startsWith('8px')),'Keyboard move');await page.keyboard.press('Home');check(await page.locator('[data-paper=source]').evaluate(e=>e.style.translate.split(' ').every(v=>parseFloat(v)===0)),'Keyboard reset');
+ await page.locator('[data-action=add]').first().click();await page.locator('#capture-form button[type=submit]').click();check(await page.locator('#capture').evaluate(e=>e.open),'Empty capture should remain open');await page.locator('#capture-text').fill('长资料验证：'+('保留原始内容，逐条核对课程要求与日期。'.repeat(25)));await page.locator('#capture-image').setInputFiles('assets/cotton-paper.webp');await page.locator('#capture-form button[type=submit]').click();await settle();check(await page.locator('.desk-unprocessed').isVisible(),'Temporary unprocessed state');check(await page.locator('.r3-upload').evaluate(e=>e.complete&&e.naturalWidth>0),'Temporary image missing');check(await page.locator('[data-confirm]').count()===0,'Temporary content fabricated fields');await page.screenshot({path:'output/playwright/desktop-01/long-1440.png',fullPage:true});
+ await page.setViewportSize({width:360,height:1000});await settle();check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Long mobile overflow');await page.screenshot({path:'output/playwright/desktop-01/long-360.png',fullPage:true});
+ actions.push('Open source folder → empty search → switch sources → keyboard move/reset → reject empty capture → long text and local image remain unprocessed.');
+ await page.goto('http://127.0.0.1:5188/desk.html');await settle();await page.locator('.desk-mobile-progress [data-desk-go=submit]').click();await page.waitForFunction(()=>{const e=document.activeElement;const r=e.getBoundingClientRect();return e.dataset.confirm==='submit'&&r.top>80&&r.bottom<innerHeight;});check(await page.locator('[data-confirm=submit]').evaluate(e=>{const r=e.getBoundingClientRect();const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return e===hit||e.contains(hit);}),'Mobile jump target obscured');check(await page.locator('[data-confirm=submit]').getAttribute('aria-pressed')==='false','Mobile jump auto confirmed');await page.screenshot({path:'output/playwright/desktop-01/mobile-jump.png'});
+ await page.emulateMedia({reducedMotion:'reduce'});await page.reload();await page.locator('[data-r3-library]').click();check(await page.locator('.desk-library-drawer').evaluate(e=>getComputedStyle(e).animationName==='none'),'Reduced motion');await page.emulateMedia({reducedMotion:'no-preference'});
+ actions.push('Mobile top progress jumps to visible submit button without confirmation; reduced-motion drawer uses no animation; refresh clears temporary state.');
+ check(await page.locator('.r3-source-option').count()===3,'Refresh did not clear capture');
+ for(const key of ['signal','orbit','paper']){await page.goto('http://127.0.0.1:5188/app.html?concept='+key);check(await page.locator('.collage-maintained').count()===0,'Collage styles enabled on '+key);check(await page.locator('#r3-view').count()===1,'Reference renderer missing '+key);}
+ await page.setViewportSize({width:1440,height:1000});await page.goto('http://127.0.0.1:5188/desk.html');await settle();await page.evaluate(()=>document.documentElement.style.filter='grayscale(1)');await page.screenshot({path:'output/playwright/desktop-01/grayscale-1440.png',fullPage:true});await page.evaluate(()=>document.documentElement.style.filter='');
+ return {layoutChecks:layouts.length,layouts,failures,errors,actions,scope:'DESK-01; local prototype only; no performance or backend claim'};
+}
+
+)(page);
+```

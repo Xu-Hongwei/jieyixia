@@ -1,0 +1,31 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-5b1b-r2-2026-11-24/review.test.js > remaining deadline choice: explicit no-deadline accepted by schedule but rejected by ready
+DEFECT explicit no-deadline: [
+  {
+    code: 'CONFIRMATION_VALUE_STALE',
+    message: 'update t-1.deadline 确认值与当前候选不一致'
+  }
+]
+
+ ✓ ../output/review-5b1b-r2-2026-11-24/review.test.js > R5 fixed: new requirements invalidate old computation and block ready 220ms
+ ✓ ../output/review-5b1b-r2-2026-11-24/review.test.js > R6 fixed: proposed date is not mistaken for external drift 30ms
+ ✓ ../output/review-5b1b-r2-2026-11-24/review.test.js > R7 fixed: text fingerprint uses UTF8 and changes invalidate ready 26ms
+ ✓ ../output/review-5b1b-r2-2026-11-24/review.test.js > remaining deadline choice: explicit no-deadline accepted by schedule but rejected by ready 26ms
+stdout | ../output/review-5b1b-r2-2026-11-24/review.test.js > remaining R7 race: same-size image replacement after hash allows stale ready
+DEFECT hash/commit race: setStatus succeeded, immediate get blocks [
+  {
+    kind: 'source',
+    code: 'SOURCE_CONTENT_CHANGED',
+    message: '证据资料 s-1 原文已变化，旧草案证据过期'
+  }
+]
+
+ ✓ ../output/review-5b1b-r2-2026-11-24/review.test.js > remaining R7 race: same-size image replacement after hash allows stale ready 26ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  19:26:55
+   Duration  1.25s (transform 90ms, setup 0ms, collect 70ms, tests 330ms, environment 0ms, prepare 94ms)
+

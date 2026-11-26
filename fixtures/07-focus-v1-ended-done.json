@@ -1,0 +1,96 @@
+{
+  "id": "07-focus-v1-ended-done",
+  "title": "v1 已结束会话（行动完成）+ 计划快捷引用",
+  "kind": "workspace",
+  "is_demo": true,
+  "depends_on": [],
+  "acceptance": [
+    "3B 计划 §8：ended_at 与 outcome 成对；结束后 running=false 且锚点为空",
+    "3B 计划 §4：行动完成是结束表单的显式选择，同事务清 current_action_id，任务不自动完成",
+    "3B 计划 §8：plan_item.focus_session_id 只是最近一次已结束会话的快捷引用",
+    "3B-0 复审 C1：快捷引用必须双向闭合——focus.plan_item_id 反指本条目，且同工作区、同任务"
+  ],
+  "source": null,
+  "analyze_request": null,
+  "expected_analysis": null,
+  "confirmed_note": null,
+  "matter": null,
+  "task": {
+    "id": "task-v1e",
+    "workspace_id": "demo-focus-v1e",
+    "title": "写课程报告初稿",
+    "description": "按提纲完成初稿各节。",
+    "matter_id": null,
+    "note_ids": [],
+    "deadline": {
+      "value": null,
+      "precision": "none",
+      "source": "manual",
+      "from_note_id": null,
+      "confirmed_at": null
+    },
+    "status": "doing",
+    "completion_criteria": null,
+    "current_action_id": null,
+    "created_at": "2026-11-18T09:00:00+08:00",
+    "updated_at": "2026-11-19T14:32:00+08:00",
+    "is_demo": true
+  },
+  "action": {
+    "id": "action-v1e",
+    "workspace_id": "demo-focus-v1e",
+    "task_id": "task-v1e",
+    "text": "写引言一节",
+    "minutes": 30,
+    "basis": "user",
+    "done": true,
+    "created_at": "2026-11-18T09:10:00+08:00"
+  },
+  "focus_session": {
+    "id": "focus-v1e",
+    "workspace_id": "demo-focus-v1e",
+    "task_id": "task-v1e",
+    "action_id": "action-v1e",
+    "plan_item_id": "plan-v1e",
+    "started_at": "2026-11-19T14:00:00+08:00",
+    "accumulated_ms": 1800000,
+    "running": false,
+    "draft_md": "## 成果\n引言初稿完成，约 600 字。\n\n## 下次继续\n从第 2 节数据集描述开始。",
+    "outcome": "done",
+    "blocker": null,
+    "ended_at": "2026-11-19T14:32:00+08:00",
+    "is_demo": true,
+    "record_version": 1,
+    "timer_anchor_at": null,
+    "task_snapshot": {
+      "title": "写课程报告初稿",
+      "matter_name": null,
+      "deadline_value": null,
+      "deadline_precision": "none",
+      "captured_at": "2026-11-19T14:00:00+08:00"
+    },
+    "action_snapshot": {
+      "text": "写引言一节",
+      "minutes": 30,
+      "captured_at": "2026-11-19T14:00:00+08:00"
+    },
+    "task_ref_state": "active",
+    "action_ref_state": "active"
+  },
+  "plan_items": [
+    {
+      "id": "plan-v1e",
+      "workspace_id": "demo-focus-v1e",
+      "task_id": "task-v1e",
+      "date": "2026-11-19",
+      "planned_minutes": 30,
+      "action_text": "写引言一节",
+      "state": "done",
+      "actual_minutes": 30,
+      "focus_session_id": "focus-v1e",
+      "order": 0,
+      "task_ref_state": "active"
+    }
+  ],
+  "change_proposal": null
+}

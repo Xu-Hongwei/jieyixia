@@ -1,0 +1,148 @@
+{
+  "result": [
+    {
+      "case": "stale_draft_service",
+      "newer": {
+        "ok": true,
+        "code": null,
+        "workspace_id": "personal",
+        "session_id": "186ff8d2-8749-4db9-84fc-3d984c580ca1",
+        "request_id": "newer",
+        "revision": 2,
+        "issued_at_ms": 1795140000000,
+        "session": {
+          "id": "186ff8d2-8749-4db9-84fc-3d984c580ca1",
+          "kind": "focus_session",
+          "workspace_id": "personal",
+          "task_id": "t",
+          "action_id": "a",
+          "plan_item_id": null,
+          "started_at": "2026-11-20T02:00:00.000Z",
+          "accumulated_ms": 0,
+          "running": true,
+          "draft_md": "第二版：应保留的新成果",
+          "outcome": null,
+          "blocker": null,
+          "ended_at": null,
+          "is_demo": false,
+          "record_version": 1,
+          "timer_anchor_at": "2026-11-20T02:00:00.000Z",
+          "task_snapshot": {
+            "title": "审查任务",
+            "matter_name": null,
+            "deadline_value": null,
+            "deadline_precision": "none",
+            "captured_at": "2026-11-20T02:00:00.000Z"
+          },
+          "action_snapshot": {
+            "text": "审查行动",
+            "minutes": 30,
+            "captured_at": "2026-11-20T02:00:00.000Z"
+          },
+          "task_ref_state": "active",
+          "action_ref_state": "active"
+        },
+        "draft_seq": 2
+      },
+      "older": {
+        "ok": false,
+        "code": "STALE_REVISION",
+        "message": "编辑基于的修订已过期，不覆盖新正文",
+        "workspace_id": "personal",
+        "session_id": "186ff8d2-8749-4db9-84fc-3d984c580ca1",
+        "request_id": "older-late",
+        "currentSeq": 2,
+        "currentRevision": 2
+      },
+      "persisted": "第二版：应保留的新成果"
+    },
+    {
+      "case": "expired_retry_without_issued_at",
+      "first": "9aa04720-a766-4ceb-840c-d69db87ef7b6",
+      "intermediate": "e833ff5f-b461-4182-ab1f-2454afd043ec",
+      "again": {
+        "ok": false,
+        "code": "STALE_REQUEST",
+        "message": "请求已超出重试窗口（台账已清理），请重新发起",
+        "workspace_id": "personal",
+        "session_id": null,
+        "request_id": "original-begin"
+      },
+      "again2": {
+        "ok": false,
+        "code": "STALE_REQUEST",
+        "message": "请求已超出重试窗口（台账已清理），请重新发起",
+        "workspace_id": "personal",
+        "session_id": null,
+        "request_id": "original-begin"
+      },
+      "sessions": [
+        "9aa04720-a766-4ceb-840c-d69db87ef7b6",
+        "e833ff5f-b461-4182-ab1f-2454afd043ec"
+      ]
+    },
+    {
+      "case": "expired_owner_write",
+      "result": {
+        "ok": false,
+        "code": "OWNER_CONFLICT",
+        "message": "会话租约已过期，请先接管并恢复确认后再写入",
+        "workspace_id": "personal",
+        "session_id": "560b33dc-19c1-4015-a7c5-929dfe90c264",
+        "request_id": "late-checkpoint",
+        "holder": {
+          "owner_id": "review-owner",
+          "epoch": 1
+        },
+        "leaseExpired": true,
+        "lease_expires_at": 1795140030000
+      },
+      "runtime": {
+        "id": "sess:560b33dc-19c1-4015-a7c5-929dfe90c264",
+        "kind": "session",
+        "session_id": "560b33dc-19c1-4015-a7c5-929dfe90c264",
+        "workspace_id": "personal",
+        "owner_id": "review-owner",
+        "epoch": 1,
+        "lease_expires_at": 1795140030000,
+        "revision": 1,
+        "draft_seq": 0,
+        "last_checkpoint_at": 1795140000000,
+        "recovery": null,
+        "ended": false,
+        "updated_at": 1795140000000
+      }
+    },
+    {
+      "case": "legacy_running_other_workspace",
+      "result": {
+        "ok": false,
+        "code": "LEGACY_RECOVERY_REQUIRED",
+        "message": "其它工作区存在旧版运行会话，请先显式结束",
+        "workspace_id": "personal",
+        "session_id": null,
+        "request_id": "new-space-begin",
+        "session": {
+          "id": "legacy-running",
+          "kind": "focus_session",
+          "workspace_id": "demo",
+          "task_id": "legacy-t",
+          "action_id": "legacy-a",
+          "started_at": "2026-11-20T02:00:00.000Z",
+          "accumulated_ms": 0,
+          "running": true,
+          "draft_md": "旧空间运行成果",
+          "outcome": null,
+          "ended_at": null
+        }
+      },
+      "running": [
+        {
+          "id": "legacy-running",
+          "ws": "demo"
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

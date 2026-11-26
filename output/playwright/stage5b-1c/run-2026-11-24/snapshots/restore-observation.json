@@ -1,0 +1,20 @@
+{
+  "found": true,
+  "wsId": "ws-restore-35555f62-8f2d-44a1-bce1-4f762640774d",
+  "threads": 1,
+  "drafts": 1,
+  "status": "needs_review",
+  "baselineNull": true,
+  "confCleared": true,
+  "rev": 3,
+  "histLen": 2,
+  "proposalReadable": true,
+  "resultReadable": true,
+  "newIds": true,
+  "bizDocs": 5,
+  "srcDocs": 5,
+  "planItems": 1,
+  "srcPlanItems": 1,
+  "ops": 0,
+  "srcUnchangedDrafts": 1
+}

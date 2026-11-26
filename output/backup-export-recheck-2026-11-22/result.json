@@ -1,0 +1,20 @@
+{
+  "baseline": {
+    "exportSucceeded": true,
+    "zipBytes": 2375,
+    "validation": {
+      "ok": true,
+      "errors": []
+    }
+  },
+  "malformed": {
+    "exportSucceeded": false,
+    "code": "BACKUP_VALIDATION_FAILED",
+    "message": "备份未通过完整性校验，已禁止下载：[B] 未知字段 unapproved_field（契约 additionalProperties:false）"
+  },
+  "oversized": {
+    "exportSucceeded": false,
+    "code": "BACKUP_VALIDATION_FAILED",
+    "message": "备份未通过完整性校验，已禁止下载：[A] JSON 超过单文件上限 26214400：data/sources.json"
+  }
+}

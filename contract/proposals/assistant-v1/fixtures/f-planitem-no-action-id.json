@@ -1,0 +1,24 @@
+{
+  "id": "f-planitem-no-action-id",
+  "title": "新 PlanItem 不得携带 action_id",
+  "layer": "application",
+  "mode": "reject",
+  "target": "PreparedPlanItemCreate",
+  "acceptance": [
+    "B0-13"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "formal_id": "p",
+    "workspace_id": "ws-fixture",
+    "task_id": "t",
+    "date": "2026-11-24",
+    "planned_minutes": 30,
+    "action_text": "x",
+    "order": 1,
+    "action_id": "a-1"
+  },
+  "expected_error": "Extra inputs",
+  "expected": null,
+  "notes": ""
+}

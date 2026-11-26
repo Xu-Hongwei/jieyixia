@@ -1,0 +1,77 @@
+{
+  "correct_behavior": [
+    {
+      "case": "R1_hard_daily_budget",
+      "effective_budget": 30,
+      "allocated": 30,
+      "unscheduled": [
+        {
+          "work_item_key": "w1",
+          "remaining_minutes": 70,
+          "reason": "no_capacity"
+        }
+      ]
+    },
+    {
+      "case": "R2_same_day_datetime",
+      "reason": "needs_deadline_day_window",
+      "after_consent_segments": 0,
+      "after_consent_reason": "needs_deadline_day_window"
+    },
+    {
+      "case": "R3_outside_window_order",
+      "scheduled": [
+        "soon"
+      ],
+      "unscheduled": [
+        {
+          "work_item_key": "later",
+          "remaining_minutes": 60,
+          "reason": "deadline_window"
+        }
+      ]
+    },
+    {
+      "case": "R4_deadline_confirmation",
+      "unconfirmed_question": "q-deadline-confirm",
+      "confirmed_fact": {
+        "task_ref": {
+          "kind": "draft",
+          "key": "tn"
+        },
+        "title": "fictional report",
+        "status": "todo",
+        "deadline_value": "2026-11-24",
+        "deadline_precision": "date",
+        "overdue_consent": false
+      },
+      "confirmed_reason": "deadline_window"
+    }
+  ],
+  "negative_control": [
+    {
+      "old_assertion": "segments[0].minutes === 100",
+      "still_holds": false
+    },
+    {
+      "old_assertion": "reason === overdue_requires_consent",
+      "still_holds": false
+    },
+    {
+      "old_assertion": "consent schedules next day",
+      "still_holds": false
+    },
+    {
+      "old_assertion": "segments[0] === later",
+      "still_holds": false
+    },
+    {
+      "old_assertion": "unconfirmed ok:true + no clarification",
+      "still_holds": false
+    },
+    {
+      "old_assertion": "unconfirmed schedules 2026-11-25 complete",
+      "still_holds": false
+    }
+  ]
+}

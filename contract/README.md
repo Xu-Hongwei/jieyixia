@@ -1,6 +1,7 @@
 # 契约 v0.1
 
 > 状态：**v0.1 已冻结，待团队评审确认**。冻结的含义是「只增不改」——新增字段可以，改语义或删字段必须升版本并同步 fixture。
+> 当前版本 **0.4.0**（2026-11-20，阶段 3B-0）：FocusSession/PlanItem 历史保留与逐引用状态，分版本校验；差异见 `devlog/coordination/2026-11-20-阶段3B-0契约0.4.0兼容方案.md`。
 > 唯一手写来源：[`models.py`](models.py)。`schema.json` 与 `typedefs.d.ts` 是生成物，**不要手改**。
 
 ## 生成与校验
@@ -13,7 +14,7 @@ python contract/selftest.py          # 负向自测：证明守卫真的会拒�
 
 环境：Python 3.12 + pydantic 2.10（本机已具备，无需额外安装）。
 
-`selftest.py` 覆盖 18 条负向用例，全部必须被拒绝。它存在的理由是：一个恒真的校验器等于没有校验器。改动 `models.py` 后必须重跑这两个脚本。
+`selftest.py` 覆盖 71 条负向用例（全部必须被拒绝）与 14 条正向放行用例（合法数据不得误拒，含旧 v0 记录兼容）。它存在的理由是：一个恒真的校验器等于没有校验器。改动 `models.py` 后必须重跑这两个脚本。
 
 ## 端点
 
@@ -69,7 +70,9 @@ Note.status  : pending → draft → reviewed
 
 ## 相对时间约定
 
-`AnalyzeRequest.captured_at` 是**收集时间**，必填，但**永远不是换算参照**（当天保存也不行）。可靠参照只有两种：消息自身明确绝对日期（节点 `reference_source=message_date`，`reference_at` 须等于 `message_date`），或用户在请求里指定的 `reference_at`（`reference_source=user`）。有可靠参照时模型换算并输出 `value` + `derived: true` + `status: "unresolved"`，保留 `raw` 原文与 `quote`；无可靠参照时 `value=null`，不硬算。前端同屏显示「原文『下周三』 · 系统推算 2026-11-25 · 待确认」。用户确认推算值后 `status=confirmed` 且 `origin=user`、保留 `derived`。
+`AnalyzeRequest.captured_at` 是**收集时间**，必填，但**永远不是换算参照**（当天保存也不行）。可靠参照只有两种：消息自身明确绝对日期（节点 `reference_source=message_date`，`reference_at` 须等于 `message_date`），或用户在请求里指定的 `reference_at`（`reference_source=user`）。有可靠参照时模型换算并输出 `value` + `derived: true` + `status: "unresolved"`，保留 `raw` 原文与 `quote`；无可靠参照时 `value=null`，不硬算。前端同屏显示「原文『下周三』 · 系统推算 2026-11-25 · 待确认」。用户确认推算值后 `status=confirmed`、保留 `derived`，**且不改变值来源 `origin`（仍可为 model）**；只有用户实际改值才标 `origin=user`（D4，第三轮修订）。跨年换算合法保留（12-31 的「明天」→ 次年 01-01，不再因年份不同被清空）。**统一参照约束（第四轮修订）**：上述要求覆盖所有依赖参照的输出——basis=relative、basis=inferred、以及任何 basis 下的补年（value 的年份未出现在 raw 原文中）。无可靠参照时一律 `value=null`（raw/quote 保留、derived=true），不靠相对词关键词枚举；模型把「三天后」「48小时内」标成 explicit 也会被年份检查兜住。
+
+`Field` 在 schema 中带 if/then 机器关联（第四轮）：`key=time_nodes` 时 `value` 必须是 `TimeNode[]` 或 `null`，越界即校验失败；运行时 Pydantic 与生成的 JSON Schema 双重执行同一约束。
 
 `02-grading-supplement` 就是这个样例：用户在请求里指定 `reference_at=2026-11-17`（周二），「下周三」推算为 11-25，标 derived + unresolved。
 

@@ -1,0 +1,118 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+MULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+RELOAD_CLARIFICATION {"status":"needs_clarification","gen":null,"input":{"userText":"","sourceIds":[],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer 28ms
+   → expected '原始要求：请帮我拆解报告\n\n此前的澄清问题与我的回答：\n问：需要图表…' to contain '交给张老师'
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry 9ms
+   → expected undefined to be 'clarification' // Object.is equality
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+SWITCH_DRAFT {"oldId":"58a8a2de-7004-4bb0-8f48-025a20d96cfc","pendingId":"08767694-0fd6-4d0b-8459-376853fbd78f","activeId":"08767694-0fd6-4d0b-8459-376853fbd78f","phase":"done"}
+
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+FORGED_PROVENANCE_ADOPTION {"prepare":true,"adopt":true,"deadline":{"value":"2026-11-30","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-25T12:51:55.154Z"}}
+
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation 68ms
+   → expected '08767694-0fd6-4d0b-8459-376853fbd78f' to be '58a8a2de-7004-4bb0-8f48-025a20d96cfc' // Object.is equality
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance 24ms
+   → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+AssertionError: expected '原始要求：请帮我拆解报告\n\n此前的澄清问题与我的回答：\n问：需要图表…' to contain '交给张老师'
+
+- Expected
++ Received
+
+- 交给张老师
++ 原始要求：请帮我拆解报告
++
++ 此前的澄清问题与我的回答：
++ 问：需要图表吗？
++ 答：需要三张图表
++
++ 请结合以上回答继续生成方案。
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:110:15
+    108|  const sent=api.propose.mock.calls[2][0].user_message;
+    109|  console.log('MULTI_CLARIFICATION',sent);
+    110|  expect(sent).toContain('交给张老师');
+       |               ^
+    111| });
+    112| it('REVIEW: reloading clarification must recover a continuation entry'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+AssertionError: expected undefined to be 'clarification' // Object.is equality
+
+- Expected: 
+"clarification"
+
++ Received: 
+undefined
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:118:27
+    116|  setActivePinia(createPinia());app=useAppStore();await app.init();stor…
+    117|  console.log('RELOAD_CLARIFICATION',JSON.stringify({status:store.activ…
+    118|  expect(store.gen?.phase).toBe('clarification');
+       |                           ^
+    119| });
+    120| it('REVIEW: changing active draft must invalidate late generation', as…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+AssertionError: expected '08767694-0fd6-4d0b-8459-376853fbd78f' to be '58a8a2de-7004-4bb0-8f48-025a20d96cfc' // Object.is equality
+
+Expected: "58a8a2de-7004-4bb0-8f48-025a20d96cfc"
+Received: "08767694-0fd6-4d0b-8459-376853fbd78f"
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:127:31
+    125|  await store.open(oldId);release();await p;
+    126|  console.log('SWITCH_DRAFT',JSON.stringify({oldId,pendingId,activeId:s…
+    127|  expect(store.activeDraft.id).toBe(oldId);
+       |                               ^
+    128|  const pending=(await db.allAssistantDrafts()).records.find(x=>x.id===…
+    129|  expect(pending.proposal).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:144:15
+    142|  const tasks=(await db.allDocs()).records.filter(x=>x.kind==='task');
+    143|  console.log('FORGED_PROVENANCE_ADOPTION',JSON.stringify({prepare:p.ok…
+    144|  expect(p.ok).toBe(false);
+       |               ^
+    145| });
+    146| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  20:51:54
+   Duration  1.06s (transform 140ms, setup 0ms, collect 314ms, tests 130ms, environment 0ms, prepare 52ms)
+
+JSON report written to E:/qoder/output/review-m2-2026-11-25/edge-results.json

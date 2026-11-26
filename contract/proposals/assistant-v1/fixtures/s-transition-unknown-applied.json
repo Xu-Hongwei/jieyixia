@@ -1,0 +1,21 @@
+{
+  "id": "s-transition-unknown-applied",
+  "title": "result_unknown 查到回执→applied",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-12"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "draft_transition",
+    "from": "result_unknown",
+    "to": "applied"
+  },
+  "expected_error": null,
+  "expected": {
+    "allowed": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

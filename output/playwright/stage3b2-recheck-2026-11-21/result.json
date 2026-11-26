@@ -1,0 +1,137 @@
+{
+  "checks": [
+    {
+      "name": "取消参数切换保留原会话、运行状态及输入",
+      "pass": true,
+      "detail": {
+        "url": "http://127.0.0.1:5183/#/work/8e555550-b493-4af1-a707-93165861a1eb?return=/tasks/t1"
+      }
+    },
+    {
+      "name": "保存失败取消导航且数据库未半暂停",
+      "pass": true,
+      "detail": {
+        "id": "8e555550-b493-4af1-a707-93165861a1eb",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t1",
+        "action_id": "a1",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T13:54:11.443Z",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-21T13:54:11.443Z",
+        "task_snapshot": {
+          "title": "完成简历初稿",
+          "matter_name": "求职准备",
+          "deadline_value": "2026-11-25T18:00",
+          "deadline_precision": "datetime",
+          "captured_at": "2026-11-21T13:54:11.443Z"
+        },
+        "action_snapshot": {
+          "text": "写教育背景",
+          "minutes": 25,
+          "captured_at": "2026-11-21T13:54:11.443Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      }
+    },
+    {
+      "name": "失败后编辑输入仍在",
+      "pass": true
+    },
+    {
+      "name": "确认后先保存暂停原会话再显示无效目标",
+      "pass": true,
+      "detail": {
+        "id": "8e555550-b493-4af1-a707-93165861a1eb",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t1",
+        "action_id": "a1",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T13:54:11.443Z",
+        "accumulated_ms": 181,
+        "running": false,
+        "draft_md": "失败时不能丢失的成果",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": null,
+        "task_snapshot": {
+          "title": "完成简历初稿",
+          "matter_name": "求职准备",
+          "deadline_value": "2026-11-25T18:00",
+          "deadline_precision": "datetime",
+          "captured_at": "2026-11-21T13:54:11.443Z"
+        },
+        "action_snapshot": {
+          "text": "写教育背景",
+          "minutes": 25,
+          "captured_at": "2026-11-21T13:54:11.443Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      }
+    },
+    {
+      "name": "连续参数切换不残留放行令牌",
+      "pass": true
+    },
+    {
+      "name": "第二次切换正文落库且已暂停",
+      "pass": true,
+      "detail": {
+        "id": "8e555550-b493-4af1-a707-93165861a1eb",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t1",
+        "action_id": "a1",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T13:54:11.443Z",
+        "accumulated_ms": 240,
+        "running": false,
+        "draft_md": "第二次切换也必须保存",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": null,
+        "task_snapshot": {
+          "title": "完成简历初稿",
+          "matter_name": "求职准备",
+          "deadline_value": "2026-11-25T18:00",
+          "deadline_precision": "datetime",
+          "captured_at": "2026-11-21T13:54:11.443Z"
+        },
+        "action_snapshot": {
+          "text": "写教育背景",
+          "minutes": 25,
+          "captured_at": "2026-11-21T13:54:11.443Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      }
+    },
+    {
+      "name": "真实刷新后正文恢复",
+      "pass": true
+    },
+    {
+      "name": "浏览器无运行时错误",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": []
+}

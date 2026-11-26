@@ -1,0 +1,39 @@
+{
+  "negative_cases": [
+    {
+      "case": "invalid_timer_anchor",
+      "accepted": false
+    },
+    {
+      "case": "invalid_calendar_anchor",
+      "accepted": false
+    },
+    {
+      "case": "invalid_snapshot_capture",
+      "accepted": false
+    },
+    {
+      "case": "invalid_snapshot_deadline",
+      "accepted": false
+    },
+    {
+      "case": "cross_workspace_active_focus",
+      "accepted": false,
+      "details": "[FAIL] fixture 业务不变量校验：2 处问题\n       - 06-focus-v1-running: focus 与 task 不在同一工作区\n       - 06-focus-v1-running: focus 与 action 不在同一工作区"
+    },
+    {
+      "case": "action_belongs_to_another_task",
+      "accepted": false,
+      "details": "[FAIL] fixture 业务不变量校验：2 处问题\n       - 06-focus-v1-running: focus 与 action 不在同一工作区\n       - 06-focus-v1-running: focus 的 action 不属于其 task"
+    },
+    {
+      "case": "plan_shortcut_to_unrelated_ended_focus",
+      "accepted": false,
+      "details": "[FAIL] fixture 业务不变量校验：2 处问题\n       - 07-focus-v1-ended-done: plan_item 快捷会话必须同工作区、同任务\n       - 07-focus-v1-ended-done: plan_item 快捷会话必须反向关联本条目（focus.plan_item_id）"
+    }
+  ],
+  "generation": {
+    "schema_matches_source": true,
+    "typedef_matches_source": true
+  }
+}

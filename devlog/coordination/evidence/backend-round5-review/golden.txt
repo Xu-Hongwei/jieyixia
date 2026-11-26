@@ -1,0 +1,16 @@
+QQ群宣讲会                 OK  deadline=None p=None tz=None
+专业实践                   OK  deadline=None p=None tz=None
+党课培训                   OK  deadline=None p=None tz=None
+奖学金申报                  OK  deadline=None p=None tz=None
+实验室                    OK  deadline=2026-11-17T12:00:00 p=datetime tz=False
+宿舍                     OK  deadline=2026-11-19T16:00:00 p=datetime tz=False
+差旅报销                   OK  deadline=2026-11-25T17:00:00 p=datetime tz=False
+开题报告                   OK  deadline=None p=None tz=None
+放假安排                   OK  deadline=None p=None tz=None
+竞赛通知                   OK  deadline=None p=None tz=None
+课程报告1                  OK  deadline=2026-11-13T18:00:00 p=datetime tz=False
+课程报告2                  OK  deadline=2026-11-15T18:00:00 p=datetime tz=False
+课程报告3                  OK  deadline=2026-11-12T12:00:00 p=datetime tz=False
+
+golden 回归通过 13/13
+

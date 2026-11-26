@@ -1,0 +1,42 @@
+模型级守卫：
+  [拒绝] AI 返回 confirmed 字段（规则 3）
+  [拒绝] missing 字段带 value（F02 不补造）
+  [拒绝] unresolved 既无原文也非推算（规则 7）
+  [拒绝] candidate 有原文却无 quote（规则 4）
+  [拒绝] 截止时间无出处便签（决策项 5）
+  [拒绝] date 精度却带时刻（F07 不补 23:59）
+  [拒绝] precision=none 却有值
+  [拒绝] 运行中会话已有 outcome
+  [拒绝] 卡住却没记卡点（F10）
+  [拒绝] accumulated_ms 为负
+  [拒绝] 关联专注却无实际用时（规则 12）
+  [拒绝] 计划条目排到时间槽（F13 只按天）
+  [拒绝] 无变化也生成变更候选（F06）
+  [拒绝] 变更候选无证据
+  [拒绝] 声称原文要求却无证据（F09 第 314 行）
+  [拒绝] 把未确认字段喂给行动建议（规则 3）
+  [拒绝] v0.2 自创键 presentation_date
+  [拒绝] v0.2 title 给数组（单值键）
+  [拒绝] v0.2 deadline 拼接多个截止节点
+  [拒绝] v0.2 derived 却标 candidate
+  [拒绝] derived 确认仍须非空值（D5，确认 null 绕过任务入口）
+  [拒绝] 手动截止非法日历日期（2月30）
+  [拒绝] 节点谎称保存日为参照来源（captured 不在枚举）
+  [拒绝] v0.2 candidate 无值（契约级）
+  [拒绝] v0.2 submit_to 给数组（单值键）
+跨 fixture 不变量：
+  [拒绝] 候选未确认却已改写任务截止时间（F06 / 规则 3）
+  [拒绝] 同时存在两个运行中专注会话（规则 8）
+time_nodes 机器关联（运行时 + 生成 schema 双重）：
+  [拒绝] time_nodes 的 value 不是数组
+  [拒绝] time_nodes 节点 role 非法
+  [拒绝] time_nodes 节点日历非法（2026-13-99）
+  [拒绝] time_node 非法 UTC 偏移 +99:99
+  [存在] Field if/then 机器关联
+  [拒绝] schema：time_nodes value 是字符串
+  [拒绝] schema：time_nodes 节点 role 非法
+  [拒绝] schema：time_nodes 节点 basis 非法
+  [放行] 合法节点数组 / null / 其他键不受影响
+
+[OK] 全部负向用例都被正确拒绝，守卫有效
+

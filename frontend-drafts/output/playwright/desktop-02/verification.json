@@ -1,0 +1,59 @@
+{
+  "layoutChecks": 9,
+  "layouts": [
+    {
+      "width": 360,
+      "view": "board"
+    },
+    {
+      "width": 360,
+      "view": "week"
+    },
+    {
+      "width": 360,
+      "view": "month"
+    },
+    {
+      "width": 768,
+      "view": "board"
+    },
+    {
+      "width": 768,
+      "view": "week"
+    },
+    {
+      "width": 768,
+      "view": "month"
+    },
+    {
+      "width": 1440,
+      "view": "board"
+    },
+    {
+      "width": 1440,
+      "view": "week"
+    },
+    {
+      "width": 1440,
+      "view": "month"
+    }
+  ],
+  "failures": [],
+  "errors": [],
+  "actions": [
+    "Keyboard flip → read reverse → flip back without layout shift; completion syncs across views; next/current week; reschedule changes Today while preserving deadline.",
+    "Taking a note off Today retains it in All tasks; no-deadline state remains explicit; add a long note with 25 requirements; new unscheduled task remains in calendar list.",
+    "Mobile day selection → task details; month switch shows three tasks on one day; adjacent month; reduced-motion flip; empty Today wall."
+  ],
+  "scope": "DESK-02; two pages, weekly default and monthly option; local demo data only",
+  "density_and_gallery": {
+    "failures": [],
+    "errors": [],
+    "checks": [
+      "12 tasks on the same day visible in board and weekly view",
+      "No horizontal overflow at 1440 and 360 in dense week",
+      "Gallery entry and all three preview selections load",
+      "Final browser at default weekly schedule"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.3, pytest-9.0.3, pluggy-1.5.0
+rootdir: E:\qoder\backend
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.8.0, hydra-core-1.3.5
+collected 481 items
+
+tests\test_api.py ...........................                            [  5%]
+tests\test_assistant_propose.py ........................................ [ 13%]
+..................                                                       [ 17%]
+tests\test_budget.py ..........                                          [ 19%]
+tests\test_config.py ................................................... [ 30%]
+...............                                                          [ 33%]
+tests\test_contract_focus.py ........................................... [ 42%]
+..........................                                               [ 47%]
+tests\test_guard.py .....................                                [ 52%]
+tests\test_model_adapters.py ....................                        [ 56%]
+tests\test_model_core.py ............................................... [ 66%]
+........................................                                 [ 74%]
+tests\test_model_registry.py ......................                      [ 79%]
+tests\test_packaging.py ....                                             [ 79%]
+tests\test_privacy.py ......                                             [ 81%]
+tests\test_render_prompt.py ....                                         [ 81%]
+tests\test_request_id.py ........                                        [ 83%]
+tests\test_time_rules.py ....................................            [ 91%]
+tests\test_upstream_limit.py .......                                     [ 92%]
+tests\test_validation.py ....................................            [100%]
+
+============================ 481 passed in 25.14s =============================

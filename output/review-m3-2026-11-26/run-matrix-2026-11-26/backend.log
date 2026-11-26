@@ -1,0 +1,20 @@
+INFO:     Started server process [8740]
+INFO:     Waiting for application startup.
+{"event": "startup", "provider": "fixture", "source_ids": ["src-01", "src-02", "src-03", "src-04"], "max_body_bytes": 8388608, "cors_origins": ["http://127.0.0.1:5177", "http://localhost:5177"], "auth_enabled": true, "rate_limit_per_min": 60, "max_concurrent_analyze": 4, "max_model_calls_per_day": 1000, "propose_budget_s": 120.0, "propose_max_attempts": 2, "propose_max_body_bytes": 524288}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49715 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49739 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49742 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49757 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55054 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55065 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55077 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "9192a643-2de8-4bc2-bfa1-4386ae3ace73", "thread_id": "79a7fa23-9d3a-4592-b8d3-643618ff6af7", "turn_id": "735c93a2-98ed-42ba-988a-5cc6099a1874", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 0.47}
+INFO:     127.0.0.1:55081 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63171 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63184 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63198 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64997 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53232 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53245 - "GET /api/healthz HTTP/1.1" 200 OK

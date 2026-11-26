@@ -1,0 +1,19 @@
+{
+  "id": "f-model-requirement-unknown-type",
+  "title": "白名单外约束类型",
+  "layer": "model",
+  "mode": "reject",
+  "target": "RequirementCandidate",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "key": "r1",
+    "type": "delete_all_tasks",
+    "value": true
+  },
+  "expected_error": "delete_all_tasks",
+  "expected": null,
+  "notes": ""
+}

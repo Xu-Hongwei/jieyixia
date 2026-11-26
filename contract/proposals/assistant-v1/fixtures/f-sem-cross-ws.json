@@ -1,0 +1,52 @@
+{
+  "id": "f-sem-cross-ws",
+  "title": "跨空间引用 Task",
+  "layer": "model",
+  "mode": "reject",
+  "target": "model_semantics",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "proposal": {
+      "task_proposals": [
+        {
+          "op": "link",
+          "key": "t-link",
+          "target_id": "t-1",
+          "evidence_refs": []
+        }
+      ]
+    },
+    "context": {
+      "workspace_id": "ws-fixture",
+      "tasks": [
+        {
+          "id": "t-1",
+          "workspace_id": "ws-other",
+          "title": "别的空间",
+          "status": "todo"
+        }
+      ],
+      "actions": [
+        {
+          "id": "a-1",
+          "task_id": "t-1",
+          "workspace_id": "ws-fixture",
+          "done": false
+        }
+      ],
+      "source_ids": [
+        "s-1"
+      ],
+      "note_ids": [
+        "n-1"
+      ],
+      "turn_id": "turn-1"
+    }
+  },
+  "expected_error": "跨空间",
+  "expected": null,
+  "notes": ""
+}

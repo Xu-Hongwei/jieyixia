@@ -1,0 +1,152 @@
+{
+  "id": "f-sem-multi-deadline-targets",
+  "title": "多交付截止→多个候选 Task（不拼接）",
+  "layer": "model",
+  "mode": "accept",
+  "target": "model_semantics",
+  "acceptance": [
+    "B0-01"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "proposal": {
+      "task_proposals": [
+        {
+          "op": "create",
+          "key": "t-a",
+          "title": "课程报告",
+          "deadline_candidates": [
+            {
+              "value": "2026-11-27",
+              "precision": "date",
+              "evidence_refs": [
+                {
+                  "kind": "source_excerpt",
+                  "source_id": "s-1",
+                  "excerpt": "周五提交课程报告"
+                }
+              ]
+            }
+          ],
+          "evidence_refs": [
+            {
+              "kind": "source_excerpt",
+              "source_id": "s-1",
+              "excerpt": "周五提交课程报告"
+            }
+          ]
+        },
+        {
+          "op": "create",
+          "key": "t-b",
+          "title": "实验报告",
+          "deadline_candidates": [
+            {
+              "value": "2026-11-29",
+              "precision": "date",
+              "evidence_refs": [
+                {
+                  "kind": "source_excerpt",
+                  "source_id": "s-1",
+                  "excerpt": "实验报告周日提交"
+                }
+              ]
+            }
+          ],
+          "evidence_refs": []
+        }
+      ],
+      "action_proposals": [
+        {
+          "op": "create",
+          "key": "a-a",
+          "task_ref": {
+            "kind": "draft",
+            "key": "t-a"
+          },
+          "text": "写报告",
+          "minutes": 120
+        },
+        {
+          "op": "create",
+          "key": "a-b",
+          "task_ref": {
+            "kind": "draft",
+            "key": "t-b"
+          },
+          "text": "写实验报告",
+          "minutes": 90
+        }
+      ],
+      "work_items": [
+        {
+          "key": "w-a",
+          "task_ref": {
+            "kind": "draft",
+            "key": "t-a"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-a"
+          },
+          "deliverable": "w-a 的虚构产出",
+          "remaining_minutes": 120,
+          "estimate_origin": "model",
+          "splittable": true,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        },
+        {
+          "key": "w-b",
+          "task_ref": {
+            "kind": "draft",
+            "key": "t-b"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-b"
+          },
+          "deliverable": "w-b 的虚构产出",
+          "remaining_minutes": 90,
+          "estimate_origin": "model",
+          "splittable": true,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        }
+      ]
+    },
+    "context": {
+      "workspace_id": "ws-fixture",
+      "tasks": [
+        {
+          "id": "t-1",
+          "workspace_id": "ws-fixture",
+          "title": "虚构任务",
+          "status": "todo"
+        }
+      ],
+      "actions": [
+        {
+          "id": "a-1",
+          "task_id": "t-1",
+          "workspace_id": "ws-fixture",
+          "done": false
+        }
+      ],
+      "source_ids": [
+        "s-1"
+      ],
+      "note_ids": [
+        "n-1"
+      ],
+      "turn_id": "turn-1"
+    }
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": "D09：两个真实交付截止保留为两个候选目标"
+}

@@ -1,0 +1,23 @@
+{
+  "results": [
+    {
+      "item": "dirty",
+      "name": "修改预算未重算应禁用采用",
+      "pass": true,
+      "detail": "adoptEnabled=false"
+    },
+    {
+      "item": "deadline",
+      "name": "改标题并清除截止后应保存明确无截止决定",
+      "pass": true,
+      "detail": "{\"revision\":3,\"confs\":[{\"confirmation_id\":\"2f0e3f95-c7a0-4ef8-93f0-1bd26aaaa603\",\"draft_revision\":3,\"object_type\":\"task\",\"object_id_or_key\":\"rpt\",\"field_path\":\"deadline\",\"old_value\":null,\"new_value\":null,\"confirmed_at\":\"2026-11-25T08:49:02.011Z\",\"id_scope\":\"draft\"}],\"ui\":\"无截止 · 今天 2026-11-25\"}"
+    },
+    {
+      "item": "dirty-empty",
+      "name": "清空必填标题应阻断采用",
+      "pass": false,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

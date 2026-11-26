@@ -1,0 +1,24 @@
+{
+  "id": "s-restore-ready",
+  "title": "恢复后 ready→needs_review 清授权",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-15"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "restore_draft_status",
+    "original_status": "ready"
+  },
+  "expected_error": null,
+  "expected": {
+    "restored_status": "needs_review",
+    "envelope_cleared": true,
+    "baseline_cleared": true,
+    "adoption_auth_cleared": true,
+    "content_kept": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

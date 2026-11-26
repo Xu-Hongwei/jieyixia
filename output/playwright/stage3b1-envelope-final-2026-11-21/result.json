@@ -1,0 +1,195 @@
+{
+  "before": {
+    "ms": 1795288620102,
+    "original": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "c8ded4ce-7a49-4e04-b955-9fba3f33e7a2",
+      "request_id": "d92ba88e-9302-48e9-90d8-2c8f16de0518",
+      "revision": 1,
+      "issued_at_ms": 1795226400000,
+      "session": {
+        "id": "c8ded4ce-7a49-4e04-b955-9fba3f33e7a2",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T02:00:00.000Z",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-21T02:00:00.000Z",
+        "task_snapshot": {
+          "title": "隔离审查任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-21T02:00:00.000Z"
+        },
+        "action_snapshot": {
+          "text": "隔离审查行动",
+          "minutes": 30,
+          "captured_at": "2026-11-21T02:00:00.000Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "draft_seq": 0,
+      "task": {
+        "id": "t",
+        "kind": "task",
+        "workspace_id": "personal",
+        "title": "隔离审查任务",
+        "status": "doing",
+        "note_ids": [],
+        "deadline": {
+          "value": null,
+          "precision": "none"
+        },
+        "created_at": "2026-11-21T02:00:00.000Z",
+        "updated_at": "2026-11-21T02:00:00.000Z",
+        "current_action_id": "a"
+      }
+    },
+    "tombstones": 200,
+    "originalTombstonePresent": false,
+    "explicit": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "请求超出重试窗口，请重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "d92ba88e-9302-48e9-90d8-2c8f16de0518",
+      "issued_at_ms": 1795226400000
+    },
+    "bare": {
+      "ok": false,
+      "code": "REQUEST_ENVELOPE_REQUIRED",
+      "message": "无法验证该 requestId 的签发信息，请复用原信封重试或重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "d92ba88e-9302-48e9-90d8-2c8f16de0518",
+      "issued_at_ms": null
+    },
+    "sameStore": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "请求超出重试窗口，请重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "d92ba88e-9302-48e9-90d8-2c8f16de0518",
+      "issued_at_ms": 1795226400000
+    },
+    "count": 103
+  },
+  "after": {
+    "rawBare": {
+      "ok": false,
+      "code": "REQUEST_ENVELOPE_REQUIRED",
+      "message": "无法验证该 requestId 的签发信息，请复用原信封重试或重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "d92ba88e-9302-48e9-90d8-2c8f16de0518",
+      "issued_at_ms": null
+    },
+    "rawEnvelope": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "请求超出重试窗口，请重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "d92ba88e-9302-48e9-90d8-2c8f16de0518",
+      "issued_at_ms": 1795226400000
+    },
+    "storeRetry": {
+      "ok": false,
+      "code": "REQUEST_ENVELOPE_REQUIRED",
+      "message": "无法验证该 requestId 的签发信息，请复用原信封重试或重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "d92ba88e-9302-48e9-90d8-2c8f16de0518",
+      "issued_at_ms": null
+    },
+    "countAfterRetry": 103,
+    "ended": null,
+    "fresh": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "3e21df31-18e1-4cdb-9b40-d18186805741",
+      "request_id": "bf2ce760-a694-4d02-a740-6771d17322f2",
+      "revision": 1,
+      "issued_at_ms": 1795288620102,
+      "session": {
+        "id": "3e21df31-18e1-4cdb-9b40-d18186805741",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T19:17:00.102Z",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-21T19:17:00.102Z",
+        "task_snapshot": {
+          "title": "隔离审查任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "action_snapshot": {
+          "text": "隔离审查行动",
+          "minutes": 30,
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "draft_seq": 0,
+      "task": {
+        "id": "t",
+        "kind": "task",
+        "workspace_id": "personal",
+        "title": "隔离审查任务",
+        "status": "doing",
+        "note_ids": [],
+        "deadline": {
+          "value": null,
+          "precision": "none"
+        },
+        "created_at": "2026-11-21T02:00:00.000Z",
+        "updated_at": "2026-11-21T19:17:00.102Z",
+        "current_action_id": "a",
+        "matter_id": null
+      }
+    }
+  },
+  "binding": {
+    "result": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "requestId 台账绑定与当前操作/空间/会话不符，请重新发起",
+      "workspace_id": "personal",
+      "session_id": "3e21df31-18e1-4cdb-9b40-d18186805741",
+      "request_id": "bf2ce760-a694-4d02-a740-6771d17322f2",
+      "issued_at_ms": 1795288620102
+    },
+    "runningAfter": true,
+    "endedAt": null
+  },
+  "errors": []
+}

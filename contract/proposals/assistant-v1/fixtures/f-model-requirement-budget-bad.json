@@ -1,0 +1,19 @@
+{
+  "id": "f-model-requirement-budget-bad",
+  "title": "预算 1441 超界",
+  "layer": "model",
+  "mode": "reject",
+  "target": "RequirementCandidate",
+  "acceptance": [
+    "B0-08"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "key": "r1",
+    "type": "daily_budget",
+    "value": 1441
+  },
+  "expected_error": "0–1440",
+  "expected": null,
+  "notes": ""
+}

@@ -1,0 +1,92 @@
+{
+  "baseline": {
+    "ok": true,
+    "errors": [],
+    "notes": []
+  },
+  "legacyMissingVersion": {
+    "ok": true,
+    "errors": [],
+    "notes": []
+  },
+  "renamedMatter": {
+    "ok": true,
+    "errors": [],
+    "notes": []
+  },
+  "fullArchive": {
+    "baseline": {
+      "ok": true,
+      "errors": [],
+      "notes": []
+    },
+    "legacyMissingVersion": {
+      "ok": true,
+      "errors": [],
+      "notes": []
+    },
+    "renamedMatter": {
+      "ok": true,
+      "errors": [],
+      "notes": []
+    }
+  },
+  "negative": {
+    "v1MissingSnapshot": {
+      "ok": false,
+      "errors": [
+        {
+          "layer": "B",
+          "message": "v1 会话开始即必须有任务与行动快照",
+          "objectId": "focus-ended",
+          "path": "FocusSession.task_snapshot"
+        }
+      ],
+      "notes": []
+    },
+    "invalidMatterTime": {
+      "ok": false,
+      "errors": [
+        {
+          "layer": "B",
+          "message": "事项本地 updated_at 必须是真实 ISO 日期时间：not-a-time",
+          "objectId": "matter-1",
+          "path": "Matter.updated_at"
+        }
+      ],
+      "notes": []
+    },
+    "unknownMatterField": {
+      "ok": false,
+      "errors": [
+        {
+          "layer": "B",
+          "message": "未知字段 unapproved_field（契约 additionalProperties:false）",
+          "objectId": "matter-1",
+          "path": "Matter.unapproved_field"
+        }
+      ],
+      "notes": []
+    }
+  },
+  "roundTrip": {
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "notes": []
+    },
+    "matter": {
+      "id": "review-id-4",
+      "workspace_id": "review-target",
+      "kind": "matter",
+      "title": "改名后的合法事项",
+      "note_ids": [
+        "review-id-3"
+      ],
+      "created_at": "2026-11-20T09:15:00+08:00",
+      "is_demo": false,
+      "updated_at": "2026-11-22T13:00:00+08:00"
+    },
+    "originalLegacyStillMissingVersion": true
+  }
+}

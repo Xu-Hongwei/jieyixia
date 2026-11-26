@@ -1,0 +1,142 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+MULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+RELOAD_CLARIFICATION {"status":"needs_clarification","gen":null,"input":{"userText":"","sourceIds":[],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+SWITCH_DRAFT {"oldId":"ef53cef0-6c69-4d1e-9fbd-437107e859a8","pendingId":"466acef6-1bf2-46ef-affc-883a474e0184","activeId":"466acef6-1bf2-46ef-affc-883a474e0184","phase":"done"}
+
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer 28ms
+   → expected '原始要求：请帮我拆解报告\n\n此前的澄清问题与我的回答：\n问：需要图表…' to contain '交给张老师'
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry 9ms
+   → expected undefined to be 'clarification' // Object.is equality
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation 57ms
+   → expected '466acef6-1bf2-46ef-affc-883a474e0184' to be 'ef53cef0-6c69-4d1e-9fbd-437107e859a8' // Object.is equality
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: modifying original requirement during clarification must reject old response
+CLARIFICATION_INPUT_CHANGE {"phase":"done","error":null,"userText":"新要求改做海报"}
+
+stdout | ../output/review-m2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+FORGED_PROVENANCE_ADOPTION {"prepare":true,"adopt":true,"deadline":{"value":"2026-11-30","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-25T12:50:35.109Z"}}
+
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: modifying original requirement during clarification must reject old response 60ms
+   → expected undefined to be 'INPUT_CHANGED' // Object.is equality
+ × ../output/review-m2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance 25ms
+   → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+AssertionError: expected '原始要求：请帮我拆解报告\n\n此前的澄清问题与我的回答：\n问：需要图表…' to contain '交给张老师'
+
+- Expected
++ Received
+
+- 交给张老师
++ 原始要求：请帮我拆解报告
++
++ 此前的澄清问题与我的回答：
++ 问：需要图表吗？
++ 答：需要三张图表
++
++ 请结合以上回答继续生成方案。
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:110:15
+    108|  const sent=api.propose.mock.calls[2][0].user_message;
+    109|  console.log('MULTI_CLARIFICATION',sent);
+    110|  expect(sent).toContain('交给张老师');
+       |               ^
+    111| });
+    112| it('REVIEW: reloading clarification must recover a continuation entry'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+AssertionError: expected undefined to be 'clarification' // Object.is equality
+
+- Expected: 
+"clarification"
+
++ Received: 
+undefined
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:118:27
+    116|  setActivePinia(createPinia());app=useAppStore();await app.init();stor…
+    117|  console.log('RELOAD_CLARIFICATION',JSON.stringify({status:store.activ…
+    118|  expect(store.gen?.phase).toBe('clarification');
+       |                           ^
+    119| });
+    120| it('REVIEW: changing active draft must invalidate late generation', as…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+AssertionError: expected '466acef6-1bf2-46ef-affc-883a474e0184' to be 'ef53cef0-6c69-4d1e-9fbd-437107e859a8' // Object.is equality
+
+Expected: "ef53cef0-6c69-4d1e-9fbd-437107e859a8"
+Received: "466acef6-1bf2-46ef-affc-883a474e0184"
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:127:31
+    125|  await store.open(oldId);release();await p;
+    126|  console.log('SWITCH_DRAFT',JSON.stringify({oldId,pendingId,activeId:s…
+    127|  expect(store.activeDraft.id).toBe(oldId);
+       |                               ^
+    128|  const pending=(await db.allAssistantDrafts()).records.find(x=>x.id===…
+    129|  expect(pending.proposal).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: modifying original requirement during clarification must reject old response
+AssertionError: expected undefined to be 'INPUT_CHANGED' // Object.is equality
+
+- Expected: 
+"INPUT_CHANGED"
+
++ Received: 
+undefined
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:137:33
+    135|  store.input.userText='新要求改做海报';release();await p;
+    136|  console.log('CLARIFICATION_INPUT_CHANGE',JSON.stringify({phase:store.…
+    137|  expect(store.gen?.error?.code).toBe('INPUT_CHANGED');
+       |                                 ^
+    138| });
+    139| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  ../output/review-m2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../output/review-m2-2026-11-25/edge.test.js:153:15
+    151|  const tasks=(await db.allDocs()).records.filter(x=>x.kind==='task');
+    152|  console.log('FORGED_PROVENANCE_ADOPTION',JSON.stringify({prepare:p.ok…
+    153|  expect(p.ok).toBe(false);
+       |               ^
+    154| });
+    155| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  20:50:34
+   Duration  1.10s (transform 143ms, setup 0ms, collect 329ms, tests 180ms, environment 0ms, prepare 52ms)
+
+JSON report written to E:/qoder/output/review-m2-2026-11-25/edge-results.json

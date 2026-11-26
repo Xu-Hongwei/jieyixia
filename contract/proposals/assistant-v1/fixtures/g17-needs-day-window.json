@@ -1,0 +1,232 @@
+{
+  "id": "g17-needs-day-window",
+  "title": "反例：需核对截止当天时段",
+  "layer": "planning",
+  "mode": "accept",
+  "target": "planning_golden",
+  "acceptance": [
+    "B0-06"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "input": {
+      "algorithm_version": "daily-v1",
+      "timezone": "Asia/Shanghai",
+      "start_date": "2026-11-24",
+      "horizon_days": 7,
+      "buffer_pct": 15,
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 0
+        }
+      ],
+      "task_facts": [
+        {
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "title": "虚构目标",
+          "deadline_value": "2026-11-25T09:00:00+08:00",
+          "deadline_precision": "datetime",
+          "overdue_consent": false,
+          "status": "todo"
+        }
+      ],
+      "work_items": [
+        {
+          "key": "w1",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-w1"
+          },
+          "deliverable": "w1 的虚构产出",
+          "remaining_minutes": 50,
+          "estimate_origin": "model",
+          "splittable": true,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        }
+      ],
+      "occupancy": [
+        {
+          "plan_item_id": "p-old",
+          "task_id": "t-old",
+          "date": "2026-11-24",
+          "planned_minutes": 31,
+          "state": "planned",
+          "task_ref_state": "active"
+        }
+      ],
+      "replacement_ids": [],
+      "extra_work_acknowledged": []
+    },
+    "result": {
+      "segments": [],
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 31,
+          "allocated_minutes": 0,
+          "free_minutes": 20,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        }
+      ],
+      "unscheduled": [
+        {
+          "work_item_key": "w1",
+          "remaining_minutes": 50,
+          "reason": "needs_deadline_day_window"
+        }
+      ],
+      "unknown_items": [],
+      "excluded_items": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "code": "datetime_deadline_conservative",
+          "message": "最迟按 2026-11-24 安排；如需 11-25 上午请核对当天时段",
+          "related_key": null
+        }
+      ],
+      "complete": false
+    }
+  },
+  "expected_error": null,
+  "expected": {
+    "initial_free_by_day": [
+      20,
+      51,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "allocated_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "final_free_by_day": [
+      20,
+      51,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "overbooked_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scheduled_total": 0,
+    "unscheduled": [
+      {
+        "work_item_key": "w1",
+        "remaining_minutes": 50,
+        "reason": "needs_deadline_day_window"
+      }
+    ],
+    "unknown_count": 0,
+    "complete": false
+  },
+  "notes": "首日free20<25非尾段；截止当天有容量但需小时窗口核对"
+}

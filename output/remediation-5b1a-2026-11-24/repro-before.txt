@@ -1,0 +1,59 @@
+[
+  {
+    "case": "hard_daily_budget_ignored",
+    "requested": 30,
+    "effective": 120,
+    "allocated": 100
+  },
+  {
+    "case": "today_deadline_reported_overdue",
+    "result": [
+      {
+        "work_item_key": "w1",
+        "remaining_minutes": 30,
+        "reason": "overdue_requires_consent"
+      }
+    ],
+    "after_overdue_consent": [
+      {
+        "date": "2026-11-24",
+        "minutes": 60
+      },
+      {
+        "date": "2026-11-25",
+        "minutes": 60
+      }
+    ]
+  },
+  {
+    "case": "outside_horizon_deadline_order_lost",
+    "scheduled": [
+      "later"
+    ],
+    "unscheduled": [
+      {
+        "work_item_key": "soon",
+        "remaining_minutes": 60,
+        "reason": "deadline_window"
+      }
+    ]
+  },
+  {
+    "case": "unresolved_deadline_silently_absent",
+    "fact": {
+      "task_ref": {
+        "kind": "draft",
+        "key": "tn"
+      },
+      "title": "fictional report",
+      "status": "todo",
+      "deadline_value": null,
+      "deadline_precision": "none",
+      "overdue_consent": false
+    },
+    "clarifications": [],
+    "complete": true,
+    "scheduled_date": "2026-11-25"
+  }
+]
+Four discrepancies reproduced; no production edits/network/database access.

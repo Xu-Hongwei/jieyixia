@@ -1,0 +1,103 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - link "↖ 方案总览" [ref=e4] [cursor=pointer]:
+        - /url: index.html
+      - generic [ref=e5]:
+        - link "01 赤道印务" [ref=e6] [cursor=pointer]:
+          - /url: app.html?concept=signal
+          - text: "01"
+          - generic [ref=e7]: 赤道印务
+        - link "02 深潜终端" [ref=e8] [cursor=pointer]:
+          - /url: app.html?concept=orbit
+          - text: "02"
+          - generic [ref=e9]: 深潜终端
+        - link "03 留白手帖" [ref=e10] [cursor=pointer]:
+          - /url: app.html?concept=paper
+          - text: "03"
+          - generic [ref=e11]: 留白手帖
+        - link "04 跳岛工作室" [ref=e12] [cursor=pointer]:
+          - /url: app.html?concept=desktop
+          - text: "04"
+          - generic [ref=e13]: 跳岛工作室
+      - generic [ref=e14]: ROUND 02 · 演示数据
+    - generic [ref=e15]:
+      - banner [ref=e16]:
+        - link "截下来 ↘" [ref=e17] [cursor=pointer]:
+          - /url: index.html
+          - text: 截下来
+          - generic [ref=e18]: ↘
+        - paragraph [ref=e19]: 把零散的信息，变成正在发生的行动。
+        - navigation [ref=e20]:
+          - button "01 今天" [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: "01"
+            - generic [ref=e23]: 今天
+          - button "02 收集箱" [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: "02"
+            - generic [ref=e26]: 收集箱
+          - button "03 专注" [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: "03"
+            - generic [ref=e29]: 专注
+        - button "收下新内容" [ref=e30] [cursor=pointer]
+      - main [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]: THE DAILY ACTION PAPER
+            - generic [ref=e38]: VOL. 018 / WEDNESDAY
+            - generic [ref=e39]: 小步推进，持续发生。
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - paragraph [ref=e42]: 今天 / NOV. 18
+              - heading "先做 这一件。" [level=1] [ref=e43]: 先做这一件。
+              - generic [aria-hidden] [ref=e44]: ✳
+              - generic [ref=e45]:
+                - text: EDITOR'S PICK / 01
+                - heading "列出课程 报告提纲" [level=2] [ref=e46]: 列出课程报告提纲
+                - paragraph [ref=e47]: 打开资料，写下方法、实验、结果三个部分。先留出结构，再填充细节。
+                - button "开始这 30 分钟 ↗" [ref=e48] [cursor=pointer]:
+                  - text: 开始这 30 分钟
+                  - generic [ref=e49]: ↗
+            - generic [ref=e50]:
+              - generic [ref=e51]:
+                - heading "TODAY'S TO-DO." [level=2] [ref=e52]: TODAY'STO-DO.
+                - generic [ref=e53]:
+                  - text: 0/03
+                  - emphasis [ref=e54]: 已完成
+              - generic [ref=e55]:
+                - paragraph [ref=e56]:
+                  - text: 今日计划
+                  - generic [ref=e57]: 共 120 分钟 · 完成条目不结束整个任务
+                - generic [ref=e58]:
+                  - button "完成今日计划：列出课程报告提纲" [ref=e59] [cursor=pointer]
+                  - generic [ref=e60]:
+                    - heading "列出课程报告提纲" [level=3] [ref=e61]
+                    - paragraph [ref=e62]: 机器学习课程报告 · 11.22 截止
+                  - generic [ref=e63]: 30MIN
+                  - button "开始：列出课程报告提纲" [ref=e64] [cursor=pointer]
+                - generic [ref=e67]:
+                  - button "完成今日计划：复习条件概率与贝叶斯公式" [ref=e68] [cursor=pointer]
+                  - generic [ref=e69]:
+                    - heading "复习条件概率与贝叶斯公式" [level=3] [ref=e70]
+                    - paragraph [ref=e71]: 概率论期末复习 · 11.25 截止
+                  - generic [ref=e72]: 45MIN
+                  - button "开始：复习条件概率与贝叶斯公式" [ref=e73] [cursor=pointer]
+                - generic [ref=e76]:
+                  - button "完成今日计划：整理第一组实验数据" [ref=e77] [cursor=pointer]
+                  - generic [ref=e78]:
+                    - heading "整理第一组实验数据" [level=3] [ref=e79]
+                    - paragraph [ref=e80]: 研究实验 · 无截止时间
+                  - generic [ref=e81]: 45MIN
+                  - button "开始：整理第一组实验数据" [ref=e82] [cursor=pointer]
+              - button "INCOMING / 01 有一份课程通知，等你核对。 原文、要求、截止日期，都在这里。 ↗" [ref=e85] [cursor=pointer]:
+                - generic [ref=e86]: INCOMING / 01
+                - generic [ref=e87]:
+                  - heading "有一份课程通知，等你核对。" [level=3] [ref=e88]
+                  - paragraph [ref=e89]: 原文、要求、截止日期，都在这里。
+                - generic [ref=e90]: ↗
+              - generic [ref=e91]:
+                - generic [ref=e92]: LESS SAVING.MORE DOING.
+                - paragraph [ref=e93]: 收下来的信息，要有下一步。
+          - generic [ref=e94]:
+            - generic [ref=e95]: 示例工作空间 · 2026 / 11 / 18
+            - generic [ref=e96]: 临时演示，刷新重置 · PUNCH PRESS
+  - status

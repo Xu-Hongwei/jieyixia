@@ -1,0 +1,67 @@
+{
+  "layoutChecks": 9,
+  "layouts": [
+    {
+      "width": 360,
+      "view": "board"
+    },
+    {
+      "width": 360,
+      "view": "week"
+    },
+    {
+      "width": 360,
+      "view": "month"
+    },
+    {
+      "width": 768,
+      "view": "board"
+    },
+    {
+      "width": 768,
+      "view": "week"
+    },
+    {
+      "width": 768,
+      "view": "month"
+    },
+    {
+      "width": 1440,
+      "view": "board"
+    },
+    {
+      "width": 1440,
+      "view": "week"
+    },
+    {
+      "width": 1440,
+      "view": "month"
+    }
+  ],
+  "failures": [],
+  "errors": [],
+  "actions": [
+    "Keyboard flip → read reverse → flip back without layout shift; completion syncs across views; next/current week; reschedule changes Today while preserving deadline.",
+    "Taking a note off Today retains it in All tasks; no-deadline state remains explicit; add a long note with 25 requirements; new unscheduled task remains in calendar list.",
+    "Mobile day selection → task details; month switch shows three tasks on one day; adjacent month; reduced-motion flip; empty Today wall."
+  ],
+  "scope": "DESK-03; two pages, weekly default and monthly option; local demo data only",
+  "density_and_continuity": {
+    "failures": [],
+    "errors": [],
+    "measurements": [
+      {
+        "width": 1440,
+        "columnWidth": 173,
+        "height": 450,
+        "scroll": 1654,
+        "overflow": "auto"
+      }
+    ],
+    "actions": [
+      "Open collection → find unscheduled task → close returns focus; create nine additional Today tasks → keyboard End in day column → complete last task → Escape retains position and focus; other days stay put.",
+      "Tablet keeps independent day scrolling; mobile uses natural scrolling and can reach twelfth task; mobile collection closes back to its entry."
+    ],
+    "scope": "DESK-03 density, collection, focus continuity and grayscale screenshots; no performance assertion"
+  }
+}

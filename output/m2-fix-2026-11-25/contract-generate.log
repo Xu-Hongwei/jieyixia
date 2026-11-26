@@ -1,0 +1,3 @@
+[OK] 已生成 schema.json（127 个定义）、typedefs.d.ts、limits.json
+[OK] 10 份 fixture 通过结构与业务不变量校验
+     sources=4 notes=4 tasks=5 actions=4 focus=6 plan_items=3 proposals=1 running=1

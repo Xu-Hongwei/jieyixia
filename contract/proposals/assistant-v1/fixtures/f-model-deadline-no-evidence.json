@@ -1,0 +1,18 @@
+{
+  "id": "f-model-deadline-no-evidence",
+  "title": "有值截止候选无证据",
+  "layer": "model",
+  "mode": "reject",
+  "target": "DeadlineCandidate",
+  "acceptance": [
+    "B0-04"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "value": "2026-11-27",
+    "precision": "date"
+  },
+  "expected_error": "证据出处",
+  "expected": null,
+  "notes": ""
+}

@@ -1,0 +1,25 @@
+{
+  "id": "f-confirm-nontask-with-scope",
+  "title": "非 task 型确认携带 id_scope",
+  "layer": "model",
+  "mode": "reject",
+  "target": "UserConfirmation",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "confirmation_id": "cf-1",
+    "draft_revision": 1,
+    "object_type": "note_field",
+    "object_id_or_key": "n-1",
+    "id_scope": "draft",
+    "field_path": "title",
+    "old_value": null,
+    "new_value": null,
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": "id_scope",
+  "expected": null,
+  "notes": ""
+}

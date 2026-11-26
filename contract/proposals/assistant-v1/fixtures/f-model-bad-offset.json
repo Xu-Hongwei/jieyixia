@@ -1,0 +1,25 @@
+{
+  "id": "f-model-bad-offset",
+  "title": "非法时区偏移 +08:75",
+  "layer": "model",
+  "mode": "reject",
+  "target": "DeadlineCandidate",
+  "acceptance": [
+    "B0-06"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "value": "2026-11-27T09:00:00+08:75",
+    "precision": "datetime",
+    "evidence_refs": [
+      {
+        "kind": "source_excerpt",
+        "source_id": "s-1",
+        "excerpt": "周五提交课程报告"
+      }
+    ]
+  },
+  "expected_error": "非法时区偏移",
+  "expected": null,
+  "notes": ""
+}

@@ -1,0 +1,31 @@
+{
+  "id": "f-confirm-deadline-formal-ok",
+  "title": "task/deadline 确认：formal 判别 + 旧值投影合法",
+  "layer": "model",
+  "mode": "accept",
+  "target": "UserConfirmation",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "confirmation_id": "cf-1",
+    "draft_revision": 1,
+    "object_type": "task",
+    "object_id_or_key": "t-1",
+    "id_scope": "formal",
+    "field_path": "deadline",
+    "old_value": {
+      "value": "2026-11-27",
+      "precision": "date"
+    },
+    "new_value": {
+      "value": "2026-11-26",
+      "precision": "date"
+    },
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

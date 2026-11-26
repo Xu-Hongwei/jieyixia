@@ -1,0 +1,39 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/qoder/frontend[39m
+
+[90mstdout[2m | ../output/m2-r1-struct-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: second clarification must retain first explicit answer
+[22m[39mMULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：报告交给谁？
+答：交给张老师
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+[90mstdout[2m | ../output/m2-r1-struct-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: reloading clarification must recover a continuation entry
+[22m[39mRELOAD_CLARIFICATION {"status":"needs_clarification","gen":{"phase":"clarification","requestId":null,"turnId":null,"clientSeq":1,"threadId":"b918f48e-e09e-4d81-b6d9-4efda599be4c","draftId":"acfa42c7-ebb9-4fa6-834b-6e6116ad580c","userMessage":"保留我的要求","userInput":{"original_user_request":"保留我的要求","clarifications":[]},"originalMessage":"保留我的要求","history":[],"isContinuation":true,"questions":[{"blocking_reason":"虚构：影响交付对象","options":["导师","班长"],"question":"报告交给谁？","question_id":"q1","related_requirement_key":null}],"error":null,"retained":null,"pendingAnalysis":null,"frozen":null,"progress":""},"input":{"userText":"保留我的要求","sourceIds":["4062b915-5c4f-4f4d-9ec9-fca0dc5b7beb"],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+[90mstdout[2m | ../output/m2-r1-struct-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: changing active draft must invalidate late generation
+[22m[39mSWITCH_DRAFT {"oldId":"c8666bea-06f1-49ab-b088-45275a9bcd7f","pendingId":"61d8d011-bc02-4a39-9598-4e0e9f97ef61","activeId":"c8666bea-06f1-49ab-b088-45275a9bcd7f"}
+
+[90mstdout[2m | ../output/m2-r1-struct-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: invented user deadline must not become manual provenance
+[22m[39mFORGED_PROVENANCE_ADOPTION {"prepare":false}
+
+[90mstdout[2m | ../output/m2-r1-struct-2026-11-25/edge.test.js[2m > [22m[2mREVIEW R1: assistant question rejected by user is not user deadline evidence
+[22m[39mQUESTION_AS_USER {"userMessage":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：是否把截止设为2026-11-30？\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","prepared":false}
+
+[90mstdout[2m | ../output/m2-r1-struct-2026-11-25/edge.test.js[2m > [22m[2mREVIEW R2: successful unplanned draft must restore original budget after reload
+[22m[39mSUCCESS_RELOAD {"status":"needs_review","input":{"userText":"保留预算45","sourceIds":["2e846847-4dc4-45de-99d0-0755a1e3c0d2"],"taskIds":[],"actionIds":[],"budgets":{"2026-11-25":45},"unavailable":[],"startDate":null,"excerpts":{}}}
+
+[90mstdout[2m | ../output/m2-r1-struct-2026-11-25/edge.test.js[2m > [22m[2mREVIEW R3: injected answer line inside model question must not ground user deadline
+[22m[39mINJECTED_QUESTION_LINE {"prepared":false}
+
+ [32m✓[39m ../output/m2-r1-struct-2026-11-25/edge.test.js [2m([22m[2m7 tests[22m[2m)[22m[32m 167[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 22:12:50
+[2m   Duration [22m 1.10s[2m (transform 145ms, setup 0ms, collect 318ms, tests 167ms, environment 0ms, prepare 52ms)[22m
+

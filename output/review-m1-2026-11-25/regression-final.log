@@ -1,0 +1,109 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-m1-2026-11-25/regression.test.js > REVIEW: changed envelope minutes must be rejected
+REVIEW_TAMPER {"result":{"ok":true,"outcome":"committed","receipt":{"application_id":"id-6","draft_id":"id-2","draft_revision":2,"input_signature":"246e3858d003fc39204e112450c426c6be48d7675e8586b15d356e2a01b80241","id_map":[{"draft_key":"t-new","formal_id":"id-3","object_type":"task"},{"draft_key":"a-new","formal_id":"id-4","object_type":"action"},{"draft_key":"w1#1","formal_id":"id-5","object_type":"plan_item"}],"counts":{"tasks_created":1,"tasks_updated":0,"actions_created":1,"plan_items_created":1,"source_fields_confirmed":0},"unscheduled_kept":[],"committed_at":"2026-11-24T10:00:00+08:00"},"counts":{"tasks_created":1,"tasks_updated":0,"actions_created":1,"plan_items_created":1,"source_fields_confirmed":0},"draft":{"id":"id-2","record_version":1,"workspace_id":"w1","thread_id":"id-1","revision":2,"revision_history":[{"revision":1,"proposal":{"task_proposals":[{"op":"create","key":"t-new","title":"虚构新目标","deadline_candidates":[{"value":"2026-12-01","precision":"date","origin":"model","derived":false,"basis":"explicit","evidence_refs":[{"kind":"source_excerpt","source_id":"s-1","excerpt":"虚构片段"}]}],"evidence_refs":[{"kind":"source_excerpt","source_id":"s-1","excerpt":"虚构片段"}]}],"action_proposals":[{"op":"create","key":"a-new","task_ref":{"kind":"draft","key":"t-new"},"text":"虚构步骤","minutes":60,"basis":"suggestion","evidence_refs":[]}],"work_items":[{"key":"w1","task_ref":{"kind":"draft","key":"t-new"},"action_ref":{"kind":"draft","key":"a-new"},"deliverable":"虚构产出","remaining_minutes":60,"estimate_origin":"model","splittable":true,"min_segment_minutes":25,"earliest_date":null,"depends_on":[],"priority":"normal"}],"requirement_candidates":[],"evidence_refs":[],"assumptions":[],"warnings":[]},"planning_input":null,"planning_result":null,"requirements":[],"created_at":"2026-11-24T10:00:00+08:00"}],"status":"applied","proposal":{"task_proposals":[{"op":"create","key":"t-new","title":"虚构新目标","deadline_candidates":[{"value":"2026-12-01","precision":"date","origin":"model","derived":false,"basis":"explicit","evidence_refs":[{"kind":"source_excerpt","source_id":"s-1","excerpt":"虚构片段"}]}],"evidence_refs":[{"kind":"source_excerpt","source_id":"s-1","excerpt":"虚构片段"}]}],"action_proposals":[{"op":"create","key":"a-new","task_ref":{"kind":"draft","key":"t-new"},"text":"虚构步骤","minutes":60,"basis":"suggestion","evidence_refs":[]}],"work_items":[{"key":"w1","task_ref":{"kind":"draft","key":"t-new"},"action_ref":{"kind":"draft","key":"a-new"},"deliverable":"虚构产出","remaining_minutes":60,"estimate_origin":"model","splittable":true,"min_segment_minutes":25,"earliest_date":null,"depends_on":[],"priority":"normal"}],"requirement_candidates":[],"evidence_refs":[],"assumptions":[],"warnings":[]},"planning_input":{"algorithm_version":"daily-v1","timezone":"Asia/Shanghai","today":"2026-11-24","start_date":"2026-11-24","horizon_days":7,"buffer_pct":15,"days":[{"date":"2026-11-24","budget_minutes":120},{"date":"2026-11-25","budget_minutes":120},{"date":"2026-11-26","budget_minutes":120},{"date":"2026-11-27","budget_minutes":120},{"date":"2026-11-28","budget_minutes":120},{"date":"2026-11-29","budget_minutes":120},{"date":"2026-11-30","budget_minutes":120}],"task_facts":[{"task_ref":{"kind":"draft","key":"t-new"},"title":"虚构新目标","status":"todo","deadline_value":"2026-12-01","deadline_precision":"date","overdue_consent":false}],"work_items":[{"key":"w1","task_ref":{"kind":"draft","key":"t-new"},"action_ref":{"kind":"draft","key":"a-new"},"deliverable":"虚构产出","remaining_minutes":60,"estimate_origin":"model","splittable":true,"min_segment_minutes":25,"earliest_date":null,"depends_on":[],"priority":"normal"}],"occupancy":[],"replacement_ids":[],"extra_work_acknowledged":[]},"planning_result":{"segments":[{"segment_key":"w1#1","work_item_key":"w1","task_ref":{"kind":"draft","key":"t-new"},"suggested_action_ref":{"kind":"draft","key":"a-new"},"date":"2026-11-24","minutes":60,"order":1,"action_text":"虚构产出","deliverable":"虚构产出"}],"days":[{"date":"2026-11-24","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":60,"free_minutes":42,"overbooked_minutes":0},{"date":"2026-11-25","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-26","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-27","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-28","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-29","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-30","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0}],"unscheduled":[],"unknown_items":[],"excluded_items":[],"conflicts":[],"warnings":[{"code":"unrecorded_calendar_notice","message":"容量按你提供的预算核对，未录入的会议/课程不会被自动知道","related_key":null}],"complete":true},"fact_baseline":{"captured_at":"2026-11-24T10:00:00+08:00","task_facts":[],"source_fingerprints":[{"source_id":"s-1","sha256":"039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81","bytes":3}],"note_field_baselines":[],"occupancy":[]},"assumptions":[],"user_confirmations":[{"confirmation_id":"dl-init","draft_revision":1,"object_type":"task","id_scope":"draft","object_id_or_key":"t-new","field_path":"deadline","old_value":null,"new_value":{"value":"2026-12-01","precision":"date"},"confirmed_at":"2026-11-24T10:00:00+08:00"},{"confirmation_id":"dl-cur","draft_revision":2,"object_type":"task","id_scope":"draft","object_id_or_key":"t-new","field_path":"deadline","old_value":null,"new_value":{"value":"2026-12-01","precision":"date"},"confirmed_at":"2026-11-24T10:00:00+08:00"}],"excluded_items":[],"source_refs":[],"applied_summary":{"application_id":"id-6","counts":{"tasks_created":1,"tasks_updated":0,"actions_created":1,"plan_items_created":1,"source_fields_confirmed":0},"id_map":[{"draft_key":"t-new","formal_id":"id-3","object_type":"task"},{"draft_key":"a-new","formal_id":"id-4","object_type":"action"},{"draft_key":"w1#1","formal_id":"id-5","object_type":"plan_item"}],"unscheduled_kept":[],"applied_at":"2026-11-24T10:00:00+08:00"},"created_at":"2026-11-24T10:00:00+08:00","updated_at":"2026-11-24T10:00:00+08:00"},"workspace_id":"w1"},"docs":[{"kind":"task","id":"id-3","workspace_id":"w1","title":"虚构新目标","description":"","matter_id":null,"note_ids":[],"deadline":{"value":"2026-12-01","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-24T10:00:00+08:00"},"status":"todo","completion_criteria":null,"current_action_id":null,"created_at":"2026-11-24T10:00:00+08:00","updated_at":"2026-11-24T10:00:00+08:00"},{"kind":"action","id":"id-4","workspace_id":"w1","task_id":"id-3","text":"虚构步骤","minutes":60,"basis":"suggestion","done":false,"created_at":"2026-11-24T10:00:00+08:00"},{"kind":"plan_item","id":"id-5","workspace_id":"w1","task_id":"id-3","date":"2026-11-24","planned_minutes":999,"action_text":"虚构产出","state":"planned","actual_minutes":null,"focus_session_id":null,"order":1,"task_ref_state":"active"}]}
+
+ × ../output/review-m1-2026-11-25/regression.test.js > REVIEW: changed envelope minutes must be rejected 205ms
+   → expected true to be false // Object.is equality
+stdout | ../output/review-m1-2026-11-25/regression.test.js > REVIEW: changed reused action content must invalidate preview
+REVIEW_ACTION_DRIFT {"ok":true,"outcome":"committed","receipt":{"application_id":"id-4","draft_id":"id-2","draft_revision":2,"input_signature":"fc6e13514922c6f1d760025ca92ea94724d4e131d9c3374b148309b787d5a144","id_map":[{"draft_key":"w1#1","formal_id":"id-3","object_type":"plan_item"}],"counts":{"tasks_created":0,"tasks_updated":0,"actions_created":0,"plan_items_created":1,"source_fields_confirmed":0},"unscheduled_kept":[],"committed_at":"2026-11-24T10:00:00+08:00"},"counts":{"tasks_created":0,"tasks_updated":0,"actions_created":0,"plan_items_created":1,"source_fields_confirmed":0},"draft":{"id":"id-2","record_version":1,"workspace_id":"w1","thread_id":"id-1","revision":2,"revision_history":[{"revision":1,"proposal":{"task_proposals":[],"action_proposals":[],"work_items":[{"key":"w1","task_ref":{"kind":"existing","id":"t-1"},"action_ref":{"kind":"existing","id":"a-1"},"deliverable":"w1 的虚构产出","remaining_minutes":60,"estimate_origin":"model","splittable":true,"min_segment_minutes":25,"earliest_date":null,"depends_on":[],"priority":"normal"}],"requirement_candidates":[],"evidence_refs":[{"kind":"source_excerpt","source_id":"s-1","excerpt":"虚构片段"}],"assumptions":[],"warnings":[]},"planning_input":null,"planning_result":null,"requirements":[],"created_at":"2026-11-24T10:00:00+08:00"}],"status":"applied","proposal":{"task_proposals":[],"action_proposals":[],"work_items":[{"key":"w1","task_ref":{"kind":"existing","id":"t-1"},"action_ref":{"kind":"existing","id":"a-1"},"deliverable":"w1 的虚构产出","remaining_minutes":60,"estimate_origin":"model","splittable":true,"min_segment_minutes":25,"earliest_date":null,"depends_on":[],"priority":"normal"}],"requirement_candidates":[],"evidence_refs":[{"kind":"source_excerpt","source_id":"s-1","excerpt":"虚构片段"}],"assumptions":[],"warnings":[]},"planning_input":{"algorithm_version":"daily-v1","timezone":"Asia/Shanghai","today":"2026-11-24","start_date":"2026-11-24","horizon_days":7,"buffer_pct":15,"days":[{"date":"2026-11-24","budget_minutes":120},{"date":"2026-11-25","budget_minutes":120},{"date":"2026-11-26","budget_minutes":120},{"date":"2026-11-27","budget_minutes":120},{"date":"2026-11-28","budget_minutes":120},{"date":"2026-11-29","budget_minutes":120},{"date":"2026-11-30","budget_minutes":120}],"task_facts":[{"task_ref":{"kind":"existing","id":"t-1"},"title":"虚构目标一","status":"todo","deadline_value":null,"deadline_precision":"none","overdue_consent":false}],"work_items":[{"key":"w1","task_ref":{"kind":"existing","id":"t-1"},"action_ref":{"kind":"existing","id":"a-1"},"deliverable":"w1 的虚构产出","remaining_minutes":60,"estimate_origin":"model","splittable":true,"min_segment_minutes":25,"earliest_date":null,"depends_on":[],"priority":"normal"}],"occupancy":[],"replacement_ids":[],"extra_work_acknowledged":[]},"planning_result":{"segments":[{"segment_key":"w1#1","work_item_key":"w1","task_ref":{"kind":"existing","id":"t-1"},"suggested_action_ref":{"kind":"existing","id":"a-1"},"date":"2026-11-24","minutes":60,"order":1,"action_text":"w1 的虚构产出","deliverable":"w1 的虚构产出"}],"days":[{"date":"2026-11-24","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":60,"free_minutes":42,"overbooked_minutes":0},{"date":"2026-11-25","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-26","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-27","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-28","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-29","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0},{"date":"2026-11-30","budget_minutes":120,"buffer_minutes":18,"committed_minutes":0,"allocated_minutes":0,"free_minutes":102,"overbooked_minutes":0}],"unscheduled":[],"unknown_items":[],"excluded_items":[],"conflicts":[],"warnings":[{"code":"unrecorded_calendar_notice","message":"容量按你提供的预算核对，未录入的会议/课程不会被自动知道","related_key":null}],"complete":true},"fact_baseline":{"captured_at":"2026-11-24T10:00:00+08:00","task_facts":[{"task_ref":{"kind":"existing","id":"t-1"},"title":"虚构目标一","status":"todo","deadline_value":null,"deadline_precision":"none","overdue_consent":false}],"source_fingerprints":[{"source_id":"s-1","sha256":"039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81","bytes":3}],"note_field_baselines":[],"occupancy":[]},"assumptions":[],"user_confirmations":[],"excluded_items":[],"source_refs":[],"applied_summary":{"application_id":"id-4","counts":{"tasks_created":0,"tasks_updated":0,"actions_created":0,"plan_items_created":1,"source_fields_confirmed":0},"id_map":[{"draft_key":"w1#1","formal_id":"id-3","object_type":"plan_item"}],"unscheduled_kept":[],"applied_at":"2026-11-24T10:00:00+08:00"},"created_at":"2026-11-24T10:00:00+08:00","updated_at":"2026-11-24T10:00:00+08:00"},"workspace_id":"w1"}
+
+stdout | ../output/review-m1-2026-11-25/regression.test.js > REVIEW: excluded-only new objects must not be created
+REVIEW_EXCLUDED {"tasks_created":1,"tasks_updated":0,"actions_created":1,"plan_items_created":0,"source_fields_confirmed":0}
+
+stdout | ../output/review-m1-2026-11-25/regression.test.js > REVIEW: real saved excluded draft must not create excluded task/action
+REVIEW_REAL_EXCLUDED {"ok":true,"counts":{"tasks_created":1,"tasks_updated":0,"actions_created":1,"plan_items_created":0,"source_fields_confirmed":0},"excluded":[{"work_item_key":"w1","excluded_by":"user","reason":"not wanted"}],"segments":[]}
+
+ × ../output/review-m1-2026-11-25/regression.test.js > REVIEW: changed reused action content must invalidate preview 27ms
+   → expected true to be false // Object.is equality
+ × ../output/review-m1-2026-11-25/regression.test.js > REVIEW: excluded-only new objects must not be created 23ms
+   → expected 2 to be +0 // Object.is equality
+ × ../output/review-m1-2026-11-25/regression.test.js > REVIEW: real saved excluded draft must not create excluded task/action 52ms
+   → expected [ { kind: 'task', …(12) }, …(1) ] to have a length of +0 but got 2
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../output/review-m1-2026-11-25/regression.test.js > REVIEW: changed envelope minutes must be rejected
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../output/review-m1-2026-11-25/regression.test.js:118:15
+    116|  const r=await asvc.apply(d.id,{expected:d,envelope:p.envelope});
+    117|  console.log('REVIEW_TAMPER',JSON.stringify({result:r,docs:await newDo…
+    118|  expect(r.ok).toBe(false);
+       |               ^
+    119| });
+    120| it('REVIEW: changed reused action content must invalidate preview',asy…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  ../output/review-m1-2026-11-25/regression.test.js > REVIEW: changed reused action content must invalidate preview
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../output/review-m1-2026-11-25/regression.test.js:125:69
+    123|  await db.putDoc({...a,text:'Changed after preview',minutes:999});
+    124|  const r=await asvc.apply(d.id,{expected:d,envelope:p.envelope});
+    125|  console.log('REVIEW_ACTION_DRIFT',JSON.stringify(r)); expect(r.ok).to…
+       |                                                                     ^
+    126| });
+    127| it('REVIEW: excluded-only new objects must not be created',async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  ../output/review-m1-2026-11-25/regression.test.js > REVIEW: excluded-only new objects must not be created
+AssertionError: expected 2 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ ../output/review-m1-2026-11-25/regression.test.js:135:58
+    133|  const p=buildAdoptionPlan(x,{workspaceId:ws,now:TS,newId:()=>`x-${++c…
+    134|  console.log('REVIEW_EXCLUDED',JSON.stringify(p.counts));
+    135|  expect(p.counts.tasks_created+p.counts.actions_created).toBe(0);
+       |                                                          ^
+    136| });
+    137| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  ../output/review-m1-2026-11-25/regression.test.js > REVIEW: real saved excluded draft must not create excluded task/action
+AssertionError: expected [ { kind: 'task', …(12) }, …(1) ] to have a length of +0 but got 2
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ ../output/review-m1-2026-11-25/regression.test.js:151:26
+    149|  let out=await asvc.apply(d.id,{expected:ready.draft,envelope:prep.env…
+    150|  console.log('REVIEW_REAL_EXCLUDED',JSON.stringify({ok:out.ok,counts:o…
+    151|  expect(await newDocs()).toHaveLength(0);
+       |                          ^
+    152| });
+    153| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  16:19:31
+   Duration  1.03s (transform 92ms, setup 0ms, collect 47ms, tests 307ms, environment 0ms, prepare 58ms)
+
+JSON report written to E:/qoder/output/review-m1-2026-11-25/regression-results.json

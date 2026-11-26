@@ -1,0 +1,188 @@
+{
+  "sources": [
+    {
+      "id": "s-course",
+      "kind": "image",
+      "captured_at": "2026-11-24T10:00:00+08:00",
+      "name": "虚构课程报告截图.png",
+      "workspace_id": "ws-1c-main",
+      "content_version": "c414cd0e204de974f73753c7e28d7638e7b3691bb8b1a2bab6b25bb7fed7ce77",
+      "blobSha": "c414cd0e204de974f73753c7e28d7638e7b3691bb8b1a2bab6b25bb7fed7ce77",
+      "blobSize": 70,
+      "blobType": "image/png"
+    }
+  ],
+  "docs": [
+    {
+      "id": "a-course",
+      "kind": "action",
+      "task_id": "t-course",
+      "text": "虚构撰写课程报告",
+      "minutes": 200,
+      "done": false,
+      "created_at": "2026-11-24T10:00:00+08:00",
+      "workspace_id": "ws-1c-main"
+    },
+    {
+      "id": "n-course",
+      "kind": "note",
+      "title": "虚构课程报告便签",
+      "source_id": "s-course",
+      "status": "reviewed",
+      "content_type": "notice",
+      "fields": [],
+      "created_at": "2026-11-24T10:00:00+08:00",
+      "updated_at": "2026-11-24T10:00:00+08:00",
+      "reviewed_at": "2026-11-24T10:00:00+08:00",
+      "workspace_id": "ws-1c-main"
+    },
+    {
+      "id": "p-other",
+      "kind": "plan_item",
+      "task_id": "t-other",
+      "date": "2026-11-25",
+      "planned_minutes": 20,
+      "state": "planned",
+      "task_ref_state": "active",
+      "order": 0,
+      "actual_minutes": null,
+      "focus_session_id": null,
+      "action_text": "虚构占用",
+      "workspace_id": "ws-1c-main"
+    },
+    {
+      "id": "t-course",
+      "kind": "task",
+      "title": "虚构课程报告",
+      "status": "todo",
+      "deadline": {
+        "value": "2026-11-27",
+        "precision": "date",
+        "confirmed_at": "2026-11-24T10:00:00+08:00"
+      },
+      "created_at": "2026-11-24T10:00:00+08:00",
+      "updated_at": "2026-11-24T10:00:00+08:00",
+      "workspace_id": "ws-1c-main"
+    },
+    {
+      "id": "t-other",
+      "kind": "task",
+      "title": "虚构未选中任务",
+      "status": "todo",
+      "deadline": {
+        "value": null,
+        "precision": "none"
+      },
+      "created_at": "2026-11-24T10:00:00+08:00",
+      "updated_at": "2026-11-24T10:00:00+08:00",
+      "workspace_id": "ws-1c-main"
+    }
+  ],
+  "opsCount": 0,
+  "threads": [
+    {
+      "id": "ws-1c-main-id-1",
+      "record_version": 1,
+      "workspace_id": "ws-1c-main",
+      "title": "课程报告的三天投入计划（5B-1C 主案例）",
+      "messages": [
+        {
+          "id": "ws-1c-main-id-3",
+          "role": "user",
+          "content": "虚构原文：课程报告 11 月 27 日截止，剩余约 200 分钟。",
+          "type": "text",
+          "refs": [
+            {
+              "object_type": "task",
+              "id": "t-course"
+            }
+          ],
+          "created_at": "2026-11-24T10:00:00+08:00"
+        }
+      ],
+      "selected_refs": [
+        {
+          "object_type": "source",
+          "id": "s-course"
+        },
+        {
+          "object_type": "task",
+          "id": "t-course"
+        },
+        {
+          "object_type": "task",
+          "id": "t-other"
+        }
+      ],
+      "confirmed_requirements": [],
+      "created_at": "2026-11-24T10:00:00+08:00",
+      "updated_at": "2026-11-24T10:00:00+08:00"
+    }
+  ],
+  "drafts": [
+    {
+      "id": "ws-1c-main-id-2",
+      "record_version": 1,
+      "workspace_id": "ws-1c-main",
+      "thread_id": "ws-1c-main-id-1",
+      "revision": 1,
+      "revision_history": [],
+      "status": "editing",
+      "proposal": {
+        "task_proposals": [],
+        "action_proposals": [],
+        "work_items": [
+          {
+            "key": "w-course",
+            "task_ref": {
+              "kind": "existing",
+              "id": "t-course"
+            },
+            "action_ref": {
+              "kind": "existing",
+              "id": "a-course"
+            },
+            "deliverable": "虚构课程报告初稿",
+            "remaining_minutes": 200,
+            "estimate_origin": "user",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [],
+            "priority": "normal"
+          }
+        ],
+        "requirement_candidates": [],
+        "evidence_refs": [
+          {
+            "kind": "source_excerpt",
+            "source_id": "s-course",
+            "excerpt": "虚构片段：课程报告 11 月 27 日截止"
+          }
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "planning_input": null,
+      "planning_result": null,
+      "fact_baseline": null,
+      "assumptions": [],
+      "user_confirmations": [],
+      "excluded_items": [],
+      "source_refs": [
+        {
+          "object_type": "source",
+          "id": "s-course"
+        }
+      ],
+      "applied_summary": null,
+      "created_at": "2026-11-24T10:00:00+08:00",
+      "updated_at": "2026-11-24T10:00:00+08:00"
+    }
+  ],
+  "workspace": {
+    "id": "ws-1c-main",
+    "name": "虚构主案例空间",
+    "is_demo": false
+  }
+}

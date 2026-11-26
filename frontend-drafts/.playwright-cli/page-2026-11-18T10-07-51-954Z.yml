@@ -1,0 +1,72 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "截下来 ↘DESIGN EXPLORATIONS" [ref=e3] [cursor=pointer]:
+      - /url: index.html
+    - generic [ref=e4]: ROUND 02 / 2026.11
+  - main [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - paragraph [ref=e8]: FOUR SEEDS. FOUR DIFFERENT WORLDS.
+        - heading [level=1] [ref=e9]:
+          - text: 同一个想法，四种
+          - emphasis [ref=e10]: 截然不同
+          - text: 的表达。
+      - paragraph [ref=e11]:
+        - text: 行动报纸 / 专注仪器 / 阅读手帖 / 创意工作室从字体、构图到操作重心，重新开始。
+        - generic [ref=e12]: 独立视觉实验 · 虚构演示数据 · 点击进入交互
+    - generic [ref=e13]:
+      - link "赤道印务 PUNCH PRESS 赤道印务实际页面截图 01 / PUNCH PRESS 赤道印务 朱橙 × 奶油白 / 窄体大字 / 双栏行动报纸 SEED 90bf8e1c1f31 ↗" [ref=e14] [cursor=pointer]:
+        - /url: app.html?concept=signal
+        - generic [ref=e15]:
+          - generic [ref=e16]: 赤道印务PUNCH PRESS
+          - img "赤道印务实际页面截图" [ref=e17]
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - paragraph [ref=e20]: 01 / PUNCH PRESS
+            - heading "赤道印务" [level=2] [ref=e21]
+            - generic "朱橙 × 奶油白 / 窄体大字 / 双栏行动报纸" [ref=e22]
+            - generic [ref=e23]: SEED 90bf8e1c1f31
+          - generic [ref=e24]: ↗
+      - link "深潜终端 DEEP WORK 深潜终端实际页面截图 02 / DEEP WORK 深潜终端 墨绿 × 硫黄绿 / 等宽数字 / 横向时间仪器 SEED 9dadb4aeb433 ↗" [ref=e25] [cursor=pointer]:
+        - /url: app.html?concept=orbit
+        - generic [ref=e26]:
+          - generic [ref=e27]: 深潜终端DEEP WORK
+          - img "深潜终端实际页面截图" [ref=e28]
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - paragraph [ref=e31]: 02 / DEEP WORK
+            - heading "深潜终端" [level=2] [ref=e32]
+            - generic "墨绿 × 硫黄绿 / 等宽数字 / 横向时间仪器" [ref=e33]
+            - generic [ref=e34]: SEED 9dadb4aeb433
+          - generic [ref=e35]: ↗
+      - link "留白手帖 FOLIO 留白手帖实际页面截图 03 / FOLIO 留白手帖 玉灰 × 墨色 / 宋体与楷体 / 目录、原文、批注 SEED e9d3b7fee103 ↗" [ref=e36] [cursor=pointer]:
+        - /url: app.html?concept=paper
+        - generic [ref=e37]:
+          - generic [ref=e38]: 留白手帖FOLIO
+          - img "留白手帖实际页面截图" [ref=e39]
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - paragraph [ref=e42]: 03 / FOLIO
+            - heading "留白手帖" [level=2] [ref=e43]
+            - generic "玉灰 × 墨色 / 宋体与楷体 / 目录、原文、批注" [ref=e44]
+            - generic [ref=e45]: SEED e9d3b7fee103
+          - generic [ref=e46]: ↗
+      - link "跳岛工作室 ISLAND CLUB 跳岛工作室实际页面截图 04 / ISLAND CLUB 跳岛工作室 黄油黄 × 群青 × 杏桃 / 中文圆体 / 资料工作桌 SEED 3c4f0f5a9320 ↗" [ref=e47] [cursor=pointer]:
+        - /url: app.html?concept=desktop
+        - generic [ref=e48]:
+          - generic [ref=e49]: 跳岛工作室ISLAND CLUB
+          - img "跳岛工作室实际页面截图" [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - paragraph [ref=e53]: 04 / ISLAND CLUB
+            - heading "跳岛工作室" [level=2] [ref=e54]
+            - generic "黄油黄 × 群青 × 杏桃 / 中文圆体 / 资料工作桌" [ref=e55]
+            - generic [ref=e56]: SEED 3c4f0f5a9320
+          - generic [ref=e57]: ↗
+    - paragraph [ref=e58]: 每套都可切换「今天 / 收集箱 / 专注」。可核对字段、勾选计划、开始计时，或临时收集文字与图片。所有状态刷新即重置。
+    - generic [ref=e59]:
+      - paragraph [ref=e60]: 随机种子用于打破设计惯性，构图与可读性经过设计取舍。Windows 本地字体：宋体、楷体、幼圆、Impact、Consolas。
+      - paragraph [ref=e61]:
+        - link "回看第一轮草案 ↗" [ref=e62] [cursor=pointer]:
+          - /url: archive-v1/index.html
+        - text: 本次仅修改 frontend-drafts/

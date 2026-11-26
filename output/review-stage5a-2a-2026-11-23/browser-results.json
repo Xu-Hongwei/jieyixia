@@ -1,0 +1,44 @@
+{
+  "results": [
+    {
+      "probe": "begin-with-unreviewed-or-invalid-history",
+      "invalidHistory": false,
+      "beginCreated": true,
+      "endError": null
+    },
+    {
+      "probe": "begin-with-unreviewed-or-invalid-history",
+      "invalidHistory": true,
+      "beginCreated": true,
+      "endError": "HISTORY_UNRESOLVED"
+    },
+    {
+      "probe": "changed-input-after-aborted-first-attempt",
+      "first": "SAVE_FAILED",
+      "secondOk": true,
+      "secondCode": null,
+      "savedAction": "a2",
+      "sameRequest": true
+    },
+    {
+      "probe": "fallback-replay-skips-input-validation",
+      "firstEndOk": true,
+      "normalChangedCode": "STALE_REQUEST",
+      "injected": true,
+      "fallback": {
+        "ok": true,
+        "code": null,
+        "workspace_id": "isolated-review",
+        "session_id": "service-5",
+        "request_id": "review-end",
+        "revision": 2,
+        "issued_at_ms": 1795399200000,
+        "replayed": true
+      },
+      "savedText": "original text",
+      "savedPlanState": "partial"
+    }
+  ],
+  "errors": [],
+  "clock": "controlled wallNow, real Chromium IndexedDB"
+}

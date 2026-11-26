@@ -1,0 +1,259 @@
+{
+  "id": "g9b-stable-sort-rerun",
+  "title": "反例：同输入重跑结果一致",
+  "layer": "planning",
+  "mode": "accept",
+  "target": "planning_golden",
+  "acceptance": [
+    "B0-07"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "input": {
+      "algorithm_version": "daily-v1",
+      "timezone": "Asia/Shanghai",
+      "start_date": "2026-11-24",
+      "horizon_days": 7,
+      "buffer_pct": 0,
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 30
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 30
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 0
+        }
+      ],
+      "task_facts": [
+        {
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "title": "虚构目标",
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "overdue_consent": false,
+          "status": "todo"
+        }
+      ],
+      "work_items": [
+        {
+          "key": "wb",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-wb"
+          },
+          "deliverable": "wb 的虚构产出",
+          "remaining_minutes": 20,
+          "estimate_origin": "model",
+          "splittable": false,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        },
+        {
+          "key": "wa",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-wa"
+          },
+          "deliverable": "wa 的虚构产出",
+          "remaining_minutes": 20,
+          "estimate_origin": "model",
+          "splittable": false,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        }
+      ],
+      "occupancy": [],
+      "replacement_ids": [],
+      "extra_work_acknowledged": []
+    },
+    "result": {
+      "segments": [
+        {
+          "segment_key": "s1",
+          "work_item_key": "wa",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "suggested_action_ref": {
+            "kind": "draft",
+            "key": "a-wa"
+          },
+          "date": "2026-11-24",
+          "minutes": 20,
+          "order": 1,
+          "action_text": "wa 当日虚构工作",
+          "deliverable": "wa 的虚构产出"
+        },
+        {
+          "segment_key": "s2",
+          "work_item_key": "wb",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "suggested_action_ref": {
+            "kind": "draft",
+            "key": "a-wb"
+          },
+          "date": "2026-11-25",
+          "minutes": 20,
+          "order": 1,
+          "action_text": "wb 当日虚构工作",
+          "deliverable": "wb 的虚构产出"
+        }
+      ],
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 30,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 20,
+          "free_minutes": 10,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 30,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 20,
+          "free_minutes": 10,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        }
+      ],
+      "unscheduled": [],
+      "unknown_items": [],
+      "excluded_items": [],
+      "conflicts": [],
+      "warnings": [],
+      "complete": true
+    }
+  },
+  "expected_error": null,
+  "expected": {
+    "initial_free_by_day": [
+      30,
+      30,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "allocated_by_day": [
+      20,
+      20,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "final_free_by_day": [
+      10,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "overbooked_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scheduled_total": 40,
+    "unscheduled": [],
+    "unknown_count": 0,
+    "complete": true
+  },
+  "notes": "与 g9 完全相同的输入与期望"
+}

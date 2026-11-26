@@ -1,0 +1,49 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mE:/qoder/frontend[39m
+
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: second clarification must retain first explicit answer
+[22m[39mMULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：报告交给谁？
+答：交给张老师
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: reloading clarification must recover a continuation entry
+[22m[39mRELOAD_CLARIFICATION {"status":"needs_clarification","gen":{"phase":"clarification","requestId":null,"turnId":null,"clientSeq":1,"threadId":"36357a09-9820-4e25-bff1-a581aa8b6aeb","draftId":"accc6d62-f487-42e2-b45f-14a74cc2fa8c","userMessage":"保留我的要求","userInput":{"original_user_request":"保留我的要求","clarifications":[]},"originalMessage":"保留我的要求","history":[],"isContinuation":true,"legacyUntrusted":false,"legacyDisplay":[],"questions":[{"blocking_reason":"虚构：影响交付对象","options":["导师","班长"],"question":"报告交给谁？","question_id":"q1","related_requirement_key":null}],"error":null,"retained":null,"pendingAnalysis":null,"frozen":null,"progress":""},"input":{"userText":"保留我的要求","sourceIds":["48679c20-89f9-40d9-9e17-f920408b5271"],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: changing active draft must invalidate late generation
+[22m[39mSWITCH_DRAFT {"oldId":"3b5e5eb5-61a0-4c09-92df-357faa5a3202","pendingId":"3aca7de4-392e-46ab-b240-cb7f83e0804a","activeId":"3b5e5eb5-61a0-4c09-92df-357faa5a3202"}
+
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW: second clarification must retain first explicit answer[32m 28[2mms[22m[39m
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW: reloading clarification must recover a continuation entry[32m 8[2mms[22m[39m
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW: changing active draft must invalidate late generation[32m 63[2mms[22m[39m
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW: invented user deadline must not become manual provenance
+[22m[39mFORGED_PROVENANCE_ADOPTION {"prepare":false}
+
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW R1: assistant question rejected by user is not user deadline evidence
+[22m[39mQUESTION_AS_USER {"userMessage":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：是否把截止设为2026-11-30？\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","prepared":false}
+
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW R2: successful unplanned draft must restore original budget after reload
+[22m[39mSUCCESS_RELOAD {"status":"needs_review","input":{"userText":"保留预算45","sourceIds":["b711a186-524d-4988-9d33-ebce31e1eb91"],"taskIds":[],"actionIds":[],"budgets":{"2026-11-25":45},"unavailable":[],"startDate":null,"excerpts":{}}}
+
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW R1 multiline: example answer inside model question is not user evidence
+[22m[39mMODEL_EXAMPLE_AS_USER {"message":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：请确认截止日期。\n参考回答：\n答：截止设为2026-11-30\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","userSegments":[],"prepared":false}
+
+[90mstdout[2m | ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22m[2mREVIEW legacy upgrade: parsed model example must not become structured user answer
+[22m[39mLEGACY_UPGRADE {"restoredHistory":[],"userInput":{"original_user_request":"请拆解报告，截止还没有决定","clarifications":[{"assistant_question":"需要图表吗？","user_answer":"不需要图表"}]},"prepared":false}
+
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW: invented user deadline must not become manual provenance[32m 21[2mms[22m[39m
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW R1: assistant question rejected by user is not user deadline evidence[32m 16[2mms[22m[39m
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW R2: successful unplanned draft must restore original budget after reload[32m 6[2mms[22m[39m
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW R1 multiline: example answer inside model question is not user evidence[32m 13[2mms[22m[39m
+ [32m✓[39m ../output/m2-legacy-2026-11-25/edge.test.js[2m > [22mREVIEW legacy upgrade: parsed model example must not become structured user answer[32m 18[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m8 passed[39m[22m[90m (8)[39m
+[2m   Start at [22m 22:34:38
+[2m   Duration [22m 1.19s[2m (transform 153ms, setup 0ms, collect 337ms, tests 173ms, environment 0ms, prepare 55ms)[22m
+

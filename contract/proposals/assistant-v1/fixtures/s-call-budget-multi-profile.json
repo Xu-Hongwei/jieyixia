@@ -1,0 +1,41 @@
+{
+  "id": "s-call-budget-multi-profile",
+  "title": "多profile降级：analyze尝试按profile求和",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-17"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "scenario": "call_budget",
+    "analyze_calls": 3,
+    "analyze_attempts_total": 7,
+    "propose_attempts": 2,
+    "analyze_profile_retries": [
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ]
+  },
+  "expected_error": null,
+  "expected": {
+    "allowed": true,
+    "total_vendor_attempts": 9,
+    "all_attempts_consume_daily_quota": true,
+    "propose_budget_covers_all_its_attempts": true,
+    "analyze_configured_attempt_upper": 12,
+    "analyze_attempts_within_configured_upper": true
+  },
+  "notes": "R5：每次 analyze 两个 retries=1 profile，配置上界各4次合计12；实际7次（如4+2+1，受提前成功/时间预算/共享额度限制）；全流程9次>8，证明8非普适上限"
+}

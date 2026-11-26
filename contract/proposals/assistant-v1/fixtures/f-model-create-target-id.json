@@ -1,0 +1,20 @@
+{
+  "id": "f-model-create-target-id",
+  "title": "create 携带 target_id",
+  "layer": "model",
+  "mode": "reject",
+  "target": "TaskProposalCreate",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "op": "create",
+    "key": "t1",
+    "title": "x",
+    "target_id": "t-1"
+  },
+  "expected_error": "Extra inputs",
+  "expected": null,
+  "notes": ""
+}

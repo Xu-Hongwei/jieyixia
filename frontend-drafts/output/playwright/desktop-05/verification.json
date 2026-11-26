@@ -1,0 +1,56 @@
+{
+  "initial": {
+    "bodyClass": "workspace round-three desktop collage-maintained collage-planner collage-atmosphere",
+    "paperAsset": "ready",
+    "lightScene": "webgl",
+    "canvasDisplay": "block",
+    "notes": 3
+  },
+  "flipped": {
+    "className": "pn-note pn-butter is-flipped is-hovered",
+    "frontHidden": "true",
+    "backHidden": "false"
+  },
+  "flippedBack": {
+    "className": "pn-note pn-butter is-hovered",
+    "frontHidden": "false",
+    "backHidden": "true"
+  },
+  "completed": {
+    "complete": true,
+    "flipped": false
+  },
+  "buttonFlip": true,
+  "keyFlip": false,
+  "keyFlipBack": true,
+  "week": {
+    "bodyClass": "workspace round-three desktop collage-maintained collage-planner collage-atmosphere",
+    "paperAsset": "ready",
+    "lightScene": "webgl",
+    "canvasDisplay": "block",
+    "notes": 0
+  },
+  "mobile": {
+    "bodyClass": "workspace round-three desktop collage-maintained collage-planner collage-atmosphere",
+    "paperAsset": "ready",
+    "lightScene": "webgl",
+    "canvasDisplay": "block",
+    "notes": 3
+  },
+  "reduced": {
+    "bodyClass": "workspace round-three desktop collage-maintained collage-planner collage-atmosphere",
+    "paperAsset": "ready",
+    "lightScene": "static-reduced",
+    "canvasDisplay": "none",
+    "notes": 3
+  },
+  "reducedFlip": true,
+  "disabled": {
+    "bodyClass": "workspace round-three desktop collage-maintained collage-planner collage-atmosphere",
+    "paperAsset": "ready",
+    "lightScene": "static-disabled",
+    "canvasDisplay": "none",
+    "notes": 3
+  },
+  "errors": []
+}

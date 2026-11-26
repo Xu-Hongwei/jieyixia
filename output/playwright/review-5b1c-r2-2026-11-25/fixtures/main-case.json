@@ -1,0 +1,106 @@
+{
+  "case": "课程报告的三天投入计划（5B-1C 主案例）",
+  "locked_at": "2026-11-24（北京时间），先锁定手算再执行算法",
+  "timezone": "Asia/Shanghai",
+  "base_instant": "2026-11-24T10:00:00+08:00",
+  "today": "2026-11-24",
+  "start_date": "2026-11-24",
+  "window": ["2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29", "2026-11-30"],
+  "available_days": ["2026-11-24", "2026-11-25", "2026-11-27"],
+  "unavailable_days": ["2026-11-26", "2026-11-28", "2026-11-29", "2026-11-30"],
+  "buffer_pct": 15,
+  "seed": {
+    "sources": [
+      { "id": "s-course", "kind": "image", "name": "虚构课程报告截图.png", "captured_at": "2026-11-24T10:00:00+08:00", "blob": "PNG_BYTES（虚构夹具字节，非真实识别）" }
+    ],
+    "notes": [
+      { "id": "n-course", "kind": "note", "title": "虚构课程报告便签", "source_id": "s-course", "status": "reviewed", "content_type": "notice", "fields": [] }
+    ],
+    "tasks": [
+      { "id": "t-course", "kind": "task", "title": "虚构课程报告", "status": "todo", "deadline": { "value": "2026-11-27", "precision": "date" }, "note": "主目标，自身不预置未来安排（不触发 D12）" },
+      { "id": "t-other", "kind": "task", "title": "虚构未选中任务", "status": "todo", "deadline": { "value": null, "precision": "none" }, "note": "未选中任务，11-25 已有 20 分钟 planned 占用" }
+    ],
+    "actions": [
+      { "id": "a-course", "kind": "action", "task_id": "t-course", "text": "虚构撰写课程报告", "minutes": 200, "done": false }
+    ],
+    "plan_items": [
+      { "id": "p-other", "kind": "plan_item", "task_id": "t-other", "date": "2026-11-25", "planned_minutes": 20, "state": "planned", "task_ref_state": "active", "order": 0, "note": "占用计入 11-25 容量，但不属于主工作项目标" }
+    ]
+  },
+  "proposal": {
+    "task_proposals": [],
+    "action_proposals": [],
+    "work_items": [
+      {
+        "key": "w-course",
+        "task_ref": { "kind": "existing", "id": "t-course" },
+        "action_ref": { "kind": "existing", "id": "a-course" },
+        "deliverable": "虚构课程报告初稿",
+        "remaining_minutes": 200,
+        "estimate_origin": "user",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [],
+        "priority": "normal"
+      }
+    ],
+    "requirement_candidates": [],
+    "evidence_refs": [{ "kind": "source_excerpt", "source_id": "s-course", "excerpt": "虚构片段：课程报告 11 月 27 日截止" }],
+    "assumptions": [],
+    "warnings": []
+  },
+  "confirmed_requirements": {
+    "round1": [
+      { "requirement_id": "req-budget-60", "version": 1, "type": "daily_budget", "value": 60, "strength": "hard" },
+      { "requirement_id": "req-unavail", "version": 1, "type": "unavailable_days", "value": ["2026-11-26", "2026-11-28", "2026-11-29", "2026-11-30"], "strength": "hard" }
+    ],
+    "round2_add": [
+      { "requirement_id": "req-budget-90", "version": 2, "type": "daily_budget", "value": 90, "strength": "hard", "note": "新 requirement_id + 更高 version，同强度取最高版本；不原地篡改 req-budget-60" }
+    ],
+    "context_days_budget_minutes": null,
+    "context_note": "context.days 预算置 null（未知），由已确认 daily_budget 要求填充；否则硬上限取 min 会把第二轮卡在 60"
+  },
+  "hand_calc": {
+    "formula": "allocatable = floor(budget × (100 − buffer_pct) / 100)；initialFree = max(0, allocatable − committed)；committed 计入 COUNTED_STATES(planned/partial/done) 占用",
+    "round1": {
+      "budget": 60,
+      "allocatable_per_available_day": "floor(60×85/100)=floor(51)=51",
+      "days": {
+        "2026-11-24": { "budget": 60, "allocatable": 51, "committed": 0, "free": 51, "scheduled": 51 },
+        "2026-11-25": { "budget": 60, "allocatable": 51, "committed": 20, "free": 31, "scheduled": 31 },
+        "2026-11-26": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 },
+        "2026-11-27": { "budget": 60, "allocatable": 51, "committed": 0, "free": 51, "scheduled": 51 },
+        "2026-11-28": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 },
+        "2026-11-29": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 },
+        "2026-11-30": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 }
+      },
+      "total_scheduled": 133,
+      "unscheduled": 67,
+      "unscheduled_reason": "deadline_window（有截止，保守最迟日 11-27 内放不下剩余 67）",
+      "complete": false,
+      "segments": [["w-course#1", "2026-11-24", 51], ["w-course#2", "2026-11-25", 31], ["w-course#3", "2026-11-27", 51]]
+    },
+    "round2": {
+      "budget": 90,
+      "allocatable_per_available_day": "floor(90×85/100)=floor(76.5)=76",
+      "days": {
+        "2026-11-24": { "budget": 90, "allocatable": 76, "committed": 0, "free": 76, "scheduled": 76 },
+        "2026-11-25": { "budget": 90, "allocatable": 76, "committed": 20, "free": 56, "scheduled": 56 },
+        "2026-11-26": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 },
+        "2026-11-27": { "budget": 90, "allocatable": 76, "committed": 0, "free": 76, "scheduled": 68 },
+        "2026-11-28": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 },
+        "2026-11-29": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 },
+        "2026-11-30": { "budget": 0, "allocatable": 0, "committed": 0, "free": 0, "scheduled": 0 }
+      },
+      "total_capacity": 208,
+      "total_scheduled": 200,
+      "unscheduled": 0,
+      "complete": true,
+      "segments": [["w-course#1", "2026-11-24", 76], ["w-course#2", "2026-11-25", 56], ["w-course#3", "2026-11-27", 68]],
+      "note": "11-27 可用 76 但只排 68（200−76−56=68），剩余 8 分钟容量未用"
+    },
+    "formal_deadline_always": "2026-11-27（date），全程不被草案修改"
+  },
+  "boundary": "结构化建议来自固定 fixture，非实时截图识别；排程/保存/恢复执行真实生产代码。本文件是验收预期，不是已执行成绩；实际输出若不同先查种子/规则/实现，不得用算法输出反向改写预期。"
+}

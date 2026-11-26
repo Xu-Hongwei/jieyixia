@@ -5,7 +5,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from app._contract import AnalyzeResponse, ApiError
+from app._contract import SCHEMA_VERSION, AnalyzeResponse, ApiError
 from app.config import get_settings
 from app.main import create_app
 from app.providers import get_provider
@@ -14,6 +14,7 @@ from app.providers import get_provider
 @pytest.fixture()
 def small_limit_app(monkeypatch):
     monkeypatch.setenv("JXL_MAX_BODY_BYTES", "1024")
+    monkeypatch.setenv("JXL_PROVIDER", "fixture")
     get_settings.cache_clear()
     get_provider.cache_clear()
     yield create_app()
@@ -48,7 +49,7 @@ def test_healthz_reports_model_ready(client):
     assert response.status_code == 200
     body = response.json()
     assert body["model_ready"] is True
-    assert body["schema_version"] == "0.3.0"
+    assert body["schema_version"] == SCHEMA_VERSION == "0.6.0"
 
 
 @pytest.mark.parametrize("fixture_id", ["01-course-assignment", "02-grading-supplement", "03-deadline-change", "04-reference-paper"])
@@ -155,3 +156,37 @@ def test_oversize_content_length_returns_413(client, payload):
 def test_invalid_fail_value_returns_422(client, payload):
     response = client.post("/api/analyze?fail=404", json=payload())
     assert response.status_code == 422
+
+
+def test_fail_injection_disabled_in_model_mode(payload):
+    # 生产模型模式关闭故障注入：?fail 不再能触发降级
+    from app.providers import ModelProvider
+
+    app = create_app()
+    app.dependency_overrides[get_provider] = lambda: ModelProvider()
+    with TestClient(app) as client:
+        response = client.post("/api/analyze?fail=503", json=payload())
+    assert response.status_code == 422
+    assert response.json()["code"] == "invalid_request"
+
+
+ORIGIN = "http://localhost:5173"
+
+
+def test_cors_readable_on_413(client, payload):
+    # 超限 413 由 BodyLimit 直写 send；CORS 必须最外层才能给跨域来源读到该错误
+    response = client.post(
+        "/api/analyze", json=payload(),
+        headers={"Content-Length": str(99 * 1024 * 1024), "Origin": ORIGIN},
+    )
+    assert response.status_code == 413
+    assert response.headers.get("access-control-allow-origin") == ORIGIN
+
+
+@pytest.mark.parametrize("status", [422, 503])
+def test_cors_readable_on_422_503(client, payload, status):
+    path = "/api/analyze" if status == 422 else "/api/analyze?fail=503"
+    data = b'{"source_id":"src-01"}' if status == 422 else json.dumps(payload()).encode()
+    response = client.post(path, content=data, headers={"Content-Type": "application/json", "Origin": ORIGIN})
+    assert response.status_code == status
+    assert response.headers.get("access-control-allow-origin") == ORIGIN

@@ -1,0 +1,526 @@
+{
+  "at": "2026-11-24T06:07:05.903Z",
+  "baseDate": "2026-11-24",
+  "executionBeijingDate": "2026-11-24",
+  "total": 86,
+  "passed": 86,
+  "failed": 0,
+  "results": [
+    {
+      "item": "C14",
+      "name": "断网后手动新建任务落库",
+      "pass": true,
+      "detail": "18ce8d12-d633-4308-8fba-93519041bdea"
+    },
+    {
+      "item": "C14",
+      "name": "断网后手动添加行动",
+      "pass": true,
+      "detail": "eaee0ef7-b333-4944-ad3e-1c7864d9e2fe"
+    },
+    {
+      "item": "C14",
+      "name": "断网后手动创建当日安排",
+      "pass": true,
+      "detail": "0b77b020-fb25-4ff1-9e8a-779da04d5cc0"
+    },
+    {
+      "item": "C14",
+      "name": "断网后开始工作（真实计时）",
+      "pass": true,
+      "detail": "e4080886-68e1-4016-8403-0671e90e0454"
+    },
+    {
+      "item": "C14",
+      "name": "断网暂停：running=false 正文保留",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C14",
+      "name": "断网继续计时",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C14",
+      "name": "断网结束并保存：成果/累计/安排联动落库",
+      "pass": true,
+      "detail": "{\"ms\":5171,\"plan\":\"partial\"}"
+    },
+    {
+      "item": "C14",
+      "name": "结束后返回日程",
+      "pass": true,
+      "detail": "#/today?plan=0b77b020-fb25-4ff1-9e8a-779da04d5cc0&recorded=e4080886-68e1-4016-8403-0671e90e0454"
+    },
+    {
+      "item": "C14",
+      "name": "断网本地 ZIP 导出（真实下载）",
+      "pass": true,
+      "detail": "截下来-个人空间-20261124-140424.jxl-backup.zip 4314B sha256=524285bfab60b55459262773a2965586ddd56b1d00bf5b7e1304fa5154c5459c"
+    },
+    {
+      "item": "C14",
+      "name": "断网恢复预览（零写入）",
+      "pass": true,
+      "detail": "{\"note\":2,\"matter\":0,\"task\":4,\"action\":6,\"focus_session\":5,\"plan_item\":6}"
+    },
+    {
+      "item": "C14",
+      "name": "断网恢复到新空间成功",
+      "pass": true,
+      "detail": "ws-restore-b8513761-c915-4a74-b4f3-3d3727dad7ae"
+    },
+    {
+      "item": "C14",
+      "name": "离线恢复后引用/成果可用（新 ID 双向关联）",
+      "pass": true,
+      "detail": "{\"plan\":\"ae560c2e-d964-471b-ba54-7ed9c222cf32\",\"sess\":\"28acec40-49c1-47b7-99d4-da8d0c762ad5\"}"
+    },
+    {
+      "item": "C14",
+      "name": "重连后无自动重发 API 请求",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "C14",
+      "name": "全程零模型调用（analyze 拦截计数=0）",
+      "pass": true,
+      "detail": "analyze=0"
+    },
+    {
+      "item": "C14",
+      "name": "离线期间无意外非本地请求（API 尝试如实记录）",
+      "pass": true,
+      "detail": "{\"offlineApi\":[],\"failed\":[]}"
+    },
+    {
+      "item": "C15",
+      "name": "模拟时钟+外国时区：浏览器本地日期≠北京今天",
+      "pass": true,
+      "detail": "local=2026-11-23 beijing=2026-11-24"
+    },
+    {
+      "item": "C15",
+      "name": "今天页按北京日界显示（不随设备时区）",
+      "pass": true,
+      "detail": "2026年11月24日"
+    },
+    {
+      "item": "C15",
+      "name": "操作时刻北京今天：新建安排日期=北京 D（非浏览器本地 D-1）",
+      "pass": true,
+      "detail": "2026-11-24"
+    },
+    {
+      "item": "C15",
+      "name": "模拟 23:59：今天仍为 D",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C15",
+      "name": "模拟跨午夜：今天动态刷新为 D+1",
+      "pass": true,
+      "detail": "2026-11-25"
+    },
+    {
+      "item": "C15",
+      "name": "跨午夜提交：事实变化拒绝旧确认，零创建",
+      "pass": true,
+      "detail": "diff=2"
+    },
+    {
+      "item": "C15",
+      "name": "重新确认后安排日≠今天需明确勾选",
+      "pass": true,
+      "detail": "checkboxes=1"
+    },
+    {
+      "item": "C15",
+      "name": "跨午夜后开始：started_at=北京 D+1，安排日不改写",
+      "pass": true,
+      "detail": "{\"startedBj\":\"2026-11-25\",\"planDate\":\"2026-11-24\"}"
+    },
+    {
+      "item": "C15",
+      "name": "午夜不自动完成/不自动改期",
+      "pass": true,
+      "detail": "{\"plan\":\"planned\",\"task\":\"doing\"}"
+    },
+    {
+      "item": "C15",
+      "name": "模拟第一段约 40s（点击开销≤0.5s）",
+      "pass": true,
+      "detail": "40085ms"
+    },
+    {
+      "item": "C15",
+      "name": "模拟第二段约 40s：累计约 80s",
+      "pass": true,
+      "detail": "80135ms"
+    },
+    {
+      "item": "C15",
+      "name": "80s 两段求和 floor 一次 = 1 分钟（模拟）",
+      "pass": true,
+      "detail": "actual=1"
+    },
+    {
+      "item": "C15",
+      "name": "模拟跳变前暂停落库基准（约 2s，点击开销披露）",
+      "pass": true,
+      "detail": "2667ms"
+    },
+    {
+      "item": "C15",
+      "name": "模拟时间跳变：进入待恢复确认，不自动计入",
+      "pass": true,
+      "detail": "{\"panel\":1,\"anyPanel\":1,\"reason\":\"time_jump\",\"ms\":2667,\"base\":2667}"
+    },
+    {
+      "item": "C15",
+      "name": "核对保留：累计不变，跳变间隔不计入",
+      "pass": true,
+      "detail": "2667ms"
+    },
+    {
+      "item": "C15",
+      "name": "恢复后仅核对后投入计入（模拟，含点击/草稿落库开销）",
+      "pass": true,
+      "detail": "8193ms"
+    },
+    {
+      "item": "C16",
+      "name": "确认框开着切空间：作用域丢弃，不跨空间创建",
+      "pass": true,
+      "detail": "dlg=true"
+    },
+    {
+      "item": "C16",
+      "name": "A 页个人空间运行会话",
+      "pass": true,
+      "detail": "cdba2dbc-a0b9-457b-8cb6-5efa74df0c95"
+    },
+    {
+      "item": "C16",
+      "name": "演示空间建同名任务/行动",
+      "pass": true,
+      "detail": "6a2b583c-03eb-4dd8-accf-5f39a7f44354"
+    },
+    {
+      "item": "C16",
+      "name": "跨空间运行：只解释+入口，不替它暂停",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C16",
+      "name": "跨空间运行中开始：事务拒绝，演示空间零会话",
+      "pass": true,
+      "detail": "sessions=0"
+    },
+    {
+      "item": "C16",
+      "name": "同名任务不同对象（ID 不同）",
+      "pass": true,
+      "detail": "{\"personal\":\"65309121-7817-486a-94cb-ea594133a69c\",\"demo\":\"6a2b583c-03eb-4dd8-accf-5f39a7f44354\"}"
+    },
+    {
+      "item": "C16",
+      "name": "空间快照隔离：各自只含自己的同名任务",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C16",
+      "name": "晚到外部结束：只读核对，本地输入保留不覆盖",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C16",
+      "name": "切空间离开确认取消：留在原空间原会话",
+      "pass": true,
+      "detail": "personal"
+    },
+    {
+      "item": "C16",
+      "name": "切空间确认离开：保存并暂停，草稿落库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C16",
+      "name": "后退触发离开保护：取消留在工作页",
+      "pass": true,
+      "detail": "#/work/c2d0baf4-430f-469e-8b46-b1f39f32f4ab"
+    },
+    {
+      "item": "C16",
+      "name": "前进回到工作页：不自动继续计时",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C16",
+      "name": "同组件换参数：取消留在原会话原输入",
+      "pass": true,
+      "detail": "dlg=1"
+    },
+    {
+      "item": "C16",
+      "name": "同组件换参数确认：原会话草稿落库，目标只读",
+      "pass": true,
+      "detail": "{\"draft\":\"C16 参数切换草稿2\",\"hash\":\"#/work-records/f753e467-16e0-42c2-8ee8-967c8f14f754\",\"e1ro\":1}"
+    },
+    {
+      "item": "C16",
+      "name": "个人空间暂停不阻塞演示空间开始（全局运行=1）",
+      "pass": true,
+      "detail": "f6d37528-ee6a-430d-a15b-9eb2db6f3392"
+    },
+    {
+      "item": "C16",
+      "name": "演示运行中个人空间继续：拒绝，不双运行",
+      "pass": true,
+      "detail": "{\"running\":false,\"err\":1,\"alertText\":\"已有其它运行中的会话，不能继续知道了\"}"
+    },
+    {
+      "item": "C17",
+      "name": "只改 query 不弹离开确认，草稿保留",
+      "pass": true,
+      "detail": "dlg=0"
+    },
+    {
+      "item": "C17",
+      "name": "换参数取消：URL/输入不变",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C17",
+      "name": "换参数确认：草稿写入原会话（不串写目标）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C17",
+      "name": "无效会话路由：明确提示，零创建零切空间",
+      "pass": true,
+      "detail": "{\"invAlert\":1,\"cntBefore\":20,\"ws\":\"personal\"}"
+    },
+    {
+      "item": "C17",
+      "name": "恢复预览含未结束会话（零写入）",
+      "pass": true,
+      "detail": "{\"note\":2,\"matter\":0,\"task\":3,\"action\":5,\"focus_session\":5,\"plan_item\":5}"
+    },
+    {
+      "item": "C17",
+      "name": "恢复到新空间：未结束 v1 暂停+占位租约",
+      "pass": true,
+      "detail": "394d6569-78cc-42de-9389-39fc9ed86889"
+    },
+    {
+      "item": "C17",
+      "name": "恢复期间原空间逐字段不变",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C17",
+      "name": "恢复空间离开保护：保存并暂停，草稿落库",
+      "pass": true,
+      "detail": "3824ms"
+    },
+    {
+      "item": "C17",
+      "name": "刷新后已保存草稿从库恢复",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C17",
+      "name": "回原空间：暂停会话与草稿原样",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "已结束 v0 只读：正文/累计可读，无编辑",
+      "pass": true,
+      "detail": "{\"bodyShown\":1,\"noEdit\":true,\"dur\":\"实际有效用时\\n10:00\\n结果\\n完成\\n工作成果（只读\"}"
+    },
+    {
+      "item": "C18",
+      "name": "已结束 v0 访问零改写",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "已结束 v1 只读保留（命名单段正文明确可读）",
+      "pass": true,
+      "detail": "{\"id\":\"f753e467-16e0-42c2-8ee8-967c8f14f754\",\"draft\":\"第一段成果：材料清单已梳理出三节提纲。\"}"
+    },
+    {
+      "item": "C18",
+      "name": "已结束 v1 访问零改写",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "v0 无安排显式结束：结果/累计/ended_at 落库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "v0 结束不补造 v1 字段",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "遗留结束后归档到记录页",
+      "pass": true,
+      "detail": "#/work-records/legacy-v0-open?return=/tasks/1f830d8e-fd60-4442-a566-547500011816"
+    },
+    {
+      "item": "C18",
+      "name": "遗留结束释放占用：可开始新工作",
+      "pass": true,
+      "detail": "075f6f09-199b-43ae-8f09-fd15f54c6ef6"
+    },
+    {
+      "item": "C18",
+      "name": "v0 活安排：遗留面板显示安排与进度选择",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "v0 遗留结束同事务联动：安排 done+权威摘要+双向关联",
+      "pass": true,
+      "detail": "{\"plan\":\"done\",\"actual\":2}"
+    },
+    {
+      "item": "C18",
+      "name": "v0 死引用：明确提示无法联动",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "v0 死引用例外结束：释放占用，无安排写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "v1 关联损坏：明确提示，不自动解绑/降级",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "v1 损坏关联：编辑/计时/暂停照常，累计保留",
+      "pass": true,
+      "detail": "122023ms"
+    },
+    {
+      "item": "C18",
+      "name": "v1 损坏关联：结束被明确拒绝（不降级 legacyEnd、零写入）",
+      "pass": true,
+      "detail": "{\"alert\":1,\"disabled\":true}"
+    },
+    {
+      "item": "C18",
+      "name": "旧 planned+历史：开始入口改为人工核对进度",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "异常历史（非法时长）：待核对块+明细，不给可确认数字",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "异常历史（非法时长）：原摘要保留不自动改写",
+      "pass": true,
+      "detail": "actual=7"
+    },
+    {
+      "item": "C18",
+      "name": "异常历史（非法时长）：任务页开始入口拦截",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "异常历史（非法结束时间）：待核对块+明细，不给可确认数字",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "异常历史（非法结束时间）：原摘要保留不自动改写",
+      "pass": true,
+      "detail": "actual=7"
+    },
+    {
+      "item": "C18",
+      "name": "异常历史（非法结束时间）：任务页开始入口拦截",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "moved 终态：只读历史，不能开始",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "moved 终态：日程详情无开始入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "遗留空间真实导出",
+      "pass": true,
+      "detail": "截下来-个人空间-20261124-140701.jxl-backup.zip 4120B sha256=763551a1a066eaaeb6803f09fa23bf5e630ed7b000bf8ef7f8901786fa1ba5f3"
+    },
+    {
+      "item": "C18",
+      "name": "遗留备份预览：未结束计数=1",
+      "pass": true,
+      "detail": "{\"note\":2,\"matter\":0,\"task\":3,\"action\":5,\"focus_session\":6,\"plan_item\":5}"
+    },
+    {
+      "item": "C18",
+      "name": "恢复后 v0 未结束只暂停，不补 v1 字段",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "恢复后 v0 已结束历史原样",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C18",
+      "name": "恢复空间 v0 仍可显式遗留结束",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

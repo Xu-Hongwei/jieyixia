@@ -1,0 +1,56 @@
+{
+  "id": "f-model-dup-keys",
+  "title": "工作项 key 重复",
+  "layer": "model",
+  "mode": "reject",
+  "target": "AssistantModelProposal",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "work_items": [
+      {
+        "key": "w1",
+        "task_ref": {
+          "kind": "existing",
+          "id": "t-1"
+        },
+        "action_ref": {
+          "kind": "existing",
+          "id": "a-1"
+        },
+        "deliverable": "w1 的虚构产出",
+        "remaining_minutes": 60,
+        "estimate_origin": "model",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [],
+        "priority": "normal"
+      },
+      {
+        "key": "w1",
+        "task_ref": {
+          "kind": "existing",
+          "id": "t-1"
+        },
+        "action_ref": {
+          "kind": "existing",
+          "id": "a-1"
+        },
+        "deliverable": "w1 的虚构产出",
+        "remaining_minutes": 30,
+        "estimate_origin": "model",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [],
+        "priority": "normal"
+      }
+    ]
+  },
+  "expected_error": "key 重复",
+  "expected": null,
+  "notes": ""
+}

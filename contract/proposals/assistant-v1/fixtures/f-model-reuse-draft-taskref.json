@@ -1,0 +1,23 @@
+{
+  "id": "f-model-reuse-draft-taskref",
+  "title": "reuse 携带 draft task_ref",
+  "layer": "model",
+  "mode": "reject",
+  "target": "ActionProposalReuse",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "op": "reuse",
+    "key": "a1",
+    "target_id": "a-1",
+    "task_ref": {
+      "kind": "draft",
+      "key": "t-new"
+    }
+  },
+  "expected_error": "existing",
+  "expected": null,
+  "notes": ""
+}

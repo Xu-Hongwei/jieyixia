@@ -1,0 +1,21 @@
+{
+  "id": "s-refresh-generating",
+  "title": "刷新后 generating 中断待显式重试",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-09"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "refresh_status",
+    "original_status": "generating"
+  },
+  "expected_error": null,
+  "expected": {
+    "restored_status": "needs_review",
+    "needs_explicit_retry": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

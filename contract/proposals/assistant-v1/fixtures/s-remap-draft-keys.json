@@ -1,0 +1,22 @@
+{
+  "id": "s-remap-draft-keys",
+  "title": "草案临时 key 不当全局ID重写",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-16"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "typed_ref_remap",
+    "ref_path": "draft.proposal.draft_keys"
+  },
+  "expected_error": null,
+  "expected": {
+    "semantics": "draft_local",
+    "missing": "keep_as_is",
+    "remap": false
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

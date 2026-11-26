@@ -1,0 +1,220 @@
+{
+  "id": "f-envelope-ok",
+  "title": "采用信封：冻结写集+ID映射+基线",
+  "layer": "application",
+  "mode": "accept",
+  "target": "ApplicationEnvelope",
+  "acceptance": [
+    "B0-10",
+    "B0-12",
+    "B0-13"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "application_id": "app-1",
+    "workspace_id": "ws-fixture",
+    "draft_id": "d-1",
+    "draft_revision": 1,
+    "input_signature": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "id_map": [
+      {
+        "draft_key": "t-new",
+        "formal_id": "task-formal-1",
+        "object_type": "task"
+      },
+      {
+        "draft_key": "a1",
+        "formal_id": "action-formal-1",
+        "object_type": "action"
+      },
+      {
+        "draft_key": "s1",
+        "formal_id": "plan-formal-1",
+        "object_type": "plan_item"
+      },
+      {
+        "draft_key": "s2",
+        "formal_id": "plan-formal-2",
+        "object_type": "plan_item"
+      }
+    ],
+    "write_set": {
+      "source_field_confirmations": [
+        {
+          "note_id": "n-1",
+          "field_key": "deadline",
+          "confirmed_value": "2026-11-27",
+          "origin": "model",
+          "derived": true
+        }
+      ],
+      "tasks_create": [
+        {
+          "formal_id": "task-formal-1",
+          "workspace_id": "ws-fixture",
+          "title": "课程报告",
+          "description": "虚构",
+          "completion_criteria": null,
+          "deadline": {
+            "value": null,
+            "precision": "none"
+          },
+          "note_ids": [],
+          "matter_id": null,
+          "status": "todo",
+          "created_at": "2026-11-24T10:00:00+08:00",
+          "updated_at": "2026-11-24T10:00:00+08:00"
+        }
+      ],
+      "tasks_update": [],
+      "actions_create": [
+        {
+          "formal_id": "action-formal-1",
+          "workspace_id": "ws-fixture",
+          "task_id": "task-formal-1",
+          "text": "整理材料",
+          "minutes": 60,
+          "basis": "suggestion",
+          "done": false,
+          "created_at": "2026-11-24T10:00:00+08:00"
+        }
+      ],
+      "plan_items_create": [
+        {
+          "formal_id": "plan-formal-1",
+          "workspace_id": "ws-fixture",
+          "task_id": "task-formal-1",
+          "date": "2026-11-24",
+          "planned_minutes": 51,
+          "action_text": "整理材料（第1段）",
+          "state": "planned",
+          "actual_minutes": null,
+          "focus_session_id": null,
+          "order": 1,
+          "task_ref_state": "active"
+        },
+        {
+          "formal_id": "plan-formal-2",
+          "workspace_id": "ws-fixture",
+          "task_id": "task-formal-1",
+          "date": "2026-11-25",
+          "planned_minutes": 9,
+          "action_text": "整理材料（第2段）",
+          "state": "planned",
+          "actual_minutes": null,
+          "focus_session_id": null,
+          "order": 1,
+          "task_ref_state": "active"
+        }
+      ],
+      "thread_result_update": null
+    },
+    "fact_baseline": {
+      "captured_at": "2026-11-24T10:00:00+08:00",
+      "task_facts": [],
+      "source_fingerprints": [
+        {
+          "source_id": "s-1",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "bytes": 1024
+        }
+      ],
+      "note_field_baselines": [
+        {
+          "note_id": "n-1",
+          "field_key": "deadline",
+          "value": "2026-11-27",
+          "status": "candidate",
+          "origin": "model",
+          "derived": true
+        }
+      ],
+      "occupancy": []
+    },
+    "capacity_baseline": [
+      {
+        "date": "2026-11-24",
+        "budget_minutes": 60,
+        "buffer_minutes": 9,
+        "committed_minutes": 0,
+        "allocated_minutes": 51,
+        "free_minutes": 0,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-25",
+        "budget_minutes": 60,
+        "buffer_minutes": 9,
+        "committed_minutes": 0,
+        "allocated_minutes": 9,
+        "free_minutes": 42,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-26",
+        "budget_minutes": 60,
+        "buffer_minutes": 9,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 51,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-27",
+        "budget_minutes": 60,
+        "buffer_minutes": 9,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 51,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-28",
+        "budget_minutes": 60,
+        "buffer_minutes": 9,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 51,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-29",
+        "budget_minutes": 60,
+        "buffer_minutes": 9,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 51,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-30",
+        "budget_minutes": 60,
+        "buffer_minutes": 9,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 51,
+        "overbooked_minutes": 0
+      }
+    ],
+    "user_confirmations": [
+      {
+        "confirmation_id": "c1",
+        "draft_revision": 1,
+        "object_type": "note_field",
+        "object_id_or_key": "n-1",
+        "field_path": "deadline",
+        "old_value": null,
+        "new_value": "2026-11-27",
+        "confirmed_at": "2026-11-24T10:00:00+08:00"
+      }
+    ],
+    "planned_gaps": [],
+    "gap_acknowledged": false,
+    "overbook_acknowledged": false,
+    "existing_overbook_dates": [],
+    "issued_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

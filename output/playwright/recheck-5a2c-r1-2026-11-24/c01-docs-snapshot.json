@@ -1,0 +1,552 @@
+[
+  {
+    "id": "01d136ff-f2ce-4bdf-b809-99e27d8ffcfa",
+    "kind": "action",
+    "task_id": "d1b8053a-0b1a-410a-a2f6-8fa677391b37",
+    "text": "独立行动",
+    "minutes": 10,
+    "basis": "user",
+    "done": true,
+    "created_at": "2026-11-24T05:55:07.988Z",
+    "workspace_id": "personal"
+  },
+  {
+    "kind": "plan_item",
+    "id": "051e41e7-9578-4926-a175-95e9020f79c8",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "date": "2026-11-26",
+    "planned_minutes": 15,
+    "action_text": "将改期的安排",
+    "state": "planned",
+    "actual_minutes": null,
+    "focus_session_id": null,
+    "order": 2,
+    "task_ref_state": "active"
+  },
+  {
+    "kind": "plan_item",
+    "id": "0ff0c9da-d0db-4503-9a6b-0d5eb101d486",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "date": "2026-11-24",
+    "planned_minutes": 30,
+    "action_text": "D 整理材料",
+    "state": "done",
+    "actual_minutes": 1,
+    "focus_session_id": "aa4936c4-7e34-4808-9327-0d72162d357d",
+    "order": 1,
+    "task_ref_state": "active"
+  },
+  {
+    "id": "1260dca2-c6ca-41ec-8f96-153bd81e6e01",
+    "kind": "task",
+    "title": "虚构任务·精确截止",
+    "description": "",
+    "matter_id": null,
+    "note_ids": [],
+    "deadline": {
+      "value": "2026-11-28T17:30",
+      "precision": "datetime",
+      "source": "manual",
+      "from_note_id": null,
+      "confirmed_at": "2026-11-24T05:55:10.088Z"
+    },
+    "status": "todo",
+    "completion_criteria": null,
+    "current_action_id": null,
+    "created_at": "2026-11-24T05:55:10.088Z",
+    "updated_at": "2026-11-24T05:55:10.088Z",
+    "workspace_id": "personal"
+  },
+  {
+    "id": "1f830d8e-fd60-4442-a566-547500011816",
+    "kind": "task",
+    "title": "机器学习课程报告",
+    "description": "",
+    "matter_id": null,
+    "note_ids": [
+      "8539916f-1c8c-48df-822d-6f2927c3fd21"
+    ],
+    "deadline": {
+      "value": "2026-11-28",
+      "precision": "date",
+      "source": "manual",
+      "confirmed_at": "2026-11-24T05:53:34.009Z"
+    },
+    "status": "doing",
+    "completion_criteria": null,
+    "current_action_id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+    "created_at": "2026-11-24T05:53:34.009Z",
+    "updated_at": "2026-11-24T05:54:20.844Z",
+    "workspace_id": "personal"
+  },
+  {
+    "id": "2057dc81-7b98-4af3-9dba-5db3995fa207",
+    "kind": "action",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "text": "同名对照行动",
+    "minutes": 15,
+    "basis": "user",
+    "done": false,
+    "created_at": "2026-11-24T05:53:35.780Z",
+    "workspace_id": "personal"
+  },
+  {
+    "kind": "plan_item",
+    "id": "48a7a8f9-ea90-4174-bb68-72c474623a69",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "date": "2026-11-26",
+    "planned_minutes": 20,
+    "action_text": "后续工作未执行",
+    "state": "planned",
+    "actual_minutes": null,
+    "focus_session_id": null,
+    "order": 1,
+    "task_ref_state": "active"
+  },
+  {
+    "id": "5125b989-25e0-4235-b6b7-fbe1d577fd14",
+    "kind": "note",
+    "source_id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75",
+    "status": "draft",
+    "content_type": "notice",
+    "title": "机器学习课程报告",
+    "fields": [
+      {
+        "key": "title",
+        "value": "机器学习课程报告",
+        "raw": "机器学习课程报告（占总评 30%）",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "机器学习课程报告（占总评 30%）",
+          "source_id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75"
+        }
+      },
+      {
+        "key": "requirement",
+        "value": "提交 PDF 报告与可运行代码压缩包",
+        "raw": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+          "source_id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-19",
+        "raw": "截止时间：2026年11月19日",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "截止时间：2026年11月19日",
+          "source_id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "constraints",
+        "value": "报告不少于 300 字，需包含实验对比",
+        "raw": "报告不少于3000字，须包含至少两组实验对比",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "报告不少于3000字，须包含至少两组实验对比",
+          "source_id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75"
+        }
+      },
+      {
+        "key": "submit_to",
+        "value": "课程平台「作业」入口",
+        "raw": "通过课程平台「作业」入口提交",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "通过课程平台「作业」入口提交",
+          "source_id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75"
+        }
+      },
+      {
+        "key": "reminder",
+        "value": "逾期提交按零分计",
+        "raw": "逾期提交按零分计",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "逾期提交按零分计",
+          "source_id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75"
+        }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "提交截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "demo_data",
+        "message": "这是演示 fixture 的固定结果，不是真实模型实时识别（PRD F12 第 386 行）",
+        "field_key": null
+      },
+      {
+        "code": "origin_unknown",
+        "message": "截图未包含可识别的来源链接，未自动填写来源",
+        "field_key": null
+      }
+    ],
+    "matter_id": null,
+    "matter_role": null,
+    "created_at": "2026-11-24T05:53:32.232Z",
+    "updated_at": "2026-11-24T05:53:32.232Z",
+    "workspace_id": "personal"
+  },
+  {
+    "id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+    "kind": "action",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "text": "整理材料",
+    "minutes": 25,
+    "basis": "user",
+    "done": false,
+    "created_at": "2026-11-24T05:53:34.889Z",
+    "workspace_id": "personal"
+  },
+  {
+    "kind": "plan_item",
+    "id": "6f58ac31-352e-463b-b171-9ce8cf4836d5",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "date": "2026-11-25",
+    "planned_minutes": 30,
+    "action_text": "D+1 写初稿",
+    "state": "partial",
+    "actual_minutes": 0,
+    "focus_session_id": "eae1cc32-5c25-45a6-a3eb-cbad8b1962b7",
+    "order": 1,
+    "task_ref_state": "active"
+  },
+  {
+    "id": "77050b3e-3119-492d-ae8b-7f726c7ce7d7",
+    "kind": "focus_session",
+    "workspace_id": "personal",
+    "task_id": "d1b8053a-0b1a-410a-a2f6-8fa677391b37",
+    "action_id": "01d136ff-f2ce-4bdf-b809-99e27d8ffcfa",
+    "plan_item_id": null,
+    "started_at": "2026-11-24T05:55:08.747Z",
+    "accumulated_ms": 67,
+    "running": false,
+    "draft_md": "独立工作成果：完成。",
+    "outcome": "done",
+    "blocker": null,
+    "ended_at": "2026-11-24T05:55:08.814Z",
+    "is_demo": false,
+    "record_version": 1,
+    "timer_anchor_at": null,
+    "task_snapshot": {
+      "title": "虚构任务·无截止独立",
+      "matter_name": null,
+      "deadline_value": null,
+      "deadline_precision": "none",
+      "captured_at": "2026-11-24T05:55:08.747Z"
+    },
+    "action_snapshot": {
+      "text": "独立行动",
+      "minutes": 10,
+      "captured_at": "2026-11-24T05:55:08.747Z"
+    },
+    "task_ref_state": "active",
+    "action_ref_state": "active"
+  },
+  {
+    "id": "8539916f-1c8c-48df-822d-6f2927c3fd21",
+    "kind": "note",
+    "source_id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5",
+    "status": "draft",
+    "content_type": "notice",
+    "title": "机器学习课程报告",
+    "fields": [
+      {
+        "key": "title",
+        "value": "机器学习课程报告",
+        "raw": "机器学习课程报告（占总评 30%）",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "机器学习课程报告（占总评 30%）",
+          "source_id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5"
+        }
+      },
+      {
+        "key": "requirement",
+        "value": "提交 PDF 报告与可运行代码压缩包",
+        "raw": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+          "source_id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-19",
+        "raw": "截止时间：2026年11月19日",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "截止时间：2026年11月19日",
+          "source_id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "constraints",
+        "value": "报告不少于 300 字，需包含实验对比",
+        "raw": "报告不少于3000字，须包含至少两组实验对比",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "报告不少于3000字，须包含至少两组实验对比",
+          "source_id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5"
+        }
+      },
+      {
+        "key": "submit_to",
+        "value": "课程平台「作业」入口",
+        "raw": "通过课程平台「作业」入口提交",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "通过课程平台「作业」入口提交",
+          "source_id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5"
+        }
+      },
+      {
+        "key": "reminder",
+        "value": "逾期提交按零分计",
+        "raw": "逾期提交按零分计",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "逾期提交按零分计",
+          "source_id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5"
+        }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "提交截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "demo_data",
+        "message": "这是演示 fixture 的固定结果，不是真实模型实时识别（PRD F12 第 386 行）",
+        "field_key": null
+      },
+      {
+        "code": "origin_unknown",
+        "message": "截图未包含可识别的来源链接，未自动填写来源",
+        "field_key": null
+      }
+    ],
+    "matter_id": null,
+    "matter_role": null,
+    "created_at": "2026-11-24T05:53:30.147Z",
+    "updated_at": "2026-11-24T05:53:30.147Z",
+    "workspace_id": "personal"
+  },
+  {
+    "id": "aa4936c4-7e34-4808-9327-0d72162d357d",
+    "kind": "focus_session",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "action_id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+    "plan_item_id": "0ff0c9da-d0db-4503-9a6b-0d5eb101d486",
+    "started_at": "2026-11-24T05:54:20.844Z",
+    "accumulated_ms": 40113,
+    "running": false,
+    "draft_md": "第二段成果：材料整理完成，可进入初稿。",
+    "outcome": "partial",
+    "blocker": null,
+    "ended_at": "2026-11-24T05:55:00.957Z",
+    "is_demo": false,
+    "record_version": 1,
+    "timer_anchor_at": null,
+    "task_snapshot": {
+      "title": "机器学习课程报告",
+      "matter_name": null,
+      "deadline_value": "2026-11-28",
+      "deadline_precision": "date",
+      "captured_at": "2026-11-24T05:54:20.844Z"
+    },
+    "action_snapshot": {
+      "text": "整理材料",
+      "minutes": 25,
+      "captured_at": "2026-11-24T05:54:20.844Z"
+    },
+    "task_ref_state": "active",
+    "action_ref_state": "active"
+  },
+  {
+    "id": "b0fc3950-00b9-4113-9caa-9f63f273a64d",
+    "kind": "action",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "text": "同名对照行动",
+    "minutes": 15,
+    "basis": "user",
+    "done": false,
+    "created_at": "2026-11-24T05:53:36.214Z",
+    "workspace_id": "personal"
+  },
+  {
+    "id": "b835283a-714a-41f2-9c1f-45bca6163b17",
+    "kind": "action",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "text": "写初稿",
+    "minutes": 30,
+    "basis": "user",
+    "done": false,
+    "created_at": "2026-11-24T05:53:35.340Z",
+    "workspace_id": "personal"
+  },
+  {
+    "kind": "plan_item",
+    "id": "ca4111eb-cfc8-4462-a982-66c459048a74",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "date": "2026-11-24",
+    "planned_minutes": 15,
+    "action_text": "将取消的安排",
+    "state": "cancelled",
+    "actual_minutes": null,
+    "focus_session_id": null,
+    "order": 2,
+    "task_ref_state": "active"
+  },
+  {
+    "id": "d1b8053a-0b1a-410a-a2f6-8fa677391b37",
+    "kind": "task",
+    "title": "虚构任务·无截止独立",
+    "description": "",
+    "matter_id": null,
+    "note_ids": [],
+    "deadline": {
+      "value": null,
+      "precision": "none"
+    },
+    "status": "doing",
+    "completion_criteria": null,
+    "current_action_id": null,
+    "created_at": "2026-11-24T05:55:07.327Z",
+    "updated_at": "2026-11-24T05:55:08.814Z",
+    "workspace_id": "personal"
+  },
+  {
+    "id": "eae1cc32-5c25-45a6-a3eb-cbad8b1962b7",
+    "kind": "focus_session",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "action_id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+    "plan_item_id": "6f58ac31-352e-463b-b171-9ce8cf4836d5",
+    "started_at": "2026-11-24T05:54:20.066Z",
+    "accumulated_ms": 89,
+    "running": false,
+    "draft_md": "初稿受阻：已列出缺口，等待数据源。",
+    "outcome": "blocked",
+    "blocker": "等待虚构数据源回复，暂无法继续初稿。",
+    "ended_at": "2026-11-24T05:54:20.155Z",
+    "is_demo": false,
+    "record_version": 1,
+    "timer_anchor_at": null,
+    "task_snapshot": {
+      "title": "机器学习课程报告",
+      "matter_name": null,
+      "deadline_value": "2026-11-28",
+      "deadline_precision": "date",
+      "captured_at": "2026-11-24T05:54:20.066Z"
+    },
+    "action_snapshot": {
+      "text": "整理材料",
+      "minutes": 25,
+      "captured_at": "2026-11-24T05:54:20.066Z"
+    },
+    "task_ref_state": "active",
+    "action_ref_state": "active"
+  },
+  {
+    "id": "f753e467-16e0-42c2-8ee8-967c8f14f754",
+    "kind": "focus_session",
+    "workspace_id": "personal",
+    "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+    "action_id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+    "plan_item_id": "0ff0c9da-d0db-4503-9a6b-0d5eb101d486",
+    "started_at": "2026-11-24T05:53:38.150Z",
+    "accumulated_ms": 40173,
+    "running": false,
+    "draft_md": "第一段成果：材料清单已梳理出三节提纲。",
+    "outcome": "partial",
+    "blocker": null,
+    "ended_at": "2026-11-24T05:54:18.323Z",
+    "is_demo": false,
+    "record_version": 1,
+    "timer_anchor_at": null,
+    "task_snapshot": {
+      "title": "机器学习课程报告",
+      "matter_name": null,
+      "deadline_value": "2026-11-28",
+      "deadline_precision": "date",
+      "captured_at": "2026-11-24T05:53:38.150Z"
+    },
+    "action_snapshot": {
+      "text": "整理材料",
+      "minutes": 25,
+      "captured_at": "2026-11-24T05:53:38.150Z"
+    },
+    "task_ref_state": "active",
+    "action_ref_state": "active"
+  }
+]

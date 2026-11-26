@@ -1,0 +1,22 @@
+{
+  "id": "s-recheck-other-app",
+  "title": "草案被另页采用→冲突+核实原回执",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-11",
+    "B0-12"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "adoption_recheck",
+    "event": "draft_adopted_by_other_application"
+  },
+  "expected_error": null,
+  "expected": {
+    "outcome": "conflict_verify_original",
+    "business_writes": 0
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

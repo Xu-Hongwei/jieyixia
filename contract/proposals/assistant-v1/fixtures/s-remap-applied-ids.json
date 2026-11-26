@@ -1,0 +1,22 @@
+{
+  "id": "s-remap-applied-ids",
+  "title": "applied_summary 正式ID历史重映射",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-16"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "typed_ref_remap",
+    "ref_path": "draft.applied_summary.id_map.formal_id"
+  },
+  "expected_error": null,
+  "expected": {
+    "semantics": "historical",
+    "missing": "historical_marker",
+    "remap": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

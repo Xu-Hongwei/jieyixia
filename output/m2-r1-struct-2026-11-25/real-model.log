@@ -1,0 +1,11 @@
+model 后端就绪：http://127.0.0.1:8030 model_ready=true
+Vite 就绪：http://127.0.0.1:5182/（北京今天 2026-11-25）
+PASS [真实] model 后端 model_ready=true（密钥可装载，健康检查不触发付费） — model_ready=true
+PASS [真实] 真实模型图文调用：analyze≥1 且 propose≥1（非桩） — {"analyze":1,"propose":1}
+PASS [真实] 真实视觉理解落便签：含字段与原文（非桩固定值） — [{"key":"title","value":"机器学习课程报告（占总评 30%）","status":"candidate"},{"key":"requirement","value":"提交材料：PDF 报告一份 + 可运行代码压缩包","status":"candidate"},{"key":"constraints","value":"报告不少于3000字，须包含至少两组实验对比","status":"candidate"},{"key":"submit_to","value":"通过课程平台「作业」入口提交","status":"candidate"},{"key":"reminder","value":"逾期提交按零分计","status":"candidate"},{"key":"time_nodes","value":[{"label":"截止时间","raw":"2026年11月19日","value":"2026-11-19","precision":"date","tz_known":null,"basis":"explicit","role":"submission_deadline","reference_at":null,"reference_source":null,"message_date":null,"derived":false}],"status":"candidate"},{"key":"deadline","value":"2026-11-19","status":"candidate"}]
+真实模型截止候选: [{"key":"t1","value":"2026-11-30","precision":"date","origin":"user"}] 便签 deadline: {"key":"deadline","value":"2026-11-19","raw":"2026年11月19日","origin":"model","status":"candidate","derived":false,"quote":{"text":"2026年11月19日","source_id":"1fe37490-93f2-470e-a86d-612db3ae2801"},"precision":"date","tz_known":null}
+PASS [真实] 真实模型建议被接收：草案含任务/工作项（非桩） — {"status":"needs_review","tasks":["t1"],"work":["w1","w2","w3"]}
+PASS [真实] 真实模型建议经核对采用：任务/行动/安排落库，草案 applied — {"tasks":1,"actions":3,"plans":6,"draft":"applied"}
+PASS [真实] 截止出处如实记录（note=模型候选匹配已确认便签；manual=用户手动） — {"path":"manual","deadline":{"value":"2026-12-01","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-25T14:14:38.059Z"}}
+PASS [隔离] 全程未触碰用户 8000/8020 后端 — []
+合计 7 项断言，失败 0 项。

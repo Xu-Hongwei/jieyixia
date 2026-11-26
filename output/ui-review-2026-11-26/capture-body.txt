@@ -1,0 +1,44 @@
+let exitCode = 0
+const observations=[]
+async function capture(page,name){
+  await page.waitForTimeout(250);await page.evaluate(()=>window.scrollTo(0,0))
+  await shot(page,name+'.png')
+  const state=await page.evaluate(()=>({url:location.href,title:document.title,height:document.documentElement.scrollHeight,width:document.documentElement.scrollWidth,viewport:[innerWidth,innerHeight],text:document.body.innerText,nav:[...document.querySelectorAll('aside nav a')].map(a=>({text:a.innerText,active:a.classList.contains('router-link-active'),aria:a.getAttribute('aria-current')})),fonts:[...new Set([...document.querySelectorAll('main p,main label,main h1,main h2')].slice(0,30).map(e=>getComputedStyle(e).fontSize))]}))
+  observations.push({name,...state})
+  console.log('CAPTURE',name,state.height,state.viewport)
+}
+async function visit(page,path,name){await page.goto(BASE+'#'+path,{waitUntil:'domcontentloaded'});await page.waitForTimeout(400);await capture(page,name)}
+try{
+ const {context,page}=await newScene('audit')
+ await page.goto(BASE+'#/today');await waitText(page,'日程');await capture(page,'desktop-empty-schedule')
+ await boot(page)
+ await visit(page,'/today','desktop-schedule')
+ await visit(page,'/today?view=list','desktop-schedule-list')
+ await visit(page,'/tasks/t-smoke?return='+encodeURIComponent('/today?date='+D(1)+'&view=list'),'desktop-task')
+ const original=page.url()
+ await btn(page,'调整后续安排').click();await waitText(page,'调整后续安排 · 选择替换范围');await capture(page,'desktop-replan-entry')
+ await btn(page,'原任务页').click();await waitText(page,'返回原列表');const taskBack=page.url()
+ await btn(page,'返回原列表').click();await page.waitForTimeout(300)
+ observations.push({name:'navigation-task-replan-return',original,taskBack,returned:page.url()})
+ await visit(page,'/assistant','desktop-assistant-home')
+ await visit(page,'/work-records','desktop-records')
+ await visit(page,'/work-records/f-1','desktop-record-detail')
+ await visit(page,'/data','desktop-data')
+ await visit(page,'/collect','desktop-library-empty')
+ await page.getByLabel('添加文字资料',{exact:true}).click()
+ await page.getByLabel('文字资料',{exact:true}).fill('虚构课程通知：请准备机器学习课程报告，先读资料，再做实验并撰写结论。周五提交。')
+ await btn(page,'AI 整理').click();await page.waitForTimeout(1200);await capture(page,'desktop-review-note')
+ await visit(page,'/collect','desktop-library')
+ const notes=await docsOf(page,'personal','note');console.log('NOTES',notes.map(n=>n.id))
+ await page.setViewportSize({width:390,height:844})
+ for(const [path,name] of [['/today','mobile-schedule'],['/tasks/t-smoke','mobile-task'],['/assistant','mobile-assistant'],['/collect','mobile-library'],['/notes','mobile-review']])await visit(page,path,name)
+ await page.setViewportSize({width:1440,height:1000})
+ await visit(page,'/today','desktop-schedule-final')
+ await context.close()
+}catch(e){console.error(e);exitCode=1}finally{
+ writeFileSync(join(RUN,'observations.json'),JSON.stringify(observations,null,2))
+ writeFileSync(join(RUN,'results.json'),JSON.stringify({results,netHits},null,2))
+ writeFileSync(join(RUN,'backend.log'),backendLog);writeFileSync(join(RUN,'vite.log'),viteLog)
+ await browser.close();vite.kill();backend.kill()
+}
+process.exit(exitCode)

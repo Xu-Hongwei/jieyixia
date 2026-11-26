@@ -1,0 +1,28 @@
+{
+  "id": "f-confirm-deadline-bad-date",
+  "title": "task/deadline 确认：非法日历日期",
+  "layer": "model",
+  "mode": "reject",
+  "target": "UserConfirmation",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "confirmation_id": "cf-1",
+    "draft_revision": 1,
+    "object_type": "task",
+    "object_id_or_key": "t-new",
+    "id_scope": "draft",
+    "field_path": "deadline",
+    "old_value": null,
+    "new_value": {
+      "value": "2026-02-30",
+      "precision": "date"
+    },
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": "非法日历",
+  "expected": null,
+  "notes": ""
+}

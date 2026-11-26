@@ -1,0 +1,46 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+MULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：报告交给谁？
+答：交给张老师
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+RELOAD_CLARIFICATION {"status":"needs_clarification","gen":{"phase":"clarification","requestId":null,"turnId":null,"clientSeq":1,"threadId":"f8ce9cee-19dc-4969-a84c-6a7d77c24ea1","draftId":"783f1e00-eebe-4231-83c5-abfb957f5a4a","userMessage":"保留我的要求","userInput":{"original_user_request":"保留我的要求","clarifications":[]},"originalMessage":"保留我的要求","history":[],"isContinuation":true,"questions":[{"blocking_reason":"虚构：影响交付对象","options":["导师","班长"],"question":"报告交给谁？","question_id":"q1","related_requirement_key":null}],"error":null,"retained":null,"pendingAnalysis":null,"frozen":null,"progress":""},"input":{"userText":"保留我的要求","sourceIds":["2d9b558b-d2cf-47e1-9495-6ed1753e9572"],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer 38ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry 9ms
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+SWITCH_DRAFT {"oldId":"08396551-d3c3-4e7f-99fb-eed33b161968","pendingId":"4e4adee9-d5c3-48bb-a4dd-1ec4068944bf","activeId":"08396551-d3c3-4e7f-99fb-eed33b161968"}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+FORGED_PROVENANCE_ADOPTION {"prepare":false}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence
+QUESTION_AS_USER {"userMessage":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：是否把截止设为2026-11-30？\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","prepared":false}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload
+SUCCESS_RELOAD {"status":"needs_review","input":{"userText":"保留预算45","sourceIds":["8cfe4725-b152-4634-b20e-3bb167b191fb"],"taskIds":[],"actionIds":[],"budgets":{"2026-11-25":45},"unavailable":[],"startDate":null,"excerpts":{}}}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1 multiline: example answer inside model question is not user evidence
+MODEL_EXAMPLE_AS_USER {"message":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：请确认截止日期。\n参考回答：\n答：截止设为2026-11-30\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","userSegments":["请拆解报告，截止还没有决定","截止设为2026-11-30","不要设截止日期"],"prepared":false}
+
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation 62ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance 33ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence 26ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload 9ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1 multiline: example answer inside model question is not user evidence 18ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  22:18:02
+   Duration  1.36s (transform 185ms, setup 0ms, collect 415ms, tests 196ms, environment 0ms, prepare 59ms)
+
+JSON report written to E:/qoder/output/review-m2-r4-2026-11-25/edge-results.json

@@ -1,0 +1,32 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5178/（北京今天 2026-11-26）
+PASS [S1] 创建草案未调模型 — propose=0
+PASS [S1] 恰好一次 propose、零 analyze — propose=1
+PASS [S1] 请求协议 1.1 + intent replan_task + 单任务上下文 — {"pv":"1.1","intent":"replan_task"}
+PASS [S1] replan_context：替换 p-1/p-2，保留含未选与受保护（不含被替换） — {"kept":["p-foc","p-keep","p-prot"]}
+PASS [S1] 有效占用：committed=全占用215−替换75=140；protected 不含被替换 — {"committedTotal":140,"protectedIds":["p-foc","p-keep","p-other","p-prot"]}
+PASS [S1] 进展清单原样进请求（权威输入）；user_input 原话=进展说明
+PASS [S1] 桩建议落库：单 link 目标任务 + estimate_origin=model — {"origin":"model"}
+PASS [S1] 建议块可见（建议，未确认）+ 采用被阻断并提示核对
+PASS [S1] 载入建议回填清单行（文本/分钟/复用）
+PASS [S1] 保存后清单 estimate_origin=user，建议块消失
+PASS [S1] 核对确认后采用解锁
+PASS [S1] 原子采用：p-1/p-2 取消且内容保留；未选/受保护/其它任务原样
+PASS [S1] 新安排全属目标任务、总量 90；复用不新增行动；总截止不变 — {"newPlans":2,"segs":2,"actions":2}
+PASS [S1] 回执绑定取消集与目标任务；台账恰好一条
+PASS [S2] 未知分钟数触发澄清（问题指向该行工作）
+PASS [S2] 澄清轮也是 replan_task 1.1
+PASS [S2] 续轮：同草案 replan_task；结构化问答归档（答=90），合成文本渲染 — {"n":2,"clar":[{"assistant_question":"「撰写报告正文」还需要多少分钟？未知工作量无法排程。","user_answer":"90"}]}
+PASS [S2] 回答值成为建议分钟数（仍 model，须核对）
+PASS [S2] 建议未确认仍阻断采用
+PASS [S2] 载入回填分钟数 90
+PASS [S2] 核对保存后 estimate_origin=user
+PASS [S3] 生成中保存清单冲突拒写（generating 基线保护）
+PASS [S3] 保存失败：结果留存待重试，草案未被改写（仍 90/user，版本未变） — {"propose":1,"rev":1}
+PASS [S3] 重试保存成功：建议落库 model、版本恰 +1；仍只调过一次模型 — {"rev":2,"before":1,"propose":1}
+PASS [S3] 建议未确认仍阻断采用
+PASS [S4] 取消后草案内容保留（本地用户清单不变） — {"status":"needs_review"}
+PASS [S4] 取消后可再次生成（共 2 次 propose，建议落库）
+PASS [全局] 全程未触碰用户 :8000/:8020 服务
+
+28/28 PASS

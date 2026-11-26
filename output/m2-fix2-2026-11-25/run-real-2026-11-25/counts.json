@@ -1,0 +1,10 @@
+{
+  "counts": {
+    "analyze": 1,
+    "propose": 1
+  },
+  "proposeRequests": [
+    "04eb61c9-f779-46ae-9a2d-5bce3547da64"
+  ],
+  "modelReady": true
+}

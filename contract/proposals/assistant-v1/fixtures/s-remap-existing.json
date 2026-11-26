@@ -1,0 +1,22 @@
+{
+  "id": "s-remap-existing",
+  "title": "proposal existing 引用重映射",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-16"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "typed_ref_remap",
+    "ref_path": "draft.proposal.existing_refs"
+  },
+  "expected_error": null,
+  "expected": {
+    "semantics": "active_or_historical",
+    "missing": "historical_marker",
+    "remap": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

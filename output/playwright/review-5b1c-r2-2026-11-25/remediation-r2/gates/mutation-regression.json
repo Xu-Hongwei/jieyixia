@@ -1,0 +1,69 @@
+{
+  "at": "2026-11-25T06:53:10.060Z",
+  "runner": "E:\\qoder\\output\\playwright\\review-5b1c-r2-2026-11-25\\scripts\\real-1c.mjs",
+  "cases": [
+    {
+      "name": "normal",
+      "expect": "all-pass-exit-0",
+      "exit": 0,
+      "passed": 51,
+      "failed": 0,
+      "skipped": 0,
+      "injected": true,
+      "failItems": [],
+      "verdict": "OK"
+    },
+    {
+      "name": "action_text",
+      "expect": "FAIL-nonzero(B1C-16)",
+      "exit": 1,
+      "passed": 24,
+      "failed": 1,
+      "skipped": 10,
+      "injected": true,
+      "failItems": [
+        "B1C-16: 主链路前后业务 docs 全字段（含正文/分钟/便签字段/描述）+sources 全字段+图片SHA一致、ops不增"
+      ],
+      "verdict": "OK"
+    },
+    {
+      "name": "restored_note",
+      "expect": "FAIL-nonzero(B1C-05)",
+      "exit": 1,
+      "passed": 24,
+      "failed": 1,
+      "skipped": 10,
+      "injected": true,
+      "failItems": [
+        "B1C-05: 恢复语义逐项核对：sources字节SHA+全字段、docs全字段、线程消息正文、草案proposal/计算/历史/引用（实际映射，声明对象全部遍历）"
+      ],
+      "verdict": "OK"
+    },
+    {
+      "name": "source_note",
+      "expect": "FAIL-nonzero(B1C-05)",
+      "exit": 1,
+      "passed": 24,
+      "failed": 1,
+      "skipped": 10,
+      "injected": true,
+      "failItems": [
+        "B1C-05: 原空间恢复前后完整快照一致（docs全字段+sources字节SHA+线程/草案全字段+目录，非仅数量）"
+      ],
+      "verdict": "OK"
+    },
+    {
+      "name": "history_ref",
+      "expect": "FAIL-nonzero(B1C-05)",
+      "exit": 1,
+      "passed": 24,
+      "failed": 1,
+      "skipped": 10,
+      "injected": true,
+      "failItems": [
+        "B1C-05: 恢复语义逐项核对：sources字节SHA+全字段、docs全字段、线程消息正文、草案proposal/计算/历史/引用（实际映射，声明对象全部遍历）"
+      ],
+      "verdict": "OK"
+    }
+  ]
+}

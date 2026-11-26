@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "filename": "截下来-个人空间-20261122-143643.jxl-backup.zip",
+    "successShown": true
+  },
+  "malformed": {
+    "downloadCount": 0,
+    "successShown": false,
+    "errorText": "导出失败：备份未通过完整性校验，已禁止下载：[B] 未知字段 unapproved_field（契约 additionalProperties:false）。未生成备份文件，可处理后重新导出。"
+  },
+  "errors": []
+}

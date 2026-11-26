@@ -1,0 +1,72 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+MULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：报告交给谁？
+答：交给张老师
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+RELOAD_CLARIFICATION {"status":"needs_clarification","gen":{"phase":"clarification","requestId":null,"turnId":null,"clientSeq":1,"threadId":"34d30a1f-fb10-43cb-86cc-04d9431225f3","draftId":"b1babf81-419a-46c3-91a2-5894a302cbb9","userMessage":"保留我的要求","userInput":{"original_user_request":"保留我的要求","clarifications":[]},"originalMessage":"保留我的要求","history":[],"isContinuation":true,"questions":[{"blocking_reason":"虚构：影响交付对象","options":["导师","班长"],"question":"报告交给谁？","question_id":"q1","related_requirement_key":null}],"error":null,"retained":null,"pendingAnalysis":null,"frozen":null,"progress":""},"input":{"userText":"保留我的要求","sourceIds":["7c31e5fa-fca4-4bdc-bdfe-386e18d9330b"],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+SWITCH_DRAFT {"oldId":"f004e3af-ea5f-4f36-b8d6-4c2864bf1f08","pendingId":"d448ddfc-f7c6-4fa8-a5fb-01b8d1f79a71","activeId":"f004e3af-ea5f-4f36-b8d6-4c2864bf1f08"}
+
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer 28ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry 8ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation 64ms
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+FORGED_PROVENANCE_ADOPTION {"prepare":false}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence
+QUESTION_AS_USER {"userMessage":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：是否把截止设为2026-11-30？\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","prepared":false}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload
+SUCCESS_RELOAD {"status":"needs_review","input":{"userText":"保留预算45","sourceIds":["717fdd70-f107-4181-96c4-5666d588a825"],"taskIds":[],"actionIds":[],"budgets":{"2026-11-25":45},"unavailable":[],"startDate":null,"excerpts":{}}}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1 multiline: example answer inside model question is not user evidence
+MODEL_EXAMPLE_AS_USER {"message":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：请确认截止日期。\n参考回答：\n答：截止设为2026-11-30\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","userSegments":["请拆解报告，截止还没有决定","截止设为2026-11-30","不要设截止日期"],"prepared":false}
+
+stdout | ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW legacy upgrade: parsed model example must not become structured user answer
+LEGACY_UPGRADE {"restoredHistory":[{"question":"请确认截止日期。","answer":"截止设为2026-11-30"}],"userInput":{"original_user_request":"请拆解报告，截止还没有决定","clarifications":[{"assistant_question":"请确认截止日期。","user_answer":"截止设为2026-11-30"},{"assistant_question":"需要图表吗？","user_answer":"不需要图表"}]},"prepared":true,"adopted":true,"deadline":{"value":"2026-11-30","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-25T14:22:03.759Z"}}
+
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance 19ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence 15ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload 5ms
+ ✓ ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW R1 multiline: example answer inside model question is not user evidence 12ms
+ × ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW legacy upgrade: parsed model example must not become structured user answer 25ms
+   → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../output/review-m2-r4-2026-11-25/edge.test.js > REVIEW legacy upgrade: parsed model example must not become structured user answer
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../output/review-m2-r4-2026-11-25/edge.test.js:206:82
+    204|  const p=await store.prepare();let a=null;if(p.ok)a=await store.adopt(…
+    205|  console.log('LEGACY_UPGRADE',JSON.stringify({restoredHistory,userInpu…
+    206|  expect(sent.user_input.clarifications.some(x=>x.user_answer.includes(…
+       |                                                                                  ^
+    207|  expect(p.ok).toBe(false);
+    208| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  22:22:02
+   Duration  1.10s (transform 145ms, setup 0ms, collect 316ms, tests 177ms, environment 0ms, prepare 50ms)
+

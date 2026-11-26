@@ -6,11 +6,22 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from app.config import get_settings
+from app.guard import MODEL_QUOTA
 from app.main import create_app
+from app.providers import get_provider
 
 FIXTURE_DIR = Path(__file__).resolve().parents[2] / "fixtures"
 IMAGE_MARKER = "BASE64_MARKER_" + "A" * 64
 TEXT_MARKER = "TEXT_MARKER_敏感原文_" + "B" * 32
+
+
+@pytest.fixture(autouse=True)
+def _reset_model_quota():
+    # 每日额度是进程级单例；测试间清零，避免跨用例累计触发 503
+    MODEL_QUOTA.reset()
+    yield
+    MODEL_QUOTA.reset()
 
 
 @pytest.fixture(scope="session")
@@ -28,9 +39,16 @@ def analysis_ids(fixtures: dict[str, dict]) -> list[str]:
 
 
 @pytest.fixture()
-def client():
+def client(monkeypatch):
+    # API 测试与运行环境解耦：强制桩模式。否则 ambient JXL_PROVIDER=model 时每条
+    # /api/analyze 用例都会真调付费模型 → 完整 API 测试停滞（此前停滞的根因）。
+    monkeypatch.setenv("JXL_PROVIDER", "fixture")
+    get_settings.cache_clear()
+    get_provider.cache_clear()
     with TestClient(create_app()) as test_client:
         yield test_client
+    get_settings.cache_clear()
+    get_provider.cache_clear()
 
 
 @pytest.fixture()

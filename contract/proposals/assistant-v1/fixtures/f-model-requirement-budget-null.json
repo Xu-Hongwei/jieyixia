@@ -1,0 +1,21 @@
+{
+  "id": "f-model-requirement-budget-null",
+  "title": "预算未知=null 合法（待澄清）",
+  "layer": "model",
+  "mode": "accept",
+  "target": "RequirementCandidate",
+  "acceptance": [
+    "B0-08"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "key": "r1",
+    "type": "daily_budget",
+    "value": null,
+    "strength": "hard",
+    "provenance": "user"
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

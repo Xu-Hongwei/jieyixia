@@ -1,0 +1,22 @@
+{
+  "id": "f-model-update-status",
+  "title": "update 试图改 status",
+  "layer": "model",
+  "mode": "reject",
+  "target": "TaskProposalUpdate",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "op": "update",
+    "key": "t1",
+    "target_id": "t-1",
+    "changes": {
+      "status": "done"
+    }
+  },
+  "expected_error": "Extra inputs",
+  "expected": null,
+  "notes": ""
+}

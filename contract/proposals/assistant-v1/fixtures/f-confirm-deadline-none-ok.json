@@ -1,0 +1,25 @@
+{
+  "id": "f-confirm-deadline-none-ok",
+  "title": "task/deadline 确认：new_value=null 明确无截止",
+  "layer": "model",
+  "mode": "accept",
+  "target": "UserConfirmation",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "confirmation_id": "cf-1",
+    "draft_revision": 1,
+    "object_type": "task",
+    "object_id_or_key": "t-new",
+    "id_scope": "draft",
+    "field_path": "deadline",
+    "old_value": null,
+    "new_value": null,
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

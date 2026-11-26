@@ -1,0 +1,18 @@
+{
+  "id": "f-model-deadline-none-value",
+  "title": "precision=none 却带值",
+  "layer": "model",
+  "mode": "reject",
+  "target": "DeadlineCandidate",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "value": "2026-11-27",
+    "precision": "none"
+  },
+  "expected_error": "value 必须为空",
+  "expected": null,
+  "notes": ""
+}

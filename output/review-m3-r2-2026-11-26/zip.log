@@ -1,0 +1,21 @@
+fixture 后端就绪：http://127.0.0.1:8011
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [ZIP] A 已采用：p-1 取消且新安排 90 分钟
+PASS [ZIP] 导出前：A 留 committed 台账；B 就绪且取消采用框不新增授权（prepare 零写入） — {"status":"ready","ops":["committed"],"ids":["p-2"]}
+PASS [ZIP] 导出前源空间：2 份改排草案（applied/ready）+ 2 线程 + 题面引用完整 — {"drafts":2,"threads":2}
+PASS [ZIP] 真实导出 ZIP 已落盘 — 截下来-个人空间-20261126-153531.jxl-backup.zip
+PASS [ZIP] 备份包条目不含 assistant_ops（授权台账不随备份导出） — manifest.json,data/sources.json,data/docs.json,data/assistant_threads.json,data/assistant_drafts.json
+PASS [ZIP] 备份内草案载荷为 applied+ready 两份改排草案（0.6.0 契约包装） — {"v":"0.6.0","n":2}
+PASS [ZIP] 恢复空间对象数量一致（任务/行动/安排/草案/线程） — {"ws":"ws-restore-5e6ecbd3-27a8-4115-99ba-e45317a16826","tasks":2,"actions":2,"plans":8,"drafts":2,"threads":2}
+PASS [ZIP] 恢复空间无任何授权台账（applied 历史不重放、不恢复 pending/committed 采用授权） — ops=0
+PASS [ZIP] 草案状态按恢复语义：applied 保留、未采用草案转 needs_review（需重新核对，不恢复待处理授权） — {"applied":"replan","ready":"replan","status":"needs_review"}
+PASS [ZIP] 范围与提案引用重映射到恢复空间新 ID（任务/行动/替换安排） — {"task":true,"ids":["16a522f8-dbff-40e7-b2c4-ec2da738f9d9"],"want":["16a522f8-dbff-40e7-b2c4-ec2da738f9d9"],"action":{"kind":"existing","id":"0442c3fa-02fa-4cf4-88a0-d3bfc4e66ecc"}}
+PASS [ZIP] 已采用历史回执引用重映射（replan_task_id + 取消集） — {"task":"14d78039-213f-4619-b78f-a10dc409af24","cancel":["1d24c5ed-dd19-4ac4-ad46-0f50455ff4cf"],"want":["1d24c5ed-dd19-4ac4-ad46-0f50455ff4cf"]}
+PASS [ZIP] 线程引用随迁且消息逐条保留（线程 ID 重映射后草案仍归属同线程） — {"src":",system","restored":",system","draftThread":["f3420a04-806b-4972-a92a-479358cad89c","6c8202d7-f4de-4992-9dd3-574c9ed1f5d6"],"threadIds":["6c8202d7-f4de-4992-9dd3-574c9ed1f5d6","f3420a04-806b-4972-a92a-479358cad89c"]}
+PASS [ZIP] 恢复后不存在旧工作区 ID 泄漏（t-smoke/a-report/p-1/p-2）
+PASS [ZIP] 旧 0.5.0 备份可读：数量一致 — {"ws":"ws-restore-9e0a5d5d-5d66-482c-92d9-f1a91a9ed199","tasks":1,"actions":2,"plans":4,"threads":1}
+PASS [ZIP] 旧 0.5.0 缺省语义：mode 缺省按 create 解释、无改排范围、无待处理授权 — {"rawMode":null,"mode":"create","scope":null,"status":"applied","ops":0}
+PASS [ZIP] 旧 0.5.0 已采用回执与依赖约束随迁 — {"deps":["w1"]}
+PASS [ZIP] 全程未调模型、未触碰用户 :8000/:8020 — {"propose":0,"analyze":0,"hits":[]}
+
+17/17 PASS

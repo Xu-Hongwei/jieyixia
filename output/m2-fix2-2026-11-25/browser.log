@@ -1,0 +1,45 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-25，周三 2026-11-25）
+PASS [②] 文字进入请求：excerpt=选定原文，7 日预算 45，周三预算 0 — {"excerpt":"虚构通知：周五交报告，包含资料整理、对比","days":[0,45,45,45,45,45,45]}
+PASS [②] propose 恰好一次（无并行付费请求） — propose=1
+PASS [⑩] 模型成功仅到待核对：needs_review 第 2 版，未自动 ready/采用 — {"status":"needs_review","revision":2}
+PASS [⑤] 手动截止约束内跨天排程：已排+未排=105 不静默裁剪，周三零新排，不超截止 — {"dates":["2026-11-26","2026-11-27","2026-11-28"],"total":105,"unschedTotal":0,"deadline":"2026-11-28"}
+PASS [⑩] 采用写入正式对象：1 任务 / 2 行动 / 安排=段数，草案 applied 只读 — {"tasks":1,"actions":2,"plans":4,"segments":4,"draft":"applied"}
+PASS [③] 手动截止来自用户输入（manual 出处＋用户消息证据），非自动今天 — {"value":"2026-11-28","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-25T13:50:07.596Z"}
+PASS [⑩] 采用后「查看日程」进入日程并见新安排 — http://127.0.0.1:5177/#/today?date=2026-11-26
+PASS [⑩] 真实导出备份 ZIP 已落盘 — 截下来-个人空间-20261125-215008.jxl-backup.zip
+PASS [⑩] 恢复空间：对象数量一致、来源随迁、草案 applied 只读、ops 不导出（无重放） — {"ws":"ws-restore-6299e0e6-045b-40ab-83ba-a2ec3fe3653e","tasks":1,"actions":2,"plans":4,"sources":1,"draft":"applied","ops":0}
+PASS [①] 图片先 analyze 再 propose（各一次），便签字段进入请求 — {"analyze":1,"propose":1}
+PASS [①] 分析便签落本地：含 deadline 候选字段与原文 raw — ["title","requirement","deadline","constraints","submit_to","reminder","time_nodes"]
+PASS [③] 资料字段确认为事实：status=confirmed，值不变（确认≠改值） — {"status":"confirmed","value":"2026-11-19"}
+PASS [①] 图片＋文字要求采用成功：任务/行动/安排齐备 — {"tasks":1}
+PASS [②] 有效旧分析复用：第二次生成 analyze 仍为 1（绑定内容指纹） — {"analyze":1,"propose":2}
+PASS [④] 澄清面板：问题+阻塞原因+选项；未答完整不能继续
+PASS [④] 续轮 seq=2、新 turn/request、同线程；合成消息含原要求+问+答 — {"seq":2,"msg":"原始要求：澄清演示：这份通知该怎么拆？\n\n此前的澄清问题与我的回答：\n问：这份资料要求完成哪些具体内容？请补充说明。\n答"}
+PASS [④] 线程真实归档：text → clarification → text → clarification（原要求与问答留痕） — ["text","clarification","text","clarification"]
+PASS [⑥] 只有显式选定的 Task/Action 进入请求快照 — {"tasks":1,"actions":1,"selAct":"b4f7cc86-b352-44dd-8f34-90b0d9d82ef6","wantAct":"b4f7cc86-b352-44dd-8f34-90b0d9d82ef6"}
+PASS [⑥] 桩返回 link + reuse 建议（不改既有对象）
+PASS [⑥] 额外工作阻断排程时可在排程前逐项确认（确认面板不依赖排程结果）
+PASS [⑥] 采用后既有任务不重复创建（link 映射回原 ID），新行动只增 create 部分 — {"tasks":2,"actions":4,"link":"3ec2cefd-32c7-408e-ac04-1d07eff19a3c"}
+PASS [⑦] 取消后晚到结果不接收：草案 needs_review 第 1 版、无 proposal — {"status":"needs_review","revision":1}
+PASS [⑦] 取消保留输入（要求与资料仍在）
+PASS [⑦] 生成期间要求/预算输入禁用，防止在途输入漂移 — {"reqDisabled":true,"budgetDisabled":true}
+PASS [⑦] 再次取消后草案仍第 1 版、无 proposal（晚到结果不接收） — {"revision":1}
+PASS [⑦] 切走再切回：旧响应不改当前草案（仍第 1 版），演示空间无草案 — {"revision":1,"demo":0}
+PASS [⑦] 刷新不自动重发 propose — {"before":3,"after":3}
+PASS [⑧] 额度不足：明确错误、输入保留、不伪装演示成功
+PASS [⑧] 额度恢复后重试成功（新轮 seq+1） — propose=2
+PASS [⑧] 断网失败：草案收敛 needs_review，输入与资料保留 — {"status":"needs_review"}
+PASS [⑤] 未知估时清楚展示、不当零、采用禁用
+PASS [⑤] 容量不足：缺口列出原因，不静默裁剪 — [{"key":"w1","reason":"deadline_window"},{"key":"w2","reason":"dependency_blocked"}]
+PASS [⑤] 缺口确认后采用：planned_gaps 留痕，未排工作不写成 0 分钟安排 — {"tasks_created":1,"tasks_updated":0,"actions_created":2,"plan_items_created":0,"source_fields_confirmed":0}
+PASS [③] 明确无截止 → precision=none，不自动设为今天 — {"value":null,"precision":"none"}
+PASS [⑨] propose 无令牌 → 401（与 analyze 同一 guard） — status=401
+PASS [⑨] analyze 无令牌 → 401（共享鉴权入口） — status=401
+PASS [⑨] 协议版本不支持 → 400 — status=400
+PASS [⑨] 未知字段 → 422（严格校验，不猜字段） — status=422
+PASS [⑨] 请求体超 512KiB → 413（按实际字节） — status=413
+PASS [⑨] 合法最小请求 → 200 且关联字段由服务端复制 — status=200 kind=proposal
+PASS [隔离] 全程未触碰用户 8000/8020 后端 — []
+
+合计 41 项断言，失败 0 项。

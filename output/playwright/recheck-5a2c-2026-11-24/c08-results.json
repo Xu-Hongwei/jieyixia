@@ -1,0 +1,354 @@
+{
+  "at": "2026-11-24T05:35:16.782Z",
+  "seed": "c01-docs-snapshot.json（C01 真实页面生成；测试辅助复制进独立 Context）",
+  "baseline": {
+    "file": "zip/baseline-normal.zip",
+    "bytes": 4027,
+    "sha256": "409be6a4c369d4fe64218dd09efd4d57a62516248cad259150f1245f2e638e9f"
+  },
+  "injections": "C12 一次性 IDB 原型包装（尾部写入/配额/提交后反馈），触发即还原；C13 fflate 重打包非法样本（披露）",
+  "results": [
+    {
+      "item": "C08",
+      "name": "真实上传→预览计数与 C01 基准一致",
+      "pass": true,
+      "detail": "{\"note\":2,\"matter\":0,\"task\":3,\"action\":5,\"focus_session\":4,\"plan_item\":5}"
+    },
+    {
+      "item": "C08",
+      "name": "预览阶段零写入（不建空空间不切空间）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "恢复完成且提交后核对无异常",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "C08",
+      "name": "新空间独立目录：非 personal/demo，is_demo=false，带恢复回执",
+      "pass": true,
+      "detail": "ws-restore-1a7bd3e4-7447-4543-95bc-61a43cd61e30"
+    },
+    {
+      "item": "C08",
+      "name": "静态源：personal docs 逐字段不变",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "静态源：图片资产哈希不变",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "独立映射：21 个对象全部新 ID，双射无复用",
+      "pass": true,
+      "detail": "mapped=21"
+    },
+    {
+      "item": "C08",
+      "name": "会话→任务/行动/安排引用全部按映射重写",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "安排→任务/会话反向引用闭合（双向）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "任务当前行动与截止来源引用按映射重写",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "截止值/精度原样保留：datetime naive 原文、date、无截止不补 23:59",
+      "pass": true,
+      "detail": "{\"DT\":{\"value\":\"2026-11-28T17:30\",\"precision\":\"datetime\",\"source\":\"manual\",\"from_note_id\":null,\"confirmed_at\":\"2026-11-24T05:33:56.879Z\"},\"U\":{\"value\":null,\"precision\":\"none\"}}"
+    },
+    {
+      "item": "C08",
+      "name": "成果/卡点/累计/起止/快照原事实保留",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "多段累计只向下取整一次：P1 actual=1min，两段和≥79s",
+      "pass": true,
+      "detail": "sum=80260"
+    },
+    {
+      "item": "C08",
+      "name": "安排状态原样（done/partial/cancelled/planned）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "图片字节哈希相等且页面可解码打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C08",
+      "name": "不导入旧 owner/租约/台账/草稿：禁止键 absent，kind 合法，运行位空+新建空台账",
+      "pass": true,
+      "detail": "runtime=ops,running"
+    },
+    {
+      "item": "C08",
+      "name": "修改恢复空间后源任务标题不受影响",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C09",
+      "name": "删除后真实 DataPage 导出（字节+SHA-256 留档）",
+      "pass": true,
+      "detail": "3716B 4f8a5659a29a…"
+    },
+    {
+      "item": "C09",
+      "name": "预览计数=删除后事实（12 条：3 安排/1 行动/4 会话/2 任务/2 便签）",
+      "pass": true,
+      "detail": "{\"note\":2,\"matter\":0,\"task\":2,\"action\":1,\"focus_session\":4,\"plan_item\":3}"
+    },
+    {
+      "item": "C09",
+      "name": "已删任务/行动/无引用安排不复活",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C09",
+      "name": "历史安排/会话引用保持 deleted，不悬空成活跃",
+      "pass": true,
+      "detail": "tSess=3"
+    },
+    {
+      "item": "C09",
+      "name": "历史成果原事实保留（正文/累计/卡点）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C09",
+      "name": "恢复空间内记录详情可读成果并标注引用已删除",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C10",
+      "name": "运行中：导出前源会话状态正确（运行，草稿已落库）",
+      "pass": true,
+      "detail": "running=true"
+    },
+    {
+      "item": "C10",
+      "name": "运行中：第二页真实导出成功",
+      "pass": true,
+      "detail": "4130B"
+    },
+    {
+      "item": "C10",
+      "name": "运行中：预览未结束工作=1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C10",
+      "name": "运行中：恢复目标 running=false/timer_anchor=null，草稿/累计/started_at 保留",
+      "pass": true,
+      "detail": "acc=561"
+    },
+    {
+      "item": "C10",
+      "name": "运行中：占位持有者租约已过期，运行位为空，不自动计时",
+      "pass": true,
+      "detail": "{\"kinds\":[\"ops\",\"running\",\"session\"],\"owner\":\"restore-placeholder:e0be83cf-1065-461b-89a5-3d44cb307a80\",\"lease\":1795498481677}"
+    },
+    {
+      "item": "C10",
+      "name": "运行中：静置 3s 累计不增长（无自动计时）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C10",
+      "name": "运行中：源会话不被恢复修改（运行中自然检查点增长合法）",
+      "pass": true,
+      "detail": "srcAcc=561≥561"
+    },
+    {
+      "item": "C10",
+      "name": "暂停中：导出前源会话状态正确（暂停，草稿已落库）",
+      "pass": true,
+      "detail": "running=false"
+    },
+    {
+      "item": "C10",
+      "name": "暂停中：第二页真实导出成功",
+      "pass": true,
+      "detail": "4118B"
+    },
+    {
+      "item": "C10",
+      "name": "暂停中：预览未结束工作=1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C10",
+      "name": "暂停中：恢复目标 running=false/timer_anchor=null，草稿/累计/started_at 保留",
+      "pass": true,
+      "detail": "acc=567"
+    },
+    {
+      "item": "C10",
+      "name": "暂停中：占位持有者租约已过期，运行位为空，不自动计时",
+      "pass": true,
+      "detail": "{\"kinds\":[\"ops\",\"running\",\"session\"],\"owner\":\"restore-placeholder:19d1d9d7-4c57-463c-9636-5a2d7fe7cb74\",\"lease\":1795498492280}"
+    },
+    {
+      "item": "C10",
+      "name": "暂停中：静置 3s 累计不增长（无自动计时）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C10",
+      "name": "暂停中：源会话不被恢复修改（运行中自然检查点增长合法）",
+      "pass": true,
+      "detail": "srcAcc=567≥567"
+    },
+    {
+      "item": "C11",
+      "name": "接管→保留已保存用时：核对后仍暂停，间隔不计入",
+      "pass": true,
+      "detail": "acc=567"
+    },
+    {
+      "item": "C11",
+      "name": "显式继续后真实计时增长（≥5s，不含接管前间隔）",
+      "pass": true,
+      "detail": "delta=6026ms"
+    },
+    {
+      "item": "C11",
+      "name": "恢复空间内结束并保存：ended_at 落库，成果保留",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C11",
+      "name": "源空间会话不受恢复空间操作影响（仍暂停未结束）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C12",
+      "name": "尾部写入失败：明确失败横幅 + 可重试（意图已冻结）",
+      "pass": true,
+      "detail": "RESTORE_WRITE_FAILED"
+    },
+    {
+      "item": "C12",
+      "name": "尾部写入失败零残留：全库逐字段不变，无半截空间",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C12",
+      "name": "同意图重试：同一 operationId/目标，恰好一个恢复空间",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C12",
+      "name": "再恢复一份：新意图新空间，同文件哈希两份独立",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C12",
+      "name": "配额失败：RESTORE_QUOTA 明确报告",
+      "pass": true,
+      "detail": "恢复提交异常：注入：配额不足"
+    },
+    {
+      "item": "C12",
+      "name": "配额失败零残留",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C12",
+      "name": "失败后重新选择恢复成功（状态未中毒）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C12",
+      "name": "提交后反馈失败：查回执认定已提交，不重复写入",
+      "pass": true,
+      "detail": "spaces=4"
+    },
+    {
+      "item": "C13",
+      "name": "取消重选：仍停留预览且全库零写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C13",
+      "name": "换文件：中部损坏 ZIP 精确拒绝，零写入",
+      "pass": true,
+      "detail": "ZIP_CORRUPT"
+    },
+    {
+      "item": "C13",
+      "name": "尾部损坏 ZIP 精确拒绝，零写入",
+      "pass": true,
+      "detail": "ZIP_CORRUPT"
+    },
+    {
+      "item": "C13",
+      "name": "截断 ZIP 精确拒绝，零写入",
+      "pass": true,
+      "detail": "ZIP_CORRUPT"
+    },
+    {
+      "item": "C13",
+      "name": "载荷哈希不符精确拒绝（A 层），零写入",
+      "pass": true,
+      "detail": "[{\"layer\":\"A\",\"message\":\"字节数与声明不符：data/docs.json（声明 12714，实际 12703）\"}]"
+    },
+    {
+      "item": "C13",
+      "name": "非法引用精确拒绝（关系层），不静默丢弃不建空空间",
+      "pass": true,
+      "detail": "[{\"layer\":\"C\",\"message\":\"计划任务 引用不存在的对象：task-does-not-exist\",\"objectId\":\"1b7a7560-2d34-4c56-a26e-2072f683e61a\",\"path\":\"PlanItem.task_id\"}]"
+    },
+    {
+      "item": "C13",
+      "name": "禁止键（owner_id）精确拒绝，零写入",
+      "pass": true,
+      "detail": "[{\"layer\":\"B\",\"message\":\"业务记录不得携带运行时/凭据字段 owner_id\",\"objectId\":\"1fefff6a-1011-4f6e-a9fe-c0c1952488d9\",\"path\":\"focus_session.owner_id\"}]"
+    },
+    {
+      "item": "C13",
+      "name": "连续拒绝后正常恢复成功（导入器未放宽也未中毒）",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

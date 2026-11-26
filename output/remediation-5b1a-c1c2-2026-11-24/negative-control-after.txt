@@ -1,0 +1,14 @@
+file:///E:/qoder/frontend/src/domains/planning/protocol.js:25
+  throw new Error(message)
+        ^
+
+Error: confirmation.id_scope（task 型必填） 必须是 draft/formal：undefined
+    at fail (file:///E:/qoder/frontend/src/domains/planning/protocol.js:25:9)
+    at checkEnum (file:///E:/qoder/frontend/src/domains/planning/protocol.js:79:33)
+    at normalizePlanningContext (file:///E:/qoder/frontend/src/domains/planning/normalize.js:396:5)
+    at file:///E:/qoder/output/remediation-5b1a-c1c2-2026-11-24/probes-before.mjs:25:14
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.14.0

@@ -1,0 +1,228 @@
+{
+  "id": "03-deadline-change",
+  "title": "截止时间更改通知（F06 变更候选，P1）",
+  "kind": "analysis",
+  "is_demo": true,
+  "depends_on": [
+    "01-course-assignment"
+  ],
+  "acceptance": [
+    "PRD 第 541 行：新旧通知可能改变同一任务截止时间时，生成可查看证据的变更候选",
+    "PRD 第 542 行：未确认前不自动修改截止时间——task-ml 仍为 2026-11-19，候选 status=pending",
+    "PRD 第 251 行：模型只产生可能变更，绝不静默覆盖已确认任务",
+    "PRD 第 257 行验收示例的日期改为 11/19 → 11/21：原文举例 11/13→11/15 相对今天（11/17）已过期，演示需要未来日期"
+  ],
+  "source": {
+    "id": "src-03",
+    "workspace_id": "demo-ml-report",
+    "kind": "image",
+    "image_ref": "assets/03-deadline-change.png",
+    "text": null,
+    "captured_at": "2026-11-17T18:05:00+08:00",
+    "origin_url": null,
+    "origin_title": null,
+    "is_demo": true
+  },
+  "analyze_request": {
+    "source_id": "src-03",
+    "kind": "image",
+    "image_base64": "__INJECT_IMAGE_BASE64__",
+    "text": null,
+    "captured_at": "2026-11-17T18:05:00+08:00",
+    "content_hint": "notice"
+  },
+  "expected_analysis": {
+    "source_id": "src-03",
+    "content_type": "notice",
+    "fields": [
+      {
+        "key": "title",
+        "value": "课程报告截止时间调整通知",
+        "raw": "关于课程报告截止时间调整的通知",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "关于课程报告截止时间调整的通知",
+          "source_id": "src-03"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-21",
+        "raw": "截止时间由11月19日调整至11月21日",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "截止时间由11月19日调整至11月21日",
+          "source_id": "src-03"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "constraints",
+        "value": "课程平台维护，顺延两天",
+        "raw": "因课程平台维护，截止时间顺延两天",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "因课程平台维护，截止时间顺延两天",
+          "source_id": "src-03"
+        }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "原截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "superseded",
+            "role": "submission_deadline",
+            "derived": false
+          },
+          {
+            "label": "新截止",
+            "raw": "截止时间由11月19日调整至11月21日",
+            "value": "2026-11-21",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "demo_data",
+        "message": "这是演示 fixture 的固定结果，不是真实模型实时识别",
+        "field_key": null
+      },
+      {
+        "code": "possible_deadline_change",
+        "message": "与 note-01 已确认的截止时间 2026-11-19 冲突，已生成变更候选 cp-01，等待用户确认",
+        "field_key": "deadline"
+      }
+    ],
+    "analyzed_at": "2026-11-17T18:05:04+08:00",
+    "model_name": "fixture:03-deadline-change",
+    "schema_version": "0.3.0"
+  },
+  "confirmed_note": {
+    "id": "note-03",
+    "workspace_id": "demo-ml-report",
+    "source_id": "src-03",
+    "status": "reviewed",
+    "content_type": "notice",
+    "title": "课程报告截止时间调整通知",
+    "fields": [
+      {
+        "key": "title",
+        "value": "课程报告截止时间调整通知",
+        "raw": "关于课程报告截止时间调整的通知",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "关于课程报告截止时间调整的通知",
+          "source_id": "src-03"
+        }
+      },
+      {
+        "key": "deadline",
+        "value": "2026-11-21",
+        "raw": "截止时间由11月19日调整至11月21日",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": {
+          "text": "截止时间由11月19日调整至11月21日",
+          "source_id": "src-03"
+        },
+        "precision": "date",
+        "tz_known": null
+      },
+      {
+        "key": "constraints",
+        "value": "课程平台维护，顺延两天",
+        "raw": "因课程平台维护，截止时间顺延两天",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": {
+          "text": "因课程平台维护，截止时间顺延两天",
+          "source_id": "src-03"
+        }
+      },
+      {
+        "key": "time_nodes",
+        "value": [
+          {
+            "label": "原截止",
+            "raw": "截止时间：2026年11月19日",
+            "value": "2026-11-19",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "superseded",
+            "role": "submission_deadline",
+            "derived": false
+          },
+          {
+            "label": "新截止",
+            "raw": "截止时间由11月19日调整至11月21日",
+            "value": "2026-11-21",
+            "precision": "date",
+            "tz_known": null,
+            "basis": "explicit",
+            "role": "submission_deadline",
+            "derived": false
+          }
+        ],
+        "raw": "",
+        "status": "candidate"
+      }
+    ],
+    "matter_id": "matter-ml",
+    "matter_role": "supplement",
+    "created_at": "2026-11-17T18:05:00+08:00",
+    "updated_at": "2026-11-17T18:09:00+08:00",
+    "reviewed_at": "2026-11-17T18:09:00+08:00",
+    "is_demo": true
+  },
+  "matter": null,
+  "task": null,
+  "action": null,
+  "focus_session": null,
+  "plan_items": [],
+  "change_proposal": {
+    "id": "cp-01",
+    "workspace_id": "demo-ml-report",
+    "task_id": "task-ml",
+    "old_note_id": "note-01",
+    "new_note_id": "note-03",
+    "old_value": "2026-11-19",
+    "new_value": "2026-11-21",
+    "evidence": [
+      {
+        "text": "截止时间：2026年11月19日",
+        "source_id": "src-01"
+      },
+      {
+        "text": "截止时间由11月19日调整至11月21日",
+        "source_id": "src-03"
+      }
+    ],
+    "status": "pending",
+    "created_at": "2026-11-17T18:05:04+08:00",
+    "resolved_at": null
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "s-transition-ready-applying",
+  "title": "ready→applying 合法",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-09"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "draft_transition",
+    "from": "ready",
+    "to": "applying"
+  },
+  "expected_error": null,
+  "expected": {
+    "allowed": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

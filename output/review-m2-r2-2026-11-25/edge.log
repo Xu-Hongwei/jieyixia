@@ -1,0 +1,80 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer
+MULTI_CLARIFICATION 原始要求：请帮我拆解报告
+
+此前的澄清问题与我的回答：
+问：报告交给谁？
+答：交给张老师
+问：需要图表吗？
+答：需要三张图表
+
+请结合以上回答继续生成方案。
+
+stdout | ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry
+RELOAD_CLARIFICATION {"status":"needs_clarification","gen":{"phase":"clarification","requestId":null,"turnId":null,"clientSeq":1,"threadId":"b3a2164a-d1f7-45e0-82e7-9672b63f9baa","draftId":"d76562c1-e488-49cb-a293-ab8a947f423e","userMessage":"保留我的要求","originalMessage":"保留我的要求","history":[],"isContinuation":true,"questions":[{"blocking_reason":"虚构：影响交付对象","options":["导师","班长"],"question":"报告交给谁？","question_id":"q1","related_requirement_key":null}],"error":null,"retained":null,"pendingAnalysis":null,"frozen":null,"progress":""},"input":{"userText":"保留我的要求","sourceIds":["532cc2eb-322e-4c41-b484-f818d8eb3b6c"],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}},"messages":2}
+
+ ✓ ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: second clarification must retain first explicit answer 28ms
+ ✓ ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: reloading clarification must recover a continuation entry 9ms
+stdout | ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation
+SWITCH_DRAFT {"oldId":"57011001-a9d6-4757-b5ff-fc8353bfa12f","pendingId":"3727b441-dd24-455d-9e9a-309816611fe5","activeId":"57011001-a9d6-4757-b5ff-fc8353bfa12f"}
+
+stdout | ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance
+FORGED_PROVENANCE_ADOPTION {"prepare":false}
+
+stdout | ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence
+QUESTION_AS_USER {"userMessage":"原始要求：请拆解报告，截止还没有决定\n\n此前的澄清问题与我的回答：\n问：是否把截止设为2026-11-30？\n答：不要设截止日期\n\n请结合以上回答继续生成方案。","prepared":true,"adopted":true,"deadline":{"value":"2026-11-30","precision":"date","source":"manual","from_note_id":null,"confirmed_at":"2026-11-25T13:33:16.716Z"}}
+
+stdout | ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload
+SUCCESS_RELOAD {"status":"needs_review","input":{"userText":"","sourceIds":[],"taskIds":[],"actionIds":[],"budgets":{},"unavailable":[],"startDate":null,"excerpts":{}}}
+
+ ✓ ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: changing active draft must invalidate late generation 70ms
+ ✓ ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW: invented user deadline must not become manual provenance 19ms
+ × ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence 25ms
+   → expected true to be false // Object.is equality
+ × ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload 6ms
+   → expected undefined to be 45 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW R1: assistant question rejected by user is not user deadline evidence
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ ../output/review-m2-r2-2026-11-25/edge.test.js:160:15
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  ../output/review-m2-r2-2026-11-25/edge.test.js > REVIEW R2: successful unplanned draft must restore original budget after reload
+AssertionError: expected undefined to be 45 // Object.is equality
+
+- Expected: 
+45
+
++ Received: 
+undefined
+
+ ❯ ../output/review-m2-r2-2026-11-25/edge.test.js:168:37
+    166|  setActivePinia(createPinia());app=useAppStore();await app.init();stor…
+    167|  console.log('SUCCESS_RELOAD',JSON.stringify({status:store.activeDraft…
+    168|  expect(store.input.budgets[today]).toBe(45);expect(store.input.source…
+       |                                     ^
+    169| });
+    170| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 4 passed (6)
+   Start at  21:33:15
+   Duration  1.12s (transform 145ms, setup 0ms, collect 331ms, tests 158ms, environment 0ms, prepare 49ms)
+
+JSON report written to E:/qoder/output/review-m2-r2-2026-11-25/edge-results.json

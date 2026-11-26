@@ -1,0 +1,110 @@
+{
+  "checks": [
+    {
+      "name": "previous_f1_finish",
+      "status": "done",
+      "completeHidden": true
+    },
+    {
+      "name": "previous_f1_rename",
+      "status": "done",
+      "title": "复验：完成后重命名",
+      "titleVisible": true
+    },
+    {
+      "name": "previous_f2_focus",
+      "inside": true
+    },
+    {
+      "name": "previous_f2_escape",
+      "parentOpen": 1,
+      "confirmClosed": true,
+      "taskExists": true
+    },
+    {
+      "name": "failed_entry",
+      "hash": "#/notes?bucket=failed",
+      "selected": "实验结果补充说明\n分析失败"
+    },
+    {
+      "name": "main_review_entry_after_reviewed",
+      "hash": "#/notes/n3",
+      "selected": "实验环境配置指南已审阅",
+      "text": "逐字段确认 · 带出处建任务\n已保存到本地\n收起原文\n资料队列\n待核对 · 2\n机器学习课程报告\n草稿\n4 项字段待确认\n开题答辩材料清单\n草稿\n1 项字段待确认\n失败 · 1\n实验结果补充说明\n分析失败\n已确认 · 1\n实验环境配置指南\n已审阅\n教程\n未归组\n标题\n已确认\n编辑\n实验环境配置指南\n查看原始数据\n手动截止建任务\n没有已确认的截止；可手动输入截止建任务。\n创建任务\n确认截止后，可带入任务\n更多操作\n原始资料\n实验环境配置指南：安装依赖并核对数据路径。\n\n收集于 2026年11月19日 18:19（北京时间） · 字段引用与原文同时查看"
+    },
+    {
+      "name": "library_return_initial",
+      "hash": "#/notes/n1?from=collect&return=/collect?q=%25E8%25AF%25BE%25E7%25A8%258B",
+      "backAvailable": true
+    },
+    {
+      "name": "library_return_after_queue_change",
+      "hash": "#/notes/n4?bucket=pending",
+      "backCount": 0
+    },
+    {
+      "name": "future_task_stays_on_note",
+      "hash": "#/notes/n1?bucket=pending",
+      "futureDate": "2026-11-29",
+      "successBar": true
+    },
+    {
+      "name": "future_task_location",
+      "hash": "#/today?view=week&task=8846fa12-8721-4234-bdbf-4447c44ba7b7&date=2026-11-29",
+      "futureDate": "2026-11-29",
+      "correctDate": true
+    },
+    {
+      "name": "task_source_return",
+      "before": "#/today?view=week&task=8846fa12-8721-4234-bdbf-4447c44ba7b7&date=2026-11-29",
+      "after": "#/today?task=8846fa12-8721-4234-bdbf-4447c44ba7b7&date=2026-11-29&view=week",
+      "sameContext": true
+    },
+    {
+      "name": "task_deeplink_refresh",
+      "open": true,
+      "hash": "#/today?task=8846fa12-8721-4234-bdbf-4447c44ba7b7&date=2026-11-29&view=week"
+    },
+    {
+      "name": "standalone_undated_result",
+      "hash": "#/today",
+      "visible": false,
+      "dialogCount": 0,
+      "undatedOpen": "false"
+    },
+    {
+      "name": "explicit_return_scroll",
+      "before": 1991,
+      "after": 0,
+      "scrollKeys": [],
+      "filter": "滚动列表资料"
+    },
+    {
+      "name": "field_draft_after_note_switch",
+      "hash": "#/notes/n4?bucket=pending",
+      "draftInput": "仅属于第一份便签的未保存草稿",
+      "secondTitleBefore": "开题答辩材料清单"
+    },
+    {
+      "name": "field_draft_save_on_second_note",
+      "secondTitle": "仅属于第一份便签的未保存草稿"
+    },
+    {
+      "name": "mobile_main_review_entry",
+      "hash": "#/notes/n3",
+      "reviewedTitle": true
+    },
+    {
+      "name": "mobile_task_return",
+      "backVisible": true,
+      "dialogOpen": true,
+      "width": {
+        "scroll": 390,
+        "viewport": 390
+      }
+    }
+  ],
+  "errors": [],
+  "seed": "虚构种子（f1f2 种子 + n4/s4 开题答辩）",
+  "scope": "isolated headless Edge; /api/analyze aborted; 方案 §4 导航验收"
+}

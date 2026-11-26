@@ -1,0 +1,265 @@
+{
+  "id": "g19-outside-window-order",
+  "title": "反例：窗口外截止保留真实先后，优先级不得反超",
+  "layer": "planning",
+  "mode": "accept",
+  "target": "planning_golden",
+  "acceptance": [
+    "B0-06"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "input": {
+      "algorithm_version": "daily-v1",
+      "timezone": "Asia/Shanghai",
+      "start_date": "2026-11-24",
+      "horizon_days": 7,
+      "buffer_pct": 0,
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 0
+        }
+      ],
+      "task_facts": [
+        {
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-soon"
+          },
+          "title": "虚构目标",
+          "deadline_value": "2026-12-01",
+          "deadline_precision": "date",
+          "overdue_consent": false,
+          "status": "todo"
+        },
+        {
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-later"
+          },
+          "title": "虚构目标",
+          "deadline_value": "2026-12-20",
+          "deadline_precision": "date",
+          "overdue_consent": false,
+          "status": "todo"
+        }
+      ],
+      "work_items": [
+        {
+          "key": "soon",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-soon"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-soon"
+          },
+          "deliverable": "soon 的虚构产出",
+          "remaining_minutes": 60,
+          "estimate_origin": "model",
+          "splittable": true,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "low"
+        },
+        {
+          "key": "later",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-later"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-later"
+          },
+          "deliverable": "later 的虚构产出",
+          "remaining_minutes": 60,
+          "estimate_origin": "model",
+          "splittable": true,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "high"
+        }
+      ],
+      "occupancy": [],
+      "replacement_ids": [],
+      "extra_work_acknowledged": []
+    },
+    "result": {
+      "segments": [
+        {
+          "segment_key": "s1",
+          "work_item_key": "soon",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-soon"
+          },
+          "suggested_action_ref": {
+            "kind": "draft",
+            "key": "a-soon"
+          },
+          "date": "2026-11-24",
+          "minutes": 60,
+          "order": 1,
+          "action_text": "soon 当日虚构工作",
+          "deliverable": "soon 的虚构产出"
+        }
+      ],
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 60,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 60,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 0,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        }
+      ],
+      "unscheduled": [
+        {
+          "work_item_key": "later",
+          "remaining_minutes": 60,
+          "reason": "deadline_window"
+        }
+      ],
+      "unknown_items": [],
+      "excluded_items": [],
+      "conflicts": [],
+      "warnings": [],
+      "complete": false
+    }
+  },
+  "expected_error": null,
+  "expected": {
+    "initial_free_by_day": [
+      60,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "allocated_by_day": [
+      60,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "final_free_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "overbooked_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scheduled_total": 60,
+    "unscheduled": [
+      {
+        "work_item_key": "later",
+        "remaining_minutes": 60,
+        "reason": "deadline_window"
+      }
+    ],
+    "unknown_count": 0,
+    "complete": false
+  },
+  "notes": "R3 整改：排序用未裁剪保守截止日；12-01 早于 12-20，low 仍先于 high"
+}

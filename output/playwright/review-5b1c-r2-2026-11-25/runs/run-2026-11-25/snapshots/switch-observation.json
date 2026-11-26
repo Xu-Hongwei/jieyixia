@@ -1,0 +1,17 @@
+{
+  "armed": {
+    "ok": true
+  },
+  "sw": {
+    "commit": {
+      "ok": false,
+      "code": "NOT_FOUND",
+      "workspace_id": "ws-1c-sw-a"
+    },
+    "digestCalls": 1,
+    "afterA": {
+      "rev": 2,
+      "status": "generating"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+/* First backend bridge: keep the API affordance visible without turning it into a second navigation. */
+.pn-backend-panel{display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:205px;color:#765646}
+.pn-backend-panel>div{display:flex;align-items:center;gap:8px}
+.pn-backend-kicker{font:9px CMono,var(--pn-font);letter-spacing:1px;color:#a06f55;white-space:nowrap}
+.pn-backend-status{font:10px var(--pn-font);color:#9a7b63;white-space:nowrap}
+.pn-backend-status[data-state=ready]{color:#527258}
+.pn-backend-status[data-state=warning]{color:#9b6c35}
+.pn-backend-status[data-state=error]{color:#a34f3b}
+.pn-backend-status[data-state=loading]{color:#a06f55}
+.pn-backend-panel button{font:10px var(--pn-font);min-height:31px;padding:6px 9px;border:1px solid #b9866a66;color:#81543f;background:#fff7e54c;border-radius:2px;white-space:nowrap}
+.pn-backend-panel button:hover:not(:disabled){background:#fff8e6;color:#6e3f2f}
+.pn-backend-panel button:disabled{opacity:.5;cursor:wait}
+.pn-board-bottom>.pn-backend-panel{margin-left:auto}
+.pn-calendar-heading>.pn-backend-panel{align-self:end;margin-left:auto}
+@media(max-width:1100px){.pn-board-bottom{flex-wrap:wrap}.pn-board-bottom>.pn-backend-panel{order:4;margin-left:0;width:100%}.pn-calendar-heading{flex-wrap:wrap}.pn-calendar-heading>.pn-backend-panel{order:3;margin-left:0;width:100%}}
+@media(max-width:650px){.pn-backend-panel{min-width:0;gap:6px}.pn-backend-panel>div{width:100%}.pn-backend-panel button{flex:1}.pn-calendar-heading>.pn-backend-panel{margin-top:2px}.pn-board-bottom>.pn-backend-panel{padding-top:4px}}

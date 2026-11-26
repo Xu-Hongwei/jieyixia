@@ -1,0 +1,2 @@
+[OK] 已生成 schema.json（92 个定义）、typedefs.d.ts、limits.json
+[OK] 154 份样本容器合法（结构/语义/金标校验见 selftest.py）

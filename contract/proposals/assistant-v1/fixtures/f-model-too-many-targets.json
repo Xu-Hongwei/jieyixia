@@ -1,0 +1,123 @@
+{
+  "id": "f-model-too-many-targets",
+  "title": "21 个目标超上限",
+  "layer": "model",
+  "mode": "reject",
+  "target": "AssistantModelProposal",
+  "acceptance": [
+    "B0-20"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "task_proposals": [
+      {
+        "op": "create",
+        "key": "t0",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t1",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t2",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t3",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t4",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t5",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t6",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t7",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t8",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t9",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t10",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t11",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t12",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t13",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t14",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t15",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t16",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t17",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t18",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t19",
+        "title": "x"
+      },
+      {
+        "op": "create",
+        "key": "t20",
+        "title": "x"
+      }
+    ]
+  },
+  "expected_error": "20",
+  "expected": null,
+  "notes": ""
+}

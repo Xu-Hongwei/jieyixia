@@ -1,0 +1,300 @@
+{
+  "at": "2026-11-24T05:36:39.607Z",
+  "seed": "c01-docs-snapshot.json（C01 真实页面生成；测试辅助复制进独立 Context）",
+  "results": [
+    {
+      "item": "C03",
+      "name": "真实 UI 开始独立工作，运行会话落库",
+      "pass": true,
+      "detail": "65bd4225-19ef-408c-a2fe-2d949129bbaf"
+    },
+    {
+      "item": "C03",
+      "name": "运行中删除任务：提交被事务拒绝并弹保护引导（含前往处理）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "运行中删除行动：事务拒绝并弹保护引导（含前往处理）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "运行中完成任务：事务拒绝",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "运行中便签联删：事务拒绝",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "运行中四类入口零业务写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "真实暂停：running=false 且仍未结束",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "暂停≠结束：删除行动仍被拒绝，引导标注已暂停",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "暂停中删除任务：提交仍被事务拒绝（暂停不解除保护）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "暂停中完成任务仍被拒绝",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "暂停分支零业务写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "结束并保存后删除确认恢复可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "安排关联运行会话：确认预禁用 + 查看未结束工作入口",
+      "pass": true,
+      "detail": "disabled=true entry=1"
+    },
+    {
+      "item": "C03",
+      "name": "安排关联会话暂停后仍预禁用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "安排会话结束并保存后确认恢复可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C03",
+      "name": "取消删除不产生写入（任务仍在）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "删除确认展示安排影响预览",
+      "pass": true,
+      "detail": "impact=1 detail=0"
+    },
+    {
+      "item": "C04",
+      "name": "Task+行动+无引用 planned（P3/P5）随删；有历史安排保留",
+      "pass": true,
+      "detail": "hist=3"
+    },
+    {
+      "item": "C04",
+      "name": "保留安排引用标为 deleted",
+      "pass": true,
+      "detail": "deleted,deleted,deleted"
+    },
+    {
+      "item": "C04",
+      "name": "已结束会话全保留：正文/卡点/累计/起止/快照原事实",
+      "pass": true,
+      "detail": "n=4"
+    },
+    {
+      "item": "C04",
+      "name": "被删任务会话引用标 deleted（含行动引用）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "无活引用悬空：保留安排的反向会话仍存在",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "工作记录详情仍可读成果正文并标注引用已删除",
+      "pass": true,
+      "detail": "body=1 badge=3"
+    },
+    {
+      "item": "C04",
+      "name": "日程历史可打开被删任务的安排详情（只读历史）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "历史不伪装成可开始活任务",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "删除 A2：行动移除，安排与会话不动",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "删除当前行动 A1：当前选择清空，会话行动引用 deleted",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "会话行动快照保留原文，不重绑同名行动",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "删除行动不删除 PlanItem",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C04",
+      "name": "planned 有结束历史：删除拒绝 + 核对进度入口",
+      "pass": true,
+      "detail": "disabled=true entry=1"
+    },
+    {
+      "item": "C04",
+      "name": "拒绝后零写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C05",
+      "name": "联删预览列真实影响范围与边界",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C05",
+      "name": "取消联删零写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C05",
+      "name": "确认联删：便签+任务+无引用安排移除；图片便签不被继续联删",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C05",
+      "name": "联删后历史保留与引用闭合与直接删任务一致",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C06",
+      "name": "撤销：任务/行动/随删安排（P3/P5）按原 ID 恢复，无重复",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C06",
+      "name": "撤销：会话与安排引用回补 active，历史成果不变",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C06",
+      "name": "撤销不重算/清空历史成果",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C06",
+      "name": "双击恢复不产生重复对象",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C06",
+      "name": "切空间后上一空间撤销不作用于当前空间（lastDeleted 清理）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C06",
+      "name": "边界如实：刷新后 lastDeleted 不恢复（内存态）",
+      "pass": true,
+      "detail": "既有边界，交回说明"
+    },
+    {
+      "item": "C06",
+      "name": "同 ID 已有新版本：整次拒绝，不覆盖后来修改",
+      "pass": true,
+      "detail": "banner=1"
+    },
+    {
+      "item": "C06",
+      "name": "部分拒绝：任务恢复，被改会话引用保持断开且修改不被覆盖，其余回补",
+      "pass": true,
+      "detail": "warn=1"
+    },
+    {
+      "item": "C06",
+      "name": "部分引用回补被拒有真实提示（区别于整次拒绝）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C06",
+      "name": "仅正文补充：引用照常回补 active，补充正文保留不被覆盖",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C07",
+      "name": "确认期间它页新增行动：旧确认被事务拒绝并重开核对",
+      "pass": true,
+      "detail": "notice=1"
+    },
+    {
+      "item": "C07",
+      "name": "重新核对最新影响后确认成功",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "C07",
+      "name": "确认期间它页开始工作：旧确认被拒绝（非仅禁用按钮）",
+      "pass": true,
+      "detail": "blockUi=1"
+    },
+    {
+      "item": "C07",
+      "name": "拒绝后会话与任务均完好",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

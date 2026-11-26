@@ -1,0 +1,21 @@
+{
+  "id": "s-recheck-receipt-diff",
+  "title": "同ID异签名→拒绝",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-12"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "adoption_recheck",
+    "event": "receipt_exists_different_signature"
+  },
+  "expected_error": null,
+  "expected": {
+    "outcome": "reject",
+    "business_writes": 0
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

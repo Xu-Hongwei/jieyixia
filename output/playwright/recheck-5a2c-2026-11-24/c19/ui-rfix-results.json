@@ -1,0 +1,222 @@
+{
+  "at": "2026-11-24T05:33:18.125Z",
+  "today": "2026-11-24",
+  "results": [
+    {
+      "item": "RF1",
+      "name": "开框显示今天安排日与「今天」关系标记",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF1",
+      "name": "差异框列出安排日期变化（旧→新）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF1",
+      "name": "未重新确认前显示仍是开框冻结版（今天标记不漂移）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF1",
+      "name": "重确认后安排日/关系/说明全部换到新版（明天+改后说明+提前执行）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF1",
+      "name": "重确认后日期勾选重置：未勾选不能开始",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF1",
+      "name": "再次改期：差异框期间显示仍是上一次确认版（明天）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF1",
+      "name": "第二次重确认跟随到后天且勾选再次重置",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF1",
+      "name": "最终按最新确认版创建唯一会话（关联原安排）",
+      "pass": true,
+      "detail": "{\"count\":1}"
+    },
+    {
+      "item": "RF2",
+      "name": "读取失败进入待核实：重试读取/取消可用，不卡「正在开始…」",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF2",
+      "name": "待核实只提供重读，不提供原信封重试（不重新创建）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF2",
+      "name": "会话其实已创建（IDB 真实存在，未结束）",
+      "pass": true,
+      "detail": "{\"count\":1}"
+    },
+    {
+      "item": "RF2",
+      "name": "重试读取后进入工作页，会话仍只有一条（未重新 begin）",
+      "pass": true,
+      "detail": "{\"count\":1}"
+    },
+    {
+      "item": "RF3",
+      "name": "missing：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作",
+      "pass": true,
+      "detail": "plain=0 planEntry=0"
+    },
+    {
+      "item": "RF3",
+      "name": "cross-task：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作",
+      "pass": true,
+      "detail": "plain=0 planEntry=0"
+    },
+    {
+      "item": "RF3",
+      "name": "dead-ref：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作",
+      "pass": true,
+      "detail": "plain=0 planEntry=0"
+    },
+    {
+      "item": "RF3",
+      "name": "cross-ws：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作",
+      "pass": true,
+      "detail": "plain=0 planEntry=0"
+    },
+    {
+      "item": "RF3",
+      "name": "cross-ws 不自动切换空间",
+      "pass": true,
+      "detail": "personal"
+    },
+    {
+      "item": "RF3",
+      "name": "确认后创建独立会话（plan_item_id=null），return 不含失效 plan",
+      "pass": true,
+      "detail": "{\"count\":1,\"plan\":null}"
+    },
+    {
+      "item": "RF3",
+      "name": "打开后失效：入口反应式切换，普通开始执行/安排入口消失",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF3",
+      "name": "无 plan 上下文的普通开始执行保持兼容（独立会话）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF4",
+      "name": "去任务选择行动携带已验证来源（view=list）与 plan 上下文",
+      "pass": true,
+      "detail": "#/tasks/t-rf4a?plan=p-rf4a&return=/today?date=2026-11-25&view=list&plan=p-rf4a"
+    },
+    {
+      "item": "RF4",
+      "name": "完成返回：同周不同日也定位安排日，来源列表视图保留",
+      "pass": true,
+      "detail": "#/today?date=2026-11-25&view=list&plan=p-rf4a&recorded=786d1753-6fbc-41b3-8bfa-24deabbbf9c5"
+    },
+    {
+      "item": "RF4",
+      "name": "目标日（明天）安排历史自动展开且历史卡可见",
+      "pass": true,
+      "detail": "expanded=true"
+    },
+    {
+      "item": "RF4",
+      "name": "手动收起历史后保持收起（不强制再展开）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF4",
+      "name": "手动选今天后停留在今天（不强制跳回安排日）",
+      "pass": true,
+      "detail": "#/today?view=list&plan=p-rf4a&recorded=786d1753-6fbc-41b3-8bfa-24deabbbf9c5"
+    },
+    {
+      "item": "RF4",
+      "name": "360px 返回：URL 定位安排日，日期条选中明天而非今天",
+      "pass": true,
+      "detail": "#/today?date=2026-11-25&plan=p-rf4b&recorded=fb3600b8-ac17-4485-b862-803ee8711e4e target=true today=false"
+    },
+    {
+      "item": "RF4",
+      "name": "360px 选中日两区展示安排日内容，完成历史自动展开",
+      "pass": true,
+      "detail": "expanded=true"
+    },
+    {
+      "item": "RF4",
+      "name": "360px 手动选今天后停留今天（不强制跳回）",
+      "pass": true,
+      "detail": "#/today?plan=p-rf4b&recorded=fb3600b8-ac17-4485-b862-803ee8711e4e"
+    },
+    {
+      "item": "RF5",
+      "name": "360px 定位 A：历史自动展开且 A 卡片可见",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF5",
+      "name": "手动收起历史 aria-expanded=false",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF5",
+      "name": "同日换目标 B（仅换 plan）：历史重新展开且 B 卡片可见",
+      "pass": true,
+      "detail": "expanded=true visible=true"
+    },
+    {
+      "item": "RF5",
+      "name": "同目标普通 store 刷新：保持手动收起，不强制重开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF5",
+      "name": "普通区定位第 1 项：不展开（前 3 项可见）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF5",
+      "name": "普通区换目标第 5 项：自动展开且卡片在真实滚动容器内可见",
+      "pass": true,
+      "detail": "{\"found\":true,\"boxed\":true,\"inside\":true,\"rtop\":1012,\"ctop\":730,\"rbot\":1082,\"cbot\":1082}"
+    },
+    {
+      "item": "RF5",
+      "name": "目标先在普通区：planned 卡片可见",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "RF5",
+      "name": "同 ID 从普通区转入历史区：历史自动展开且卡片可见",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "checks": [
+    {
+      "name": "预览不写目录且原数据不变",
+      "pass": true
+    },
+    {
+      "name": "末个存储区失败时目录和协调记录回滚且原库不变",
+      "pass": true
+    },
+    {
+      "name": "双击仅创建一个恢复空间",
+      "pass": true,
+      "detail": {
+        "count": 1
+      }
+    },
+    {
+      "name": "原空间完整字段和原图哈希不变",
+      "pass": true
+    },
+    {
+      "name": "恢复10份记录及2份资料且全部新ID",
+      "pass": true
+    },
+    {
+      "name": "未结束会话暂停并具备恢复协调记录",
+      "pass": true
+    },
+    {
+      "name": "刷新后目标空间仍可选择",
+      "pass": true
+    },
+    {
+      "name": "恢复工作可接管核对并到达可继续状态",
+      "pass": true
+    },
+    {
+      "name": "页面无运行时错误",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,94 @@
+{
+  "checks": [
+    {
+      "name": "七列周视图",
+      "pass": true
+    },
+    {
+      "name": "无后端状态和联调按钮",
+      "pass": true
+    },
+    {
+      "name": "无技术文案",
+      "pass": true
+    },
+    {
+      "name": "接口仍可显式调用",
+      "pass": true
+    },
+    {
+      "name": "月视图可切换",
+      "pass": true
+    },
+    {
+      "name": "本周回到北京时间",
+      "pass": true
+    },
+    {
+      "name": "便签墙包含三条安排",
+      "pass": true
+    },
+    {
+      "name": "便签纸面翻面",
+      "pass": true
+    },
+    {
+      "name": "标记完成",
+      "pass": true
+    },
+    {
+      "name": "刷新保留完成状态",
+      "pass": true
+    },
+    {
+      "name": "新建任务进入便签墙",
+      "pass": true
+    },
+    {
+      "name": "刷新保留新建任务",
+      "pass": true
+    },
+    {
+      "name": "从今天取下",
+      "pass": true
+    },
+    {
+      "name": "未安排任务仍在清单",
+      "pass": true
+    },
+    {
+      "name": "详情打开",
+      "pass": true
+    },
+    {
+      "name": "调整安排已保存",
+      "pass": true
+    },
+    {
+      "name": "取消重置保留修改",
+      "pass": true
+    },
+    {
+      "name": "确认重置恢复七条示例",
+      "pass": true
+    },
+    {
+      "name": "窄屏无横向溢出",
+      "pass": true
+    },
+    {
+      "name": "窄屏便签可读",
+      "pass": true
+    },
+    {
+      "name": "默认没有 API 请求",
+      "pass": true
+    },
+    {
+      "name": "页面无运行错误",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "api": []
+}

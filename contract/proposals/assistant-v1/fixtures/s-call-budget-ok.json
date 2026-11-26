@@ -1,0 +1,25 @@
+{
+  "id": "s-call-budget-ok",
+  "title": "完整操作：3次analyze+2次propose尝试",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-17"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "scenario": "call_budget",
+    "analyze_calls": 3,
+    "analyze_attempts_total": 6,
+    "propose_attempts": 2
+  },
+  "expected_error": null,
+  "expected": {
+    "allowed": true,
+    "total_vendor_attempts": 8,
+    "all_attempts_consume_daily_quota": true,
+    "propose_budget_covers_all_its_attempts": true
+  },
+  "notes": "特定算例：每次 analyze 仅一个 retries=1 profile（各2次尝试），3×2+2=8 不是普适最坏上限；2次仅指一次propose；全部厂家尝试消耗共享每日额度"
+}

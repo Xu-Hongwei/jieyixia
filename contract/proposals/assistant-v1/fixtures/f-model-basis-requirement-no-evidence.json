@@ -1,0 +1,25 @@
+{
+  "id": "f-model-basis-requirement-no-evidence",
+  "title": "basis=requirement 无证据",
+  "layer": "model",
+  "mode": "reject",
+  "target": "ActionProposalCreate",
+  "acceptance": [
+    "B0-04"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "op": "create",
+    "key": "a1",
+    "task_ref": {
+      "kind": "existing",
+      "id": "t-1"
+    },
+    "text": "x",
+    "minutes": 30,
+    "basis": "requirement"
+  },
+  "expected_error": "必须给证据",
+  "expected": null,
+  "notes": ""
+}

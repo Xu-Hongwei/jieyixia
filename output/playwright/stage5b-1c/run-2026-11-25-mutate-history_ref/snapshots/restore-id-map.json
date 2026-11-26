@@ -1,0 +1,44 @@
+{
+  "wsId": "ws-restore-28a2d561-99f6-48fb-8c43-c8c61d1be069",
+  "signatureMatch": true,
+  "seqLen": 10,
+  "used": 8,
+  "liveCount": 8,
+  "live": [
+    [
+      "s-course",
+      "c3b0241d-1317-4dda-ae80-2a997746a265"
+    ],
+    [
+      "a-course",
+      "e8b84965-f14d-4a97-8f36-2dce0ad2e244"
+    ],
+    [
+      "n-course",
+      "f62a2079-4b25-465c-8533-9d4cfa994e89"
+    ],
+    [
+      "p-other",
+      "915d1f9b-f5c1-4e32-9e92-29898f2ecdb5"
+    ],
+    [
+      "t-course",
+      "ba373950-3db3-40fe-b735-35d09bdc5a29"
+    ],
+    [
+      "t-other",
+      "e9d017d3-022b-49d8-8387-052b7e0e4673"
+    ],
+    [
+      "ws-1c-main-id-1",
+      "1d996171-3489-4eb7-9633-f10305bd3637"
+    ],
+    [
+      "ws-1c-main-id-2",
+      "6a690440-a93d-463b-943e-056910bf0be7"
+    ]
+  ],
+  "history": [],
+  "sig": "{\"live\":[[\"a-course\",\"e8b84965-f14d-4a97-8f36-2dce0ad2e244\"],[\"n-course\",\"f62a2079-4b25-465c-8533-9d4cfa994e89\"],[\"p-other\",\"915d1f9b-f5c1-4e32-9e92-29898f2ecdb5\"],[\"s-course\",\"c3b0241d-1317-4dda-ae80-2a997746a265\"],[\"t-course\",\"ba373950-3db3-40fe-b735-35d09bdc5a29\"],[\"t-other\",\"e9d017d3-022b-49d8-8387-052b7e0e4673\"],[\"ws-1c-main-id-1\",\"1d996171-3489-4eb7-9633-f10305bd3637\"],[\"ws-1c-main-id-2\",\"6a690440-a93d-463b-943e-056910bf0be7\"]],\"history\":[]}",
+  "expectedSig": "{\"live\":[[\"a-course\",\"e8b84965-f14d-4a97-8f36-2dce0ad2e244\"],[\"n-course\",\"f62a2079-4b25-465c-8533-9d4cfa994e89\"],[\"p-other\",\"915d1f9b-f5c1-4e32-9e92-29898f2ecdb5\"],[\"s-course\",\"c3b0241d-1317-4dda-ae80-2a997746a265\"],[\"t-course\",\"ba373950-3db3-40fe-b735-35d09bdc5a29\"],[\"t-other\",\"e9d017d3-022b-49d8-8387-052b7e0e4673\"],[\"ws-1c-main-id-1\",\"1d996171-3489-4eb7-9633-f10305bd3637\"],[\"ws-1c-main-id-2\",\"6a690440-a93d-463b-943e-056910bf0be7\"]],\"history\":[]}"
+}

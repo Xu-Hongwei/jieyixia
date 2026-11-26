@@ -1,0 +1,57 @@
+{
+  "id": "f-threads-payload",
+  "title": "助手线程 payload",
+  "layer": "backup",
+  "mode": "accept",
+  "target": "AssistantThreadsPayload",
+  "acceptance": [
+    "B0-15"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "schema_version": "0.5.0",
+    "threads": [
+      {
+        "id": "th-1",
+        "record_version": 1,
+        "workspace_id": "ws-fixture",
+        "title": "虚构规划对话",
+        "messages": [
+          {
+            "id": "m1",
+            "role": "user",
+            "content": "每天最多一小时",
+            "type": "text",
+            "refs": [],
+            "created_at": "2026-11-24T10:00:00+08:00"
+          },
+          {
+            "id": "m2",
+            "role": "assistant",
+            "content": "已整理两个目标",
+            "type": "proposal_card",
+            "refs": [
+              {
+                "object_type": "draft",
+                "id": "d-1"
+              }
+            ],
+            "created_at": "2026-11-24T10:00:00+08:00"
+          }
+        ],
+        "selected_refs": [
+          {
+            "object_type": "source",
+            "id": "s-1"
+          }
+        ],
+        "confirmed_requirements": [],
+        "created_at": "2026-11-24T10:00:00+08:00",
+        "updated_at": "2026-11-24T10:00:00+08:00"
+      }
+    ]
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

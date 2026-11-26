@@ -1,0 +1,25 @@
+{
+  "id": "f-confirm-deadline-raw-string",
+  "title": "task/deadline 确认：裸字符串不是投影",
+  "layer": "model",
+  "mode": "reject",
+  "target": "UserConfirmation",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "confirmation_id": "cf-1",
+    "draft_revision": 1,
+    "object_type": "task",
+    "object_id_or_key": "t-new",
+    "id_scope": "draft",
+    "field_path": "deadline",
+    "old_value": null,
+    "new_value": "2026-11-26",
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": "投影",
+  "expected": null,
+  "notes": ""
+}

@@ -1,0 +1,22 @@
+{
+  "id": "s-transition-applied-ready",
+  "title": "applied 不得回 ready",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-09",
+    "B0-13"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "draft_transition",
+    "from": "applied",
+    "to": "ready"
+  },
+  "expected_error": null,
+  "expected": {
+    "allowed": false
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

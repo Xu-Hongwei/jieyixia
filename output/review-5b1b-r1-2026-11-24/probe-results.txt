@@ -1,0 +1,33 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+ ✓ ../output/review-5b1b-r1-2026-11-24/review.test.js > fixed R1: new occupancy and midnight block ready 202ms
+ ✓ ../output/review-5b1b-r1-2026-11-24/review.test.js > fixed R2: unchanged reschedule retains revision 23ms
+ ✓ ../output/review-5b1b-r1-2026-11-24/review.test.js > fixed R3: acknowledged known gap permits ready 24ms
+ ✓ ../output/review-5b1b-r1-2026-11-24/review.test.js > fixed R4: unknown nested field rejected atomically 21ms
+stdout | ../output/review-5b1b-r1-2026-11-24/review.test.js > remaining R1: newly confirmed zero daily budget does not invalidate old ready
+DEFECT requirements drift: confirmed budget=0, stored budgets= [
+  120, 120, 120,
+  120, 120, 120,
+  120
+] ready= true
+
+stdout | ../output/review-5b1b-r1-2026-11-24/review.test.js > new regression: approved proposed deadline mistaken for live fact drift
+DEFECT legitimate deadline preview: [ { code: 'TASK_DEADLINE_CHANGED', message: '事实已变化：目标 t-1 截止已变化' } ]
+
+stdout | ../output/review-5b1b-r1-2026-11-24/review.test.js > remaining R1: text evidence hashes empty bytes and content changes stay fresh
+DEFECT text fingerprint: {
+  source_id: 's-1',
+  sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+  bytes: 0
+} changed text fresh: true
+
+ ✓ ../output/review-5b1b-r1-2026-11-24/review.test.js > remaining R1: newly confirmed zero daily budget does not invalidate old ready 28ms
+ ✓ ../output/review-5b1b-r1-2026-11-24/review.test.js > new regression: approved proposed deadline mistaken for live fact drift 24ms
+ ✓ ../output/review-5b1b-r1-2026-11-24/review.test.js > remaining R1: text evidence hashes empty bytes and content changes stay fresh 24ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  19:05:23
+   Duration  1.24s (transform 84ms, setup 0ms, collect 66ms, tests 348ms, environment 0ms, prepare 87ms)
+

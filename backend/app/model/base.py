@@ -46,6 +46,7 @@ class VisionModel(Protocol):
         user_text: str,
         image_b64: str | None,
         media_type: str,
+        deadline: float | None = None,
     ) -> str: ...
 
 

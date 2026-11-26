@@ -1,0 +1,193 @@
+{
+  "oldPageAfterOtherOwnerEnd": {
+    "sid": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+    "newOwner": {
+      "takeover": {
+        "ok": true,
+        "code": null,
+        "workspace_id": "personal",
+        "session_id": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+        "request_id": "3e9365c3-8bb1-437b-8241-30e7414845e9",
+        "revision": 2,
+        "issued_at_ms": 1795226442000,
+        "session": {
+          "id": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+          "kind": "focus_session",
+          "workspace_id": "personal",
+          "task_id": "t1",
+          "action_id": "a1",
+          "plan_item_id": null,
+          "started_at": "2026-11-21T02:00:02.000Z",
+          "accumulated_ms": 0,
+          "running": true,
+          "draft_md": "",
+          "outcome": null,
+          "blocker": null,
+          "ended_at": null,
+          "is_demo": false,
+          "record_version": 1,
+          "timer_anchor_at": "2026-11-21T02:00:02.000Z",
+          "task_snapshot": {
+            "title": "完成简历初稿",
+            "matter_name": "求职准备",
+            "deadline_value": "2026-11-25T18:00",
+            "deadline_precision": "datetime",
+            "captured_at": "2026-11-21T02:00:02.000Z"
+          },
+          "action_snapshot": {
+            "text": "写教育背景",
+            "minutes": 25,
+            "captured_at": "2026-11-21T02:00:02.000Z"
+          },
+          "task_ref_state": "active",
+          "action_ref_state": "active"
+        },
+        "draft_seq": 0,
+        "recovery": {
+          "reason": "takeover",
+          "since": "2026-11-21T02:00:02.000Z",
+          "pending_ms": 40000
+        }
+      },
+      "recover": {
+        "ok": true,
+        "code": null,
+        "workspace_id": "personal",
+        "session_id": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+        "request_id": "669c721c-4256-4e6e-8b95-b82c3ab465fe",
+        "revision": 3,
+        "issued_at_ms": 1795226442000,
+        "session": {
+          "id": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+          "kind": "focus_session",
+          "workspace_id": "personal",
+          "task_id": "t1",
+          "action_id": "a1",
+          "plan_item_id": null,
+          "started_at": "2026-11-21T02:00:02.000Z",
+          "accumulated_ms": 0,
+          "running": true,
+          "draft_md": "",
+          "outcome": null,
+          "blocker": null,
+          "ended_at": null,
+          "is_demo": false,
+          "record_version": 1,
+          "timer_anchor_at": "2026-11-21T02:00:42.000Z",
+          "task_snapshot": {
+            "title": "完成简历初稿",
+            "matter_name": "求职准备",
+            "deadline_value": "2026-11-25T18:00",
+            "deadline_precision": "datetime",
+            "captured_at": "2026-11-21T02:00:02.000Z"
+          },
+          "action_snapshot": {
+            "text": "写教育背景",
+            "minutes": 25,
+            "captured_at": "2026-11-21T02:00:02.000Z"
+          },
+          "task_ref_state": "active",
+          "action_ref_state": "active"
+        },
+        "draft_seq": 0
+      },
+      "end": {
+        "ok": true,
+        "code": null,
+        "workspace_id": "personal",
+        "session_id": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+        "request_id": "859a080c-b43c-4230-b42e-9fb2e39a16a8",
+        "revision": 4,
+        "issued_at_ms": 1795226442000,
+        "session": {
+          "id": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+          "kind": "focus_session",
+          "workspace_id": "personal",
+          "task_id": "t1",
+          "action_id": "a1",
+          "plan_item_id": null,
+          "started_at": "2026-11-21T02:00:02.000Z",
+          "accumulated_ms": 0,
+          "running": false,
+          "draft_md": "新持有者已保存的最终成果",
+          "outcome": "partial",
+          "blocker": null,
+          "ended_at": "2026-11-21T02:00:42.000Z",
+          "is_demo": false,
+          "record_version": 1,
+          "timer_anchor_at": null,
+          "task_snapshot": {
+            "title": "完成简历初稿",
+            "matter_name": "求职准备",
+            "deadline_value": "2026-11-25T18:00",
+            "deadline_precision": "datetime",
+            "captured_at": "2026-11-21T02:00:02.000Z"
+          },
+          "action_snapshot": {
+            "text": "写教育背景",
+            "minutes": 25,
+            "captured_at": "2026-11-21T02:00:02.000Z"
+          },
+          "task_ref_state": "active",
+          "action_ref_state": "active"
+        },
+        "draft_seq": 1
+      }
+    },
+    "url": "http://127.0.0.1:5183/#/work/d0121c85-9f14-48cc-81e8-4a6b2d976129?return=/tasks/t1",
+    "oldTextVisible": true,
+    "editorCount": 0,
+    "db": {
+      "id": "d0121c85-9f14-48cc-81e8-4a6b2d976129",
+      "kind": "focus_session",
+      "workspace_id": "personal",
+      "task_id": "t1",
+      "action_id": "a1",
+      "plan_item_id": null,
+      "started_at": "2026-11-21T02:00:02.000Z",
+      "accumulated_ms": 0,
+      "running": false,
+      "draft_md": "新持有者已保存的最终成果",
+      "outcome": "partial",
+      "blocker": null,
+      "ended_at": "2026-11-21T02:00:42.000Z",
+      "is_demo": false,
+      "record_version": 1,
+      "timer_anchor_at": null,
+      "task_snapshot": {
+        "title": "完成简历初稿",
+        "matter_name": "求职准备",
+        "deadline_value": "2026-11-25T18:00",
+        "deadline_precision": "datetime",
+        "captured_at": "2026-11-21T02:00:02.000Z"
+      },
+      "action_snapshot": {
+        "text": "写教育背景",
+        "minutes": 25,
+        "captured_at": "2026-11-21T02:00:02.000Z"
+      },
+      "task_ref_state": "active",
+      "action_ref_state": "active"
+    },
+    "errors": []
+  },
+  "reopenEndedWork": {
+    "url": "http://127.0.0.1:5183/#/work/d0121c85-9f14-48cc-81e8-4a6b2d976129",
+    "oldTextVisible": true
+  },
+  "escapeLeave": {
+    "dialogCount": 0,
+    "navigation": "cancelled",
+    "url": "http://127.0.0.1:5183/#/work/d3af9d9d-3044-4b05-aca9-b04da5d03467?return=/tasks/t1",
+    "errors": []
+  },
+  "normalDeleteUndo": {
+    "deleted": true,
+    "undo": {
+      "ok": true
+    },
+    "restoredTask": true,
+    "restoredAction": true,
+    "errors": []
+  }
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "case": "C1_task_missing_id_scope",
+    "passed": true
+  },
+  {
+    "case": "C1_task_bad_id_scope",
+    "passed": true
+  },
+  {
+    "case": "C1_nontask_with_id_scope",
+    "passed": true
+  },
+  {
+    "case": "C1_formal_scope_accepted",
+    "passed": true
+  },
+  {
+    "case": "C2_missing_new_value",
+    "passed": true
+  },
+  {
+    "case": "C2_missing_old_value",
+    "passed": true
+  },
+  {
+    "case": "C2_explicit_null_accepted",
+    "passed": true
+  },
+  {
+    "case": "C2_roundtrip_explicit_null_survives_python",
+    "passed": true
+  },
+  {
+    "case": "C2_roundtrip_explicit_null_survives_json",
+    "passed": true
+  },
+  {
+    "case": "C2_exclude_unset_keeps_explicit_null",
+    "passed": true
+  }
+]

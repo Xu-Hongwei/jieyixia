@@ -1,0 +1,28 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+stdout | ../output/review-5b1b-2026-11-24/review.test.js > R1: changed live occupancy and date still allow ready
+R1 stale ready: ready old occupancy: 0
+
+ ✓ ../output/review-5b1b-2026-11-24/review.test.js > R1: changed live occupancy and date still allow ready 215ms
+stdout | ../output/review-5b1b-2026-11-24/review.test.js > R2: unchanged scheduling at a later instant burns revision
+R2 revisions: 2 3
+
+stdout | ../output/review-5b1b-2026-11-24/review.test.js > R3: explicitly acknowledged capacity gap remains permanently blocked
+R3 blockers: [ { code: 'RESULT_INCOMPLETE', message: 'result.complete=false' } ]
+
+ ✓ ../output/review-5b1b-2026-11-24/review.test.js > R2: unchanged scheduling at a later instant burns revision 23ms
+ ✓ ../output/review-5b1b-2026-11-24/review.test.js > R3: explicitly acknowledged capacity gap remains permanently blocked 24ms
+stdout | ../output/review-5b1b-2026-11-24/review.test.js > R4: service accepts unknown proposal fields but full backup fails
+R4 export error: 备份未通过完整性校验，已禁止下载：[B] 值不满足 anyOf 任一分支（含可空类型） [{"layer":"B","message":"值不满足 anyOf 任一分支（含可空类型）","objectId":"review-2","path":"AssistantDraft.proposal"}]
+
+stdout | ../output/review-5b1b-2026-11-24/review.test.js > R4: service accepts unknown proposal fields but full backup fails
+R4 control: removing only unknown field restores successful backup
+
+ ✓ ../output/review-5b1b-2026-11-24/review.test.js > R4: service accepts unknown proposal fields but full backup fails 121ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  18:41:40
+   Duration  1.35s (transform 123ms, setup 0ms, collect 79ms, tests 384ms, environment 0ms, prepare 97ms)
+

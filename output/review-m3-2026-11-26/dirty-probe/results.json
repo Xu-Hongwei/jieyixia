@@ -1,0 +1,152 @@
+{
+  "date": "2026-11-26",
+  "base": "http://127.0.0.1:5177/",
+  "backend": "http://127.0.0.1:8010",
+  "results": [
+    {
+      "item": "S1",
+      "name": "面板展示任务名/总截止/本轮不修改截止",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "受保护条目只读并展示原因（已有投入/专注会话）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "可替换条目有复选框，受保护条目无复选框",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "replan 草案创建：mode/scope/progress/建议齐全，未调模型",
+      "pass": true,
+      "detail": "{\"mode\":\"replan\",\"ids\":[\"p-1\",\"p-2\"],\"propose\":0}"
+    },
+    {
+      "item": "S1",
+      "name": "替换范围确认面板在排程前可见",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "保留安排触发排程前范围澄清（不静默排程）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "排程冻结替换基线：2 条快照 + 新排总量 90",
+      "pass": true,
+      "detail": "{\"baseline\":[\"p-1\",\"p-2\"],\"segTotal\":90,\"segs\":2}"
+    },
+    {
+      "item": "S1",
+      "name": "三块预览：保留/将取消/将新增 + 总量口径",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "保留块含未选/受保护/其它任务安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "REVIEW",
+      "name": "修改替换范围及分钟数后，旧采用必须禁用",
+      "pass": false,
+      "detail": "{\"unchecked\":true,\"minutes\":\"180\"}"
+    },
+    {
+      "item": "S1",
+      "name": "采用弹窗按钮文案含替换/新增数量",
+      "pass": true,
+      "detail": "确认替换 2 条旧安排，新增 2 条安排"
+    },
+    {
+      "item": "REVIEW",
+      "name": "不能取消用户刚取消勾选的旧安排或忽略新分钟数",
+      "pass": false,
+      "detail": "{\"p2\":\"cancelled\",\"newMinutes\":90,\"displayedMinutes\":180}"
+    },
+    {
+      "item": "S1",
+      "name": "原子采用：p-1/p-2 取消且内容字段保留",
+      "pass": true,
+      "detail": "{\"p1\":\"cancelled\",\"p2\":\"cancelled\"}"
+    },
+    {
+      "item": "S1",
+      "name": "未选/受保护/其它任务安排原样保留",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "新安排=段数、全属目标任务、总量 90；复用行动不新增行动",
+      "pass": true,
+      "detail": "{\"newPlans\":2,\"segs\":2,\"actions\":2}"
+    },
+    {
+      "item": "S1",
+      "name": "总截止不变；草案 applied 只读；回执取消集绑定",
+      "pass": true,
+      "detail": "{\"deadline\":\"2026-12-02\",\"status\":\"applied\"}"
+    },
+    {
+      "item": "S1",
+      "name": "采用台账恰好一条（无重复写入）",
+      "pass": true,
+      "detail": "ops=1"
+    },
+    {
+      "item": "S1",
+      "name": "采用后「查看任务」进入原任务详情",
+      "pass": true,
+      "detail": "http://127.0.0.1:5177/#/tasks/t-smoke"
+    },
+    {
+      "item": "S2",
+      "name": "任务详情入口带 replanTask 直达改排面板",
+      "pass": true,
+      "detail": "http://127.0.0.1:5177/#/assistant?replanTask=t-smoke"
+    },
+    {
+      "item": "S2",
+      "name": "零预算：新安排为零，缺口 90 保留可见",
+      "pass": true,
+      "detail": "{\"segs\":0,\"status\":\"ready\"}"
+    },
+    {
+      "item": "S2",
+      "name": "零新安排时采用按钮禁用（不整批清空）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "未采用：所有旧安排原样（p-1 仍 planned）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S3",
+      "name": "移动端改排面板渲染（含保护原因）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "全局",
+      "name": "全程未触碰用户 :8000/:8020 服务",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

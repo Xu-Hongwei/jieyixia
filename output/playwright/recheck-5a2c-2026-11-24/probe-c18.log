@@ -1,0 +1,8 @@
+PASS [PROBE] positional-selection: page displays exact stored body — {"id":"9aff6f54-ba41-465c-970c-1a4c5a74a891","draft":"第二段成果：材料整理完成，可进入初稿。"}
+PASS [PROBE] positional-selection: readonly marker
+PASS [PROBE] positional-selection: no business write
+PASS [PROBE] first-p1-segment: page displays exact stored body — {"id":"cf42b38b-9782-4833-be76-5152ed432a38","draft":"第一段成果：材料清单已梳理出三节提纲。"}
+PASS [PROBE] first-p1-segment: readonly marker
+PASS [PROBE] first-p1-segment: no business write
+PASS [PROBE] positional record is second segment; first segment explicitly identified — {"wrong":"9aff6f54-ba41-465c-970c-1a4c5a74a891","first":"cf42b38b-9782-4833-be76-5152ed432a38"}
+7/7 passed

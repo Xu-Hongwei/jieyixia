@@ -1,0 +1,15 @@
+
+  VITE v7.3.8  ready in 499 ms
+
+  ➜  Local:   http://localhost:5176/
+  ➜  Network: use --host to expose
+
+file:///E:/qoder/output/playwright/5b1b-final-2026-11-24/real-idb-1b.mjs:33
+  if (Date.now() > deadline) { console.error(viteLog); vite.kill(); throw new Error('vite 未就绪') }
+                                                                          ^
+
+Error: vite 未就绪
+    at file:///E:/qoder/output/playwright/5b1b-final-2026-11-24/real-idb-1b.mjs:33:75
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.14.0

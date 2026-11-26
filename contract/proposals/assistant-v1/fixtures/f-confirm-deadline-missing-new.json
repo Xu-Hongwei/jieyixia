@@ -1,0 +1,24 @@
+{
+  "id": "f-confirm-deadline-missing-new",
+  "title": "task/deadline 确认缺 new_value 不得当明确无截止",
+  "layer": "model",
+  "mode": "reject",
+  "target": "UserConfirmation",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "confirmation_id": "cf-1",
+    "draft_revision": 1,
+    "object_type": "task",
+    "object_id_or_key": "t-new",
+    "id_scope": "draft",
+    "field_path": "deadline",
+    "old_value": null,
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": "显式携带 new_value",
+  "expected": null,
+  "notes": ""
+}

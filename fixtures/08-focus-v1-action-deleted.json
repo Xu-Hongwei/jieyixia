@@ -1,0 +1,72 @@
+{
+  "id": "08-focus-v1-action-deleted",
+  "title": "v1 已结束会话：行动已删、任务仍在（逐引用断开）",
+  "kind": "workspace",
+  "is_demo": true,
+  "depends_on": [],
+  "acceptance": [
+    "3B 计划 §2/§9：删 Action 留 Task 时只断 action 引用，task_ref_state 保持 active 仍可返回任务",
+    "3B 计划 §8：deleted 后 action_id 只是历史标识，禁止当活链接；快照保留删除前事实",
+    "3B 计划 §9：删除事务不临时伪造快照，草稿/成果/用时保留"
+  ],
+  "source": null,
+  "analyze_request": null,
+  "expected_analysis": null,
+  "confirmed_note": null,
+  "matter": null,
+  "task": {
+    "id": "task-v1d",
+    "workspace_id": "demo-focus-v1d",
+    "title": "准备小组展示材料",
+    "description": "整理展示用讲稿与示例。",
+    "matter_id": null,
+    "note_ids": [],
+    "deadline": {
+      "value": null,
+      "precision": "none",
+      "source": "manual",
+      "from_note_id": null,
+      "confirmed_at": null
+    },
+    "status": "doing",
+    "completion_criteria": null,
+    "current_action_id": null,
+    "created_at": "2026-11-18T15:00:00+08:00",
+    "updated_at": "2026-11-19T17:00:00+08:00",
+    "is_demo": true
+  },
+  "action": null,
+  "focus_session": {
+    "id": "focus-v1d",
+    "workspace_id": "demo-focus-v1d",
+    "task_id": "task-v1d",
+    "action_id": "action-v1d-gone",
+    "plan_item_id": null,
+    "started_at": "2026-11-19T16:00:00+08:00",
+    "accumulated_ms": 1200000,
+    "running": false,
+    "draft_md": "## 成果\n讲稿大纲完成一半，示例还差两个。\n\n## 下次继续\n补示例后通读一遍。",
+    "outcome": "partial",
+    "blocker": null,
+    "ended_at": "2026-11-19T16:22:00+08:00",
+    "is_demo": true,
+    "record_version": 1,
+    "timer_anchor_at": null,
+    "task_snapshot": {
+      "title": "准备小组展示材料",
+      "matter_name": null,
+      "deadline_value": null,
+      "deadline_precision": "none",
+      "captured_at": "2026-11-19T16:00:00+08:00"
+    },
+    "action_snapshot": {
+      "text": "列讲稿大纲",
+      "minutes": 20,
+      "captured_at": "2026-11-19T16:00:00+08:00"
+    },
+    "task_ref_state": "active",
+    "action_ref_state": "deleted"
+  },
+  "plan_items": [],
+  "change_proposal": null
+}

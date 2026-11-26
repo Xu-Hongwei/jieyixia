@@ -1,0 +1,25 @@
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+ ✓ ../output/review-5b1b-final-2026-11-24/review.test.js > R5 fixed: new requirements invalidate old computation and block ready 228ms
+ ✓ ../output/review-5b1b-final-2026-11-24/review.test.js > R6 fixed: proposed date is not mistaken for external drift 33ms
+ ✓ ../output/review-5b1b-final-2026-11-24/review.test.js > R7 fixed: text fingerprint uses UTF8 and changes invalidate ready 28ms
+stdout | ../output/review-5b1b-final-2026-11-24/review.test.js > R8 fixed: explicit no-deadline permits ready
+R8 fixed: no-deadline ready succeeds
+
+stdout | ../output/review-5b1b-final-2026-11-24/review.test.js > R10 fixed: changed deadline blocks stale computation
+R10 fixed: changed deadline requires recompute and ready commit is blocked
+
+stdout | ../output/review-5b1b-final-2026-11-24/review.test.js > R9 fixed: same-size image replacement after hash blocks ready
+R9 fixed: same-size image replacement blocked before ready
+
+ ✓ ../output/review-5b1b-final-2026-11-24/review.test.js > R8 fixed: explicit no-deadline permits ready 35ms
+ ✓ ../output/review-5b1b-final-2026-11-24/review.test.js > R10 fixed: changed deadline blocks stale computation 29ms
+ ✓ ../output/review-5b1b-final-2026-11-24/review.test.js > R10 recovery: recompute with new decision then reconfirm current revision succeeds 33ms
+ ✓ ../output/review-5b1b-final-2026-11-24/review.test.js > R9 fixed: same-size image replacement after hash blocks ready 33ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  20:13:19
+   Duration  1.51s (transform 92ms, setup 0ms, collect 80ms, tests 420ms, environment 0ms, prepare 102ms)
+

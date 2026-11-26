@@ -1,0 +1,100 @@
+{
+  "results": [
+    {
+      "probe": "live-snapshot-overwrites-newer-minutes",
+      "before": 60,
+      "after": 60,
+      "afterText": "虚构安排原说明",
+      "conflictDialogShown": 1
+    },
+    {
+      "probe": "second-change-while-confirmation-open",
+      "differenceUserSaw": "安排已被其它修改更新\n\n以下字段已变化（当前值为开框时冻结的最新快照，与确认提交的版本一致）：\n\n字段「预计分钟」：你提交时的值 30 分钟 → 当前最新值 60 分钟\n\n本次草稿将写入：30 分钟（将覆盖当前最新值）\n\n草稿保留；确认后按最新快照重新提交。\n\n取消\n按最新事实重新提交",
+      "newestBeforeConfirm": 90,
+      "afterConfirm": 90,
+      "conflictDialogRemaining": 1
+    },
+    {
+      "probe": "replace-dirty-editor",
+      "remainingText": "尚未保存不能丢弃的草稿",
+      "discardDialogShown": 1,
+      "existingRecord": "虚构安排原说明"
+    },
+    {
+      "probe": "continue-editing-retains-draft",
+      "text": "尚未保存不能丢弃的草稿"
+    },
+    {
+      "probe": "detail-cancel-confirmation-uses-unshown-baseline",
+      "differenceUserSaw": "安排已被其它修改更新\n\n以下字段已变化（当前值为开框时冻结的最新快照，与确认提交的版本一致）：\n\n字段「预计分钟」：提交时 30 分钟 → 当前 60 分钟\n\n确认后按最新快照重新执行本次操作。\n\n取消\n按最新事实重新确认",
+      "newestBeforeConfirm": 90,
+      "stateAfterConfirm": "planned",
+      "minutesAfterConfirm": 90,
+      "secondConflictDialogShown": 1
+    },
+    {
+      "probe": "fixed-task-can-be-replaced",
+      "offeredChange": false,
+      "pageUrl": "http://127.0.0.1:5173/#/tasks/review-task-a",
+      "savedTaskIds": [
+        "review-task-a"
+      ]
+    },
+    {
+      "probe": "mobile-overflow",
+      "viewport": 360,
+      "bodyWidth": 360
+    },
+    {
+      "probe": "mobile-toolbar",
+      "controls": [
+        {
+          "text": "工作记录",
+          "box": {
+            "x": 132,
+            "y": 139,
+            "width": 84,
+            "height": 26
+          }
+        },
+        {
+          "text": "周视图",
+          "box": {
+            "x": 227,
+            "y": 140,
+            "width": 56,
+            "height": 24
+          }
+        },
+        {
+          "text": "列表",
+          "box": {
+            "x": 285,
+            "y": 140,
+            "width": 56,
+            "height": 24
+          }
+        },
+        {
+          "text": "安排工作",
+          "box": {
+            "x": 138,
+            "y": 175,
+            "width": 114,
+            "height": 36
+          }
+        },
+        {
+          "text": "新建",
+          "box": {
+            "x": 260,
+            "y": 175,
+            "width": 84,
+            "height": 36
+          }
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

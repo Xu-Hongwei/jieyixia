@@ -1,0 +1,35 @@
+{
+  "id": "f-model-tool-field",
+  "title": "模型输出执行工具字段",
+  "layer": "model",
+  "mode": "reject",
+  "target": "WorkItemProposal",
+  "acceptance": [
+    "B0-03",
+    "B0-18"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "key": "w1",
+    "task_ref": {
+      "kind": "existing",
+      "id": "t-1"
+    },
+    "action_ref": {
+      "kind": "existing",
+      "id": "a-1"
+    },
+    "deliverable": "w1 的虚构产出",
+    "remaining_minutes": 60,
+    "estimate_origin": "model",
+    "splittable": true,
+    "min_segment_minutes": 25,
+    "earliest_date": null,
+    "depends_on": [],
+    "priority": "normal",
+    "execute_tool": "delete_all"
+  },
+  "expected_error": "Extra inputs",
+  "expected": null,
+  "notes": ""
+}

@@ -1,0 +1,20 @@
+{
+  "id": "f-compat-deadline-bad-date",
+  "title": "既有截止：非法日历日期仍拒绝",
+  "layer": "http",
+  "mode": "reject",
+  "target": "ExistingDeadline",
+  "acceptance": [
+    "B0-06"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "value": "2026-02-30T09:00",
+    "precision": "datetime",
+    "source": "manual",
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": "非法日历日期",
+  "expected": null,
+  "notes": ""
+}

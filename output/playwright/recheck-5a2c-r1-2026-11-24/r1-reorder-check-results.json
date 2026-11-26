@@ -1,0 +1,45 @@
+{
+  "at": "2026-11-24T06:03:34.164Z",
+  "results": [
+    {
+      "name": "A1 inventory 含 p1Segments 命名字段",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A2 first = P1 会话按 started_at 排序第 1 段",
+      "pass": true,
+      "detail": "{\"id\":\"f753e467-16e0-42c2-8ee8-967c8f14f754\",\"started\":\"2026-11-24T05:53:38.150Z\"}"
+    },
+    {
+      "name": "A3 second = P1 会话按 started_at 排序第 2 段",
+      "pass": true,
+      "detail": "{\"id\":\"aa4936c4-7e34-4808-9327-0d72162d357d\",\"started\":\"2026-11-24T05:54:20.844Z\"}"
+    },
+    {
+      "name": "A4 first 属于 P1 / v1 / 已结束",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "A5 重排/反转/旋转 sessions 后命名选择恒等",
+      "pass": true,
+      "detail": "orders=6"
+    },
+    {
+      "name": "B1 复验批旧逻辑 sessions[1] ≠ 真正第一段（复现原失败根因）",
+      "pass": true,
+      "detail": "{\"oldPick\":\"9aff6f54-ba41-465c-970c-1a4c5a74a891\",\"trueFirst\":\"cf42b38b-9782-4833-be76-5152ed432a38\"}"
+    },
+    {
+      "name": "B2 复验批旧逻辑恰好选中第二段",
+      "pass": true,
+      "detail": "{\"second\":\"9aff6f54-ba41-465c-970c-1a4c5a74a891\"}"
+    },
+    {
+      "name": "B3 排序逻辑在复验批数据上选中「第一段成果」记录",
+      "pass": true,
+      "detail": "{\"firstDraft\":\"第一段成果：材料清单已梳理出三节提纲。\",\"secondDraft\":\"第二段成果：材料整理完成，可进入初稿。\"}"
+    }
+  ]
+}

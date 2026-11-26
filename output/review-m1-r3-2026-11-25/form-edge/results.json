@@ -1,0 +1,59 @@
+{
+  "results": [
+    {
+      "item": "dirty",
+      "name": "修改预算未重算应禁用采用",
+      "pass": true,
+      "detail": "adoptEnabled=false"
+    },
+    {
+      "item": "deadline",
+      "name": "改标题并清除截止后应保存明确无截止决定",
+      "pass": true,
+      "detail": "{\"revision\":3,\"confs\":[{\"confirmation_id\":\"be21f24d-ce84-489a-83a0-97e6bafd2c38\",\"draft_revision\":3,\"object_type\":\"task\",\"object_id_or_key\":\"rpt\",\"field_path\":\"deadline\",\"old_value\":null,\"new_value\":null,\"confirmed_at\":\"2026-11-25T09:15:17.817Z\",\"id_scope\":\"draft\"}]}"
+    },
+    {
+      "item": "F3-empty-title",
+      "name": "清空必填标题应阻断采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "F3-empty-title-save",
+      "name": "清空标题应阻断保存",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "F3-empty-title-alert",
+      "name": "应单独显示必填错误",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "F3-ws-title",
+      "name": "纯空白标题应阻断采用与保存",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "F3-empty-action",
+      "name": "空行动正文应阻断采用与保存",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "F3-empty-action-alert",
+      "name": "应单独显示必填错误",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "F3-revert",
+      "name": "清空禁用、改回原值后恢复可采用",
+      "pass": true,
+      "detail": "{\"original\":\"演示：提交周报\",\"disabledWhenEmpty\":true,\"enabledAfterRevert\":true}"
+    }
+  ],
+  "netHits": []
+}

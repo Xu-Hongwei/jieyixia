@@ -1,0 +1,44 @@
+[
+  {
+    "item": "真实",
+    "name": "model 后端 model_ready=true（密钥可装载，健康检查不触发付费）",
+    "pass": true,
+    "detail": "model_ready=true"
+  },
+  {
+    "item": "真实",
+    "name": "真实模型图文调用：analyze≥1 且 propose≥1（非桩）",
+    "pass": true,
+    "detail": "{\"analyze\":1,\"propose\":1}"
+  },
+  {
+    "item": "真实",
+    "name": "真实视觉理解落便签：含字段与原文（非桩固定值）",
+    "pass": true,
+    "detail": "[{\"key\":\"title\",\"value\":\"机器学习课程报告（占总评 30%）\",\"status\":\"candidate\"},{\"key\":\"requirement\",\"value\":[\"提交材料：PDF 报告一份 + 可运行代码压缩包\",\"报告不少于3000字，须包含至少两组实验对比\"],\"status\":\"candidate\"},{\"key\":\"submit_to\",\"value\":\"课程平台「作业」入口\",\"status\":\"candidate\"},{\"key\":\"constraints\",\"value\":[\"报告不少于3000字\",\"须包含至少两组实验对比\"],\"status\":\"candidate\"},{\"key\":\"reminder\",\"value\":\"逾期提交按零分计\",\"status\":\"candidate\"},{\"key\":\"time_nodes\",\"value\":[{\"label\":\"截止时间\",\"raw\":\"2026年11月19日\",\"value\":\"2026-11-19\",\"precision\":\"date\",\"tz_known\":null,\"basis\":\"explicit\",\"role\":\"submission_deadline\",\"reference_at\":null,\"reference_source\":null,\"message_date\":null,\"derived\":false}],\"status\":\"candidate\"},{\"key\":\"deadline\",\"value\":\"2026-11-19\",\"status\":\"candidate\"}]"
+  },
+  {
+    "item": "真实",
+    "name": "真实模型建议被接收：草案含任务/工作项（非桩）",
+    "pass": true,
+    "detail": "{\"status\":\"needs_review\",\"tasks\":[\"t1\"],\"work\":[\"w1\",\"w2\",\"w3\"]}"
+  },
+  {
+    "item": "真实",
+    "name": "真实模型建议经核对采用：任务/行动/安排落库，草案 applied",
+    "pass": true,
+    "detail": "{\"tasks\":1,\"actions\":3,\"plans\":7,\"draft\":\"applied\"}"
+  },
+  {
+    "item": "真实",
+    "name": "截止出处如实记录（note=模型候选匹配已确认便签；manual=用户手动）",
+    "pass": true,
+    "detail": "{\"path\":\"manual\",\"deadline\":{\"value\":\"2026-12-01T23:59:59\",\"precision\":\"datetime\",\"source\":\"manual\",\"from_note_id\":null,\"confirmed_at\":\"2026-11-25T13:27:03.803Z\"}}"
+  },
+  {
+    "item": "隔离",
+    "name": "全程未触碰用户 8000/8020 后端",
+    "pass": true,
+    "detail": "[]"
+  }
+]

@@ -1,0 +1,1575 @@
+{
+  "assistant_protocol_version": "1.0",
+  "note": "全部虚构数据；金标=规范样本校验，场景=设计验证",
+  "cases": [
+    {
+      "id": "f-http-text-only",
+      "file": "f-http-text-only.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-01"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-multi-image",
+      "file": "f-http-multi-image.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-01"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-existing-sources-only",
+      "file": "f-http-existing-sources-only.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-01"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-revise",
+      "file": "f-http-revise.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-09"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-explain",
+      "file": "f-http-explain.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-02"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-resp-clarification",
+      "file": "f-resp-clarification.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-02"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-resp-proposal",
+      "file": "f-resp-proposal.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-01",
+        "B0-04"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-resp-explanation",
+      "file": "f-resp-explanation.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-02"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-bad-version",
+      "file": "f-http-bad-version.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-02"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-revise-no-prev",
+      "file": "f-http-revise-no-prev.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-09"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-past-start",
+      "file": "f-http-past-start.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-action-cross-task",
+      "file": "f-http-action-cross-task.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-msg-too-long",
+      "file": "f-http-msg-too-long.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-20"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-http-nonconsecutive-days",
+      "file": "f-http-nonconsecutive-days.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-confirmed-field",
+      "file": "f-model-confirmed-field.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-tool-field",
+      "file": "f-model-tool-field.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03",
+        "B0-18"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-deadline-none-value",
+      "file": "f-model-deadline-none-value.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-deadline-no-evidence",
+      "file": "f-model-deadline-no-evidence.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-04"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-remaining-zero",
+      "file": "f-model-remaining-zero.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05",
+        "B0-10"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-remaining-negative",
+      "file": "f-model-remaining-negative.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-update-status",
+      "file": "f-model-update-status.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-model-update-empty",
+      "file": "f-model-update-empty.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-model-reuse-draft-taskref",
+      "file": "f-model-reuse-draft-taskref.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-create-target-id",
+      "file": "f-model-create-target-id.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-dup-keys",
+      "file": "f-model-dup-keys.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-too-many-targets",
+      "file": "f-model-too-many-targets.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-20"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-bad-date",
+      "file": "f-model-bad-date.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-bad-offset",
+      "file": "f-model-bad-offset.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-requirement-budget-null",
+      "file": "f-model-requirement-budget-null.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-requirement-budget-bad",
+      "file": "f-model-requirement-budget-bad.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-requirement-unknown-type",
+      "file": "f-model-requirement-unknown-type.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-model-basis-requirement-no-evidence",
+      "file": "f-model-basis-requirement-no-evidence.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-04"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-compat-deadline-no-seconds-offset",
+      "file": "f-compat-deadline-no-seconds-offset.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-compat-deadline-naive",
+      "file": "f-compat-deadline-naive.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-compat-deadline-fractional",
+      "file": "f-compat-deadline-fractional.json",
+      "layer": "http",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-compat-deadline-bad-date",
+      "file": "f-compat-deadline-bad-date.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-compat-deadline-bad-offset",
+      "file": "f-compat-deadline-bad-offset.json",
+      "layer": "http",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-compat-planfact-no-seconds",
+      "file": "f-compat-planfact-no-seconds.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-compat-planfact-fractional",
+      "file": "f-compat-planfact-fractional.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-compat-planfact-bad-offset",
+      "file": "f-compat-planfact-bad-offset.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-model-candidate-still-strict",
+      "file": "f-model-candidate-still-strict.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "f-sem-link-ok",
+      "file": "f-sem-link-ok.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-01",
+        "B0-04"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-unknown-id",
+      "file": "f-sem-unknown-id.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-cross-ws",
+      "file": "f-sem-cross-ws.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-cross-task-action",
+      "file": "f-sem-cross-task-action.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-done-action-reuse",
+      "file": "f-sem-done-action-reuse.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-cycle",
+      "file": "f-sem-cycle.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-key-collision",
+      "file": "f-sem-key-collision.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-03"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-evidence-unknown-source",
+      "file": "f-sem-evidence-unknown-source.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-04",
+        "B0-18"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-multi-deadline-targets",
+      "file": "f-sem-multi-deadline-targets.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-01"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-user-origin-no-user-evidence",
+      "file": "f-sem-user-origin-no-user-evidence.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-04"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-injection-data",
+      "file": "f-sem-injection-data.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-18"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-done-action-direct",
+      "file": "f-sem-done-action-direct.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-direct-undone-ok",
+      "file": "f-sem-direct-undone-ok.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-update-deadline-unknown-source",
+      "file": "f-sem-update-deadline-unknown-source.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-04"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-update-deadline-user-origin",
+      "file": "f-sem-update-deadline-user-origin.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-04"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-sem-update-deadline-ok",
+      "file": "f-sem-update-deadline-ok.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-04"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-replacement-nonempty",
+      "file": "f-plan-replacement-nonempty.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-19"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-dup-occupancy",
+      "file": "f-plan-dup-occupancy.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-planned-deleted",
+      "file": "f-plan-planned-deleted.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-08",
+        "B0-11"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-budget-null",
+      "file": "f-plan-budget-null.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-budget-over",
+      "file": "f-plan-budget-over.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-buffer-over",
+      "file": "f-plan-buffer-over.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-horizon-6",
+      "file": "f-plan-horizon-6.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-tz-wrong",
+      "file": "f-plan-tz-wrong.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-unknown-dep",
+      "file": "f-plan-unknown-dep.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-cycle",
+      "file": "f-plan-cycle.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-extra-work-missing",
+      "file": "f-plan-extra-work-missing.json",
+      "layer": "planning",
+      "mode": "reject",
+      "acceptance": [
+        "B0-10"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-plan-extra-work-ok",
+      "file": "f-plan-extra-work-ok.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-10"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g1-capacity-buffer",
+      "file": "g1-capacity-buffer.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g2-deadline-window",
+      "file": "g2-deadline-window.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05",
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g3-no-deadline-leftover",
+      "file": "g3-no-deadline-leftover.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05",
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g4-unsplittable",
+      "file": "g4-unsplittable.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g5a-dependency-same-day",
+      "file": "g5a-dependency-same-day.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05",
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g5b-dependency-blocked",
+      "file": "g5b-dependency-blocked.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05",
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g6-datetime-deadline",
+      "file": "g6-datetime-deadline.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05",
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g7-overbook",
+      "file": "g7-overbook.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05",
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g8-unknown-estimate",
+      "file": "g8-unknown-estimate.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05",
+        "B0-10"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g9-stable-sort",
+      "file": "g9-stable-sort.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g9b-stable-sort-rerun",
+      "file": "g9b-stable-sort-rerun.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-07"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g10-leap-cross-month",
+      "file": "g10-leap-cross-month.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g11-cross-year",
+      "file": "g11-cross-year.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g12-deleted-history-occupancy",
+      "file": "g12-deleted-history-occupancy.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-08",
+        "B0-11"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g13-cancelled-moved-free",
+      "file": "g13-cancelled-moved-free.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g14-unselected-task-occupancy",
+      "file": "g14-unselected-task-occupancy.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-08"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g15-outside-horizon",
+      "file": "g15-outside-horizon.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g16a-overdue-consent",
+      "file": "g16a-overdue-consent.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g16b-overdue-no-consent",
+      "file": "g16b-overdue-no-consent.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g17-needs-day-window",
+      "file": "g17-needs-day-window.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g18-same-day-datetime",
+      "file": "g18-same-day-datetime.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g19-outside-window-order",
+      "file": "g19-outside-window-order.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "g20-future-window-today",
+      "file": "g20-future-window-today.json",
+      "layer": "planning",
+      "mode": "accept",
+      "acceptance": [
+        "B0-06"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-deadline-ok",
+      "file": "f-confirm-deadline-ok.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-deadline-none-ok",
+      "file": "f-confirm-deadline-none-ok.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-deadline-formal-ok",
+      "file": "f-confirm-deadline-formal-ok.json",
+      "layer": "model",
+      "mode": "accept",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-deadline-raw-string",
+      "file": "f-confirm-deadline-raw-string.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-deadline-bad-date",
+      "file": "f-confirm-deadline-bad-date.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-task-no-scope",
+      "file": "f-confirm-task-no-scope.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-task-bad-scope",
+      "file": "f-confirm-task-bad-scope.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-nontask-with-scope",
+      "file": "f-confirm-nontask-with-scope.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-deadline-missing-new",
+      "file": "f-confirm-deadline-missing-new.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-confirm-deadline-missing-old",
+      "file": "f-confirm-deadline-missing-old.json",
+      "layer": "model",
+      "mode": "reject",
+      "acceptance": [
+        "B0-05"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-draft-ready",
+      "file": "f-draft-ready.json",
+      "layer": "draft",
+      "mode": "accept",
+      "acceptance": [
+        "B0-09",
+        "B0-10"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-draft-applied-readonly",
+      "file": "f-draft-applied-readonly.json",
+      "layer": "draft",
+      "mode": "accept",
+      "acceptance": [
+        "B0-13"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-draft-applied-no-summary",
+      "file": "f-draft-applied-no-summary.json",
+      "layer": "draft",
+      "mode": "reject",
+      "acceptance": [
+        "B0-09"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-draft-history-rev",
+      "file": "f-draft-history-rev.json",
+      "layer": "draft",
+      "mode": "reject",
+      "acceptance": [
+        "B0-09"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-envelope-ok",
+      "file": "f-envelope-ok.json",
+      "layer": "application",
+      "mode": "accept",
+      "acceptance": [
+        "B0-10",
+        "B0-12",
+        "B0-13"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-envelope-gap-noack",
+      "file": "f-envelope-gap-noack.json",
+      "layer": "application",
+      "mode": "reject",
+      "acceptance": [
+        "B0-10"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-envelope-overbook-noack",
+      "file": "f-envelope-overbook-noack.json",
+      "layer": "application",
+      "mode": "reject",
+      "acceptance": [
+        "B0-08",
+        "B0-10"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-planitem-no-action-id",
+      "file": "f-planitem-no-action-id.json",
+      "layer": "application",
+      "mode": "reject",
+      "acceptance": [
+        "B0-13"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-planitem-actual-not-null",
+      "file": "f-planitem-actual-not-null.json",
+      "layer": "application",
+      "mode": "reject",
+      "acceptance": [
+        "B0-13"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-receipt-ok",
+      "file": "f-receipt-ok.json",
+      "layer": "application",
+      "mode": "accept",
+      "acceptance": [
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-op-pending-ok",
+      "file": "f-op-pending-ok.json",
+      "layer": "application",
+      "mode": "accept",
+      "acceptance": [
+        "B0-12",
+        "B0-15"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-op-committed-no-receipt",
+      "file": "f-op-committed-no-receipt.json",
+      "layer": "application",
+      "mode": "reject",
+      "acceptance": [
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-op-pending-with-receipt",
+      "file": "f-op-pending-with-receipt.json",
+      "layer": "application",
+      "mode": "reject",
+      "acceptance": [
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "f-backup-manifest-v2",
+      "file": "f-backup-manifest-v2.json",
+      "layer": "backup",
+      "mode": "accept",
+      "acceptance": [
+        "B0-14",
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-backup-manifest-missing-assistant",
+      "file": "f-backup-manifest-missing-assistant.json",
+      "layer": "backup",
+      "mode": "reject",
+      "acceptance": [
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-backup-manifest-ops",
+      "file": "f-backup-manifest-ops.json",
+      "layer": "backup",
+      "mode": "reject",
+      "acceptance": [
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-backup-manifest-no-format",
+      "file": "f-backup-manifest-no-format.json",
+      "layer": "backup",
+      "mode": "reject",
+      "acceptance": [
+        "B0-14"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-backup-manifest-no-source-count",
+      "file": "f-backup-manifest-no-source-count.json",
+      "layer": "backup",
+      "mode": "reject",
+      "acceptance": [
+        "B0-14"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-threads-payload",
+      "file": "f-threads-payload.json",
+      "layer": "backup",
+      "mode": "accept",
+      "acceptance": [
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "f-drafts-payload",
+      "file": "f-drafts-payload.json",
+      "layer": "backup",
+      "mode": "accept",
+      "acceptance": [
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-transition-ready-applying",
+      "file": "s-transition-ready-applying.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-09"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-transition-applied-ready",
+      "file": "s-transition-applied-ready.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-09",
+        "B0-13"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-transition-unknown-applied",
+      "file": "s-transition-unknown-applied.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-refresh-generating",
+      "file": "s-refresh-generating.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-09"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-refresh-applying",
+      "file": "s-refresh-applying.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-09",
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-restore-ready",
+      "file": "s-restore-ready.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-restore-applying",
+      "file": "s-restore-applying.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-restore-applied",
+      "file": "s-restore-applied.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-15"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-recheck-new-plan",
+      "file": "s-recheck-new-plan.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-11"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-recheck-other-app",
+      "file": "s-recheck-other-app.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-11",
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-recheck-receipt-same",
+      "file": "s-recheck-receipt-same.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-recheck-receipt-diff",
+      "file": "s-recheck-receipt-diff.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-recheck-tail-fail",
+      "file": "s-recheck-tail-fail.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-12"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-recheck-read-fail",
+      "file": "s-recheck-read-fail.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-12",
+        "B0-20"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-recheck-cross-midnight",
+      "file": "s-recheck-cross-midnight.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-11"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-recheck-source-replaced",
+      "file": "s-recheck-source-replaced.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-11"
+      ],
+      "implement_batch": "5B-2"
+    },
+    {
+      "id": "s-error-body",
+      "file": "s-error-body.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17",
+        "B0-20"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-error-quota",
+      "file": "s-error-quota.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17",
+        "B0-20"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-error-timeout",
+      "file": "s-error-timeout.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17",
+        "B0-20"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-error-output",
+      "file": "s-error-output.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17",
+        "B0-20"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-error-protocol",
+      "file": "s-error-protocol.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-02",
+        "B0-17"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-backup-v1",
+      "file": "s-backup-v1.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-14"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-backup-v2",
+      "file": "s-backup-v2.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-14"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-backup-unknown",
+      "file": "s-backup-unknown.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-14"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-remap-existing",
+      "file": "s-remap-existing.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-16"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-remap-draft-keys",
+      "file": "s-remap-draft-keys.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-16"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-remap-body-text",
+      "file": "s-remap-body-text.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-16"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-remap-applied-ids",
+      "file": "s-remap-applied-ids.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-16"
+      ],
+      "implement_batch": "5B-1"
+    },
+    {
+      "id": "s-call-budget-ok",
+      "file": "s-call-budget-ok.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-call-budget-over",
+      "file": "s-call-budget-over.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-call-budget-multi-profile",
+      "file": "s-call-budget-multi-profile.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17"
+      ],
+      "implement_batch": "5B-3"
+    },
+    {
+      "id": "s-call-budget-attempts-over-config",
+      "file": "s-call-budget-attempts-over-config.json",
+      "layer": "scenario",
+      "mode": "expect",
+      "acceptance": [
+        "B0-17"
+      ],
+      "implement_batch": "5B-3"
+    }
+  ]
+}

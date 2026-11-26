@@ -1,0 +1,17 @@
+import { chromium } from 'playwright-core'
+const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+const page = browser.contexts()[0].pages().find((p) => p.url().includes('localhost:5175'))
+const removed = await page.evaluate(async () => {
+  const open = () => new Promise((res, rej) => { const r = indexedDB.open('jxl-product', 2); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error) })
+  const all = (db, s) => new Promise((res, rej) => { const q = db.transaction(s).objectStore(s).getAll(); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error) })
+  const db = await open()
+  const srcIds = new Set((await all(db, 'sources')).map((s) => s.id))
+  const orphans = (await all(db, 'docs')).filter((d) => d.kind === 'note' && d.source_id && !srcIds.has(d.source_id))
+  await new Promise((res, rej) => { const t = db.transaction('docs', 'readwrite'); for (const n of orphans) t.objectStore('docs').delete(n.id); t.oncomplete = res; t.onerror = () => rej(t.error) })
+  db.close()
+  return orphans.map((n) => n.title)
+})
+console.log('REMOVED orphan notes:', JSON.stringify(removed))
+await page.reload({ waitUntil: 'domcontentloaded' })
+await browser.close()
+console.log('CLEANUP2 done')

@@ -1,0 +1,170 @@
+{
+  "id": "f-resp-proposal",
+  "title": "proposal：建议对象+证据+假设+警告",
+  "layer": "http",
+  "mode": "accept",
+  "target": "AssistantProposeResponse",
+  "acceptance": [
+    "B0-01",
+    "B0-04"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "protocol_version": "1.0",
+    "request_id": "req-1",
+    "thread_id": "th-1",
+    "turn_id": "turn-1",
+    "client_seq": 1,
+    "workspace_id": "ws-fixture",
+    "summary": "两个交付目标，建议拆成三步",
+    "payload": {
+      "kind": "proposal",
+      "proposal": {
+        "task_proposals": [
+          {
+            "op": "create",
+            "key": "t-new",
+            "title": "课程报告",
+            "description": "虚构课程报告",
+            "deadline_candidates": [
+              {
+                "value": "2026-11-27",
+                "precision": "date",
+                "origin": "model",
+                "derived": true,
+                "basis": "relative",
+                "evidence_refs": [
+                  {
+                    "kind": "source_excerpt",
+                    "source_id": "s-1",
+                    "excerpt": "周五提交课程报告"
+                  }
+                ]
+              }
+            ],
+            "evidence_refs": [
+              {
+                "kind": "source_excerpt",
+                "source_id": "s-1",
+                "excerpt": "周五提交课程报告"
+              }
+            ]
+          },
+          {
+            "op": "link",
+            "key": "t-link",
+            "target_id": "t-1",
+            "evidence_refs": [
+              {
+                "kind": "existing_fact",
+                "object_type": "task",
+                "object_id": "t-1",
+                "field_path": "title"
+              }
+            ]
+          }
+        ],
+        "action_proposals": [
+          {
+            "op": "create",
+            "key": "a1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "t-new"
+            },
+            "text": "整理材料并定提纲",
+            "minutes": 50,
+            "basis": "suggestion",
+            "evidence_refs": []
+          },
+          {
+            "op": "reuse",
+            "key": "a2",
+            "target_id": "a-1",
+            "task_ref": {
+              "kind": "existing",
+              "id": "t-1"
+            },
+            "evidence_refs": []
+          }
+        ],
+        "work_items": [
+          {
+            "key": "w1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "t-new"
+            },
+            "action_ref": {
+              "kind": "draft",
+              "key": "a1"
+            },
+            "deliverable": "w1 的虚构产出",
+            "remaining_minutes": 120,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [],
+            "priority": "normal"
+          },
+          {
+            "key": "w2",
+            "task_ref": {
+              "kind": "existing",
+              "id": "t-1"
+            },
+            "action_ref": {
+              "kind": "existing",
+              "id": "a-1"
+            },
+            "deliverable": "w2 的虚构产出",
+            "remaining_minutes": 40,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [],
+            "priority": "normal"
+          }
+        ],
+        "requirement_candidates": [
+          {
+            "key": "r1",
+            "type": "daily_budget",
+            "value": 60,
+            "strength": "hard",
+            "provenance": "user",
+            "evidence_refs": [
+              {
+                "kind": "user_message",
+                "turn_id": "turn-1",
+                "excerpt": "每天最多一小时"
+              }
+            ]
+          }
+        ],
+        "evidence_refs": [],
+        "assumptions": [
+          {
+            "id": "as1",
+            "text": "假设报告含图表整理",
+            "related_keys": [
+              "w1"
+            ]
+          }
+        ],
+        "warnings": [
+          {
+            "code": "estimate_is_suggestion",
+            "message": "50 分钟为建议估时",
+            "related_key": "a1"
+          }
+        ]
+      }
+    }
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

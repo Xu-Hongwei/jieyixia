@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.3.0",
+  "schema_version": "0.4.0",
   "workspace_id": "demo-ml-report",
   "purpose": "同一批 JSON 服务三处：后端 tests 的输入与断言基准、前端 src/mock 的 canned 响应、F12 演示空间的初始数据",
   "is_demo": true,
@@ -59,5 +59,15 @@
   "pending": [
     "3 张通知截图均已生成（PIL 渲染）。02、03 已用真实模型做过视觉冒烟；鲁棒性摸底见 devlog 第 12 节。",
     "F13 批量录入与规划草案的 fixture 待产品 P0 闭环时补充。"
-  ]
+  ],
+  "contract_only": {
+    "note": "06–10 是 0.4.0 契约兼容 fixture（v1 会话/逐引用断开/旧 v0 记录），只供契约校验与测试，不进演示 storyline。",
+    "files": [
+      "06-focus-v1-running.json",
+      "07-focus-v1-ended-done.json",
+      "08-focus-v1-action-deleted.json",
+      "09-focus-v1-task-deleted.json",
+      "10-focus-legacy-ended-v0.json"
+    ]
+  }
 }

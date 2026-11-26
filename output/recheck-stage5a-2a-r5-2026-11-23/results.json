@@ -1,0 +1,131 @@
+[
+  {
+    "probe": "begin-with-unreviewed-or-invalid-history",
+    "invalidHistory": false,
+    "beginCreated": false,
+    "code": "PLAN_REVIEW_REQUIRED"
+  },
+  {
+    "probe": "begin-with-unreviewed-or-invalid-history",
+    "invalidHistory": true,
+    "beginCreated": false,
+    "code": "HISTORY_UNRESOLVED"
+  },
+  {
+    "probe": "changed-input-after-aborted-first-attempt",
+    "first": "SAVE_FAILED",
+    "secondOk": false,
+    "secondCode": "STALE_REQUEST",
+    "sameRequest": true
+  },
+  {
+    "probe": "same-input-after-failed-first-attempt",
+    "ok": true,
+    "action": "a"
+  },
+  {
+    "probe": "fallback-replay-skips-input-validation",
+    "firstEndOk": true,
+    "normalChangedCode": "STALE_REQUEST",
+    "injected": true,
+    "fallback": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "请求输入已变化（结果/正文/安排/行动），请重新核对后签发新意图",
+      "workspace_id": "isolated-review",
+      "session_id": "service-3",
+      "request_id": "review-end",
+      "issued_at_ms": 1795399200000
+    },
+    "savedText": "original text",
+    "savedPlanState": "partial"
+  },
+  {
+    "probe": "same-input-fallback-success",
+    "result": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "isolated-review",
+      "session_id": "service-3",
+      "request_id": "review-end",
+      "revision": 2,
+      "issued_at_ms": 1795399200000,
+      "replayed": true
+    }
+  },
+  {
+    "probe": "caller-mutates-input-after-service-call",
+    "acceptedAction": "a",
+    "createdAction": "a",
+    "ok": true,
+    "replayedOriginal": true,
+    "replayedSessionId": "service-4"
+  },
+  {
+    "probe": "plain-control-existing-session",
+    "result": {
+      "ok": false,
+      "code": "PLAN_SESSION_EXISTS",
+      "workspace_id": "isolated-review",
+      "session_id": "service-4",
+      "request_id": "proxy-plain-control",
+      "revision": null,
+      "issued_at_ms": 1795399200000,
+      "session": {
+        "id": "service-4",
+        "kind": "focus_session",
+        "workspace_id": "isolated-review",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": "p",
+        "started_at": "2026-11-23T10:00:00+08:00",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-23T10:00:00+08:00",
+        "task_snapshot": {
+          "title": "虚构任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-23T10:00:00+08:00"
+        },
+        "action_snapshot": {
+          "text": "原行动",
+          "minutes": 30,
+          "captured_at": "2026-11-23T10:00:00+08:00"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "samePlan": true
+    }
+  },
+  {
+    "probe": "vue-ref-expected-input",
+    "error": null,
+    "code": "PLAN_SESSION_EXISTS",
+    "sessionId": "service-4"
+  },
+  {
+    "probe": "reactive-end-and-nested-array-mutation",
+    "ok": true,
+    "savedText": "响应式成果",
+    "planState": "partial",
+    "outcome": "blocked",
+    "replayed": true,
+    "changedRetry": "STALE_REQUEST"
+  },
+  {
+    "probe": "invalid-value-and-top-reactive-independent-work",
+    "invalidCode": "INVALID_FIELD",
+    "beginOk": true,
+    "endOk": true,
+    "planId": null
+  }
+]

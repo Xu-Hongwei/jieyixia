@@ -1,0 +1,84 @@
+{
+  "sources": [
+    {
+      "id": "s-course",
+      "kind": "image",
+      "name": "虚构课程报告截图.png",
+      "captured_at": "2026-11-24T10:00:00+08:00",
+      "content_version": "c414cd0e204de974f73753c7e28d7638e7b3691bb8b1a2bab6b25bb7fed7ce77",
+      "sha": "c414cd0e204de974f73753c7e28d7638e7b3691bb8b1a2bab6b25bb7fed7ce77"
+    }
+  ],
+  "docs": [
+    {
+      "id": "a-course",
+      "kind": "action",
+      "title": null,
+      "status": null,
+      "task_id": "t-course",
+      "date": null,
+      "planned_minutes": null,
+      "state": null,
+      "done": false,
+      "deadline": null
+    },
+    {
+      "id": "n-course",
+      "kind": "note",
+      "title": "虚构课程报告便签",
+      "status": "reviewed",
+      "task_id": null,
+      "date": null,
+      "planned_minutes": null,
+      "state": null,
+      "done": null,
+      "deadline": null
+    },
+    {
+      "id": "p-other",
+      "kind": "plan_item",
+      "title": null,
+      "status": null,
+      "task_id": "t-other",
+      "date": "2026-11-25",
+      "planned_minutes": 20,
+      "state": "planned",
+      "done": null,
+      "deadline": null
+    },
+    {
+      "id": "t-course",
+      "kind": "task",
+      "title": "虚构课程报告",
+      "status": "todo",
+      "task_id": null,
+      "date": null,
+      "planned_minutes": null,
+      "state": null,
+      "done": null,
+      "deadline": {
+        "value": "2026-11-27",
+        "precision": "date",
+        "confirmed_at": "2026-11-24T10:00:00+08:00"
+      }
+    },
+    {
+      "id": "t-other",
+      "kind": "task",
+      "title": "虚构未选中任务",
+      "status": "todo",
+      "task_id": null,
+      "date": null,
+      "planned_minutes": null,
+      "state": null,
+      "done": null,
+      "deadline": {
+        "value": null,
+        "precision": "none"
+      }
+    }
+  ],
+  "opsCount": 0,
+  "threads": 1,
+  "drafts": 1
+}

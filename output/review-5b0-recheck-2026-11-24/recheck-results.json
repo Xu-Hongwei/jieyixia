@@ -1,0 +1,91 @@
+[
+  {
+    "probe": "legacy_deadline",
+    "value": "2026-11-26T09:00+08:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "legacy_deadline",
+    "value": "2026-11-26T09:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "legacy_deadline",
+    "value": "2026-11-26T09:00:00.123+08:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal": {
+      "accepted": true
+    }
+  },
+  {
+    "probe": "typescript_discriminated_union",
+    "model": "AssistantModelProposal",
+    "field": "task_proposals",
+    "generated_type": "Array<TaskProposalCreate | TaskProposalLink | TaskProposalUpdate>"
+  },
+  {
+    "probe": "typescript_discriminated_union",
+    "model": "AssistantProposeResponse",
+    "field": "payload",
+    "generated_type": "ClarificationPayload | ProposalPayload | ExplanationPayload"
+  },
+  {
+    "probe": "completed_action",
+    "direct_work_reference": {
+      "accepted": false,
+      "error": "已完成 Action 只能作为已满足前置的事实引用，不能重新排为未完成步骤"
+    },
+    "reuse_control": {
+      "accepted": false,
+      "error": "已完成 Action 只能作为已满足前置的事实引用，不能重新排为未完成步骤"
+    }
+  },
+  {
+    "probe": "update_deadline_evidence",
+    "origin": "model",
+    "update": {
+      "accepted": false,
+      "error": "task t-update 截止候选 证据指向未选定 source：unselected-source"
+    },
+    "create_control": {
+      "accepted": false,
+      "error": "task t-new 截止候选 证据指向未选定 source：unselected-source"
+    }
+  },
+  {
+    "probe": "update_deadline_evidence",
+    "origin": "user",
+    "update": {
+      "accepted": false,
+      "error": "origin=user 的截止候选必须有用户消息证据"
+    },
+    "create_control": {
+      "accepted": false,
+      "error": "origin=user 的截止候选必须有用户消息证据"
+    }
+  },
+  {
+    "probe": "analyze_multi_profile_attempts",
+    "profiles": 2,
+    "retries_each": 1,
+    "attempts": [
+      "a",
+      "a",
+      "b",
+      "b"
+    ],
+    "count": 4
+  }
+]

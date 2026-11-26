@@ -1,0 +1,38 @@
+{
+  "baseline": {
+    "exportSucceeded": true,
+    "zipBytes": 2374,
+    "validation": {
+      "ok": true,
+      "errors": []
+    }
+  },
+  "malformed": {
+    "exportSucceeded": true,
+    "zipBytes": 2416,
+    "validation": {
+      "ok": false,
+      "errors": [
+        {
+          "layer": "B",
+          "message": "未知字段 unapproved_field（契约 additionalProperties:false）",
+          "objectId": "task-1",
+          "path": "Task.unapproved_field"
+        }
+      ]
+    }
+  },
+  "oversized": {
+    "exportSucceeded": true,
+    "zipBytes": 26432,
+    "validation": {
+      "ok": false,
+      "errors": [
+        {
+          "layer": "A",
+          "message": "JSON 超过单文件上限 26214400：data/sources.json"
+        }
+      ]
+    }
+  }
+}

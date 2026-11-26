@@ -1,0 +1,26 @@
+const {createRequire}=require('node:module');const {chromium}=createRequire('E:/qoder/frontend/package.json')('playwright-core');const fs=require('node:fs');
+(async()=>{const b=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});const c=await b.newContext();const p=await c.newPage();const checks=[];const errors=[];p.on('pageerror',e=>errors.push(e.message));const check=(name,pass,detail)=>{checks.push({name,pass:!!pass,detail});if(!pass)throw Error(name+': '+JSON.stringify(detail));};
+try{
+ await p.goto('http://127.0.0.1:5183/#/data');await p.waitForFunction(async()=>{const {useAppStore}=await import('/src/stores/app.js');return useAppStore().ready});
+ await p.evaluate(async()=>{const db=await import('/src/services/storage/db.js');const {fictionalRecords}=await import('/src/tests/backupFixtures.js');const {sourceFromBackup}=await import('/src/services/backup/adapt.js');const v=fictionalRecords();for(const s of v.sources)await db.putSource({...sourceFromBackup(s,s.asset_path?v.assets.get(s.asset_path):null),workspace_id:'personal'});for(const d of v.docs)await db.putDoc({...d,workspace_id:'personal'});});await p.reload();
+ const original=()=>p.evaluate(async()=>{const db=await import('/src/services/storage/db.js');const v=await db.readWorkspaceSnapshot('personal');const src=[];for(const s of v.sources){const {blob,...rest}=s;src.push({...rest,hash:blob?Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await blob.arrayBuffer()))).join(','):null})};return JSON.stringify({workspace:v.workspace,sources:src.sort((a,b)=>a.id.localeCompare(b.id)),docs:v.docs.sort((a,b)=>a.id.localeCompare(b.id))});});
+ const before=await original();const dirs=()=>p.evaluate(async()=>{const db=await import('/src/services/storage/db.js');return db.allWorkspaces()});const beforeDirs=await dirs();
+ await p.locator('input[type=file]').setInputFiles('E:/qoder/output/backup-export-recheck-2026-11-22/browser-baseline.zip');await p.getByText('备份预览',{exact:true}).waitFor();
+ check('预览不写目录且原数据不变',(await dirs()).length===beforeDirs.length&&await original()===before);
+ await p.evaluate(()=>{window.__reviewAdd=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(value,...rest){if(this.name==='focus_runtime')throw new DOMException('审查模拟写入失败','QuotaExceededError');return window.__reviewAdd.call(this,value,...rest)}});
+ await p.getByRole('button',{name:'恢复到新空间',exact:true}).click();await p.getByRole('button',{name:'重试恢复',exact:true}).waitFor();
+ const failedTargets=await p.evaluate(async()=>{const {allFocusRuntime}=await import('/src/services/storage/db.js');return (await allFocusRuntime()).records.filter(r=>r.workspace_id.startsWith('ws-restore-')).length});
+ check('末个存储区失败时目录和协调记录回滚且原库不变',(await dirs()).length===beforeDirs.length&&failedTargets===0&&await original()===before);
+ await p.evaluate(()=>{IDBObjectStore.prototype.add=window.__reviewAdd});
+ await p.getByRole('button',{name:'重试恢复',exact:true}).dblclick();await p.getByRole('button',{name:'进入恢复空间',exact:true}).waitFor();
+ const afterDirs=await dirs();const restored=afterDirs.filter(w=>w.restore_receipt);check('双击仅创建一个恢复空间',restored.length===1,{count:restored.length});check('原空间完整字段和原图哈希不变',await original()===before);
+ const target=restored[0].id;
+ const facts=await p.evaluate(async target=>{const db=await import('/src/services/storage/db.js');const v=await db.readWorkspaceSnapshot(target);return {docs:v.docs,sources:v.sources.map(({blob,...s})=>({...s,size:blob?.size})),runtime:(await db.allFocusRuntime()).records.filter(r=>r.workspace_id===target)}},target);
+ check('恢复10份记录及2份资料且全部新ID',facts.docs.length===10&&facts.sources.length===2&&!facts.docs.some(d=>['note-1','task-1','action-1','focus-paused'].includes(d.id)));
+ const unfinished=facts.docs.find(d=>d.kind==='focus_session'&&d.ended_at==null);check('未结束会话暂停并具备恢复协调记录',!unfinished.running&&facts.runtime.some(r=>r.session_id===unfinished.id&&r.kind==='session'));
+ await p.getByRole('button',{name:'进入恢复空间',exact:true}).click();await p.waitForURL(/#\/today/);await p.reload();
+ await p.waitForFunction(async target=>{const {useAppStore}=await import('/src/stores/app.js');return useAppStore().ready&&useAppStore().workspaceId===target},target);
+ check('刷新后目标空间仍可选择',await p.getByRole('combobox',{name:'切换工作区'}).first().inputValue()===target);
+ await p.goto('http://127.0.0.1:5183/#/work/'+unfinished.id);await p.getByRole('button',{name:'恢复编辑',exact:false}).waitFor();await p.getByRole('button',{name:'恢复编辑',exact:false}).click();await p.getByRole('button',{name:'核对用时（保持暂停）',exact:true}).click();await p.getByRole('button',{name:'继续计时',exact:true}).waitFor();
+ check('恢复工作可接管核对并到达可继续状态',await p.getByRole('textbox',{name:'本次成果正文'}).isEnabled());check('页面无运行时错误',errors.length===0,errors);
+}finally{await b.close();fs.writeFileSync('E:/qoder/output/restore-review-2026-11-22/result.json',JSON.stringify({checks,errors},null,2));console.log(JSON.stringify({checks,errors},null,2));}})().catch(e=>{console.error(e);process.exitCode=1});

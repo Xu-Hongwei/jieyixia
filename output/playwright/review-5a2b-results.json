@@ -1,0 +1,172 @@
+{
+  "results": [
+    {
+      "case": "initial-dialog",
+      "text": "开始这项安排\n\n核对安排与行动事实后明确开始；取消不创建会话。\n\n所属任务\n审查虚构报告\n待办\n任务总截止：无截止\n安排日期\n2026-11-23\n今天\n审查安排\n安排预计 30 分钟 · 安排说明不覆盖行动内容\n将执行的行动（按 ID 明确选择，不按文字匹配）\n审查行动\n行动预计 25 分钟\n去任务选择行动\n取消\n确认并开始\n\n开始后进入工作页计时；取消不创建会话。事实变化会要求重新核对，不会静默改绑行动。"
+    },
+    {
+      "case": "after-external-change-before-submit",
+      "text": "开始这项安排\n\n核对安排与行动事实后明确开始；取消不创建会话。\n\n所属任务\n审查虚构报告\n待办\n任务总截止：无截止\n安排日期\n2026-11-23\n今天\n改到明天的安排\n安排预计 60 分钟 · 安排说明不覆盖行动内容\n将执行的行动（按 ID 明确选择，不按文字匹配）\n审查行动\n行动预计 25 分钟\n去任务选择行动\n取消\n确认并开始\n\n开始后进入工作页计时；取消不创建会话。事实变化会要求重新核对，不会静默改绑行动。"
+    },
+    {
+      "case": "after-reconfirm-date-change",
+      "text": "开始这项安排\n\n核对安排与行动事实后明确开始；取消不创建会话。\n\n所属任务\n审查虚构报告\n待办\n任务总截止：无截止\n安排日期\n2026-11-23\n今天\n改到明天的安排\n安排预计 60 分钟 · 安排说明不覆盖行动内容\n将执行的行动（按 ID 明确选择，不按文字匹配）\n审查行动\n行动预计 25 分钟\n去任务选择行动\n取消\n确认并开始\n\n开始后进入工作页计时；取消不创建会话。事实变化会要求重新核对，不会静默改绑行动。",
+      "checkboxes": 0
+    },
+    {
+      "case": "begun",
+      "url": "http://127.0.0.1:5173/#/work/1d7f8dae-8ddd-48e4-aa4b-c3cabe97afce?return=%2Ftoday%3Fview%3Dlist%26plan%3Dreview-p",
+      "body": "返回日程\n运行中\n已保存\n审查虚构报告\n审查行动 · 预计 25 分钟 · 已投入 00:00\n暂停\n结束本次\n所属安排\n2026-11-24\n待执行\n返回安排\n\n当前安排说明：改到明天的安排\n\n安排预计 60 分钟 · 已结束 0 段 · 累计 00:00 · 实际 未记录\n\n任务总截止：未设置\n\n本段计时单独显示（顶部「已投入」），不混入已结束累计。\n\n本次成果\n\n纯文本 / Markdown 源码；停止输入约 1 秒自动保存。\n\n关联资料（只读）\n\n本任务没有关联便签（独立任务可直接执行）。"
+    },
+    {
+      "case": "end-form",
+      "text": "结束本次工作\n\n编辑区当前正文将作为本次成果一并保存。选择「行动完成」只完成该行动，不会自动完成任务。\n\n所属安排\n2026-11-24\n\n改到明天的安排\n\n安排预计 60 分钟 · 暂无已结束历史\n\n本段有效用时将在保存时结算，不混入上方已结束累计。\n\n这次行动的结果\n行动完成\n确认完成当前行动；任务不自动完成，也不自动选下一条。\n部分完成\n记录进展，行动保持原状态，之后可再开始新一段。\n被阻塞\n写明具体卡点；行动/任务状态不会自动改为受阻。\n这项安排的进度\n还需要继续\n安排保持部分完成，之后可另安排一天继续。\n这项安排已完成\n只完成这项安排，不代表完成任务；行动结果按上方选择单独记录。\n取消\n结束并保存\n\n取消只关闭表单，不结束、不暂停、不写进度；同会话重开保留已选结果与卡点。"
+    },
+    {
+      "case": "after-end",
+      "url": "http://127.0.0.1:5173/#/today?view=list&plan=review-p&recorded=1d7f8dae-8ddd-48e4-aa4b-c3cabe97afce",
+      "body": "2026年11月23日 · 周一北京时间\n工作记录\n周视图\n列表\n安排工作\n新建\n这次记录已保存 · 行动部分完成。 查看工作记录知道了\n安排详情\n已完成\n已完成的安排是历史，只读；继续工作请另建安排\n改到明天的安排\n所属任务：审查虚构报告\n安排日期\n2026-11-24\n预计\n60 分钟\n总截止\n无截止\n实际\n<1分钟\n\n安排只说明「这天准备做什么」；任务截止与行动不受安排操作影响。\n\n实际 <1分钟 · 累计 00:00 · 1 段已结束最近一段记录\n已结束的工作记录 · 1\n2026年11月23日 20:02（北京时间）\n部分完成\n00:00\n查看记录\n另安排一天\n操作只作用于这项安排，不影响任务截止与行动。\n11.23 — 11.29\n\n2026 · 上方每日工作 · 下方每日截止 · 北京时间\n\n本周\n2026-11-23\n周一\n今天\n选中\n工作 0 · 截止 0\n每日工作 · 0 项\n\n未安排工作\n\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n2026-11-24\n周二\n工作 0 · 截止 0\n每日工作 · 0 项\n\n未安排工作\n\n安排历史 1 项 · 展开\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n2026-11-25\n周三\n工作 0 · 截止 0\n每日工作 · 0 项\n\n未安排工作\n\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n2026-11-26\n周四\n工作 0 · 截止 0\n每日工作 · 0 项\n\n未安排工作\n\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n2026-11-27\n周五\n工作 0 · 截止 0\n每日工作 · 0 项\n\n未安排工作\n\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n2026-11-28\n周六\n工作 0 · 截止 0\n每日工作 · 0 项\n\n未安排工作\n\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n2026-11-29\n周日\n工作 0 · 截止 0\n每日工作 · 0 项\n\n未安排工作\n\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n本周工作 0 项\n·\n截止 0 项\n·\n逾期红标 · 完成淡化 · 点击卡片看详情\n待安排\n1\n过去未完成\n0\n全部任务\n1\n同一展开区 · 搜索与筛选对当前清单生效\n恢复入口",
+      "data": {
+        "docs": [
+          {
+            "id": "1d7f8dae-8ddd-48e4-aa4b-c3cabe97afce",
+            "kind": "focus_session",
+            "workspace_id": "personal",
+            "task_id": "review-t",
+            "action_id": "review-a",
+            "plan_item_id": "review-p",
+            "started_at": "2026-11-23T12:02:18.703Z",
+            "accumulated_ms": 88,
+            "running": false,
+            "draft_md": "",
+            "outcome": "partial",
+            "blocker": null,
+            "ended_at": "2026-11-23T12:02:18.791Z",
+            "is_demo": false,
+            "record_version": 1,
+            "timer_anchor_at": null,
+            "task_snapshot": {
+              "title": "审查虚构报告",
+              "matter_name": null,
+              "deadline_value": null,
+              "deadline_precision": "none",
+              "captured_at": "2026-11-23T12:02:18.703Z"
+            },
+            "action_snapshot": {
+              "text": "审查行动",
+              "minutes": 25,
+              "captured_at": "2026-11-23T12:02:18.703Z"
+            },
+            "task_ref_state": "active",
+            "action_ref_state": "active"
+          },
+          {
+            "id": "review-p",
+            "kind": "plan_item",
+            "workspace_id": "personal",
+            "task_id": "review-t",
+            "date": "2026-11-24",
+            "state": "done",
+            "action_text": "改到明天的安排",
+            "planned_minutes": 60,
+            "actual_minutes": 0,
+            "focus_session_id": "1d7f8dae-8ddd-48e4-aa4b-c3cabe97afce",
+            "task_ref_state": "active",
+            "order": 1,
+            "created_at": "2026-11-23T12:02:18.480Z",
+            "updated_at": "2026-11-23T12:02:18.480Z"
+          }
+        ]
+      }
+    },
+    {
+      "case": "mobile-plan-return",
+      "body": "2026年11月23日 · 周一北京时间\n工作记录\n周视图\n列表\n安排工作\n新建\n安排详情\n已完成\n已完成的安排是历史，只读；继续工作请另建安排\n改到明天的安排\n所属任务：审查虚构报告\n安排日期\n2026-11-24\n预计\n60 分钟\n总截止\n无截止\n实际\n<1分钟\n\n安排只说明「这天准备做什么」；任务截止与行动不受安排操作影响。\n\n实际 <1分钟 · 累计 00:00 · 1 段已结束最近一段记录\n已结束的工作记录 · 1\n2026年11月23日 20:02（北京时间）\n部分完成\n00:00\n查看记录\n另安排一天\n操作只作用于这项安排，不影响任务截止与行动。\n11.23 — 11.29\n\n2026 · 上方每日工作 · 下方每日截止 · 北京时间\n\n本周\n周一\n23\n0·0\n周二\n24\n0·0\n周三\n25\n0·0\n周四\n26\n0·0\n周五\n27\n0·0\n周六\n28\n0·0\n周日\n29\n0·0\n2026-11-23\n周一\n今天\n每日工作 · 0 项\n\n未安排工作\n\n＋安排\n每日截止 · 0 项\n\n暂无截止\n\n本周工作 0 项\n·\n截止 0 项\n·\n逾期红标 · 完成淡化 · 点击卡片看详情\n待安排\n1\n过去未完成\n0\n全部任务\n1\n同一展开区 · 搜索与筛选对当前清单生效\n恢复入口"
+    },
+    {
+      "case": "invalid-plan-context-before-start",
+      "body": "返回原列表\n链接中的安排不存在或不属于当前空间（不会自动切换空间）。 返回日程\n审查虚构报告\n进行中\n完成任务\n无截止\n所属事项\n未归组\n\n完成任务是独立操作：不会自动把 1 个未完成行动标为完成。\n\n当前行动\n审查行动\n预计 25 分钟 · 用户手动填写\n完成行动\n取消当前\n开始执行\n进入执行页记录成果并计时。\n行动列表 · 1\n\n手动填写内容与预计分钟；完成行动不等于完成任务。\n\n审查行动25 分钟当前\n分钟\n添加行动\n跨日安排 · 1\n安排工作\n\n安排只说明「这天准备做什么」，不改任务截止与行动。已完成任务的安排为只读历史。\n\n2026-11-24\n已完成\n改到明天的安排\n审查虚构报告\n预计 60 分\n· 实际 <1分钟\n工作记录 · 1 段\n合计 00:00\n全部工作记录\n审查行动\n部分完成\n00:00\n查看成果\n2026年11月23日 20:02（北京时间） → 2026年11月23日 20:02（北京时间）（北京时间）\n说明与完成标准\n保存说明\n保存完成标准\n关联资料\n\n没有关联便签；截止为用户手动输入或独立创建。"
+    },
+    {
+      "case": "invalid-plan-context-created-independent-session",
+      "url": "http://127.0.0.1:5173/#/work/6b848462-3a8f-4f0a-b18e-e2f8d0f965f2?return=%2Ftasks%2Freview-t%3Freturn%3D%252Ftoday%253Fview%253Dlist",
+      "sessions": [
+        {
+          "id": "6b848462-3a8f-4f0a-b18e-e2f8d0f965f2",
+          "kind": "focus_session",
+          "workspace_id": "personal",
+          "task_id": "review-t",
+          "action_id": "review-a",
+          "plan_item_id": null,
+          "started_at": "2026-11-23T12:02:20.523Z",
+          "accumulated_ms": 0,
+          "running": true,
+          "draft_md": "",
+          "outcome": null,
+          "blocker": null,
+          "ended_at": null,
+          "is_demo": false,
+          "record_version": 1,
+          "timer_anchor_at": "2026-11-23T12:02:20.523Z",
+          "task_snapshot": {
+            "title": "审查虚构报告",
+            "matter_name": null,
+            "deadline_value": null,
+            "deadline_precision": "none",
+            "captured_at": "2026-11-23T12:02:20.523Z"
+          },
+          "action_snapshot": {
+            "text": "审查行动",
+            "minutes": 25,
+            "captured_at": "2026-11-23T12:02:20.523Z"
+          },
+          "task_ref_state": "active",
+          "action_ref_state": "active"
+        }
+      ]
+    },
+    {
+      "case": "begin-followup-read-failure",
+      "url": "http://127.0.0.1:5173/#/today?plan=review-p2",
+      "dialog": "开始这项安排\n\n核对安排与行动事实后明确开始；取消不创建会话。\n\n所属任务\n审查虚构报告\n进行中\n任务总截止：无截止\n安排日期\n2026-11-23\n今天\n改到明天的安排\n安排预计 60 分钟 · 安排说明不覆盖行动内容\n将执行的行动（按 ID 明确选择，不按文字匹配）\n审查行动\n行动预计 25 分钟\n去任务选择行动\n取消\n正在开始…\n\n开始后进入工作页计时；取消不创建会话。事实变化会要求重新核对，不会静默改绑行动。",
+      "cancelDisabled": true,
+      "running": [
+        {
+          "id": "f685b6c6-5aa6-41cd-a6af-e6f8e3c93d8c",
+          "kind": "focus_session",
+          "workspace_id": "personal",
+          "task_id": "review-t",
+          "action_id": "review-a",
+          "plan_item_id": "review-p2",
+          "started_at": "2026-11-23T12:02:20.619Z",
+          "accumulated_ms": 0,
+          "running": true,
+          "draft_md": "",
+          "outcome": null,
+          "blocker": null,
+          "ended_at": null,
+          "is_demo": false,
+          "record_version": 1,
+          "timer_anchor_at": "2026-11-23T12:02:20.619Z",
+          "task_snapshot": {
+            "title": "审查虚构报告",
+            "matter_name": null,
+            "deadline_value": null,
+            "deadline_precision": "none",
+            "captured_at": "2026-11-23T12:02:20.619Z"
+          },
+          "action_snapshot": {
+            "text": "审查行动",
+            "minutes": 25,
+            "captured_at": "2026-11-23T12:02:20.619Z"
+          },
+          "task_ref_state": "active",
+          "action_ref_state": "active"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "REVIEW injected read failure after committed begin"
+  ]
+}

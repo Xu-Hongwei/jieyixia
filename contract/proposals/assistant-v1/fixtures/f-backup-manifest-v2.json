@@ -1,0 +1,58 @@
+{
+  "id": "f-backup-manifest-v2",
+  "title": "v2 manifest 含助手必需 payload",
+  "layer": "backup",
+  "mode": "accept",
+  "target": "BackupManifestV2",
+  "acceptance": [
+    "B0-14",
+    "B0-15"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "format": "jxl-backup",
+    "backup_format_version": 2,
+    "schema_version": "0.5.0",
+    "backup_id": "bk-1",
+    "exported_at": "2026-11-24T10:00:00+08:00",
+    "source_workspace": {
+      "id": "ws-fixture",
+      "name": "虚构空间",
+      "is_demo": true
+    },
+    "counts": {
+      "source_count": 1,
+      "image_count": 1,
+      "doc_count": 3,
+      "assistant_thread_count": 1,
+      "assistant_draft_count": 1
+    },
+    "source_count": 1,
+    "image_count": 1,
+    "payloads": [
+      {
+        "path": "data/sources.json",
+        "bytes": 100,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "path": "data/docs.json",
+        "bytes": 100,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "path": "data/assistant_threads.json",
+        "bytes": 100,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      {
+        "path": "data/assistant_drafts.json",
+        "bytes": 100,
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ]
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

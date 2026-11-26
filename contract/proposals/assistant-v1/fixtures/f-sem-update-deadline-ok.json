@@ -1,0 +1,67 @@
+{
+  "id": "f-sem-update-deadline-ok",
+  "title": "update 截止候选证据/来源合法",
+  "layer": "model",
+  "mode": "accept",
+  "target": "model_semantics",
+  "acceptance": [
+    "B0-04"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "proposal": {
+      "task_proposals": [
+        {
+          "op": "update",
+          "key": "t-up",
+          "target_id": "t-1",
+          "changes": {
+            "deadline_candidates": [
+              {
+                "value": "2026-11-27",
+                "precision": "date",
+                "origin": "user",
+                "evidence_refs": [
+                  {
+                    "kind": "user_message",
+                    "turn_id": "turn-1",
+                    "excerpt": "截止改到周五"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "context": {
+      "workspace_id": "ws-fixture",
+      "tasks": [
+        {
+          "id": "t-1",
+          "workspace_id": "ws-fixture",
+          "title": "虚构任务",
+          "status": "todo"
+        }
+      ],
+      "actions": [
+        {
+          "id": "a-1",
+          "task_id": "t-1",
+          "workspace_id": "ws-fixture",
+          "done": false
+        }
+      ],
+      "source_ids": [
+        "s-1"
+      ],
+      "note_ids": [
+        "n-1"
+      ],
+      "turn_id": "turn-1"
+    }
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": "R4：合法 update 正例；逐字段确认边界不变"
+}

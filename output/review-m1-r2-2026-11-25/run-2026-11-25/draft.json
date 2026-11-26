@@ -1,0 +1,886 @@
+{
+  "id": "c576b4b7-1cfe-47e7-b754-51773973a20d",
+  "record_version": 1,
+  "workspace_id": "demo",
+  "thread_id": "47a3ff44-e8a1-4cac-a733-e76772a07cbd",
+  "revision": 3,
+  "revision_history": [
+    {
+      "revision": 1,
+      "proposal": {
+        "task_proposals": [
+          {
+            "op": "create",
+            "key": "rpt",
+            "title": "演示：提交周报",
+            "description": "虚构演示任务，可自由编辑。",
+            "completion_criteria": null,
+            "deadline_candidates": [
+              {
+                "value": "2026-11-27",
+                "precision": "date",
+                "origin": "user",
+                "derived": false,
+                "basis": "explicit",
+                "evidence_refs": [
+                  {
+                    "kind": "user_message",
+                    "turn_id": "9462232e-8085-4cb5-95e8-0432bfca670e",
+                    "excerpt": "我把任务「演示：提交周报」的截止设为 2026-11-27。"
+                  }
+                ]
+              }
+            ],
+            "evidence_refs": [
+              {
+                "kind": "source_excerpt",
+                "source_id": "9df9f383-ba32-416b-94a9-09bd2e35490f",
+                "excerpt": "后天提交周报。",
+                "locator": null
+              }
+            ]
+          }
+        ],
+        "action_proposals": [
+          {
+            "op": "create",
+            "key": "a1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "text": "整理本周进展",
+            "minutes": 60,
+            "basis": "suggestion",
+            "evidence_refs": []
+          },
+          {
+            "op": "create",
+            "key": "a2",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "text": "撰写报告正文并核对",
+            "minutes": 90,
+            "basis": "suggestion",
+            "evidence_refs": []
+          }
+        ],
+        "work_items": [
+          {
+            "key": "w1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "action_ref": {
+              "kind": "draft",
+              "key": "a1"
+            },
+            "deliverable": "进展清单",
+            "remaining_minutes": 60,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [],
+            "priority": "normal"
+          },
+          {
+            "key": "w2",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "action_ref": {
+              "kind": "draft",
+              "key": "a2"
+            },
+            "deliverable": "报告正文",
+            "remaining_minutes": 90,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [
+              "w1"
+            ],
+            "priority": "normal"
+          }
+        ],
+        "requirement_candidates": [],
+        "evidence_refs": [
+          {
+            "kind": "source_excerpt",
+            "source_id": "9df9f383-ba32-416b-94a9-09bd2e35490f",
+            "excerpt": "后天提交周报。",
+            "locator": null
+          }
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "planning_input": null,
+      "planning_result": null,
+      "requirements": [],
+      "created_at": "2026-11-25T08:47:07.585Z"
+    },
+    {
+      "revision": 2,
+      "proposal": {
+        "task_proposals": [
+          {
+            "op": "create",
+            "key": "rpt",
+            "title": "演示：提交周报",
+            "description": "虚构演示任务，可自由编辑。",
+            "completion_criteria": null,
+            "deadline_candidates": [
+              {
+                "value": "2026-11-27",
+                "precision": "date",
+                "origin": "user",
+                "derived": false,
+                "basis": "explicit",
+                "evidence_refs": [
+                  {
+                    "kind": "user_message",
+                    "turn_id": "9462232e-8085-4cb5-95e8-0432bfca670e",
+                    "excerpt": "我把任务「演示：提交周报」的截止设为 2026-11-27。"
+                  }
+                ]
+              }
+            ],
+            "evidence_refs": [
+              {
+                "kind": "source_excerpt",
+                "source_id": "9df9f383-ba32-416b-94a9-09bd2e35490f",
+                "excerpt": "后天提交周报。",
+                "locator": null
+              }
+            ]
+          }
+        ],
+        "action_proposals": [
+          {
+            "op": "create",
+            "key": "a1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "text": "整理本周进展",
+            "minutes": 60,
+            "basis": "suggestion",
+            "evidence_refs": []
+          },
+          {
+            "op": "create",
+            "key": "a2",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "text": "撰写报告正文并核对",
+            "minutes": 90,
+            "basis": "suggestion",
+            "evidence_refs": []
+          }
+        ],
+        "work_items": [
+          {
+            "key": "w1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "action_ref": {
+              "kind": "draft",
+              "key": "a1"
+            },
+            "deliverable": "进展清单",
+            "remaining_minutes": 60,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [],
+            "priority": "normal"
+          },
+          {
+            "key": "w2",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "action_ref": {
+              "kind": "draft",
+              "key": "a2"
+            },
+            "deliverable": "报告正文",
+            "remaining_minutes": 90,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [
+              "w1"
+            ],
+            "priority": "normal"
+          }
+        ],
+        "requirement_candidates": [],
+        "evidence_refs": [
+          {
+            "kind": "source_excerpt",
+            "source_id": "9df9f383-ba32-416b-94a9-09bd2e35490f",
+            "excerpt": "后天提交周报。",
+            "locator": null
+          }
+        ],
+        "assumptions": [],
+        "warnings": []
+      },
+      "planning_input": {
+        "algorithm_version": "daily-v1",
+        "timezone": "Asia/Shanghai",
+        "today": "2026-11-25",
+        "start_date": "2026-11-25",
+        "horizon_days": 7,
+        "buffer_pct": 15,
+        "days": [
+          {
+            "date": "2026-11-25",
+            "budget_minutes": 120
+          },
+          {
+            "date": "2026-11-26",
+            "budget_minutes": 120
+          },
+          {
+            "date": "2026-11-27",
+            "budget_minutes": 120
+          },
+          {
+            "date": "2026-11-28",
+            "budget_minutes": 120
+          },
+          {
+            "date": "2026-11-29",
+            "budget_minutes": 120
+          },
+          {
+            "date": "2026-11-30",
+            "budget_minutes": 120
+          },
+          {
+            "date": "2026-12-01",
+            "budget_minutes": 120
+          }
+        ],
+        "task_facts": [
+          {
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "title": "演示：提交周报",
+            "status": "todo",
+            "deadline_value": "2026-11-27",
+            "deadline_precision": "date",
+            "overdue_consent": false
+          }
+        ],
+        "work_items": [
+          {
+            "key": "w1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "action_ref": {
+              "kind": "draft",
+              "key": "a1"
+            },
+            "deliverable": "进展清单",
+            "remaining_minutes": 60,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [],
+            "priority": "normal"
+          },
+          {
+            "key": "w2",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "action_ref": {
+              "kind": "draft",
+              "key": "a2"
+            },
+            "deliverable": "报告正文",
+            "remaining_minutes": 90,
+            "estimate_origin": "model",
+            "splittable": true,
+            "min_segment_minutes": 25,
+            "earliest_date": null,
+            "depends_on": [
+              "w1"
+            ],
+            "priority": "normal"
+          }
+        ],
+        "occupancy": [],
+        "replacement_ids": [],
+        "extra_work_acknowledged": []
+      },
+      "planning_result": {
+        "segments": [
+          {
+            "segment_key": "w1#1",
+            "work_item_key": "w1",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "suggested_action_ref": {
+              "kind": "draft",
+              "key": "a1"
+            },
+            "date": "2026-11-25",
+            "minutes": 60,
+            "order": 1,
+            "action_text": "进展清单",
+            "deliverable": "进展清单"
+          },
+          {
+            "segment_key": "w2#1",
+            "work_item_key": "w2",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "suggested_action_ref": {
+              "kind": "draft",
+              "key": "a2"
+            },
+            "date": "2026-11-25",
+            "minutes": 42,
+            "order": 2,
+            "action_text": "报告正文",
+            "deliverable": "报告正文"
+          },
+          {
+            "segment_key": "w2#2",
+            "work_item_key": "w2",
+            "task_ref": {
+              "kind": "draft",
+              "key": "rpt"
+            },
+            "suggested_action_ref": {
+              "kind": "draft",
+              "key": "a2"
+            },
+            "date": "2026-11-26",
+            "minutes": 48,
+            "order": 1,
+            "action_text": "报告正文",
+            "deliverable": "报告正文"
+          }
+        ],
+        "days": [
+          {
+            "date": "2026-11-25",
+            "budget_minutes": 120,
+            "buffer_minutes": 18,
+            "committed_minutes": 0,
+            "allocated_minutes": 102,
+            "free_minutes": 0,
+            "overbooked_minutes": 0
+          },
+          {
+            "date": "2026-11-26",
+            "budget_minutes": 120,
+            "buffer_minutes": 18,
+            "committed_minutes": 0,
+            "allocated_minutes": 48,
+            "free_minutes": 54,
+            "overbooked_minutes": 0
+          },
+          {
+            "date": "2026-11-27",
+            "budget_minutes": 120,
+            "buffer_minutes": 18,
+            "committed_minutes": 0,
+            "allocated_minutes": 0,
+            "free_minutes": 102,
+            "overbooked_minutes": 0
+          },
+          {
+            "date": "2026-11-28",
+            "budget_minutes": 120,
+            "buffer_minutes": 18,
+            "committed_minutes": 0,
+            "allocated_minutes": 0,
+            "free_minutes": 102,
+            "overbooked_minutes": 0
+          },
+          {
+            "date": "2026-11-29",
+            "budget_minutes": 120,
+            "buffer_minutes": 18,
+            "committed_minutes": 0,
+            "allocated_minutes": 0,
+            "free_minutes": 102,
+            "overbooked_minutes": 0
+          },
+          {
+            "date": "2026-11-30",
+            "budget_minutes": 120,
+            "buffer_minutes": 18,
+            "committed_minutes": 0,
+            "allocated_minutes": 0,
+            "free_minutes": 102,
+            "overbooked_minutes": 0
+          },
+          {
+            "date": "2026-12-01",
+            "budget_minutes": 120,
+            "buffer_minutes": 18,
+            "committed_minutes": 0,
+            "allocated_minutes": 0,
+            "free_minutes": 102,
+            "overbooked_minutes": 0
+          }
+        ],
+        "unscheduled": [],
+        "unknown_items": [],
+        "excluded_items": [],
+        "conflicts": [],
+        "warnings": [
+          {
+            "code": "unrecorded_calendar_notice",
+            "message": "容量按你提供的预算核对，未录入的会议/课程不会被自动知道",
+            "related_key": null
+          }
+        ],
+        "complete": true
+      },
+      "requirements": [],
+      "created_at": "2026-11-25T08:47:08.040Z"
+    }
+  ],
+  "status": "editing",
+  "proposal": {
+    "task_proposals": [
+      {
+        "op": "create",
+        "key": "rpt",
+        "title": "审查：改标题并清除截止",
+        "description": "虚构演示任务，可自由编辑。",
+        "completion_criteria": null,
+        "deadline_candidates": [
+          {
+            "value": "2026-11-27",
+            "precision": "date",
+            "origin": "user",
+            "derived": false,
+            "basis": "explicit",
+            "evidence_refs": [
+              {
+                "kind": "user_message",
+                "turn_id": "9462232e-8085-4cb5-95e8-0432bfca670e",
+                "excerpt": "我把任务「演示：提交周报」的截止设为 2026-11-27。"
+              }
+            ]
+          }
+        ],
+        "evidence_refs": [
+          {
+            "kind": "source_excerpt",
+            "source_id": "9df9f383-ba32-416b-94a9-09bd2e35490f",
+            "excerpt": "后天提交周报。",
+            "locator": null
+          }
+        ]
+      }
+    ],
+    "action_proposals": [
+      {
+        "op": "create",
+        "key": "a1",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "text": "整理本周进展",
+        "minutes": 60,
+        "basis": "suggestion",
+        "evidence_refs": []
+      },
+      {
+        "op": "create",
+        "key": "a2",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "text": "撰写报告正文并核对",
+        "minutes": 90,
+        "basis": "suggestion",
+        "evidence_refs": []
+      }
+    ],
+    "work_items": [
+      {
+        "key": "w1",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "action_ref": {
+          "kind": "draft",
+          "key": "a1"
+        },
+        "deliverable": "进展清单",
+        "remaining_minutes": 60,
+        "estimate_origin": "model",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [],
+        "priority": "normal"
+      },
+      {
+        "key": "w2",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "action_ref": {
+          "kind": "draft",
+          "key": "a2"
+        },
+        "deliverable": "报告正文",
+        "remaining_minutes": 90,
+        "estimate_origin": "model",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [
+          "w1"
+        ],
+        "priority": "normal"
+      }
+    ],
+    "requirement_candidates": [],
+    "evidence_refs": [
+      {
+        "kind": "source_excerpt",
+        "source_id": "9df9f383-ba32-416b-94a9-09bd2e35490f",
+        "excerpt": "后天提交周报。",
+        "locator": null
+      }
+    ],
+    "assumptions": [],
+    "warnings": []
+  },
+  "planning_input": {
+    "algorithm_version": "daily-v1",
+    "timezone": "Asia/Shanghai",
+    "today": "2026-11-25",
+    "start_date": "2026-11-25",
+    "horizon_days": 7,
+    "buffer_pct": 15,
+    "days": [
+      {
+        "date": "2026-11-25",
+        "budget_minutes": 120
+      },
+      {
+        "date": "2026-11-26",
+        "budget_minutes": 120
+      },
+      {
+        "date": "2026-11-27",
+        "budget_minutes": 120
+      },
+      {
+        "date": "2026-11-28",
+        "budget_minutes": 120
+      },
+      {
+        "date": "2026-11-29",
+        "budget_minutes": 120
+      },
+      {
+        "date": "2026-11-30",
+        "budget_minutes": 120
+      },
+      {
+        "date": "2026-12-01",
+        "budget_minutes": 120
+      }
+    ],
+    "task_facts": [
+      {
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "title": "演示：提交周报",
+        "status": "todo",
+        "deadline_value": "2026-11-27",
+        "deadline_precision": "date",
+        "overdue_consent": false
+      }
+    ],
+    "work_items": [
+      {
+        "key": "w1",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "action_ref": {
+          "kind": "draft",
+          "key": "a1"
+        },
+        "deliverable": "进展清单",
+        "remaining_minutes": 60,
+        "estimate_origin": "model",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [],
+        "priority": "normal"
+      },
+      {
+        "key": "w2",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "action_ref": {
+          "kind": "draft",
+          "key": "a2"
+        },
+        "deliverable": "报告正文",
+        "remaining_minutes": 90,
+        "estimate_origin": "model",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [
+          "w1"
+        ],
+        "priority": "normal"
+      }
+    ],
+    "occupancy": [],
+    "replacement_ids": [],
+    "extra_work_acknowledged": []
+  },
+  "planning_result": {
+    "segments": [
+      {
+        "segment_key": "w1#1",
+        "work_item_key": "w1",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "suggested_action_ref": {
+          "kind": "draft",
+          "key": "a1"
+        },
+        "date": "2026-11-25",
+        "minutes": 60,
+        "order": 1,
+        "action_text": "进展清单",
+        "deliverable": "进展清单"
+      },
+      {
+        "segment_key": "w2#1",
+        "work_item_key": "w2",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "suggested_action_ref": {
+          "kind": "draft",
+          "key": "a2"
+        },
+        "date": "2026-11-25",
+        "minutes": 42,
+        "order": 2,
+        "action_text": "报告正文",
+        "deliverable": "报告正文"
+      },
+      {
+        "segment_key": "w2#2",
+        "work_item_key": "w2",
+        "task_ref": {
+          "kind": "draft",
+          "key": "rpt"
+        },
+        "suggested_action_ref": {
+          "kind": "draft",
+          "key": "a2"
+        },
+        "date": "2026-11-26",
+        "minutes": 48,
+        "order": 1,
+        "action_text": "报告正文",
+        "deliverable": "报告正文"
+      }
+    ],
+    "days": [
+      {
+        "date": "2026-11-25",
+        "budget_minutes": 120,
+        "buffer_minutes": 18,
+        "committed_minutes": 0,
+        "allocated_minutes": 102,
+        "free_minutes": 0,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-26",
+        "budget_minutes": 120,
+        "buffer_minutes": 18,
+        "committed_minutes": 0,
+        "allocated_minutes": 48,
+        "free_minutes": 54,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-27",
+        "budget_minutes": 120,
+        "buffer_minutes": 18,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 102,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-28",
+        "budget_minutes": 120,
+        "buffer_minutes": 18,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 102,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-29",
+        "budget_minutes": 120,
+        "buffer_minutes": 18,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 102,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-11-30",
+        "budget_minutes": 120,
+        "buffer_minutes": 18,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 102,
+        "overbooked_minutes": 0
+      },
+      {
+        "date": "2026-12-01",
+        "budget_minutes": 120,
+        "buffer_minutes": 18,
+        "committed_minutes": 0,
+        "allocated_minutes": 0,
+        "free_minutes": 102,
+        "overbooked_minutes": 0
+      }
+    ],
+    "unscheduled": [],
+    "unknown_items": [],
+    "excluded_items": [],
+    "conflicts": [],
+    "warnings": [
+      {
+        "code": "unrecorded_calendar_notice",
+        "message": "容量按你提供的预算核对，未录入的会议/课程不会被自动知道",
+        "related_key": null
+      }
+    ],
+    "complete": true
+  },
+  "fact_baseline": {
+    "captured_at": "2026-11-25T08:47:08.006Z",
+    "task_facts": [],
+    "action_facts": [],
+    "source_fingerprints": [
+      {
+        "source_id": "9df9f383-ba32-416b-94a9-09bd2e35490f",
+        "sha256": "b0e5d5badc4b9340b37059ad3c5e5f92b928a4bc502b6e516b639527356aebf7",
+        "bytes": 132
+      }
+    ],
+    "note_field_baselines": [],
+    "occupancy": []
+  },
+  "assumptions": [],
+  "user_confirmations": [
+    {
+      "confirmation_id": "2dca7332-8169-471c-b88c-7baf375b0005",
+      "draft_revision": 1,
+      "object_type": "task",
+      "object_id_or_key": "rpt",
+      "field_path": "deadline",
+      "old_value": null,
+      "new_value": {
+        "value": "2026-11-27",
+        "precision": "date"
+      },
+      "confirmed_at": "2026-11-25T08:47:07.585Z",
+      "id_scope": "draft"
+    },
+    {
+      "confirmation_id": "ef11e136-72a3-449a-b2a9-b4ba0acfa0dd",
+      "draft_revision": 2,
+      "object_type": "task",
+      "object_id_or_key": "rpt",
+      "field_path": "deadline",
+      "old_value": null,
+      "new_value": {
+        "value": "2026-11-27",
+        "precision": "date"
+      },
+      "confirmed_at": "2026-11-25T08:47:08.031Z",
+      "id_scope": "draft"
+    },
+    {
+      "confirmation_id": "5d84b082-d73c-4f5b-9fa4-f305681237a8",
+      "draft_revision": 3,
+      "object_type": "task",
+      "object_id_or_key": "rpt",
+      "field_path": "deadline",
+      "old_value": null,
+      "new_value": null,
+      "confirmed_at": "2026-11-25T08:47:08.604Z",
+      "id_scope": "draft"
+    }
+  ],
+  "excluded_items": [],
+  "source_refs": [
+    {
+      "object_type": "source",
+      "id": "9df9f383-ba32-416b-94a9-09bd2e35490f"
+    }
+  ],
+  "applied_summary": null,
+  "created_at": "2026-11-25T08:47:07.549Z",
+  "updated_at": "2026-11-25T08:47:08.604Z"
+}

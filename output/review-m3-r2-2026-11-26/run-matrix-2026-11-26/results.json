@@ -1,0 +1,200 @@
+{
+  "date": "2026-11-26",
+  "base": "http://127.0.0.1:5178/",
+  "backend": "http://127.0.0.1:8010",
+  "results": [
+    {
+      "item": "S1",
+      "name": "合格条目才有勾选框（p-1/p-2/p-keep 三条，受保护六条无框）",
+      "pass": true,
+      "detail": "{\"boxCount\":3,\"goneBoxes\":[0,0,0,0,0,0]}"
+    },
+    {
+      "item": "S1",
+      "name": "只读原因：有投入(含 actual=0) ×2、会话引用(含运行中) ×2、已完成/部分 ×2",
+      "pass": true,
+      "detail": "{\"actual\":2,\"session\":2,\"state\":2}"
+    },
+    {
+      "item": "S1",
+      "name": "替换/保留计数与受保护条目一致",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "勾选后计数 1/8",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "草案范围只含用户所选，受保护条目不静默纳入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "容量手算：120−18缓冲−30保留=72 可用（选中60已排除，不重复扣减）",
+      "pass": true,
+      "detail": "{\"d0\":{\"date\":\"2026-11-26\",\"budget_minutes\":120,\"buffer_minutes\":18,\"committed_minutes\":30,\"allocated_minutes\":72,\"free_minutes\":0,\"overbooked_minutes\":0}}"
+    },
+    {
+      "item": "S2",
+      "name": "其它任务占用参与：D1 既有 60、余 42",
+      "pass": true,
+      "detail": "{\"d1\":{\"date\":\"2026-11-27\",\"budget_minutes\":120,\"buffer_minutes\":18,\"committed_minutes\":60,\"allocated_minutes\":0,\"free_minutes\":42,\"overbooked_minutes\":0}}"
+    },
+    {
+      "item": "S2",
+      "name": "新排总量 72 全部落 D0（单段 72）",
+      "pass": true,
+      "detail": "[{\"segment_key\":\"rw1#1\",\"work_item_key\":\"rw1\",\"task_ref\":{\"kind\":\"existing\",\"id\":\"t-smoke\"},\"suggested_action_ref\":{\"kind\":\"draft\",\"key\":\"nact1\"},\"date\":\"2026-11-26\",\"minutes\":72,\"order\":1,\"action_text\":\"容量测试新工作\",\"deliverable\":\"容量测试新工作\"}]"
+    },
+    {
+      "item": "S2",
+      "name": "预览按日显示 预算120·缓冲18·既有30·新排72·余0",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "改排三块预览：保留含保留工作与其它任务占用，将取消 2、将新增 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S3",
+      "name": "未知估时单列 unknown_items，不生成 0 分钟安排",
+      "pass": true,
+      "detail": "{\"segs\":[],\"unknown\":[{\"work_item_key\":\"rw1\",\"reason\":\"estimate_missing\"}]}"
+    },
+    {
+      "item": "S3",
+      "name": "界面提示未知估时并要求补分钟；零新安排不提供采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S3",
+      "name": "草案仍为本地用户清单（复用行动、分钟未知保持 null）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S4",
+      "name": "越界/无效输出被拒并显示失败（含重试生成），模型内容未采用",
+      "pass": true,
+      "detail": "{\"propose\":1}"
+    },
+    {
+      "item": "S4",
+      "name": "采用保持禁用；正式安排零写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S5",
+      "name": "生成建议后正式安排零写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S5",
+      "name": "改表单预算后正式安排仍零写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S5",
+      "name": "放弃草案后正式安排零写入、草案只读丢弃",
+      "pass": true,
+      "detail": "{\"status\":\"discarded\",\"propose\":1}"
+    },
+    {
+      "item": "S6",
+      "name": "事实漂移→「需重新核对…本次确定未提交」并列差异码",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S6",
+      "name": "整体拒绝：旧安排未取消、无半份新对象、无成功回执",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S6",
+      "name": "草案转入需复核（needs_review），采用禁用",
+      "pass": true,
+      "detail": "{\"status\":\"needs_review\"}"
+    },
+    {
+      "item": "S7",
+      "name": "注入写失败→「确定未提交」，无成功回执",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S7",
+      "name": "整体回滚：旧安排未取消、无半份新对象、正式事实逐字未变",
+      "pass": true,
+      "detail": "{\"plans\":3}"
+    },
+    {
+      "item": "S7",
+      "name": "草案收敛为 needs_review 供重核",
+      "pass": true,
+      "detail": "{\"status\":\"needs_review\"}"
+    },
+    {
+      "item": "S8",
+      "name": "双击只提交一次：台账恰好一份 committed，取消/新增各一份",
+      "pass": true,
+      "detail": "{\"ops\":1,\"cancelled\":[\"p-1\",\"p-2\"],\"new\":1}"
+    },
+    {
+      "item": "S8",
+      "name": "双标签后到者冲突拒写，不重复取消/新增",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S9",
+      "name": "手机创建草案：范围与清单保存到库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S9",
+      "name": "手机核对与预览：三块预览 + 就绪可采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S10",
+      "name": "模型不可达→失败可重试；用户输入与清单原样保留",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S10",
+      "name": "失败期间正式安排零写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S10",
+      "name": "离线时本地规则继续排程：总量 90、无模型调用",
+      "pass": true,
+      "detail": "{\"segs\":2,\"propose\":1}"
+    },
+    {
+      "item": "全局",
+      "name": "全程未触碰用户 :8000/:8020 服务",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

@@ -1,0 +1,61 @@
+{
+  "purpose": "0.4.0 正式契约冻结快照：v1 备份校验永远使用本目录 schema；contract/generate.py 只写 contract/schema.json 与 contract/typedefs.d.ts，不写本目录。",
+  "frozen_at": "2026-11-24",
+  "schema_version": "0.4.0",
+  "source_of_truth_at_freeze": "contract/models.py @ HEAD 5da0dec (v0.3)",
+  "regression_inputs": "fixtures/ 全部 11 份 JSON（10 份 fixture + index.json）为 0.4.0 固定回归输入，冻结副本在 fixtures/ 子目录。",
+  "files": {
+    "schema.json": {
+      "bytes": 54363,
+      "sha256": "dba255603be209e4c8cce911df064c8ae19c94cdc3fa8848d8287c8d5a86d1d6"
+    },
+    "typedefs.d.ts": {
+      "bytes": 10194,
+      "sha256": "ae131cf241ff301415a293ca1d0a13fa30c1b974df78626b5bf6ace0a75f0613"
+    },
+    "fixtures/01-course-assignment.json": {
+      "bytes": 8295,
+      "sha256": "0dc3ca6a22188b9a7d6edca64d16372c52c3432583cd8901fd634e2645415819"
+    },
+    "fixtures/02-grading-supplement.json": {
+      "bytes": 6795,
+      "sha256": "24279d6d33a5aa6b9950bef42dfe713277b24fb0b037922aaae8531f433b6bb1"
+    },
+    "fixtures/03-deadline-change.json": {
+      "bytes": 7061,
+      "sha256": "af425e6c2340debcc28e33a590039b876a018686d797bf366116ac87bb68aa60"
+    },
+    "fixtures/04-reference-paper.json": {
+      "bytes": 6873,
+      "sha256": "01e412a670039e608489b9ee274985f739ec0ce32f511081964c53c6a61631d8"
+    },
+    "fixtures/05-task-and-focus.json": {
+      "bytes": 3288,
+      "sha256": "6ae37fdd29cfdc40e13704da94a4f26da4d7a4f087dcaf9e415ed46a77a3ba6b"
+    },
+    "fixtures/06-focus-v1-running.json": {
+      "bytes": 2600,
+      "sha256": "8d515d68b33b22dcd1ad8bd48d186dabf7d8501c41a19f23ddc28b37d9ff723f"
+    },
+    "fixtures/07-focus-v1-ended-done.json": {
+      "bytes": 2927,
+      "sha256": "247d0dbfadd36166a622962c35b8447560185907d3e913dffba839ce7540510a"
+    },
+    "fixtures/08-focus-v1-action-deleted.json": {
+      "bytes": 2271,
+      "sha256": "553e6cf4fa991d464ed83c24c69e15bec39d3bd6af649ef161102806e43cefd9"
+    },
+    "fixtures/09-focus-v1-task-deleted.json": {
+      "bytes": 1902,
+      "sha256": "65e095aecf48bffb518a4c0a763869be06b3c44919fd9b7bdd6198ca174197a6"
+    },
+    "fixtures/10-focus-legacy-ended-v0.json": {
+      "bytes": 2010,
+      "sha256": "5e9c64f1f76805e43bc816b4a15cbc438a6ac1a5fa6ebcf2d17fc08d10576fca"
+    },
+    "fixtures/index.json": {
+      "bytes": 3092,
+      "sha256": "46027982456e7420982a1c3ec635e20e408f273348251bc68ced3c861642d23f"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "browser-baseline": {
+    "checksums_match": true,
+    "source_count": 2,
+    "doc_count": 10,
+    "image_matches_independent_constant": true,
+    "workspace_ids": [
+      "personal"
+    ],
+    "has_unapproved_field": false,
+    "sources_json_bytes": 366
+  }
+}

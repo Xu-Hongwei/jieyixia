@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, toRaw } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { AlertTriangle, Check, Clock, Pencil, RefreshCw, Sparkles, Upload } from 'lucide-vue-next'
 import Badge from '@/components/ui/Badge.vue'
@@ -8,7 +8,7 @@ import Card from '@/components/ui/Card.vue'
 import Input from '@/components/ui/Input.vue'
 import Separator from '@/components/ui/Separator.vue'
 import Textarea from '@/components/ui/Textarea.vue'
-import { allDocs, allSources, deleteDoc, getSource, putDoc, putSource } from '@/lib/db'
+import { allDocs, allSources, deepRaw, deleteNoteAtomic, getSource, putDoc, putSource } from '@/lib/db'
 import { analyze, blobToBase64, healthz } from '@/lib/api'
 
 const tab = ref('collect')
@@ -25,6 +25,8 @@ const imageUrl = ref(null)
 const pendingUrl = ref(null)
 const editing = ref(null)
 const fileInput = ref(null)
+// 模型已成功但本地保存失败时暂存分析结果：重试只重新落库，不重调模型
+const pendingSave = ref(null)
 
 const notes = computed(() => docs.value.filter((d) => d.kind === 'note'))
 const tasks = computed(() =>
@@ -38,7 +40,7 @@ const pendingSource = computed(() => sources.value.find((s) => s.id === pendingI
 
 const say = (tone, msg) => (banner.value = { tone, msg })
 const now = () => new Date().toISOString()
-const clone = (v) => structuredClone(toRaw(v))
+const clone = (v) => structuredClone(deepRaw(v))
 
 // 日历合法性：正则只查形状，2月30/25点这类必须真构造日期验证
 function isValidTimeValue(v) {
@@ -47,6 +49,7 @@ function isValidTimeValue(v) {
   const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))
   if (d.getUTCFullYear() !== +m[1] || d.getUTCMonth() !== +m[2] - 1 || d.getUTCDate() !== +m[3]) return false
   if (m[4] && (+m[5] > 23 || +m[6] > 59 || (m[8] && +m[8] > 59))) return false
+  if (m[9] && m[9] !== 'Z' && (+m[9].slice(1, 3) > 23 || +m[9].slice(4, 6) > 59)) return false
   return true
 }
 const isValidDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v) && isValidTimeValue(v)
@@ -137,8 +140,10 @@ async function runAI(fail = null) {
       try {
         await putDoc(note)
       } catch (err) {
-        return say('destructive', `保存失败（${err.message}）：草稿未持久化`)
+        pendingSave.value = note
+        return say('destructive', `保存失败（${err.message}）：分析结果已暂存，可重试保存（不重调模型）`)
       }
+      pendingSave.value = null
       docs.value.push(note)
       pendingId.value = null
       await selectNote(note.id)
@@ -153,8 +158,10 @@ async function runAI(fail = null) {
       try {
         await putDoc(note)
       } catch (err) {
-        return say('destructive', `保存失败（${err.message}）：失败记录未持久化`)
+        pendingSave.value = note
+        return say('destructive', `保存失败（${err.message}）：失败记录已暂存，可重试保存（不重调模型）`)
       }
+      pendingSave.value = null
       docs.value.push(note)
       await selectNote(note.id)
       tab.value = 'notes'
@@ -174,28 +181,54 @@ async function runAI(fail = null) {
   }
 }
 
-async function mutateNote(note, fn) {
-  const draft = clone(note)
-  fn(draft)
-  draft.updated_at = now()
+async function retrySave() {
+  const note = pendingSave.value
+  if (!note) return
   try {
-    await putDoc(draft)
+    await putDoc(note)
   } catch (err) {
-    say('destructive', `保存失败（${err.message}）：修改未持久化，界面保持原样`)
-    return false
+    return say('destructive', `保存失败（${err.message}）：分析结果仍在暂存，可再次重试（不重调模型）`)
   }
-  const idx = docs.value.findIndex((d) => d.id === note.id)
-  if (idx >= 0) docs.value[idx] = draft
-  return true
+  pendingSave.value = null
+  docs.value.push(note)
+  pendingId.value = null
+  await selectNote(note.id)
+  tab.value = 'notes'
+  say('success', '分析结果已保存（重试仅落库，未重调模型）')
+}
+
+// 按文档 id 串行化变更：每次从 docs.value 的最新已提交状态克隆再改，
+// 避免连续确认两个字段时后一份旧快照覆盖前一次确认（丢修改）。
+const mutationChains = new Map()
+function mutateNote(note, fn) {
+  const id = note.id
+  const prev = mutationChains.get(id) || Promise.resolve()
+  const run = prev.catch(() => {}).then(async () => {
+    const current = docs.value.find((d) => d.id === id) || note
+    const draft = clone(current)
+    fn(draft)
+    draft.updated_at = now()
+    try {
+      await putDoc(draft)
+    } catch (err) {
+      say('destructive', `保存失败（${err.message}）：修改未持久化，界面保持原样`)
+      return false
+    }
+    const idx = docs.value.findIndex((d) => d.id === id)
+    if (idx >= 0) docs.value[idx] = draft
+    return true
+  })
+  mutationChains.set(id, run)
+  run.finally(() => {
+    if (mutationChains.get(id) === run) mutationChains.delete(id)
+  })
+  return run
 }
 
 const confirmField = (note, key) =>
   mutateNote(note, (n) => {
     const f = n.fields.find((x) => x.key === key)
-    if (f) {
-      f.status = 'confirmed'
-      if (f.derived) f.origin = 'user' // 推算值由用户确认：保留 derived 与原文，来源记 user
-    }
+    if (f) f.status = 'confirmed' // D4：确认不改值来源 origin；推算值保留 derived 与原文，origin 仍为 model
   })
 
 function startEdit(note, key) {
@@ -261,28 +294,26 @@ async function deleteNote(note) {
   if (affected.length) {
     return say('destructive', `不能删除：${affected.length} 个任务的截止引用此便签（${affected.map((t) => t.title).join('、')}）。请先更换/清空截止来源或改为用户输入`)
   }
-  try {
-    await deleteDoc(note.id)
-  } catch (err) {
-    return say('destructive', `删除失败（${err.message}）`)
-  }
-  // 解除其余任务对本便签的 note_ids 关联，不留悬空引用
-  let unlinkFailed = false
-  for (const t of tasks.value.filter((t) => (t.note_ids || []).includes(note.id))) {
+  // 先构造解除关联后的任务草稿，再与删便签放进同一事务：整体成功才提交，失败不留悬空引用
+  const linked = tasks.value.filter((t) => (t.note_ids || []).includes(note.id))
+  const drafts = linked.map((t) => {
     const draft = clone(t)
     draft.note_ids = draft.note_ids.filter((id) => id !== note.id)
     draft.updated_at = now()
-    try {
-      await putDoc(draft)
-      const idx = docs.value.findIndex((d) => d.id === t.id)
-      if (idx >= 0) docs.value[idx] = draft
-    } catch {
-      unlinkFailed = true
-    }
+    return draft
+  })
+  try {
+    await deleteNoteAtomic(note.id, drafts)
+  } catch (err) {
+    return say('destructive', `删除失败（${err.message}）：便签与任务关联均未改动`)
+  }
+  for (const draft of drafts) {
+    const idx = docs.value.findIndex((d) => d.id === draft.id)
+    if (idx >= 0) docs.value[idx] = draft
   }
   docs.value = docs.value.filter((d) => d.id !== note.id)
   selectedId.value = null
-  say(unlinkFailed ? 'warning' : 'success', unlinkFailed ? '便签已删除，但部分任务的关联清理失败，请刷新检查' : '便签已删除；任务关联已解除，原始资料保留')
+  say('success', '便签已删除；任务关联已解除，原始资料保留')
 }
 
 const manualDeadline = ref('')
@@ -422,7 +453,9 @@ const bannerClass = {
               <Button variant="outline" @click="fileInput.click()"><Upload />选择图片</Button>
               <Button variant="outline" @click="saveTextOnly">仅保存文字</Button>
               <Button :disabled="aiDown || busy" @click="runAI()"><Sparkles />{{ busy ? '分析中…' : 'AI 整理' }}</Button>
+              <Button v-if="pendingSave" variant="outline" :disabled="busy" @click="retrySave"><RefreshCw />重试保存分析结果（不重调模型）</Button>
             </div>
+            <p v-if="pendingSave" class="text-xs text-muted-foreground">上次 AI 分析成功但本地保存失败，结果已暂存；重试只重新落库，不会再次请求模型。</p>
             <Textarea v-model="textDraft" placeholder="或粘贴 / 输入纯文字…" class="min-h-24" />
             <div class="flex items-center gap-2">
               <Input v-model="referenceAt" placeholder="参照日期（可选 YYYY-MM-DD）" class="max-w-xs" />

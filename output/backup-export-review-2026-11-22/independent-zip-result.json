@@ -1,0 +1,35 @@
+{
+  "browser-baseline": {
+    "checksums_match": true,
+    "source_count": 2,
+    "doc_count": 10,
+    "image_matches_independent_constant": true,
+    "workspace_ids": [
+      "personal"
+    ],
+    "has_unapproved_field": false,
+    "sources_json_bytes": 366
+  },
+  "browser-invalid": {
+    "checksums_match": true,
+    "source_count": 2,
+    "doc_count": 10,
+    "image_matches_independent_constant": true,
+    "workspace_ids": [
+      "personal"
+    ],
+    "has_unapproved_field": true,
+    "sources_json_bytes": 366
+  },
+  "oversized-json": {
+    "checksums_match": true,
+    "source_count": 1,
+    "doc_count": 0,
+    "image_matches_independent_constant": null,
+    "workspace_ids": [
+      "ws-src"
+    ],
+    "has_unapproved_field": false,
+    "sources_json_bytes": 26214507
+  }
+}

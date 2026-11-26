@@ -1,0 +1,22 @@
+{
+  "id": "s-recheck-read-fail",
+  "title": "已提交但读取失败→待核实查原回执",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-12",
+    "B0-20"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "adoption_recheck",
+    "event": "committed_but_read_failed"
+  },
+  "expected_error": null,
+  "expected": {
+    "outcome": "result_unknown_query_original",
+    "business_writes": "unknown_pending_verify"
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

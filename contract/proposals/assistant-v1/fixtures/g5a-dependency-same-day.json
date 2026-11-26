@@ -1,0 +1,262 @@
+{
+  "id": "g5a-dependency-same-day",
+  "title": "算例5a：依赖同日明确顺序",
+  "layer": "planning",
+  "mode": "accept",
+  "target": "planning_golden",
+  "acceptance": [
+    "B0-05",
+    "B0-07"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "input": {
+      "algorithm_version": "daily-v1",
+      "timezone": "Asia/Shanghai",
+      "start_date": "2026-11-24",
+      "horizon_days": 7,
+      "buffer_pct": 0,
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 100
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 100
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 100
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 100
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 100
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 100
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 100
+        }
+      ],
+      "task_facts": [
+        {
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "title": "虚构目标",
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "overdue_consent": false,
+          "status": "todo"
+        }
+      ],
+      "work_items": [
+        {
+          "key": "wa",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-wa"
+          },
+          "deliverable": "wa 的虚构产出",
+          "remaining_minutes": 40,
+          "estimate_origin": "model",
+          "splittable": false,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        },
+        {
+          "key": "wb",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-wb"
+          },
+          "deliverable": "wb 的虚构产出",
+          "remaining_minutes": 30,
+          "estimate_origin": "model",
+          "splittable": true,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [
+            "wa"
+          ],
+          "priority": "normal"
+        }
+      ],
+      "occupancy": [],
+      "replacement_ids": [],
+      "extra_work_acknowledged": []
+    },
+    "result": {
+      "segments": [
+        {
+          "segment_key": "s1",
+          "work_item_key": "wa",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "suggested_action_ref": {
+            "kind": "draft",
+            "key": "a-wa"
+          },
+          "date": "2026-11-24",
+          "minutes": 40,
+          "order": 1,
+          "action_text": "wa 当日虚构工作",
+          "deliverable": "wa 的虚构产出"
+        },
+        {
+          "segment_key": "s2",
+          "work_item_key": "wb",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "suggested_action_ref": {
+            "kind": "draft",
+            "key": "a-wb"
+          },
+          "date": "2026-11-24",
+          "minutes": 30,
+          "order": 2,
+          "action_text": "wb 当日虚构工作",
+          "deliverable": "wb 的虚构产出"
+        }
+      ],
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 100,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 70,
+          "free_minutes": 30,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 100,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 100,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 100,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 100,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 100,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 100,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 100,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 100,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 100,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 100,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 100,
+          "buffer_minutes": 0,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 100,
+          "overbooked_minutes": 0
+        }
+      ],
+      "unscheduled": [],
+      "unknown_items": [],
+      "excluded_items": [],
+      "conflicts": [],
+      "warnings": [],
+      "complete": true
+    }
+  },
+  "expected_error": null,
+  "expected": {
+    "initial_free_by_day": [
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100
+    ],
+    "allocated_by_day": [
+      70,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "final_free_by_day": [
+      30,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100
+    ],
+    "overbooked_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scheduled_total": 70,
+    "unscheduled": [],
+    "unknown_count": 0,
+    "complete": true
+  },
+  "notes": "A先B后；不保证具体小时"
+}

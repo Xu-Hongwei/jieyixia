@@ -1,0 +1,147 @@
+{
+  "id": "04-reference-paper",
+  "title": "参考资料（文字输入 + 缺失字段样例）",
+  "kind": "analysis",
+  "is_demo": true,
+  "depends_on": ["01-course-assignment"],
+  "acceptance": [
+    "PRD 第 523 行：AI 能为三类内容生成可编辑草稿——本份为 reference 类",
+    "PRD 第 156 行：未明确提及的信息留空，不能补造事实——deadline 为 missing 且 value=null",
+    "PRD 第 128 行：粘贴或输入纯文字也能创建原始资料（kind=text，无图片）",
+    "PRD 第 234 行：参考资料归入同一事项并标记角色 reference"
+  ],
+  "source": {
+    "id": "src-04",
+    "workspace_id": "demo-ml-report",
+    "kind": "text",
+    "image_ref": null,
+    "text": "机器学习实验报告写作指南（课程组整理）\n\n一份合格的实验报告应当包含：问题定义、数据与预处理、方法、对比实验、结果分析、结论与局限。\n对比实验至少两组，建议包含一个朴素基线（如多数类分类器或线性回归）与一个改进方法；若改动多个模块，请补消融实验说明各模块贡献。\n图表规范：坐标轴须有单位，图例不得遮挡数据，表格数字右对齐并对齐小数位。\n写作提醒：结论段不要重复摘要，应回答「所以呢」；局限段要写清失败情形，而不是套话。\n关键词：对比实验、消融、图表规范、可复现。",
+    "captured_at": "2026-11-16T21:40:00+08:00",
+    "origin_url": null,
+    "origin_title": "机器学习实验报告写作指南（用户手填）",
+    "is_demo": true
+  },
+  "analyze_request": {
+    "source_id": "src-04",
+    "kind": "text",
+    "image_base64": null,
+    "text": "机器学习实验报告写作指南（课程组整理）\n\n一份合格的实验报告应当包含：问题定义、数据与预处理、方法、对比实验、结果分析、结论与局限。\n对比实验至少两组，建议包含一个朴素基线（如多数类分类器或线性回归）与一个改进方法；若改动多个模块，请补消融实验说明各模块贡献。\n图表规范：坐标轴须有单位，图例不得遮挡数据，表格数字右对齐并对齐小数位。\n写作提醒：结论段不要重复摘要，应回答「所以呢」；局限段要写清失败情形，而不是套话。\n关键词：对比实验、消融、图表规范、可复现。",
+    "captured_at": "2026-11-16T21:40:00+08:00",
+    "content_hint": null
+  },
+  "expected_analysis": {
+    "source_id": "src-04",
+    "content_type": "reference",
+    "fields": [
+      {
+        "key": "title",
+        "value": "机器学习实验报告写作指南",
+        "raw": "机器学习实验报告写作指南（课程组整理）",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": { "text": "机器学习实验报告写作指南（课程组整理）", "source_id": "src-04" }
+      },
+      {
+        "key": "summary",
+        "value": "报告须含问题定义、数据、方法、对比实验、结果分析与局限；对比实验至少两组并建议补消融；图表与结论段有具体规范。",
+        "raw": "一份合格的实验报告应当包含：问题定义、数据与预处理、方法、对比实验、结果分析、结论与局限。",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": { "text": "对比实验至少两组，建议包含一个朴素基线（如多数类分类器或线性回归）与一个改进方法", "source_id": "src-04" }
+      },
+      {
+        "key": "keywords",
+        "value": ["对比实验", "消融", "图表规范", "可复现"],
+        "raw": "关键词：对比实验、消融、图表规范、可复现。",
+        "origin": "model",
+        "status": "candidate",
+        "derived": false,
+        "quote": { "text": "关键词：对比实验、消融、图表规范、可复现。", "source_id": "src-04" }
+      },
+      {
+        "key": "deadline",
+        "value": null,
+        "raw": "",
+        "origin": "model",
+        "status": "missing",
+        "derived": false,
+        "quote": null
+      }
+    ],
+    "warnings": [
+      {
+        "code": "demo_data",
+        "message": "这是演示 fixture 的固定结果，不是真实模型实时识别",
+        "field_key": null
+      },
+      {
+        "code": "no_deadline_in_source",
+        "message": "参考资料未提及截止时间，保持空值，不推测",
+        "field_key": "deadline"
+      }
+    ],
+    "analyzed_at": "2026-11-16T21:40:03+08:00",
+    "model_name": "fixture:04-reference-paper",
+    "schema_version": "0.3.0"
+  },
+  "confirmed_note": {
+    "id": "note-04",
+    "workspace_id": "demo-ml-report",
+    "source_id": "src-04",
+    "status": "reviewed",
+    "content_type": "reference",
+    "title": "机器学习实验报告写作指南",
+    "fields": [
+      {
+        "key": "title",
+        "value": "机器学习实验报告写作指南",
+        "raw": "机器学习实验报告写作指南（课程组整理）",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": { "text": "机器学习实验报告写作指南（课程组整理）", "source_id": "src-04" }
+      },
+      {
+        "key": "summary",
+        "value": "报告须含问题定义、数据、方法、对比实验、结果分析与局限；对比实验至少两组并建议补消融；图表与结论段有具体规范。",
+        "raw": "一份合格的实验报告应当包含：问题定义、数据与预处理、方法、对比实验、结果分析、结论与局限。",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": { "text": "对比实验至少两组，建议包含一个朴素基线（如多数类分类器或线性回归）与一个改进方法", "source_id": "src-04" }
+      },
+      {
+        "key": "keywords",
+        "value": ["对比实验", "消融", "图表规范", "可复现"],
+        "raw": "关键词：对比实验、消融、图表规范、可复现。",
+        "origin": "model",
+        "status": "confirmed",
+        "derived": false,
+        "quote": { "text": "关键词：对比实验、消融、图表规范、可复现。", "source_id": "src-04" }
+      },
+      {
+        "key": "deadline",
+        "value": null,
+        "raw": "",
+        "origin": "model",
+        "status": "missing",
+        "derived": false,
+        "quote": null
+      }
+    ],
+    "matter_id": "matter-ml",
+    "matter_role": "reference",
+    "created_at": "2026-11-16T21:40:00+08:00",
+    "updated_at": "2026-11-17T09:22:00+08:00",
+    "reviewed_at": "2026-11-17T09:22:00+08:00",
+    "is_demo": true
+  },
+  "matter": null,
+  "task": null,
+  "action": null,
+  "focus_session": null,
+  "plan_items": [],
+  "change_proposal": null
+}

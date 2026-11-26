@@ -1,0 +1,420 @@
+{
+  "at": "2026-11-24T05:32:55.268Z",
+  "today": "2026-11-24",
+  "results": [
+    {
+      "item": "B01",
+      "name": "独立会话 plan_item_id=null",
+      "pass": true,
+      "detail": "{\"sid\":\"1d8fe3d8-b3c4-40e0-ae04-d1abfb503cc9\"}"
+    },
+    {
+      "item": "B01",
+      "name": "独立会话结束表单不显示安排进度组",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B01",
+      "name": "结束落库 outcome=done；行动完成；任务不自动完成；返回任务页",
+      "pass": true,
+      "detail": "{\"outcome\":\"done\",\"actionDone\":true,\"taskStatus\":\"doing\"}"
+    },
+    {
+      "item": "B02",
+      "name": "确认面板展示当前行动（a1）但不自动提交",
+      "pass": true,
+      "detail": "开始这项安排\n\n核对安排与行动事实后明确开始；取消不创建会话。\n\n所属任务\n虚构任务·b02a\n待办\n任务总截止：无截止\n安排日期\n2026-11-24\n今天\n虚构安排·b02a\n安排预计 30 分钟 · 安排说明不覆盖行动内容\n将执行的行动（按 ID 明确选择，不按文字匹配）\n同名行动\n行动预计 25 分钟\n去任务选"
+    },
+    {
+      "item": "B02",
+      "name": "去任务选择行动携带显式 plan 上下文与 return",
+      "pass": true,
+      "detail": "#/tasks/t-b02a?plan=p-b02a&return=/today?plan=p-b02a"
+    },
+    {
+      "item": "B02",
+      "name": "显式设为当前切换 a2（不文字匹配）",
+      "pass": true,
+      "detail": "a2-b02a"
+    },
+    {
+      "item": "B02",
+      "name": "会话绑定明确选择的 a2；零自动创建行动",
+      "pass": true,
+      "detail": "{\"actionId\":\"a2-b02a\",\"count\":2}"
+    },
+    {
+      "item": "B02",
+      "name": "无有效行动：禁用开始并引导去任务选择",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B02",
+      "name": "任务页新增行动后同一确认流程开始；绑定新行动 ID",
+      "pass": true,
+      "detail": "{\"actionId\":\"45aad6dd-e93f-46bd-b850-8e491025b347\"}"
+    },
+    {
+      "item": "B03",
+      "name": "暂停成功（running=false）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B03",
+      "name": "同安排未结束入口=回到工作（已暂停），不新建",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B03",
+      "name": "回到工作不自动续计时（仍暂停，需主动继续）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B03",
+      "name": "同 Task/Action 不同安排 → 冲突入口而非回到工作",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B05",
+      "name": "blocked 任务：面板内明确确认文案且未勾选禁用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B05",
+      "name": "确认后任务转进行中；started_at 为真实时钟",
+      "pass": true,
+      "detail": "{\"status\":\"doing\",\"driftMs\":34}"
+    },
+    {
+      "item": "B05",
+      "name": "安排日早于今天：延后执行提示+未勾选禁用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B05",
+      "name": "开始后原安排日与任务总截止不变",
+      "pass": true,
+      "detail": "{\"date\":\"2026-11-23\",\"deadline\":{\"value\":\"2026-11-25\",\"precision\":\"date\"}}"
+    },
+    {
+      "item": "B05",
+      "name": "跨午夜（模拟）：confirmDate 差异列出，不静默开始",
+      "pass": true,
+      "detail": "开始这项安排\n\n核对安排与行动事实后明确开始；取消不创建会话。\n\n所属任务\n虚构任务·b05c\n待办\n任务总截止：无截止\n安排日期\n2026-11-24\n今天\n虚构安排·b05c\n安排预计 30 分钟 · 安排说明不覆盖行动内容\n将执行的行动（按 ID 明确选择，不按文字匹配）\n虚构行动·b05c\n行动预计 25 分钟\n确认期间事实已变化，请核对全部差异\n「确认日期」：2026-11-24 → 2"
+    },
+    {
+      "item": "B05",
+      "name": "跨午夜（模拟）：差异期间未创建会话",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B05",
+      "name": "重新确认后开始（模拟）：started_at=次日真实（模拟）时钟；原安排日不改",
+      "pass": true,
+      "detail": "{\"startedDate\":\"2026-11-25\",\"planDate\":\"2026-11-24\"}"
+    },
+    {
+      "item": "B07",
+      "name": "旧 planned 有合法历史 → 核对入口而非直接开始",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B07",
+      "name": "核对进度框打开（人工确认，不自动写）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B07",
+      "name": "取消核对不改变安排状态",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B07",
+      "name": "异常历史：解释问题+记录链接；不提供开始",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B08",
+      "name": "done/done：会话与安排逐项落库",
+      "pass": true,
+      "detail": "{\"outcome\":\"done\",\"plan\":\"done\",\"blocker\":null}"
+    },
+    {
+      "item": "B08",
+      "name": "done/done：行动完成仅随 done；任务不自动完成",
+      "pass": true,
+      "detail": "{\"actionDone\":true,\"taskStatus\":\"doing\"}"
+    },
+    {
+      "item": "B10",
+      "name": "done/done：返回日程无需刷新即见安排新状态",
+      "pass": true,
+      "detail": "#/today?plan=p-b08-done-done&recorded=d011c132-8f0b-4574-a0eb-dfa37da8f73c"
+    },
+    {
+      "item": "B08",
+      "name": "done/partial：会话与安排逐项落库",
+      "pass": true,
+      "detail": "{\"outcome\":\"done\",\"plan\":\"partial\",\"blocker\":null}"
+    },
+    {
+      "item": "B08",
+      "name": "done/partial：行动完成仅随 done；任务不自动完成",
+      "pass": true,
+      "detail": "{\"actionDone\":true,\"taskStatus\":\"doing\"}"
+    },
+    {
+      "item": "B10",
+      "name": "done/partial：返回日程无需刷新即见安排新状态",
+      "pass": true,
+      "detail": "#/today?plan=p-b08-done-partial&recorded=d06fd0a2-c98a-45c0-a60f-b64659585b97"
+    },
+    {
+      "item": "B08",
+      "name": "partial/done：会话与安排逐项落库",
+      "pass": true,
+      "detail": "{\"outcome\":\"partial\",\"plan\":\"done\",\"blocker\":null}"
+    },
+    {
+      "item": "B08",
+      "name": "partial/done：行动完成仅随 done；任务不自动完成",
+      "pass": true,
+      "detail": "{\"actionDone\":false,\"taskStatus\":\"doing\"}"
+    },
+    {
+      "item": "B10",
+      "name": "partial/done：返回日程无需刷新即见安排新状态",
+      "pass": true,
+      "detail": "#/today?plan=p-b08-partial-done&recorded=26714401-5b0c-44f2-8edb-4f512094befe"
+    },
+    {
+      "item": "B08",
+      "name": "partial/partial：会话与安排逐项落库",
+      "pass": true,
+      "detail": "{\"outcome\":\"partial\",\"plan\":\"partial\",\"blocker\":null}"
+    },
+    {
+      "item": "B08",
+      "name": "partial/partial：行动完成仅随 done；任务不自动完成",
+      "pass": true,
+      "detail": "{\"actionDone\":false,\"taskStatus\":\"doing\"}"
+    },
+    {
+      "item": "B10",
+      "name": "partial/partial：返回日程无需刷新即见安排新状态",
+      "pass": true,
+      "detail": "#/today?plan=p-b08-partial-partial&recorded=8340df12-b870-4488-a57a-98f2056e19f6"
+    },
+    {
+      "item": "B08",
+      "name": "blocked/done：会话与安排逐项落库",
+      "pass": true,
+      "detail": "{\"outcome\":\"blocked\",\"plan\":\"done\",\"blocker\":\"虚构卡点：等队友接口\"}"
+    },
+    {
+      "item": "B08",
+      "name": "blocked/done：行动完成仅随 done；任务不自动完成",
+      "pass": true,
+      "detail": "{\"actionDone\":false,\"taskStatus\":\"doing\"}"
+    },
+    {
+      "item": "B10",
+      "name": "blocked/done：返回日程无需刷新即见安排新状态",
+      "pass": true,
+      "detail": "#/today?plan=p-b08-blocked-done&recorded=c046d383-816c-491e-b736-137c5df80578"
+    },
+    {
+      "item": "B08",
+      "name": "blocked/partial：会话与安排逐项落库",
+      "pass": true,
+      "detail": "{\"outcome\":\"blocked\",\"plan\":\"partial\",\"blocker\":\"虚构卡点：等队友接口\"}"
+    },
+    {
+      "item": "B08",
+      "name": "blocked/partial：行动完成仅随 done；任务不自动完成",
+      "pass": true,
+      "detail": "{\"actionDone\":false,\"taskStatus\":\"doing\"}"
+    },
+    {
+      "item": "B10",
+      "name": "blocked/partial：返回日程无需刷新即见安排新状态",
+      "pass": true,
+      "detail": "#/today?plan=p-b08-blocked-partial&recorded=82c75ad1-dc04-4f26-833b-4c765f474636"
+    },
+    {
+      "item": "B08",
+      "name": "blocked 未填卡点：拒绝提交并提示，会话未结束",
+      "pass": true,
+      "detail": "结束本次工作\n\n编辑区当前正文将作为本次成果一并保存。选择「行动完成」只完成该行动，不会自动完成任务。\n\n所属安排\n2026-11-24\n\n虚构安排·b08blk\n\n安排预计 30 分钟 · 暂无已结束历史\n\n本段有效用时将在保存时结算，不"
+    },
+    {
+      "item": "B09",
+      "name": "工作页安排块：已结束 2 段累计 02:00，与本段计时分开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B09",
+      "name": "sum(120000+本段) 后 floor=2 分钟；本段<1分钟单独保留毫秒",
+      "pass": true,
+      "detail": "{\"actual\":2,\"segmentMs\":1328}"
+    },
+    {
+      "item": "B09",
+      "name": "最近已结束引用指向本段",
+      "pass": true,
+      "detail": "faf0a8ab-c826-497b-a312-98dc79cbd3f7"
+    },
+    {
+      "item": "B09",
+      "name": "无历史：actual_minutes=null（不是 0）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B09",
+      "name": "少于一分钟结束：actual_minutes=0（与 null 区分）",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "item": "B11",
+      "name": "取消仅关表单：不结束不暂停",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B11",
+      "name": "取消后正文保留在编辑器",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B11",
+      "name": "同会话重开保留已选结果与卡点",
+      "pass": true,
+      "detail": "{\"blockedChecked\":true,\"blockerVal\":\"等队友接口\"}"
+    },
+    {
+      "item": "B11",
+      "name": "新会话表单回到初值 partial，不串上一会话卡点",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B16",
+      "name": "done 结束返回原日程定位原安排",
+      "pass": true,
+      "detail": "#/today?plan=p-b16&recorded=35e223cf-695e-4394-b0f6-d5c21c8df6a6"
+    },
+    {
+      "item": "B16",
+      "name": "done 安排在日程仍可见且提示来自真实记录",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B16",
+      "name": "目标日列安排历史自动展开且历史卡可见（日程卡片，非详情文字）",
+      "pass": true,
+      "detail": "aria-expanded=true, cardVisible=true"
+    },
+    {
+      "item": "B16",
+      "name": "刷新深链接：目标可见、无自动 begin/end（会话数不变、无未结束）",
+      "pass": true,
+      "detail": "{\"count\":1}"
+    },
+    {
+      "item": "B16",
+      "name": "刷新深链接后安排历史仍自动展开且历史卡可见",
+      "pass": true,
+      "detail": "aria-expanded=true, cardVisible=true"
+    },
+    {
+      "item": "B16",
+      "name": "周视图深链接：目标安排可见",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B16",
+      "name": "周视图深链接：目标日列安排历史自动展开且历史卡可见",
+      "pass": true,
+      "detail": "aria-expanded=true, cardVisible=true"
+    },
+    {
+      "item": "B17",
+      "name": "前置：行动已完成",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B17",
+      "name": "新安排新 ID/planned/空累计；原 partial 安排不变",
+      "pass": true,
+      "detail": "{\"newId\":\"cab8ee92-2950-4e21-9cfa-2437fa0fc39b\",\"state\":\"planned\"}"
+    },
+    {
+      "item": "B17",
+      "name": "已完成行动不自动复活",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B18",
+      "name": "v0 无安排：遗留表单，无安排进度组，不补造快照",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B18",
+      "name": "v0 无安排显式结束：归档不自动完成行动、不补 record_version",
+      "pass": true,
+      "detail": "{\"outcome\":\"partial\"}"
+    },
+    {
+      "item": "B18",
+      "name": "v0 有效活安排：表单增加安排结果与确认快照说明",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B18",
+      "name": "v0 有效安排同事务保存：安排 done/实际 2 分钟；不升版本不触碰行动",
+      "pass": true,
+      "detail": "{\"plan\":\"done\",\"actual\":2}"
+    },
+    {
+      "item": "B18",
+      "name": "v0 失效关联：提示可结束但无法更新安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B18",
+      "name": "v0 失效关联仍可显式结束释放占用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "B18",
+      "name": "正常 v1 安排终态：明确拒绝不降级遗留结束，会话未结束",
+      "pass": true,
+      "detail": ""
+    }
+  ]
+}

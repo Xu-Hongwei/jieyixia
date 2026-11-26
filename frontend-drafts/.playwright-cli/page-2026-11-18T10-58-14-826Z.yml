@@ -1,0 +1,111 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - link "↖ 同页比较" [ref=f3e4] [cursor=pointer]:
+        - /url: index.html
+      - generic [ref=f3e5]:
+        - link "01 截图冲印室" [ref=f3e6] [cursor=pointer]:
+          - /url: app.html?concept=signal
+        - link "02 行动控制塔" [ref=f3e7] [cursor=pointer]:
+          - /url: app.html?concept=orbit
+        - link "03 旁注手稿" [ref=f3e8] [cursor=pointer]:
+          - /url: app.html?concept=paper
+        - link "04 拼贴工作桌" [ref=f3e9] [cursor=pointer]:
+          - /url: app.html?concept=desktop
+      - generic [ref=f3e10]: ROUND 04 / 演示数据
+    - generic [ref=f3e11]:
+      - complementary [ref=f3e12]:
+        - link "截下来 ↘" [ref=f3e13] [cursor=pointer]:
+          - /url: index.html
+          - text: 截下来
+          - generic [ref=f3e14]: ↘
+        - navigation [ref=f3e15]:
+          - button "今天" [ref=f3e16] [cursor=pointer]
+          - button "收集箱" [ref=f3e21] [cursor=pointer]
+          - button "专注" [ref=f3e26] [cursor=pointer]
+      - main [ref=f3e31]:
+        - generic [ref=f3e32]:
+          - generic [ref=f3e33]:
+            - generic [ref=f3e34]:
+              - text: CONTACT SHEET / 01
+              - heading "资料冲印台⌁" [level=1] [ref=f3e35]
+            - button "放入新资料" [ref=f3e36] [cursor=pointer]
+          - link "原文已保留 · 3 项信息待核对 去行动单 ↓" [ref=f3e40] [cursor=pointer]:
+            - /url: "#review-fields"
+            - generic [ref=f3e41]: 原文已保留 · 3 项信息待核对
+            - text: 去行动单 ↓
+          - generic [ref=f3e42]:
+            - generic [ref=f3e43]:
+              - generic [ref=f3e44]:
+                - generic [ref=f3e45]: ORIGINAL / 100%
+                - generic [ref=f3e46]: 原始文字 · 可追溯
+              - article [ref=f3e47]:
+                - generic [ref=f3e48]:
+                  - generic [ref=f3e49]: 课程平台 / 原始资料
+                  - generic [ref=f3e50]: 虚构示例
+                - paragraph [ref=f3e51]: SOURCE_001 · 课程通知
+                - heading "机器学习课程报告" [level=2] [ref=f3e52]
+                - paragraph [ref=f3e53]:
+                  - mark [ref=f3e54]: 请于 2026 年 11 月 22 日前提交机器学习课程报告。
+                  - mark [ref=f3e55]: 报告需包含方法介绍、实验设置与结果分析。
+                  - mark [ref=f3e56]: 请将 PDF 文件上传至课程平台。
+                - generic [ref=f3e57]: 仅供草案演示 · 不是实时识别结果
+              - generic [ref=f3e58]:
+                - generic [ref=f3e59]: ＋
+                - generic [ref=f3e60]: ＋
+            - complementary [ref=f3e61]:
+              - generic [ref=f3e62]:
+                - generic [ref=f3e63]: ACTION RECEIPT
+                - heading "行动单" [level=2] [ref=f3e64]
+                - generic [ref=f3e65]: 机器学习课程报告
+              - generic [ref=f3e66]:
+                - generic [ref=f3e67]:
+                  - generic [ref=f3e68]:
+                    - generic [ref=f3e69]: 01 / 报告要求
+                    - generic [ref=f3e70]: 示例提取 · 待确认
+                  - heading "方法介绍、实验设置、结果分析" [level=3] [ref=f3e71]
+                  - button "＋ 确认此项" [ref=f3e72] [cursor=pointer]
+                - generic [ref=f3e73]:
+                  - generic [ref=f3e74]:
+                    - generic [ref=f3e75]: 02 / 截止日期
+                    - generic [ref=f3e76]: 示例提取 · 待确认
+                  - heading "2026 年 11 月 22 日" [level=3] [ref=f3e77]
+                  - button "＋ 确认此项" [ref=f3e78] [cursor=pointer]
+                - generic [ref=f3e79]:
+                  - generic [ref=f3e80]:
+                    - generic [ref=f3e81]: 03 / 提交方式
+                    - generic [ref=f3e82]: 示例提取 · 待确认
+                  - heading "课程平台 · PDF 文件" [level=3] [ref=f3e83]
+                  - button "＋ 确认此项" [ref=f3e84] [cursor=pointer]
+              - link "↑ 回看原文依据" [ref=f3e85] [cursor=pointer]:
+                - /url: "#original-source"
+              - generic [ref=f3e86]:
+                - generic [ref=f3e91]: 0 / 3 项已确认
+                - button "建立行动任务" [disabled] [ref=f3e92]
+                - generic [ref=f3e95]: 确认带入的字段后创建 · 保留原文出处
+          - generic [ref=f3e97]:
+            - generic [ref=f3e98]:
+              - generic [ref=f3e99]: 收集底片
+              - generic [ref=f3e100]: 3 SOURCES
+            - generic [ref=f3e101]:
+              - searchbox "搜索资料" [ref=f3e106]
+              - generic [ref=f3e107]:
+                - button "01 机器学习课程报告 课程通知 · 今天 09:42" [pressed] [ref=f3e108] [cursor=pointer]:
+                  - generic [ref=f3e109]: "01"
+                  - generic [ref=f3e110]:
+                    - strong [ref=f3e111]: 机器学习课程报告
+                    - generic [ref=f3e112]: 课程通知 · 今天 09:42
+                - button "02 报告评分标准补充 评分标准 · 今天 09:38" [ref=f3e113] [cursor=pointer]:
+                  - generic [ref=f3e114]: "02"
+                  - generic [ref=f3e115]:
+                    - strong [ref=f3e116]: 报告评分标准补充
+                    - generic [ref=f3e117]: 评分标准 · 今天 09:38
+                - button "03 论文阅读：注意力机制 学习资料 · 昨天 18:20" [ref=f3e118] [cursor=pointer]:
+                  - generic [ref=f3e119]: "03"
+                  - generic [ref=f3e120]:
+                    - strong [ref=f3e121]: 论文阅读：注意力机制
+                    - generic [ref=f3e122]: 学习资料 · 昨天 18:20
+          - generic [ref=f3e123]:
+            - generic [ref=f3e124]: CONTACT ROOM / 2026.11.18
+            - generic [ref=f3e125]: 本页临时演示 · 刷新重置
+  - status

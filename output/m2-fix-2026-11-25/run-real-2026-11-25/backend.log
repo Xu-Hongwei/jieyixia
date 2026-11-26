@@ -1,0 +1,16 @@
+INFO:     Started server process [24760]
+INFO:     Waiting for application startup.
+{"event": "model_router_ready", "profiles": ["qwen", "deepseek"]}
+{"event": "startup", "provider": "model", "source_ids": [], "max_body_bytes": 8388608, "cors_origins": ["http://127.0.0.1:5182", "http://localhost:5182"], "auth_enabled": true, "rate_limit_per_min": 60, "max_concurrent_analyze": 4, "max_model_calls_per_day": 1000, "propose_budget_s": 120.0, "propose_max_attempts": 2, "propose_max_body_bytes": 524288}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8030 (Press CTRL+C to quit)
+{"event": "model_router_ready", "request_id": "0e60a131f2aa4f7e950050cf68ad8be9", "profiles": ["qwen", "deepseek"]}
+INFO:     127.0.0.1:57787 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57802 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "model_analyze", "request_id": "8337e0307eda4ff3adfcc97788d10967", "source_id": "0c2e3136-51b8-45e2-95b6-b246af902286", "profile": "qwen", "content_type": "notice", "field_count": 7}
+{"event": "analyze", "request_id": "8337e0307eda4ff3adfcc97788d10967", "source_id": "0c2e3136-51b8-45e2-95b6-b246af902286", "provider": "model", "content_type": "notice", "field_count": 7, "warning_codes": ["demo_data"], "duration_ms": 9674.59}
+INFO:     127.0.0.1:57803 - "POST /api/analyze HTTP/1.1" 200 OK
+{"event": "model_router_ready", "request_id": "db1883a19a114198914f550d81645357", "profiles": ["qwen", "deepseek"]}
+{"event": "model_propose", "request_id": "3e47651a-f965-41ee-a7c9-53cca853faf7", "profile": "qwen", "payload_kind": "proposal"}
+{"event": "propose", "request_id": "3e47651a-f965-41ee-a7c9-53cca853faf7", "thread_id": "23fb39a7-774e-4049-9b77-f04ba87b075e", "turn_id": "87a35bca-2271-4a7c-8b13-849098a19f1e", "provider": "model", "payload_kind": "proposal", "duration_ms": 10620.65}
+INFO:     127.0.0.1:50063 - "POST /api/assistant/propose HTTP/1.1" 200 OK

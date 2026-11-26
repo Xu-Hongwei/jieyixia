@@ -1,0 +1,19 @@
+model 后端就绪：http://127.0.0.1:8030 model_ready=true
+Vite 就绪：http://127.0.0.1:5182/（北京今天 2026-11-26）
+PASS [真实] model 后端 model_ready=true（密钥可装载，健康检查不触发付费） — model_ready=true
+PASS [真实] 创建改排草案零模型调用 — propose=0
+PROBE waiting {"status":"generating","rev":1,"items":[["rw1",90,"user"]],"flags":[]}
+PASS [真实] 真实模型成功给出建议、零 analyze（propose 共 1 次，其中失败重试 0 次） — propose=1 retries=0
+PASS [真实] 请求协议 1.1 + intent replan_task + 单任务 + 原话进展 — {"pv":"1.1","intent":"replan_task"}
+PASS [真实] replan_context：替换 p-1/p-2，保留含未选与受保护（不含被替换） — {"kept":["p-foc","p-keep","p-prot"]}
+PASS [真实] 真实厂家调用可审计（后端日志 model_propose + profile） — {"event": "model_propose", "request_id": "5346c4f7-beb8-4e96-8b15-ab2ef25190f2", "profile": "qwen", "payload_kind": "proposal"}
+PASS [真实] 真实建议通过服务端语义校验：工作项非空且全部 model 来源（须用户核对） — [["w1",90]]
+PASS [真实] 建议未确认时采用被阻断
+PASS [真实] 用户核对保存后清单=user 来源、总量 90、建议块消失 — [{"key":"rw1","task_ref":{"kind":"existing","id":"t-smoke"},"action_ref":{"kind":"existing","id":"a-report"},"deliverable":"撰写报告正文","remaining_minutes":90,"estimate_origin":"user","splittable":true,"min_segment_minutes":25,"earliest_date":null,"depends_on":[],"priority":"normal"}]
+PASS [真实] 核对确认后采用解锁
+PASS [真实] 原子采用：旧 p-1/p-2 取消且内容保留；未选/受保护/其它任务原样
+PASS [真实] 新安排全属目标任务、总量 90；任务不重复、截止不变、复用不新增行动 — {"newPlans":2,"segs":2,"tasks":2,"actions":2}
+PASS [真实] 回执绑定取消集与目标任务；台账恰好一条
+PASS [全局] 全程未触碰用户 :8000/:8020 服务
+
+14/14 PASS

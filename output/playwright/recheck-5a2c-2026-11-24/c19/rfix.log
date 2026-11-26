@@ -1,0 +1,39 @@
+PASS [RF1] 开框显示今天安排日与「今天」关系标记
+PASS [RF1] 差异框列出安排日期变化（旧→新）
+PASS [RF1] 未重新确认前显示仍是开框冻结版（今天标记不漂移）
+PASS [RF1] 重确认后安排日/关系/说明全部换到新版（明天+改后说明+提前执行）
+PASS [RF1] 重确认后日期勾选重置：未勾选不能开始
+PASS [RF1] 再次改期：差异框期间显示仍是上一次确认版（明天）
+PASS [RF1] 第二次重确认跟随到后天且勾选再次重置
+PASS [RF1] 最终按最新确认版创建唯一会话（关联原安排） — {"count":1}
+PASS [RF2] 读取失败进入待核实：重试读取/取消可用，不卡「正在开始…」
+PASS [RF2] 待核实只提供重读，不提供原信封重试（不重新创建）
+PASS [RF2] 会话其实已创建（IDB 真实存在，未结束） — {"count":1}
+PASS [RF2] 重试读取后进入工作页，会话仍只有一条（未重新 begin） — {"count":1}
+PASS [RF3] missing：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作 — plain=0 planEntry=0
+PASS [RF3] cross-task：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作 — plain=0 planEntry=0
+PASS [RF3] dead-ref：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作 — plain=0 planEntry=0
+PASS [RF3] cross-ws：警告+无普通开始执行/安排入口，只有返回日程或显式改为独立工作 — plain=0 planEntry=0
+PASS [RF3] cross-ws 不自动切换空间 — personal
+PASS [RF3] 确认后创建独立会话（plan_item_id=null），return 不含失效 plan — {"count":1,"plan":null}
+PASS [RF3] 打开后失效：入口反应式切换，普通开始执行/安排入口消失
+PASS [RF3] 无 plan 上下文的普通开始执行保持兼容（独立会话）
+PASS [RF4] 去任务选择行动携带已验证来源（view=list）与 plan 上下文 — #/tasks/t-rf4a?plan=p-rf4a&return=/today?date=2026-11-25&view=list&plan=p-rf4a
+PASS [RF4] 完成返回：同周不同日也定位安排日，来源列表视图保留 — #/today?date=2026-11-25&view=list&plan=p-rf4a&recorded=786d1753-6fbc-41b3-8bfa-24deabbbf9c5
+PASS [RF4] 目标日（明天）安排历史自动展开且历史卡可见 — expanded=true
+PASS [RF4] 手动收起历史后保持收起（不强制再展开）
+PASS [RF4] 手动选今天后停留在今天（不强制跳回安排日） — #/today?view=list&plan=p-rf4a&recorded=786d1753-6fbc-41b3-8bfa-24deabbbf9c5
+PASS [RF4] 360px 返回：URL 定位安排日，日期条选中明天而非今天 — #/today?date=2026-11-25&plan=p-rf4b&recorded=fb3600b8-ac17-4485-b862-803ee8711e4e target=true today=false
+PASS [RF4] 360px 选中日两区展示安排日内容，完成历史自动展开 — expanded=true
+PASS [RF4] 360px 手动选今天后停留今天（不强制跳回） — #/today?plan=p-rf4b&recorded=fb3600b8-ac17-4485-b862-803ee8711e4e
+PASS [RF5] 360px 定位 A：历史自动展开且 A 卡片可见
+PASS [RF5] 手动收起历史 aria-expanded=false
+PASS [RF5] 同日换目标 B（仅换 plan）：历史重新展开且 B 卡片可见 — expanded=true visible=true
+PASS [RF5] 同目标普通 store 刷新：保持手动收起，不强制重开
+PASS [RF5] 普通区定位第 1 项：不展开（前 3 项可见）
+PASS [RF5] 普通区换目标第 5 项：自动展开且卡片在真实滚动容器内可见 — {"found":true,"boxed":true,"inside":true,"rtop":1012,"ctop":730,"rbot":1082,"cbot":1082}
+PASS [RF5] 目标先在普通区：planned 卡片可见
+PASS [RF5] 同 ID 从普通区转入历史区：历史自动展开且卡片可见
+
+36/36 passed
+rfix exit=0

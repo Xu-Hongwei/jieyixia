@@ -1,0 +1,115 @@
+PASS [B01] 独立会话 plan_item_id=null — {"sid":"1d8fe3d8-b3c4-40e0-ae04-d1abfb503cc9"}
+PASS [B01] 独立会话结束表单不显示安排进度组
+PASS [B01] 结束落库 outcome=done；行动完成；任务不自动完成；返回任务页 — {"outcome":"done","actionDone":true,"taskStatus":"doing"}
+PASS [B02] 确认面板展示当前行动（a1）但不自动提交 — 开始这项安排
+
+核对安排与行动事实后明确开始；取消不创建会话。
+
+所属任务
+虚构任务·b02a
+待办
+任务总截止：无截止
+安排日期
+2026-11-24
+今天
+虚构安排·b02a
+安排预计 30 分钟 · 安排说明不覆盖行动内容
+将执行的行动（按 ID 明确选择，不按文字匹配）
+同名行动
+行动预计 25 分钟
+去任务选
+PASS [B02] 去任务选择行动携带显式 plan 上下文与 return — #/tasks/t-b02a?plan=p-b02a&return=/today?plan=p-b02a
+PASS [B02] 显式设为当前切换 a2（不文字匹配） — a2-b02a
+PASS [B02] 会话绑定明确选择的 a2；零自动创建行动 — {"actionId":"a2-b02a","count":2}
+PASS [B02] 无有效行动：禁用开始并引导去任务选择
+PASS [B02] 任务页新增行动后同一确认流程开始；绑定新行动 ID — {"actionId":"45aad6dd-e93f-46bd-b850-8e491025b347"}
+PASS [B03] 暂停成功（running=false）
+PASS [B03] 同安排未结束入口=回到工作（已暂停），不新建
+PASS [B03] 回到工作不自动续计时（仍暂停，需主动继续）
+PASS [B03] 同 Task/Action 不同安排 → 冲突入口而非回到工作
+PASS [B05] blocked 任务：面板内明确确认文案且未勾选禁用
+PASS [B05] 确认后任务转进行中；started_at 为真实时钟 — {"status":"doing","driftMs":34}
+PASS [B05] 安排日早于今天：延后执行提示+未勾选禁用
+PASS [B05] 开始后原安排日与任务总截止不变 — {"date":"2026-11-23","deadline":{"value":"2026-11-25","precision":"date"}}
+PASS [B05] 跨午夜（模拟）：confirmDate 差异列出，不静默开始 — 开始这项安排
+
+核对安排与行动事实后明确开始；取消不创建会话。
+
+所属任务
+虚构任务·b05c
+待办
+任务总截止：无截止
+安排日期
+2026-11-24
+今天
+虚构安排·b05c
+安排预计 30 分钟 · 安排说明不覆盖行动内容
+将执行的行动（按 ID 明确选择，不按文字匹配）
+虚构行动·b05c
+行动预计 25 分钟
+确认期间事实已变化，请核对全部差异
+「确认日期」：2026-11-24 → 2
+PASS [B05] 跨午夜（模拟）：差异期间未创建会话
+PASS [B05] 重新确认后开始（模拟）：started_at=次日真实（模拟）时钟；原安排日不改 — {"startedDate":"2026-11-25","planDate":"2026-11-24"}
+PASS [B07] 旧 planned 有合法历史 → 核对入口而非直接开始
+PASS [B07] 核对进度框打开（人工确认，不自动写）
+PASS [B07] 取消核对不改变安排状态
+PASS [B07] 异常历史：解释问题+记录链接；不提供开始
+PASS [B08] done/done：会话与安排逐项落库 — {"outcome":"done","plan":"done","blocker":null}
+PASS [B08] done/done：行动完成仅随 done；任务不自动完成 — {"actionDone":true,"taskStatus":"doing"}
+PASS [B10] done/done：返回日程无需刷新即见安排新状态 — #/today?plan=p-b08-done-done&recorded=d011c132-8f0b-4574-a0eb-dfa37da8f73c
+PASS [B08] done/partial：会话与安排逐项落库 — {"outcome":"done","plan":"partial","blocker":null}
+PASS [B08] done/partial：行动完成仅随 done；任务不自动完成 — {"actionDone":true,"taskStatus":"doing"}
+PASS [B10] done/partial：返回日程无需刷新即见安排新状态 — #/today?plan=p-b08-done-partial&recorded=d06fd0a2-c98a-45c0-a60f-b64659585b97
+PASS [B08] partial/done：会话与安排逐项落库 — {"outcome":"partial","plan":"done","blocker":null}
+PASS [B08] partial/done：行动完成仅随 done；任务不自动完成 — {"actionDone":false,"taskStatus":"doing"}
+PASS [B10] partial/done：返回日程无需刷新即见安排新状态 — #/today?plan=p-b08-partial-done&recorded=26714401-5b0c-44f2-8edb-4f512094befe
+PASS [B08] partial/partial：会话与安排逐项落库 — {"outcome":"partial","plan":"partial","blocker":null}
+PASS [B08] partial/partial：行动完成仅随 done；任务不自动完成 — {"actionDone":false,"taskStatus":"doing"}
+PASS [B10] partial/partial：返回日程无需刷新即见安排新状态 — #/today?plan=p-b08-partial-partial&recorded=8340df12-b870-4488-a57a-98f2056e19f6
+PASS [B08] blocked/done：会话与安排逐项落库 — {"outcome":"blocked","plan":"done","blocker":"虚构卡点：等队友接口"}
+PASS [B08] blocked/done：行动完成仅随 done；任务不自动完成 — {"actionDone":false,"taskStatus":"doing"}
+PASS [B10] blocked/done：返回日程无需刷新即见安排新状态 — #/today?plan=p-b08-blocked-done&recorded=c046d383-816c-491e-b736-137c5df80578
+PASS [B08] blocked/partial：会话与安排逐项落库 — {"outcome":"blocked","plan":"partial","blocker":"虚构卡点：等队友接口"}
+PASS [B08] blocked/partial：行动完成仅随 done；任务不自动完成 — {"actionDone":false,"taskStatus":"doing"}
+PASS [B10] blocked/partial：返回日程无需刷新即见安排新状态 — #/today?plan=p-b08-blocked-partial&recorded=82c75ad1-dc04-4f26-833b-4c765f474636
+PASS [B08] blocked 未填卡点：拒绝提交并提示，会话未结束 — 结束本次工作
+
+编辑区当前正文将作为本次成果一并保存。选择「行动完成」只完成该行动，不会自动完成任务。
+
+所属安排
+2026-11-24
+
+虚构安排·b08blk
+
+安排预计 30 分钟 · 暂无已结束历史
+
+本段有效用时将在保存时结算，不
+PASS [B09] 工作页安排块：已结束 2 段累计 02:00，与本段计时分开
+PASS [B09] sum(120000+本段) 后 floor=2 分钟；本段<1分钟单独保留毫秒 — {"actual":2,"segmentMs":1328}
+PASS [B09] 最近已结束引用指向本段 — faf0a8ab-c826-497b-a312-98dc79cbd3f7
+PASS [B09] 无历史：actual_minutes=null（不是 0）
+PASS [B09] 少于一分钟结束：actual_minutes=0（与 null 区分） — 0
+PASS [B11] 取消仅关表单：不结束不暂停
+PASS [B11] 取消后正文保留在编辑器
+PASS [B11] 同会话重开保留已选结果与卡点 — {"blockedChecked":true,"blockerVal":"等队友接口"}
+PASS [B11] 新会话表单回到初值 partial，不串上一会话卡点
+PASS [B16] done 结束返回原日程定位原安排 — #/today?plan=p-b16&recorded=35e223cf-695e-4394-b0f6-d5c21c8df6a6
+PASS [B16] done 安排在日程仍可见且提示来自真实记录
+PASS [B16] 目标日列安排历史自动展开且历史卡可见（日程卡片，非详情文字） — aria-expanded=true, cardVisible=true
+PASS [B16] 刷新深链接：目标可见、无自动 begin/end（会话数不变、无未结束） — {"count":1}
+PASS [B16] 刷新深链接后安排历史仍自动展开且历史卡可见 — aria-expanded=true, cardVisible=true
+PASS [B16] 周视图深链接：目标安排可见
+PASS [B16] 周视图深链接：目标日列安排历史自动展开且历史卡可见 — aria-expanded=true, cardVisible=true
+PASS [B17] 前置：行动已完成
+PASS [B17] 新安排新 ID/planned/空累计；原 partial 安排不变 — {"newId":"cab8ee92-2950-4e21-9cfa-2437fa0fc39b","state":"planned"}
+PASS [B17] 已完成行动不自动复活
+PASS [B18] v0 无安排：遗留表单，无安排进度组，不补造快照
+PASS [B18] v0 无安排显式结束：归档不自动完成行动、不补 record_version — {"outcome":"partial"}
+PASS [B18] v0 有效活安排：表单增加安排结果与确认快照说明
+PASS [B18] v0 有效安排同事务保存：安排 done/实际 2 分钟；不升版本不触碰行动 — {"plan":"done","actual":2}
+PASS [B18] v0 失效关联：提示可结束但无法更新安排
+PASS [B18] v0 失效关联仍可显式结束释放占用
+PASS [B18] 正常 v1 安排终态：明确拒绝不降级遗留结束，会话未结束
+
+69/69 passed

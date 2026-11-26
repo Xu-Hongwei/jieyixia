@@ -1,0 +1,5 @@
+
+> jiexialai-frontend@0.1.0 test
+> vitest run --reporter=json --outputFile=../output/review-m2-2026-11-25/frontend-results.json
+
+JSON report written to E:/qoder/output/review-m2-2026-11-25/frontend-results.json

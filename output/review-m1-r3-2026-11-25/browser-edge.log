@@ -1,0 +1,4 @@
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-25）
+PASS [dirty] 修改预算未重算应禁用采用 — adoptEnabled=false
+PASS [deadline] 改标题并清除截止后应保存明确无截止决定 — {"revision":3,"confs":[{"confirmation_id":"20aadc72-28fa-4af1-ae26-7c07a3034302","draft_revision":3,"object_type":"task","object_id_or_key":"rpt","field_path":"deadline","old_value":null,"new_value":null,"confirmed_at":"2026-11-25T09:13:38.152Z","id_scope":"draft"}],"ui":"无截止 · 今天 2026-11-25"}
+PASS [dirty-empty] 清空必填标题应阻断采用

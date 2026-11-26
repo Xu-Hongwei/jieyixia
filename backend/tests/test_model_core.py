@@ -12,6 +12,12 @@ def nodes_field(nodes: list[dict]) -> dict:
     return {"key": "time_nodes", "value": nodes, "raw": "", "status": "candidate"}
 
 
+def synth_node(response):
+    """deadline-only 输出合成的节点（role=unknown，deadline 缺席，节点保留供人工选择）。"""
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    return tn.value[0]
+
+
 def test_multi_nodes_primary_is_earliest_and_deterministic():
     nodes = [
         {"label": "第二场", "raw": "2026年11月18日 19:00-20:00", "value": "2026-11-18T19:00:00", "basis": "explicit", "role": "event_start"},
@@ -63,12 +69,26 @@ def test_relative_with_user_reference_from_request_kept():
     assert dl.derived is True
 
 
-def test_node_missing_year_is_inferred_and_flagged():
+def test_node_missing_year_without_reference_nulled():
     text = model_json(fields=[nodes_field([
         {"label": "报名", "raw": "9月19日17:00", "value": "2026-09-19T17:00:00", "basis": "explicit", "role": "submission_deadline"},
     ])])
     response = parse(text)
+    node = synth_node(response)
+    assert node["value"] is None, "缺年份且无可靠参照：不任意补年"
+    assert node["derived"] is True
+    assert not any(f.key == "deadline" for f in response.fields)
+    assert any(w.code == "date_year_inferred" for w in response.warnings)
+
+
+def test_node_missing_year_with_user_reference_kept():
+    text = model_json(fields=[nodes_field([
+        {"label": "报名", "raw": "9月19日17:00", "value": "2026-09-19T17:00:00", "basis": "explicit",
+         "role": "submission_deadline", "reference_at": "2026-09-01", "reference_source": "user"},
+    ])])
+    response = parse(text, user_reference_at="2026-09-01")
     dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-09-19T17:00:00"
     assert dl.derived is True
     assert dl.status.value == "unresolved"
     assert any(w.code == "date_year_inferred" for w in response.warnings)
@@ -90,9 +110,10 @@ def test_duplicate_keys_deduped():
         {"key": "deadline", "value": "2026-11-21", "raw": "2026年11月21日", "status": "candidate"},
     ])
     response = parse(text)
-    dls = [f for f in response.fields if f.key == "deadline"]
-    assert len(dls) == 1
-    assert dls[0].value == "2026-11-21"
+    # 重复 deadline 键去重保留最后；合成节点 role=unknown，deadline 缺席，值落在节点上
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert len(tn.value) == 1
+    assert tn.value[0]["value"] == "2026-11-21"
 
 
 def test_warning_codes_closed_and_backend_authoritative():
@@ -109,8 +130,8 @@ def test_warning_codes_closed_and_backend_authoritative():
 
 def test_superseded_node_excluded_from_primary():
     text = model_json(fields=[nodes_field([
-        {"label": "旧截止", "raw": "由11月13日调整", "value": "2026-11-13T18:00:00", "basis": "superseded", "role": "submission_deadline"},
-        {"label": "新截止", "raw": "调整至11月15日18:00", "value": "2026-11-15T18:00:00", "basis": "explicit", "role": "submission_deadline"},
+        {"label": "旧截止", "raw": "由2026年11月13日调整", "value": "2026-11-13T18:00:00", "basis": "superseded", "role": "submission_deadline"},
+        {"label": "新截止", "raw": "调整至2026年11月15日18:00", "value": "2026-11-15T18:00:00", "basis": "explicit", "role": "submission_deadline"},
     ])])
     response = parse(text)
     dl = next(f for f in response.fields if f.key == "deadline")
@@ -139,7 +160,7 @@ def test_node_invalid_calendar_rejected():
 
 def test_node_2400_folds_to_date_precision():
     text = model_json(fields=[nodes_field([
-        {"label": "线上", "raw": "9月16日24:00", "value": "2026-09-16T24:00:00", "basis": "explicit", "role": "submission_deadline"},
+        {"label": "线上", "raw": "2026年9月16日24:00", "value": "2026-09-16T24:00:00", "basis": "explicit", "role": "submission_deadline"},
     ])])
     response = parse(text)
     dl = next(f for f in response.fields if f.key == "deadline")
@@ -159,19 +180,35 @@ def test_node_2400_folds_to_date_precision():
 )
 def test_datetime_serialization_is_canonical(key, value, raw, expected):
     text = model_json(fields=[{"key": key, "value": value, "raw": raw, "status": "candidate"}])
-    assert parse(text).fields[0].value == expected
+    response = parse(text)
+    if key == "deadline":
+        # deadline-only 合成节点 role=unknown，deadline 缺席；规范化值落在节点上
+        assert synth_node(response)["value"] == expected
+    else:
+        assert response.fields[0].value == expected
 
 
-def test_model_invented_year_and_timezone_are_stripped_and_flagged():
+def test_model_invented_year_without_reference_nulled():
     text = model_json(fields=[{
         "key": "deadline", "value": "2026-11-18T14:30:00+08:00",
         "raw": "11月18日 周三 14:30-15:30", "status": "candidate",
     }])
     response = parse(text)
-    field = response.fields[0]
-    assert field.value == "2026-11-18T14:30:00", "原文没有的时区必须剥掉"
-    assert field.derived is True, "原文没有的年份属推算"
-    assert field.status.value == "unresolved"
+    node = synth_node(response)
+    assert node["value"] is None, "缺年份且无可靠参照：不任意补年"
+    assert node["derived"] is True
+    assert any(w.code == "date_year_inferred" for w in response.warnings)
+
+
+def test_model_invented_timezone_stripped_with_reference():
+    text = model_json(fields=[{
+        "key": "deadline", "value": "2026-11-18T14:30:00+08:00",
+        "raw": "11月18日 周三 14:30-15:30", "status": "candidate",
+    }])
+    response = parse(text, user_reference_at="2026-11-17")
+    node = synth_node(response)
+    assert node["value"] == "2026-11-18T14:30:00", "原文没有的时区必须剥掉"
+    assert node["derived"] is True, "原文没有的年份属推算"
     codes = {w.code for w in response.warnings}
     assert "date_year_inferred" in codes
     assert "timezone_unspecified" in codes
@@ -179,11 +216,11 @@ def test_model_invented_year_and_timezone_are_stripped_and_flagged():
 
 def test_end_of_day_2400_folds_to_date_precision():
     text = model_json(fields=[
-        {"key": "deadline", "value": "2026-09-16T24:00:00", "raw": "9月16日24:00", "status": "candidate"},
+        {"key": "deadline", "value": "2026-09-16T24:00:00", "raw": "2026年9月16日24:00", "status": "candidate"},
     ])
-    f = parse(text).fields[0]
-    assert f.value == "2026-09-16"
-    assert f.precision == "date"
+    node = synth_node(parse(text))
+    assert node["value"] == "2026-09-16"
+    assert node["precision"] == "date"
 
 
 def test_invalid_calendar_value_rejected():
@@ -207,23 +244,23 @@ def test_time_metadata_precision_and_tz_known():
     text = model_json(fields=[
         {"key": "deadline", "value": "2026-11-19", "raw": "2026年11月19日", "status": "candidate"},
     ])
-    f = parse(text).fields[0]
-    assert f.precision == "date"
-    assert f.tz_known is None
+    node = synth_node(parse(text))
+    assert node["precision"] == "date"
+    assert node["tz_known"] is None
 
     text = model_json(fields=[
         {"key": "deadline", "value": "2026-11-19T18:00:00+08:00", "raw": "2026年11月19日18:00+08:00", "status": "candidate"},
     ])
-    f = parse(text).fields[0]
-    assert f.precision == "datetime"
-    assert f.tz_known is True
+    node = synth_node(parse(text))
+    assert node["precision"] == "datetime"
+    assert node["tz_known"] is True
 
     text = model_json(fields=[
         {"key": "deadline", "value": "2026-11-19T18:00", "raw": "2026年11月19日18:00", "status": "candidate"},
     ])
-    f = parse(text).fields[0]
-    assert f.precision == "datetime"
-    assert f.tz_known is False
+    node = synth_node(parse(text))
+    assert node["precision"] == "datetime"
+    assert node["tz_known"] is False
 
 
 def test_naive_datetime_keeps_no_timezone_and_warns():
@@ -232,7 +269,7 @@ def test_naive_datetime_keeps_no_timezone_and_warns():
     assert canonical_datetime("2026-11-13T18:00") == "2026-11-13T18:00:00"
     text = model_json(fields=[{"key": "deadline", "value": "2026-11-13T18:00", "raw": "2026年11月13日18:00", "status": "candidate"}])
     response = parse(text)
-    assert response.fields[0].value == "2026-11-13T18:00:00"
+    assert synth_node(response)["value"] == "2026-11-13T18:00:00"
     assert any(w.code == "timezone_unspecified" for w in response.warnings)
 
 
@@ -399,13 +436,19 @@ def test_confirmed_null_rejected():
         Field(key="deadline", value=None, raw="原文", status="confirmed")
 
 
-def test_derived_confirmed_by_user_keeps_provenance():
+def test_derived_confirmed_preserves_value_origin():
     from contract.models import Field
+    # D4：用户确认模型推算值（未改值）→ derived+confirmed 合法，origin 保持 model，不伪装成 user
     f = Field(key="deadline", value="2026-11-25", raw="下周三课堂展示", status="confirmed",
+              derived=True, origin="model", quote={"text": "下周三课堂展示", "source_id": "src-01"})
+    assert f.derived is True and f.status.value == "confirmed" and f.origin.value == "model"
+    # 用户实际改值 → origin=user 同样合法，保留 derived 与原文
+    g = Field(key="deadline", value="2026-11-26", raw="下周三课堂展示", status="confirmed",
               derived=True, origin="user", quote={"text": "下周三课堂展示", "source_id": "src-01"})
-    assert f.derived is True and f.status.value == "confirmed"
+    assert g.origin.value == "user" and g.derived is True
+    # 确认 null 仍拒绝（D5）
     with pytest.raises(Exception):
-        Field(key="deadline", value="2026-11-25", raw="下周三课堂展示", status="confirmed",
+        Field(key="deadline", value=None, raw="下周三课堂展示", status="confirmed",
               derived=True, origin="model", quote={"text": "下周三课堂展示", "source_id": "src-01"})
 
 
@@ -414,10 +457,11 @@ def test_deadline_only_explicit_goes_through_node_rules():
         {"key": "deadline", "value": "2026-11-20", "raw": "2026年11月20日", "status": "candidate"},
     ])
     response = parse(text)
-    tn = next(f for f in response.fields if f.key == "time_nodes")
-    assert tn.value[0]["role"] == "submission_deadline"
-    dl = next(f for f in response.fields if f.key == "deadline")
-    assert dl.value == "2026-11-20"
+    node = synth_node(response)
+    # D4：模型未给节点角色，合成节点 role=unknown，不伪造 submission_deadline；deadline 缺席交用户选择
+    assert node["role"] == "unknown"
+    assert node["value"] == "2026-11-20"
+    assert not any(f.key == "deadline" for f in response.fields)
 
 
 def test_deadline_only_relative_without_reference_is_nulled():
@@ -431,14 +475,37 @@ def test_deadline_only_relative_without_reference_is_nulled():
     assert any(w.code == "relative_date_derived" for w in response.warnings)
 
 
-def test_deadline_only_relative_with_user_reference_kept():
+def test_deadline_only_relative_with_digit_no_reference_nulled():
+    # 复现：「明天下午5点前提交」含数字 5，不能用「raw 无数字」判相对；无参照必须置空
+    text = model_json(fields=[
+        {"key": "deadline", "value": "2026-11-18T17:00:00", "raw": "明天下午5点前提交", "status": "candidate"},
+    ])
+    response = parse(text)
+    assert synth_node(response)["value"] is None
+    assert not any(f.key == "deadline" and f.value for f in response.fields)
+
+
+def test_deadline_only_activity_start_not_promoted_to_submission():
+    # 复现：活动开始即便有参照也不得被合成为提交截止（role=unknown，deadline 缺席）
+    text = model_json(fields=[
+        {"key": "deadline", "value": "2026-11-18T17:00:00", "raw": "宣讲会明天下午5点开始", "status": "candidate"},
+    ])
+    response = parse(text, user_reference_at="2026-11-17")
+    node = synth_node(response)
+    assert node["role"] == "unknown"
+    assert node["value"] == "2026-11-18T17:00:00", "节点保留供人工选择"
+    assert not any(f.key == "deadline" for f in response.fields), "活动开始不自动升为提交截止"
+
+
+def test_deadline_only_relative_with_user_reference_kept_as_node():
     text = model_json(fields=[
         {"key": "deadline", "value": "2026-11-18", "raw": "明天", "status": "candidate"},
     ])
     response = parse(text, user_reference_at="2026-11-17")
-    dl = next(f for f in response.fields if f.key == "deadline")
-    assert dl.value == "2026-11-18"
-    assert dl.derived is True and dl.status.value == "unresolved"
+    node = synth_node(response)
+    assert node["value"] == "2026-11-18"
+    assert node["derived"] is True and node["role"] == "unknown"
+    assert not any(f.key == "deadline" for f in response.fields), "角色未确认，deadline 缺席交用户选择"
 
 
 def test_deadline_only_tutorial_relative_without_reference_nulled():
@@ -481,3 +548,218 @@ def test_user_prompt_carries_reference_and_demotes_capture():
     req2 = AnalyzeRequest(source_id="s", kind="text", text="明天交",
                           captured_at="2026-11-17T09:12:00+08:00")
     assert "用户指定参照日期" not in build_user_text(req2)
+
+
+def test_cross_year_relative_kept():
+    # 12-31 的「明天」→ 次年 01-01：有可靠参照（消息日期）不得因跨年清空
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "明天17:00", "value": "2027-01-01T17:00:00", "basis": "relative",
+         "role": "submission_deadline", "reference_at": "2026-12-31", "reference_source": "message_date",
+         "message_date": "2026-12-31"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2027-01-01T17:00:00"
+    assert dl.derived is True and dl.status.value == "unresolved"
+
+
+def test_cross_year_inferred_kept():
+    # 消息日期 12-31，原文「1月1日」补年 → 次年 01-01：inferred 跨年同样保留
+    text = model_json(fields=[nodes_field([
+        {"label": "报名", "raw": "1月1日17:00", "value": "2027-01-01T17:00:00", "basis": "inferred",
+         "role": "submission_deadline", "reference_at": "2026-12-31", "reference_source": "message_date",
+         "message_date": "2026-12-31"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2027-01-01T17:00:00"
+    assert dl.derived is True
+
+
+# ---- 第四轮：inferred 绕过可靠参照的漏洞（三次验收第 2 节三例 + 误标变体）----
+
+@pytest.mark.parametrize("raw", ["三天后17:00提交", "收到通知后48小时内提交", "11月20日提交"])
+def test_inferred_without_reference_nulled(raw):
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": raw, "value": "2038-11-20T17:00:00", "basis": "inferred", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    node = synth_node(response)
+    assert node["value"] is None, "inferred 无可靠参照不得接受模型补出的年份/换算"
+    assert node["derived"] is True
+    assert not any(f.key == "deadline" for f in response.fields)
+
+
+@pytest.mark.parametrize("raw", ["三天后17:00提交", "收到通知后48小时内提交", "11月20日提交"])
+def test_inferred_with_user_reference_kept(raw):
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": raw, "value": "2038-11-20T17:00:00", "basis": "inferred",
+         "role": "submission_deadline", "reference_at": "2038-11-17", "reference_source": "user"},
+    ])])
+    response = parse(text, user_reference_at="2038-11-17")
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2038-11-20T17:00:00", "有可靠参照时允许保留模型推算候选"
+    assert dl.derived is True
+    assert dl.status.value == "unresolved"
+
+
+def test_inferred_with_message_date_reference_kept():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "11月20日提交", "value": "2026-11-20T17:00:00", "basis": "inferred",
+         "role": "submission_deadline", "reference_at": "2026-11-10", "reference_source": "message_date",
+         "message_date": "2026-11-10"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-20T17:00:00"
+    assert dl.derived is True
+
+
+@pytest.mark.parametrize("basis", ["explicit", "inferred"])
+def test_mislabeled_relative_unknown_words_caught_by_year_check(basis):
+    # 「三天后」不在相对词表内：不靠扩词表，value 年份不在原文 → 结构化拦下
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "三天后17:00提交", "value": "2038-11-20T17:00:00", "basis": basis, "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    assert synth_node(response)["value"] is None
+
+
+def test_invented_year_lie_about_user_reference_nulled():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "11月20日提交", "value": "2038-11-20T17:00:00", "basis": "inferred",
+         "role": "submission_deadline", "reference_at": "2038-11-17", "reference_source": "user"},
+    ])])
+    response = parse(text)  # 请求里并没有 reference_at：谎称 user 不算可靠参照
+    assert synth_node(response)["value"] is None
+
+
+def test_deadline_only_field_invented_year_without_reference_nulled():
+    text = model_json(fields=[
+        {"key": "deadline", "value": "2038-11-20T17:00:00", "raw": "11月20日提交", "status": "candidate"},
+    ])
+    response = parse(text)
+    node = synth_node(response)
+    assert node["value"] is None, "字段级补年同样受统一参照约束"
+    assert node["derived"] is True
+
+
+def test_deadline_only_field_invented_year_with_user_reference_kept():
+    text = model_json(fields=[
+        {"key": "deadline", "value": "2038-11-20T17:00:00", "raw": "11月20日提交", "status": "candidate"},
+    ])
+    response = parse(text, user_reference_at="2038-11-17")
+    node = synth_node(response)
+    assert node["value"] == "2038-11-20T17:00:00"
+    assert node["derived"] is True
+
+
+def test_explicit_full_date_in_raw_needs_no_reference():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "2026年11月20日17:00前", "value": "2026-11-20T17:00:00", "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-20T17:00:00"
+    assert dl.derived is False
+    assert dl.status.value == "candidate"
+
+
+# ---------------------------------------------------------------- 统一时间合法性（非法偏移）
+@pytest.mark.parametrize("bad_offset", ["+08:75", "+08:60", "+25:00", "+99:99"])
+def test_node_illegal_offset_rejected(bad_offset):
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": f"2026年11月18日10:00{bad_offset}", "value": f"2026-11-18T10:00:00{bad_offset}",
+         "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    with pytest.raises(ModelError) as info:
+        parse(text)
+    assert info.value.kind == "invalid_output"
+
+
+@pytest.mark.parametrize("bad_offset", ["+08:75", "+08:60"])
+def test_deadline_field_illegal_offset_rejected(bad_offset):
+    text = model_json(fields=[
+        {"key": "deadline", "value": f"2026-11-18T10:00:00{bad_offset}", "raw": f"2026年11月18日10:00{bad_offset}", "status": "candidate"},
+    ])
+    with pytest.raises(ModelError) as info:
+        parse(text)
+    assert info.value.kind == "invalid_output"
+
+
+def test_node_legal_leap_day_and_explicit_offset_kept():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "2028年2月29日10:00+08:00", "value": "2028-02-29T10:00:00+08:00",
+         "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2028-02-29T10:00:00+08:00"
+    assert dl.tz_known is True
+
+
+# ---------------------------------------------------------------- 北京时间默认解释（选主）
+def test_naive_and_explicit_datetime_comparable_by_beijing_instant():
+    # naive 18:00 按北京解释 → 10:00 UTC；+00:00 09:00 → 09:00 UTC。后者更早，选为主且偏移保留
+    text = model_json(fields=[nodes_field([
+        {"label": "a", "raw": "2026年11月18日18:00", "value": "2026-11-18T18:00:00", "basis": "explicit", "role": "submission_deadline"},
+        {"label": "b", "raw": "2026年11月18日09:00+00:00", "value": "2026-11-18T09:00:00+00:00", "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-18T09:00:00+00:00"
+    assert dl.tz_known is True
+    assert not any(w.code == "deadline_unselectable" for w in response.warnings), "naive 与明确偏移可按同一时刻比较，不再判不可比较"
+
+
+def test_explicit_other_offset_not_replaced_with_beijing():
+    # +09:00 的 18:00 实际 09:00 UTC，比 naive 18:00（北京 10:00 UTC）早；选主保留 +09:00 原值
+    text = model_json(fields=[nodes_field([
+        {"label": "a", "raw": "2026年11月18日18:00", "value": "2026-11-18T18:00:00", "basis": "explicit", "role": "submission_deadline"},
+        {"label": "b", "raw": "2026年11月18日18:00+09:00", "value": "2026-11-18T18:00:00+09:00", "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-18T18:00:00+09:00", "明确偏移保留实际含义，绝不替换成 +08:00"
+
+
+def test_naive_value_stays_naive_with_beijing_warning():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "2026年11月18日18:00", "value": "2026-11-18T18:00:00", "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    dl = next(f for f in response.fields if f.key == "deadline")
+    assert dl.value == "2026-11-18T18:00:00", "value 忠实保留原文 naive 形状，不冒充补时区"
+    assert dl.tz_known is False
+    w = next(w for w in response.warnings if w.code == "timezone_unspecified")
+    assert "北京" in w.message and "原文未注明时区" in w.message
+
+
+# ---------------------------------------------------------------- 缺失日期不补今天
+def test_missing_deadline_stays_absent_not_filled_with_today():
+    text = model_json(content_type="reference", fields=[
+        {"key": "title", "value": "参考资料", "raw": "参考资料", "status": "candidate"},
+    ])
+    response = parse(text)
+    assert not any(f.key == "deadline" for f in response.fields), "无截止不拿今天兜底"
+
+
+def test_missing_node_value_not_filled_with_today():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "尽快提交", "value": None, "basis": "explicit", "role": "submission_deadline"},
+    ])])
+    response = parse(text)
+    tn = next(f for f in response.fields if f.key == "time_nodes")
+    assert tn.value[0]["value"] is None
+    assert not any(f.key == "deadline" and f.value for f in response.fields)
+
+
+def test_missing_message_date_and_reference_not_auto_filled():
+    text = model_json(fields=[nodes_field([
+        {"label": "提交", "raw": "明天17:00", "value": "2026-11-18T17:00:00", "basis": "relative", "role": "submission_deadline"},
+    ])])
+    response = parse(text)  # 无 message_date / reference_at / 用户参照
+    node = synth_node(response)
+    assert node["message_date"] is None
+    assert node["reference_at"] is None
+    assert node["value"] is None, "无可靠参照不换算，更不拿今天兜底"

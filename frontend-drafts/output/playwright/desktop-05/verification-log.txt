@@ -1,0 +1,13 @@
+DESK-05 Edge verification
+
+- Asset load: paperAsset=ready; lightScene=webgl; canvas=block; page errors=0.
+- Surface click: report note front -> back -> front; aria-hidden toggles correctly.
+- Controls: completion keeps note on front; front flip button works; Enter and Space toggle the note.
+- Weekly view: WebGL environment remains active and the weekly calendar renders.
+- Narrow view: three notes render without changing the task content structure.
+- Reduced motion: lightScene=static-reduced; canvas hidden; surface flip remains available.
+- fx=off: lightScene=static-disabled; canvas hidden.
+
+Screenshots: today-1440.png, flip-1440.png, flip-back-1440.png, week-1440.png, today-360.png.
+No performance, persistence, or generated-video claim is made.
+

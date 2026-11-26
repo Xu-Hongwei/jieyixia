@@ -1,0 +1,17 @@
+{
+  "results": [
+    {
+      "item": "dirty",
+      "name": "修改预算未重算应禁用采用",
+      "pass": false,
+      "detail": "adoptEnabled=true"
+    },
+    {
+      "item": "deadline",
+      "name": "改标题并清除截止后应保存明确无截止决定",
+      "pass": false,
+      "detail": "{\"revision\":3,\"confs\":[],\"ui\":\"2026年11月27日\"}"
+    }
+  ],
+  "netHits": []
+}

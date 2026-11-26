@@ -1,0 +1,20 @@
+{
+  "id": "f-model-confirmed-field",
+  "title": "模型输出 confirmed_at 额外字段",
+  "layer": "model",
+  "mode": "reject",
+  "target": "TaskProposalCreate",
+  "acceptance": [
+    "B0-03"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "op": "create",
+    "key": "t1",
+    "title": "x",
+    "confirmed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": "Extra inputs",
+  "expected": null,
+  "notes": ""
+}

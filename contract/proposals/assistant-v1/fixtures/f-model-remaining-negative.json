@@ -1,0 +1,33 @@
+{
+  "id": "f-model-remaining-negative",
+  "title": "负估时",
+  "layer": "model",
+  "mode": "reject",
+  "target": "WorkItemProposal",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "key": "w1",
+    "task_ref": {
+      "kind": "existing",
+      "id": "t-1"
+    },
+    "action_ref": {
+      "kind": "existing",
+      "id": "a-1"
+    },
+    "deliverable": "w1 的虚构产出",
+    "remaining_minutes": -5,
+    "estimate_origin": "model",
+    "splittable": true,
+    "min_segment_minutes": 25,
+    "earliest_date": null,
+    "depends_on": [],
+    "priority": "normal"
+  },
+  "expected_error": "正安全整数",
+  "expected": null,
+  "notes": ""
+}

@@ -11,15 +11,35 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field as PydField, ValidationError, model_validator
 
-SCHEMA_VERSION = "0.3.0"
+SCHEMA_VERSION = "0.6.0"
 API_VERSION = "v1"
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?(\.\d+)?([+-]\d{2}:\d{2}|Z)?$")
 # v0.2：deadline 只接受单一 date 或规范 datetime（YYYY-MM-DDTHH:MM:SS±HH:MM）
 DEADLINE_VALUE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}([+-]\d{2}:\d{2}|Z)?)?$")
+
+
+def _check_real_datetime(value: str, label: str) -> None:
+    """v0.4：事件时间的真实日历/时刻/偏移校验（正则只管形状，fromisoformat 管真实性）。
+
+    fromisoformat 会静默接受 +08:75 这类非法分钟偏移，必须先显式查偏移范围。
+    无偏移的 naive 值按产品默认北京时间解释（与后端一致），绝不按设备时区猜测。
+    """
+    if not DATETIME_RE.match(value):
+        raise ValueError(f"{label} 必须是 ISO 日期时间（YYYY-MM-DDTHH:MM[:SS][.小数][±HH:MM|Z]）：{value}")
+    offset = re.search(r"[+-](\d{2}):(\d{2})$", value)
+    if offset and (int(offset.group(1)) > 23 or int(offset.group(2)) > 59):
+        raise ValueError(f"{label} 含非法时区偏移：{value}")
+    probe = value.replace("Z", "+00:00")
+    if re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$", probe):
+        probe += ":00"
+    try:
+        datetime.fromisoformat(probe)
+    except ValueError as exc:
+        raise ValueError(f"{label} 含非法日历日期或时刻：{value}") from exc
 
 # v0.2：键集合按内容类型封闭。title/deadline 通用；其余按类型。
 UNIVERSAL_KEYS = {"title", "deadline"}
@@ -63,7 +83,7 @@ STATUS_SEMANTICS: dict[str, str] = {
     "candidate": "原文可确定的事实候选，待用户确认；value 不得为 null",
     "unresolved": "仅用于原文时间或事实无法确定（相对时间、缺年份、模糊表述）；多场次/多选项是确定事实，用 candidate+数组，不得标 unresolved",
     "missing": "原文没写；value=null、raw=\"\"；绝不推测补造",
-    "confirmed": "只能由用户标记，模型不得输出；用户确认推算值时保留 derived=true 与原文引用（origin=user）",
+    "confirmed": "只能由用户标记，模型不得输出；用户确认推算值保留 derived=true 与原文引用，且不改变值来源 origin（确认≠改值，origin 仍可为 model）；用户实际改值才标 origin=user",
 }
 
 TIME_RULES: list[str] = [
@@ -151,6 +171,13 @@ class FocusOutcome(str, Enum):
     blocked = "blocked"
 
 
+class RefState(str, Enum):
+    """v0.4：活引用状态。deleted 后原 id 只是历史标识，禁止当活链接使用。"""
+
+    active = "active"
+    deleted = "deleted"
+
+
 class PlanItemState(str, Enum):
     planned = "planned"
     done = "done"
@@ -199,6 +226,14 @@ class TimeNode(ContractModel):
     def _check(self) -> TimeNode:
         if self.value is not None and not DEADLINE_VALUE_RE.match(self.value):
             raise ValueError("time_node.value 必须是单一 date 或规范 datetime")
+        if self.value is not None:
+            probe = self.value.replace("Z", "+00:00")
+            if re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$", probe):
+                probe += ":00"
+            try:
+                datetime.fromisoformat(probe)
+            except ValueError as exc:
+                raise ValueError(f"time_node.value 含非法日历日期：{self.value}") from exc
         if self.basis in ("relative", "inferred") and not self.derived:
             raise ValueError("relative/inferred 节点必须标 derived")
         if self.reference_at is not None and not DATE_RE.match(self.reference_at):
@@ -206,6 +241,20 @@ class TimeNode(ContractModel):
         if self.message_date is not None and not DATE_RE.match(self.message_date):
             raise ValueError("message_date 必须是 YYYY-MM-DD")
         return self
+
+
+# 机器关联（导出时由 generate.py 并入对应定义的 JSON Schema）：
+# key=time_nodes 时 value 受 TimeNode[] 约束，与 Field._check 的运行时校验同源。
+# 不走 pydantic json_schema_extra：其 $ref 归一化只认自身生成的引用，会 KeyError。
+FIELD_SCHEMA_LINKS: dict[str, dict] = {
+    "Field": {
+        "if": {"properties": {"key": {"const": "time_nodes"}}, "required": ["key"]},
+        "then": {"properties": {"value": {"anyOf": [
+            {"type": "array", "items": {"$ref": "#/$defs/TimeNode"}},
+            {"type": "null"},
+        ]}}},
+    },
+}
 
 
 class Field(ContractModel):
@@ -224,17 +273,24 @@ class Field(ContractModel):
 
     @model_validator(mode="after")
     def _check(self) -> Field:
+        if self.key == "time_nodes" and self.value is not None:
+            if not isinstance(self.value, list):
+                raise ValueError("time_nodes 的 value 必须是 TimeNode 数组")
+            for node in self.value:
+                try:
+                    TimeNode.model_validate(node)
+                except ValidationError as exc:
+                    raise ValueError(f"time_nodes 节点不符合 TimeNode 契约：{exc.errors()[0]['msg']}") from exc
         if self.status is FieldStatus.missing and self.value is not None:
             raise ValueError("missing 字段不得带 value（PRD F02：未提及的信息留空）")
         if self.status in (FieldStatus.candidate, FieldStatus.unresolved) and self.raw and self.quote is None:
             raise ValueError("有原文的 candidate/unresolved 字段必须带 quote（规则 4）")
         if self.status is FieldStatus.unresolved and not self.raw and not self.derived:
             raise ValueError("unresolved 必须给出原文或标明是推算值（规则 7）")
-        if self.derived and self.status is FieldStatus.confirmed:
-            if self.origin is not FieldOrigin.user:
-                raise ValueError("derived 推算值只能由用户确认（origin=user），并保留推算标记与出处")
-        elif self.derived and self.status is not FieldStatus.unresolved:
-            raise ValueError("v0.2：derived 推算值必须保持 unresolved，待用户确认")
+        if self.derived and self.status not in (FieldStatus.unresolved, FieldStatus.confirmed):
+            raise ValueError("derived 推算值必须保持 unresolved，待用户确认")
+        # D4：用户确认推算值（未改值）保留 derived=true 与值来源 origin=model；
+        # 确认行为不改 origin，只有用户实际改值才标 origin=user（见 saveEdit）。
         if self.status is FieldStatus.confirmed and self.value is None:
             raise ValueError("v0.3：confirmed 必须有有效值，不能确认 null（D5）")
         return self
@@ -580,8 +636,63 @@ class Action(ContractModel):
         return self
 
 
+class TaskSnapshot(ContractModel):
+    """v0.4：会话开始时冻结的任务事实。不随活对象改名重写；不是原始资料备份。"""
+
+    title: str
+    matter_name: str | None = None
+    deadline_value: str | None = None
+    deadline_precision: Literal["none", "date", "datetime"] = "none"
+    captured_at: str
+
+    @model_validator(mode="after")
+    def _check(self) -> TaskSnapshot:
+        _check_real_datetime(self.captured_at, "captured_at")
+        if self.deadline_precision == "none":
+            if self.deadline_value is not None:
+                raise ValueError("precision=none 时 deadline_value 必须为空")
+            return self
+        if self.deadline_value is None:
+            raise ValueError("有精度就必须有值")
+        if self.deadline_precision == "date":
+            if not DATE_RE.match(self.deadline_value):
+                raise ValueError("deadline_value 与 precision=date 不符")
+            try:
+                datetime.fromisoformat(self.deadline_value)
+            except ValueError as exc:
+                raise ValueError(f"deadline_value 含非法日历日期：{self.deadline_value}") from exc
+        else:
+            _check_real_datetime(self.deadline_value, "deadline_value")
+        return self
+
+
+class ActionSnapshot(ContractModel):
+    """v0.4：会话开始时冻结的行动事实。"""
+
+    text: str
+    minutes: int
+    captured_at: str
+
+    @model_validator(mode="after")
+    def _check(self) -> ActionSnapshot:
+        _check_real_datetime(self.captured_at, "captured_at")
+        if not self.text.strip():
+            raise ValueError("行动快照文本不能为空")
+        if self.minutes <= 0:
+            raise ValueError("minutes 必须为正")
+        return self
+
+
 class FocusSession(ContractModel):
-    """墙上时钟：started_at + accumulated_ms + running，禁止用 setInterval 累加。"""
+    """墙上时钟：started_at（首次开始，不变）+ accumulated_ms（已提交累计）+ timer_anchor_at（本段起点）。
+
+    v0.4 分版本校验：record_version=0 完全沿用 0.3.0 规则且新字段必须缺席；
+    record_version=1 要求开始即有快照、逐引用状态、锚点与运行态一致、ended_at/outcome 成对，
+    且 started_at/ended_at/timer_anchor_at 必须是真实日历/时刻/偏移合法的 ISO 日期时间。
+    事件时间时区规则：带偏移按绝对时刻保留；naive 值按产品默认北京时间解释，不依赖设备时区。
+    v0 旧记录的 started_at/ended_at 保持 0.3.0 的兼容边界，不收紧。
+    禁止用 setInterval 累加；恢复不自动计入离线间隔。
+    """
 
     id: str
     workspace_id: str
@@ -596,6 +707,24 @@ class FocusSession(ContractModel):
     blocker: str | None = None
     ended_at: str | None = None
     is_demo: bool = False
+    record_version: Literal[0, 1] = PydField(
+        default=0, description="0=旧记录（0.3.0 形态），1=3B 起新会话；分版本校验，不混用"
+    )
+    timer_anchor_at: str | None = PydField(
+        default=None, description="运行中本段尚未计入 accumulated_ms 的起点；v1 运行中必填，暂停/结束必须为 null"
+    )
+    task_snapshot: TaskSnapshot | None = PydField(
+        default=None, description="开始时冻结的任务标题/事项名称/截止值及精度/捕获时刻；v1 必填"
+    )
+    action_snapshot: ActionSnapshot | None = PydField(
+        default=None, description="开始时冻结的行动文本/预计分钟/捕获时刻；v1 必填"
+    )
+    task_ref_state: RefState | None = PydField(
+        default=None, description="任务活引用状态；deleted 后 task_id 只是历史标识；v1 必填，v0 必须缺席"
+    )
+    action_ref_state: RefState | None = PydField(
+        default=None, description="行动活引用状态，与任务独立；v1 必填，v0 必须缺席"
+    )
 
     @model_validator(mode="after")
     def _check(self) -> FocusSession:
@@ -603,15 +732,46 @@ class FocusSession(ContractModel):
             raise ValueError("accumulated_ms 不得为负")
         if self.running and (self.outcome is not None or self.ended_at is not None):
             raise ValueError("进行中的会话不得有 outcome / ended_at")
-        if self.outcome is not None and self.running:
-            raise ValueError("已结束的会话不得仍在运行")
         if self.outcome is FocusOutcome.blocked and not self.blocker:
             raise ValueError("卡住必须记录具体卡点（F10 结束结果表）")
+        if self.record_version == 0:
+            # 旧记录校验与 0.3.0 完全一致；新字段出现即混版，拒绝。不补造过去快照。
+            if any(x is not None for x in (
+                self.timer_anchor_at, self.task_snapshot, self.action_snapshot,
+                self.task_ref_state, self.action_ref_state,
+            )):
+                raise ValueError("record_version=0 的旧记录不得携带 v1 字段（锚点/快照/引用状态）")
+            return self
+        _check_real_datetime(self.started_at, "started_at")
+        if self.ended_at is not None:
+            _check_real_datetime(self.ended_at, "ended_at")
+        if self.timer_anchor_at is not None:
+            _check_real_datetime(self.timer_anchor_at, "timer_anchor_at")
+        if self.task_snapshot is None or self.action_snapshot is None:
+            raise ValueError("v1 会话开始即必须有任务与行动快照")
+        if self.task_ref_state is None or self.action_ref_state is None:
+            raise ValueError("v1 会话必须分别标记任务与行动引用状态")
+        if (self.ended_at is None) != (self.outcome is None):
+            raise ValueError("ended_at 与 outcome 必须成对存在")
+        if self.running:
+            if self.timer_anchor_at is None:
+                raise ValueError("v1 运行中会话必须有计时锚点 timer_anchor_at")
+        elif self.timer_anchor_at is not None:
+            raise ValueError("暂停/结束的会话锚点必须为空")
+        if self.ended_at is None and (
+            self.task_ref_state is not RefState.active or self.action_ref_state is not RefState.active
+        ):
+            raise ValueError("未结束会话（含暂停）的引用必须 active，不得断开")
         return self
 
 
 class PlanItem(ContractModel):
-    """只引用 task_id，永不回写 Task（规则 11/12）。"""
+    """只引用 task_id，永不回写 Task（规则 11/12）。
+
+    v0.4：focus_session_id 是最近一次**已结束**会话的快捷引用；全部会话以
+    FocusSession.plan_item_id 反查，不保存第二份会话 ID 数组。
+    task_ref_state=deleted 后 task_id 只是历史标识；未执行（planned）条目不得指向已删任务。
+    """
 
     id: str
     workspace_id: str
@@ -621,8 +781,13 @@ class PlanItem(ContractModel):
     action_text: str
     state: PlanItemState = PlanItemState.planned
     actual_minutes: int | None = None
-    focus_session_id: str | None = None
+    focus_session_id: str | None = PydField(
+        default=None, description="最近一次已结束专注会话的快捷引用；全部历史以 FocusSession.plan_item_id 反查"
+    )
     order: int = 0
+    task_ref_state: RefState = PydField(
+        default=RefState.active, description="任务活引用状态；旧记录缺省 active；planned 条目不得 deleted"
+    )
 
     @model_validator(mode="after")
     def _check(self) -> PlanItem:
@@ -632,6 +797,8 @@ class PlanItem(ContractModel):
             raise ValueError("planned_minutes 必须为正")
         if self.focus_session_id and self.actual_minutes is None:
             raise ValueError("关联了专注会话就必须记录实际用时")
+        if self.state is PlanItemState.planned and self.task_ref_state is RefState.deleted:
+            raise ValueError("未执行计划不得继续指向已删任务（删除事务应移除 planned 条目）")
         return self
 
 
@@ -728,8 +895,8 @@ class Fixture(ContractModel):
                 raise ValueError("confirmed_note.source_id 与 source.id 不一致")
             if self.confirmed_note.status is not NoteStatus.reviewed:
                 raise ValueError("confirmed_note 必须是 reviewed 状态")
-        if self.kind == "workspace" and self.task is None:
-            raise ValueError("workspace fixture 必须带 task")
+        if self.kind == "workspace" and self.task is None and self.focus_session is None:
+            raise ValueError("workspace fixture 必须带 task 或 focus_session（任务已删时历史仍可独立存在）")
         return self
 
 
@@ -741,7 +908,7 @@ ALL_MODELS: list[type[ContractModel]] = [
     MatterBrief, TaskBrief, MatchRequest, MatchSuggestion, MatchResponse,
     SuggestActionRequest, SuggestActionResponse, TaskDraft,
     ParseTasksRequest, ParseTasksResponse, ApiError,
-    Source, Note, Matter, Task, Action, FocusSession,
+    Source, Note, Matter, Task, Action, TaskSnapshot, ActionSnapshot, FocusSession,
     PlanItem, Unscheduled, PlanDraft, ChangeProposal, Fixture,
 ]
 
@@ -781,3 +948,79 @@ ENDPOINTS: list[dict[str, Any]] = [
         "idempotency": "只读解析，结果必须经用户确认才入库",
     },
 ]
+
+# ---------------------------------------------------------------- 0.5.0 助手持久类型（5B-1B）
+# 唯一手写来源在 assistant_models.py（契约差异包 §1.3 A 批闭包）；此处并入 ALL_MODELS，
+# 生成器机制不变。双上下文导入：包上下文（backend contract.models）与脚本上下文（裸 models）。
+# 必须放在文件末尾：assistant_models 反向导入的共享基类/枚举/正则/时间校验此时均已定义。
+if __package__:
+    from .assistant_models import (
+        ASSISTANT_PERSISTENT_MODELS,
+        LIMITS,
+        KEY_RE,
+        SHA256_RE,
+        JS_SAFE_INT_MAX,
+        _check_real_date,
+        _check_deadline_value,
+        _check_existing_deadline_value,
+        _consecutive_days,
+    )
+else:
+    from assistant_models import (
+        ASSISTANT_PERSISTENT_MODELS,
+        LIMITS,
+        KEY_RE,
+        SHA256_RE,
+        JS_SAFE_INT_MAX,
+        _check_real_date,
+        _check_deadline_value,
+        _check_existing_deadline_value,
+        _consecutive_days,
+    )
+
+ALL_MODELS.extend(ASSISTANT_PERSISTENT_MODELS)
+
+# 名字再导出：selftest / backend 可 from (contract.)models import UserConfirmation 等，无需知道分文件。
+for _cls in ASSISTANT_PERSISTENT_MODELS:
+    globals()[_cls.__name__] = _cls
+del _cls
+if __package__:
+    from .assistant_models import (
+        Priority, Strength, DraftStatus, UnscheduledReason,
+        TypedRef, EvidenceRef, TaskProposal, ActionProposal,
+    )
+else:
+    from assistant_models import (
+        Priority, Strength, DraftStatus, UnscheduledReason,
+        TypedRef, EvidenceRef, TaskProposal, ActionProposal,
+    )
+
+# ---------------------------------------------------------------- 0.5.0 propose HTTP 类型（M2）
+# 唯一手写来源在 assistant_http.py（C 批，纯线上类型，不落 IDB/备份）；机制同上。
+# 差异记录：devlog/coordination/2026-11-25-M2-propose契约差异.md。
+if __package__:
+    from .assistant_http import (
+        ASSISTANT_HTTP_MODELS,
+        ASSISTANT_PROTOCOL_VERSION,
+        ASSISTANT_PROTOCOL_VERSIONS,
+        PROPOSE_ENDPOINT,
+        PROPOSE_RULES,
+        Intent,
+        ResponsePayload,
+    )
+else:
+    from assistant_http import (
+        ASSISTANT_HTTP_MODELS,
+        ASSISTANT_PROTOCOL_VERSION,
+        ASSISTANT_PROTOCOL_VERSIONS,
+        PROPOSE_ENDPOINT,
+        PROPOSE_RULES,
+        Intent,
+        ResponsePayload,
+    )
+
+ALL_MODELS.extend(ASSISTANT_HTTP_MODELS)
+for _cls in ASSISTANT_HTTP_MODELS:
+    globals()[_cls.__name__] = _cls
+del _cls
+ENDPOINTS.append(PROPOSE_ENDPOINT)

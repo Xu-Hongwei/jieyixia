@@ -1,0 +1,21 @@
+INFO:     Started server process [7476]
+INFO:     Waiting for application startup.
+{"event": "startup", "provider": "fixture", "source_ids": ["src-01", "src-02", "src-03", "src-04"], "max_body_bytes": 8388608, "cors_origins": ["http://127.0.0.1:5177", "http://localhost:5177"], "auth_enabled": true, "rate_limit_per_min": 60, "max_concurrent_analyze": 4, "max_model_calls_per_day": 1000, "propose_budget_s": 120.0, "propose_max_attempts": 2, "propose_max_body_bytes": 524288}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+INFO:     127.0.0.1:63937 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58783 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56198 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "4d9b8c3c-5bb5-4770-bc58-b4934284495a", "thread_id": "25536699-8070-42e5-b994-2532e4016c47", "turn_id": "5da2aaa9-98a0-4e0e-b043-9668f2c8ea16", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 0.45}
+INFO:     127.0.0.1:56211 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64523 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "14e257ed-76b4-42e8-b49d-86b4a65567d8", "thread_id": "c7fcfeb2-fd2b-4ac4-ae95-b27b60f6ac20", "turn_id": "545dbdad-8ec2-47d0-a5eb-a4f14e1f3ef0", "provider": "fixture", "payload_kind": "clarification", "duration_ms": 0.28}
+INFO:     127.0.0.1:64527 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "16aa8eaf-a29c-4985-b029-201800a07326", "thread_id": "c7fcfeb2-fd2b-4ac4-ae95-b27b60f6ac20", "turn_id": "24615289-b2ff-4344-82bf-16cc1d8e0bed", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 0.25}
+INFO:     127.0.0.1:64530 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64539 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "e62b8505-61b7-44e9-98e3-2322a4e1594c", "thread_id": "3f3bcc4f-4e8b-4cbc-8700-3add5d36c4d3", "turn_id": "23748d25-5f17-41f7-970f-8b4122445386", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 0.28}
+INFO:     127.0.0.1:56703 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56712 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "c047d8ac-668f-4731-bda8-17584c3a76ce", "thread_id": "ffead7a6-cb42-41db-bfaf-be37f437b1f8", "turn_id": "8cf50bcd-262a-484f-b832-7cbd7590a4c2", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 0.3}
+INFO:     127.0.0.1:56715 - "POST /api/assistant/propose HTTP/1.1" 200 OK

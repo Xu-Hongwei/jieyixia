@@ -1,0 +1,25 @@
+INFO:     Started server process [44940]
+INFO:     Waiting for application startup.
+{"event": "startup", "provider": "fixture", "source_ids": ["src-01", "src-02", "src-03", "src-04"], "max_body_bytes": 8388608, "cors_origins": ["http://127.0.0.1:5178", "http://localhost:5178"], "auth_enabled": true, "rate_limit_per_min": 60, "max_concurrent_analyze": 4, "max_model_calls_per_day": 1000, "propose_budget_s": 120.0, "propose_max_attempts": 2, "propose_max_body_bytes": 524288}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+INFO:     127.0.0.1:50330 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50362 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50365 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50379 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50382 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50400 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50406 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63870 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63874 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58057 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "4bb9ffc1-fb8f-4ef8-ac63-269738d1eb14", "thread_id": "382bdf19-fd8c-47d2-8f6b-a26e9dfedbf1", "turn_id": "745d9a1b-8d6c-4895-a947-c8b4fd6efb7d", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 1.77}
+INFO:     127.0.0.1:58060 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53136 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53151 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53164 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53168 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53175 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61974 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61977 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61990 - "GET /api/healthz HTTP/1.1" 200 OK

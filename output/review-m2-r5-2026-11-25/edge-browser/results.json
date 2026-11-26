@@ -1,0 +1,26 @@
+[
+  {
+    "item": "refresh",
+    "name": "待澄清刷新后仍可回答并继续",
+    "pass": true,
+    "detail": "{\"continueButtons\":1,\"questionVisible\":true}"
+  },
+  {
+    "item": "switch",
+    "name": "选择旧草案后迟到结果不得抢回页面",
+    "pass": true,
+    "detail": "{\"oldVisible\":true,\"newVisible\":false,\"newProposal\":null}"
+  },
+  {
+    "item": "generated-refresh",
+    "name": "已生成但未排程草案刷新应保留预算45",
+    "pass": true,
+    "detail": "{\"beforeBudget\":\"45\",\"afterBudget\":\"45\"}"
+  },
+  {
+    "item": "legacy-restore",
+    "name": "旧归档恢复警示+只读展示；重填续轮不含模型示例",
+    "pass": true,
+    "detail": "{\"noticeShown\":true,\"displayShown\":true,\"user_input\":{\"original_user_request\":\"旧归档澄清演示\",\"clarifications\":[{\"assistant_question\":\"需要图表吗？\",\"user_answer\":\"不需要图表\"}]}}"
+  }
+]

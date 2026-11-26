@@ -1,0 +1,91 @@
+[
+  {
+    "probe": "legacy_deadline",
+    "value": "2026-11-26T09:00+08:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal": {
+      "accepted": false,
+      "error": "1 validation error for ExistingDeadline\n  Value error, deadline.value 必须是单一 date 或规范 datetime：2026-11-26T09:00+08:00 [type=value_error, input_value={'value': '2026-11-26T09:...6-11-24T10:00:00+08:00'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+    }
+  },
+  {
+    "probe": "legacy_deadline",
+    "value": "2026-11-26T09:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal": {
+      "accepted": false,
+      "error": "1 validation error for ExistingDeadline\n  Value error, deadline.value 必须是单一 date 或规范 datetime：2026-11-26T09:00 [type=value_error, input_value={'value': '2026-11-26T09:...6-11-24T10:00:00+08:00'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+    }
+  },
+  {
+    "probe": "legacy_deadline",
+    "value": "2026-11-26T09:00:00.123+08:00",
+    "production_0_4": {
+      "accepted": true
+    },
+    "proposal": {
+      "accepted": false,
+      "error": "1 validation error for ExistingDeadline\n  Value error, deadline.value 必须是单一 date 或规范 datetime：2026-11-26T09:00:00.123+08:00 [type=value_error, input_value={'value': '2026-11-26T09:...6-11-24T10:00:00+08:00'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/value_error"
+    }
+  },
+  {
+    "probe": "typescript_discriminated_union",
+    "model": "AssistantModelProposal",
+    "field": "task_proposals",
+    "generated_type": "Array<unknown>"
+  },
+  {
+    "probe": "typescript_discriminated_union",
+    "model": "AssistantProposeResponse",
+    "field": "payload",
+    "generated_type": "unknown"
+  },
+  {
+    "probe": "completed_action",
+    "direct_work_reference": {
+      "accepted": true
+    },
+    "reuse_control": {
+      "accepted": false,
+      "error": "已完成 Action 只能作为已满足前置的事实引用，不能重新排为未完成步骤"
+    }
+  },
+  {
+    "probe": "update_deadline_evidence",
+    "origin": "model",
+    "update": {
+      "accepted": true
+    },
+    "create_control": {
+      "accepted": false,
+      "error": "task t-new 截止候选 证据指向未选定 source：unselected-source"
+    }
+  },
+  {
+    "probe": "update_deadline_evidence",
+    "origin": "user",
+    "update": {
+      "accepted": true
+    },
+    "create_control": {
+      "accepted": false,
+      "error": "origin=user 的截止候选必须有用户消息证据"
+    }
+  },
+  {
+    "probe": "analyze_multi_profile_attempts",
+    "profiles": 2,
+    "retries_each": 1,
+    "attempts": [
+      "a",
+      "a",
+      "b",
+      "b"
+    ],
+    "count": 4
+  }
+]

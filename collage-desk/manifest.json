@@ -1,0 +1,103 @@
+{
+  "name": "截下来 · 拼贴工作桌",
+  "packaged_at": "2026-11-19",
+  "source": "frontend-drafts",
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "app.js",
+      "bytes": 23476,
+      "sha256": "c00472167d93f72b821330d19d0389bd764437b75361831d43b61649d4763019"
+    },
+    {
+      "path": "assets/cotton-paper.webp",
+      "bytes": 53512,
+      "sha256": "73581f4a5dbe95a422eb54541e29c5dca6fbca5775ce47d183ef0636c920bb7f"
+    },
+    {
+      "path": "assets/darkroom-tray.webp",
+      "bytes": 71296,
+      "sha256": "3df4f3eff3d7bcc26b02224058c141f8e2ad836eecdfd90fbed72f13da8a38de"
+    },
+    {
+      "path": "assets/paper-note-v4.webp",
+      "bytes": 122090,
+      "sha256": "7a450b99895052cff06995d28f07cfae9bff7441b3d2d60c4d4d1158a0109fa4"
+    },
+    {
+      "path": "assets/window-light-v4.webp",
+      "bytes": 156334,
+      "sha256": "8f4045915d4e6f0e0105e8bf5f95b268c5678cc04a8ab2d441d9e5150cc0ed17"
+    },
+    {
+      "path": "collage-backend.js",
+      "bytes": 4385,
+      "sha256": "2c7b6feb7baf59241f0328e93a866979dc5beeb2cd285c41c01d7e36fefe0841"
+    },
+    {
+      "path": "collage-effects.css",
+      "bytes": 13525,
+      "sha256": "650f8ba4c489a0552c67e5bc53cf3f4652ee73d611c609e563a0cb11643205f2"
+    },
+    {
+      "path": "collage-effects.js",
+      "bytes": 6973,
+      "sha256": "557eae3e12d0eeadffe4859f4c3d46f80595b97cb38143dbe047f2221e0943c3"
+    },
+    {
+      "path": "collage-local.js",
+      "bytes": 954,
+      "sha256": "fb88a126d58a3abb18ed3474677c9c514a2850a6dbb84412b137ffe7105d1f21"
+    },
+    {
+      "path": "collage-planner.css",
+      "bytes": 36653,
+      "sha256": "db74b84bf82a4cec7da13038fbbc9b341df4ed65fd2c4315e8a567f6dbc013bc"
+    },
+    {
+      "path": "collage-planner.js",
+      "bytes": 27527,
+      "sha256": "d8a2b89b88db0e64604cc9d61fef3fc55901d3a09cb92ed67a0e5173142d8d61"
+    },
+    {
+      "path": "collage-workspace.css",
+      "bytes": 19382,
+      "sha256": "17a6fa186bec8b52c02f9cfd49398688f76db773dfe6ec49865bc0313f10ba10"
+    },
+    {
+      "path": "collage-workspace.js",
+      "bytes": 6380,
+      "sha256": "22900d4f4e31d754aab24f79529aa9145c1788ad6d2772f3d5a5e8850a4b092d"
+    },
+    {
+      "path": "compositions.css",
+      "bytes": 68238,
+      "sha256": "b9661731b90fc1e9d456e0dca4592d422ee7095773e81f383aad5a776e67b04c"
+    },
+    {
+      "path": "compositions.js",
+      "bytes": 23068,
+      "sha256": "1ca9d0d4c597a6f172b4d75fc09a94a99f88b5fe181b6b3ec03b17df3ba27d76"
+    },
+    {
+      "path": "desk.html",
+      "bytes": 1090,
+      "sha256": "5c8581982f0ee44146676255c2a4783075d729a52a4f0f8fc9ce898a57b813b6"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1090,
+      "sha256": "5c8581982f0ee44146676255c2a4783075d729a52a4f0f8fc9ce898a57b813b6"
+    },
+    {
+      "path": "refinements.css",
+      "bytes": 16221,
+      "sha256": "9245d8496ee77df21148a7001b75277c7a2793e824e82072721bcc8794c0b510"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 46823,
+      "sha256": "119c3647f329c356c9f94d3d24a1f6a8c6c63e6f5f9aee62578e2094e4da4b73"
+    }
+  ]
+}

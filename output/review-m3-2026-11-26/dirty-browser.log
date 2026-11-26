@@ -1,0 +1,28 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [S1] 面板展示任务名/总截止/本轮不修改截止
+PASS [S1] 受保护条目只读并展示原因（已有投入/专注会话）
+PASS [S1] 可替换条目有复选框，受保护条目无复选框
+PASS [S1] replan 草案创建：mode/scope/progress/建议齐全，未调模型 — {"mode":"replan","ids":["p-1","p-2"],"propose":0}
+PASS [S1] 替换范围确认面板在排程前可见
+PASS [S1] 保留安排触发排程前范围澄清（不静默排程）
+PASS [S1] 排程冻结替换基线：2 条快照 + 新排总量 90 — {"baseline":["p-1","p-2"],"segTotal":90,"segs":2}
+PASS [S1] 三块预览：保留/将取消/将新增 + 总量口径
+PASS [S1] 保留块含未选/受保护/其它任务安排
+FAIL [REVIEW] 修改替换范围及分钟数后，旧采用必须禁用 — {"unchecked":true,"minutes":"180"}
+PASS [S1] 采用弹窗按钮文案含替换/新增数量 — 确认替换 2 条旧安排，新增 2 条安排
+FAIL [REVIEW] 不能取消用户刚取消勾选的旧安排或忽略新分钟数 — {"p2":"cancelled","newMinutes":90,"displayedMinutes":180}
+PASS [S1] 原子采用：p-1/p-2 取消且内容字段保留 — {"p1":"cancelled","p2":"cancelled"}
+PASS [S1] 未选/受保护/其它任务安排原样保留
+PASS [S1] 新安排=段数、全属目标任务、总量 90；复用行动不新增行动 — {"newPlans":2,"segs":2,"actions":2}
+PASS [S1] 总截止不变；草案 applied 只读；回执取消集绑定 — {"deadline":"2026-12-02","status":"applied"}
+PASS [S1] 采用台账恰好一条（无重复写入） — ops=1
+PASS [S1] 采用后「查看任务」进入原任务详情 — http://127.0.0.1:5177/#/tasks/t-smoke
+PASS [S2] 任务详情入口带 replanTask 直达改排面板 — http://127.0.0.1:5177/#/assistant?replanTask=t-smoke
+PASS [S2] 零预算：新安排为零，缺口 90 保留可见 — {"segs":0,"status":"ready"}
+PASS [S2] 零新安排时采用按钮禁用（不整批清空）
+PASS [S2] 未采用：所有旧安排原样（p-1 仍 planned）
+PASS [S3] 移动端改排面板渲染（含保护原因）
+PASS [全局] 全程未触碰用户 :8000/:8020 服务
+
+22/24 PASS

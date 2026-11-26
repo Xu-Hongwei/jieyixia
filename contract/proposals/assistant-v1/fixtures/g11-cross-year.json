@@ -1,0 +1,240 @@
+{
+  "id": "g11-cross-year",
+  "title": "反例：跨年窗口",
+  "layer": "planning",
+  "mode": "accept",
+  "target": "planning_golden",
+  "acceptance": [
+    "B0-06"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "input": {
+      "algorithm_version": "daily-v1",
+      "timezone": "Asia/Shanghai",
+      "start_date": "2026-12-30",
+      "horizon_days": 7,
+      "buffer_pct": 15,
+      "days": [
+        {
+          "date": "2026-12-30",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-12-31",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2027-01-01",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2027-01-02",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2027-01-03",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2027-01-04",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2027-01-05",
+          "budget_minutes": 60
+        }
+      ],
+      "task_facts": [
+        {
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "title": "虚构目标",
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "overdue_consent": false,
+          "status": "todo"
+        }
+      ],
+      "work_items": [
+        {
+          "key": "w1",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-w1"
+          },
+          "deliverable": "w1 的虚构产出",
+          "remaining_minutes": 60,
+          "estimate_origin": "model",
+          "splittable": true,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        }
+      ],
+      "occupancy": [],
+      "replacement_ids": [],
+      "extra_work_acknowledged": []
+    },
+    "result": {
+      "segments": [
+        {
+          "segment_key": "s1",
+          "work_item_key": "w1",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "suggested_action_ref": {
+            "kind": "draft",
+            "key": "a-w1"
+          },
+          "date": "2026-12-30",
+          "minutes": 51,
+          "order": 1,
+          "action_text": "w1 当日虚构工作",
+          "deliverable": "w1 的虚构产出"
+        },
+        {
+          "segment_key": "s2",
+          "work_item_key": "w1",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "suggested_action_ref": {
+            "kind": "draft",
+            "key": "a-w1"
+          },
+          "date": "2026-12-31",
+          "minutes": 9,
+          "order": 1,
+          "action_text": "w1 当日虚构工作",
+          "deliverable": "w1 的虚构产出"
+        }
+      ],
+      "days": [
+        {
+          "date": "2026-12-30",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 51,
+          "free_minutes": 0,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-12-31",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 9,
+          "free_minutes": 42,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2027-01-01",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2027-01-02",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2027-01-03",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2027-01-04",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2027-01-05",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        }
+      ],
+      "unscheduled": [],
+      "unknown_items": [],
+      "excluded_items": [],
+      "conflicts": [],
+      "warnings": [],
+      "complete": true
+    }
+  },
+  "expected_error": null,
+  "expected": {
+    "initial_free_by_day": [
+      51,
+      51,
+      51,
+      51,
+      51,
+      51,
+      51
+    ],
+    "allocated_by_day": [
+      51,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "final_free_by_day": [
+      0,
+      42,
+      51,
+      51,
+      51,
+      51,
+      51
+    ],
+    "overbooked_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scheduled_total": 60,
+    "unscheduled": [],
+    "unknown_count": 0,
+    "complete": true
+  },
+  "notes": "窗口 12-30/12-31/2027-01-01…01-05"
+}

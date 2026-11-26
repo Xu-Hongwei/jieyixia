@@ -1,0 +1,22 @@
+{
+  "id": "s-refresh-applying",
+  "title": "刷新后 applying 先核实原回执",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-09",
+    "B0-12"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "refresh_status",
+    "original_status": "applying"
+  },
+  "expected_error": null,
+  "expected": {
+    "restored_status": "result_unknown",
+    "needs_explicit_retry": true
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

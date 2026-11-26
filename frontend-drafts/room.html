@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>房间工作台 · 时间窗景</title>
+  <link rel="stylesheet" href="room-atmosphere.css">
+</head>
+<body>
+  <main class="room-page">
+    <header class="room-header">
+      <div>
+        <p class="room-kicker">ROOM WORKSPACE / STEP 01</p>
+        <h1>窗外，跟着时间慢慢变。</h1>
+        <p class="room-intro">小镇窗景、天体、光色分别运行；现在先审查时间层的关系。</p>
+      </div>
+      <div class="room-clock" aria-live="polite">
+        <span id="room-time">--:--</span>
+        <small id="room-time-label">读取本地时间</small>
+      </div>
+    </header>
+
+    <section class="room-stage-wrap" aria-label="房间时间窗景预览">
+      <div class="room-stage" id="room-stage" data-mode="live" data-time="day">
+        <img class="room-base" src="assets/room-base-v4.webp" alt="蓝色房间、打开的窗户、空书桌和黑板">
+        <div class="window-port" aria-hidden="true">
+          <div class="window-view window-view-a"></div>
+          <div class="window-view window-view-b"></div>
+          <div class="celestial-layer">
+            <span class="sun"></span>
+            <span class="moon"></span>
+            <span class="stars"></span>
+          </div>
+        </div>
+        <div class="room-light-layer" aria-hidden="true"></div>
+        <div class="scene-caption"><span id="scene-caption">本地时间 · 读取中</span><span>窗户保持打开</span></div>
+      </div>
+    </section>
+
+    <section class="room-controls" aria-label="时间预览控制">
+      <div class="control-copy">
+        <span class="room-kicker">TIME OF DAY</span>
+        <strong id="mode-name">跟随真实时间</strong>
+        <span id="mode-detail">太阳、月亮与星星由独立图层控制</span>
+      </div>
+      <div class="time-buttons" role="group" aria-label="选择时间预览">
+        <button data-demo-time="06:40">清晨 <small>06:40</small></button>
+        <button data-demo-time="12:30">正午 <small>12:30</small></button>
+        <button data-demo-time="18:30">傍晚 <small>18:30</small></button>
+        <button data-demo-time="22:10">夜间 <small>22:10</small></button>
+        <button class="live-button" data-live-time>跟随本地时间</button>
+      </div>
+    </section>
+
+    <footer class="room-footer">
+      <span>当前素材：小镇与天空窗景 · 无固定树冠 · 无窗帘</span>
+      <span>下一层：透明窗帘 / 微风 / 窗边光影</span>
+    </footer>
+  </main>
+  <script src="room-atmosphere.js"></script>
+</body>
+</html>

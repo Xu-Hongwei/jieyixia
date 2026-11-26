@@ -1,0 +1,17 @@
+INFO:     Started server process [36996]
+INFO:     Waiting for application startup.
+{"event": "model_router_ready", "profiles": ["qwen", "deepseek"]}
+{"event": "startup", "provider": "model", "source_ids": [], "max_body_bytes": 8388608, "cors_origins": ["http://127.0.0.1:5182", "http://localhost:5182"], "auth_enabled": true, "rate_limit_per_min": 60, "max_concurrent_analyze": 4, "max_model_calls_per_day": 1000, "propose_budget_s": 120.0, "propose_max_attempts": 2, "propose_max_body_bytes": 524288}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8030 (Press CTRL+C to quit)
+{"event": "model_router_ready", "request_id": "e068a8666866426aae413bfe2df11a76", "profiles": ["qwen", "deepseek"]}
+INFO:     127.0.0.1:62626 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60124 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "model_analyze", "request_id": "e30be8d5c3724586a589486af1e770dd", "source_id": "1fe37490-93f2-470e-a86d-612db3ae2801", "profile": "qwen", "content_type": "notice", "field_count": 7}
+{"event": "analyze", "request_id": "e30be8d5c3724586a589486af1e770dd", "source_id": "1fe37490-93f2-470e-a86d-612db3ae2801", "provider": "model", "content_type": "notice", "field_count": 7, "warning_codes": ["demo_data"], "duration_ms": 7939.3}
+INFO:     127.0.0.1:60126 - "POST /api/analyze HTTP/1.1" 200 OK
+{"event": "model_router_ready", "request_id": "fdf3b568955940f1b92abb50c32c97c5", "profiles": ["qwen", "deepseek"]}
+{"event": "model_attempt_failed", "request_id": "fdf3b568955940f1b92abb50c32c97c5", "profile": "qwen", "kind": "invalid_output", "retryable": true, "attempt": 1}
+{"event": "model_propose", "request_id": "829c8996-e0d7-4a46-b586-863d6eca662b", "profile": "deepseek", "payload_kind": "proposal"}
+{"event": "propose", "request_id": "829c8996-e0d7-4a46-b586-863d6eca662b", "thread_id": "82cbac82-1c9e-4fa8-9298-94165785ffad", "turn_id": "d5368f63-b143-45e9-b705-008280c1c3e5", "provider": "model", "payload_kind": "proposal", "duration_ms": 24325.57}
+INFO:     127.0.0.1:53705 - "POST /api/assistant/propose HTTP/1.1" 200 OK

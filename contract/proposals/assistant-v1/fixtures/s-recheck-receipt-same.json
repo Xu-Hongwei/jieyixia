@@ -1,0 +1,21 @@
+{
+  "id": "s-recheck-receipt-same",
+  "title": "同ID同签名→返回原结果",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-12"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "adoption_recheck",
+    "event": "receipt_exists_same_signature"
+  },
+  "expected_error": null,
+  "expected": {
+    "outcome": "return_original",
+    "business_writes": 0
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

@@ -1,0 +1,217 @@
+{
+  "id": "g4-unsplittable",
+  "title": "算例4：不可拆整段放不下",
+  "layer": "planning",
+  "mode": "accept",
+  "target": "planning_golden",
+  "acceptance": [
+    "B0-05"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "input": {
+      "algorithm_version": "daily-v1",
+      "timezone": "Asia/Shanghai",
+      "start_date": "2026-11-24",
+      "horizon_days": 7,
+      "buffer_pct": 15,
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 60
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 60
+        }
+      ],
+      "task_facts": [
+        {
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "title": "虚构目标",
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "overdue_consent": false,
+          "status": "todo"
+        }
+      ],
+      "work_items": [
+        {
+          "key": "w1",
+          "task_ref": {
+            "kind": "existing",
+            "id": "t-1"
+          },
+          "action_ref": {
+            "kind": "draft",
+            "key": "a-w1"
+          },
+          "deliverable": "w1 的虚构产出",
+          "remaining_minutes": 70,
+          "estimate_origin": "model",
+          "splittable": false,
+          "min_segment_minutes": 25,
+          "earliest_date": null,
+          "depends_on": [],
+          "priority": "normal"
+        }
+      ],
+      "occupancy": [],
+      "replacement_ids": [],
+      "extra_work_acknowledged": []
+    },
+    "result": {
+      "segments": [],
+      "days": [
+        {
+          "date": "2026-11-24",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 60,
+          "buffer_minutes": 9,
+          "committed_minutes": 0,
+          "allocated_minutes": 0,
+          "free_minutes": 51,
+          "overbooked_minutes": 0
+        }
+      ],
+      "unscheduled": [
+        {
+          "work_item_key": "w1",
+          "remaining_minutes": 70,
+          "reason": "not_splittable"
+        }
+      ],
+      "unknown_items": [],
+      "excluded_items": [],
+      "conflicts": [],
+      "warnings": [],
+      "complete": false
+    }
+  },
+  "expected_error": null,
+  "expected": {
+    "initial_free_by_day": [
+      51,
+      51,
+      51,
+      51,
+      51,
+      51,
+      51
+    ],
+    "allocated_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "final_free_by_day": [
+      51,
+      51,
+      51,
+      51,
+      51,
+      51,
+      51
+    ],
+    "overbooked_by_day": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "scheduled_total": 0,
+    "unscheduled": [
+      {
+        "work_item_key": "w1",
+        "remaining_minutes": 70,
+        "reason": "not_splittable"
+      }
+    ],
+    "unknown_count": 0,
+    "complete": false
+  },
+  "notes": "0已排70未排；不拆成51+19"
+}

@@ -1,0 +1,114 @@
+{
+  "at": "2026-11-24T05:33:58.393Z",
+  "baseDate": "2026-11-24",
+  "results": [
+    {
+      "item": "C01",
+      "name": "文字资料与测试图片经真实 UI 落库（AI 拦截 fixture）",
+      "pass": true,
+      "detail": "{\"textNote\":\"f91e0935-8265-438d-a7b9-eeeb9d08d44a\",\"img\":\"49800c00-080e-452d-b7c8-94e06ba95fe9\",\"imgNote\":\"ed2c78eb-e8ba-460e-b121-cbc2e683d858\",\"aiCalls\":2,\"healthCalls\":1}"
+    },
+    {
+      "item": "C01",
+      "name": "便签建任务：真实关联 + D+4 日期精度截止",
+      "pass": true,
+      "detail": "{\"id\":\"127ce978-2c4c-4b96-8c99-24889d677048\",\"title\":\"机器学习课程报告\",\"deadline\":{\"value\":\"2026-11-28\",\"precision\":\"date\",\"source\":\"manual\",\"confirmed_at\":\"2026-11-24T05:32:21.161Z\"}}"
+    },
+    {
+      "item": "C01",
+      "name": "A1/A2+两条同名行动不同 ID；显式设为当前 A1",
+      "pass": true,
+      "detail": "{\"A1\":\"93968d88-9f61-4183-93a0-3c8fb655d55b\",\"A2\":\"471a041e-9eda-47a6-9a0a-55ea8ed85a0c\",\"current\":\"93968d88-9f61-4183-93a0-3c8fb655d55b\"}"
+    },
+    {
+      "item": "C01",
+      "name": "P1 页面创建 planned",
+      "pass": true,
+      "detail": "c1f144af-cd24-4efc-98d4-d26fa9991eba"
+    },
+    {
+      "item": "C01",
+      "name": "第一段真实计时落库 ≥39s，安排 partial",
+      "pass": true,
+      "detail": "{\"ms\":40158,\"state\":\"partial\"}"
+    },
+    {
+      "item": "C01",
+      "name": "另安排一天：P2 新 ID/空摘要/D+1，原 P1 保持 partial",
+      "pass": true,
+      "detail": "{\"P2\":\"1b7a7560-2d34-4c56-a26e-2072f683e61a\"}"
+    },
+    {
+      "item": "C01",
+      "name": "提前执行需明确日期确认勾选",
+      "pass": true,
+      "detail": "checkboxes=1"
+    },
+    {
+      "item": "C01",
+      "name": "P2 blocked+partial：卡点正文落库，安排 partial",
+      "pass": true,
+      "detail": "{\"outcome\":\"blocked\",\"state\":\"partial\"}"
+    },
+    {
+      "item": "C01",
+      "name": "第二段 ≥39s；两段独立求和 floor 一次 = 安排实际分钟",
+      "pass": true,
+      "detail": "{\"ms1\":40158,\"ms2\":40102,\"sum\":80260,\"actual\":1}"
+    },
+    {
+      "item": "C02",
+      "name": "行动 partial × 安排 done 独立：安排 done、行动未完成、任务不自动 done",
+      "pass": true,
+      "detail": "{\"plan\":\"done\",\"actionDone\":false,\"task\":\"doing\"}"
+    },
+    {
+      "item": "C01",
+      "name": "安排↔最近已结束会话双向关联",
+      "pass": true,
+      "detail": "{\"planSid\":\"9aff6f54-ba41-465c-970c-1a4c5a74a891\"}"
+    },
+    {
+      "item": "C01",
+      "name": "P3 planned 且无任何会话引用",
+      "pass": true,
+      "detail": "89f9edca-ed8a-4686-b067-fed1956661a5"
+    },
+    {
+      "item": "C01",
+      "name": "正常取消 → cancelled 历史",
+      "pass": true,
+      "detail": "cancelled"
+    },
+    {
+      "item": "C01",
+      "name": "正常改期 → 同 ID 原地换日 D+2，仍 planned，无重复新安排",
+      "pass": true,
+      "detail": "{\"id\":\"f37a89a6-6b58-4e10-babf-f34ba090cb8b\",\"date\":\"2026-11-26\",\"state\":\"planned\"}"
+    },
+    {
+      "item": "C01",
+      "name": "无截止独立会话：plan_item_id=null，行动完成，任务不自动 done",
+      "pass": true,
+      "detail": "{\"sid\":\"ecf9aa3a-dc79-4050-ad40-a47be1eb8eb0\"}"
+    },
+    {
+      "item": "C01",
+      "name": "精确截止任务：datetime 精度，17:30 按北京解释为正确绝对时刻",
+      "pass": true,
+      "detail": "{\"deadline\":{\"value\":\"2026-11-28T17:30\",\"precision\":\"datetime\",\"source\":\"manual\",\"from_note_id\":null,\"confirmed_at\":\"2026-11-24T05:33:56.879Z\"},\"interp\":1795858200000,\"expect\":1795858200000}"
+    },
+    {
+      "item": "C01",
+      "name": "基准 ZIP 真实下载成功（字节+SHA-256 留档）",
+      "pass": true,
+      "detail": "{\"file\":\"zip/baseline-normal.zip\",\"bytes\":4027,\"sha256\":\"409be6a4c369d4fe64218dd09efd4d57a62516248cad259150f1245f2e638e9f\"}"
+    },
+    {
+      "item": "C01",
+      "name": "对象 ID 清单与完整快照留档（虚构数据）",
+      "pass": true,
+      "detail": "docs=19 sources=2"
+    }
+  ]
+}

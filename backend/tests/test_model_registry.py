@@ -12,6 +12,7 @@ from app.model.base import ModelError, ModelProfile
 from app.model.core import parse_model_output
 from app.model.registry import ModelRouter, build_router, load_profiles
 from app.providers import ModelProvider, get_provider
+from helpers import PNG_1X1
 
 KEY = "sk-TEST-SECRET"
 PROFILES_JSON = json.dumps([
@@ -204,7 +205,8 @@ def test_router_mixed_failures_report_unavailable():
 
 
 def request_body() -> dict:
-    return {"source_id": "src-x", "kind": "image", "image_base64": "aGVsbG8=",
+    # model 路径会做真实图片校验，必须喂真实 PNG（占位串会在调模型前被 422 拒绝）
+    return {"source_id": "src-x", "kind": "image", "image_base64": PNG_1X1,
             "captured_at": "2026-11-17T09:12:00+08:00"}
 
 
@@ -253,4 +255,16 @@ def test_model_error_response_does_not_leak_key_or_image():
     with client_with(provider) as client:
         response = client.post("/api/analyze", json=request_body())
     assert KEY not in response.text
-    assert "aGVsbG8=" not in response.text
+    assert PNG_1X1 not in response.text
+
+
+def test_upstream_vendor_detail_not_echoed_in_response():
+    # 完整上游异常/厂家详情（可能含用户内容）不得进入错误响应
+    detail = "USER-PRIVATE-CONTENT-XYZ upstream traceback detail"
+    bad = httpx.Response(500, json={"error": {"message": detail}})
+    provider = ModelProvider(router=ModelRouter([adapter("a", lambda r: bad, retries=0)]))
+    with client_with(provider) as client:
+        response = client.post("/api/analyze", json=request_body())
+    assert response.status_code == 503
+    assert detail not in response.text
+    assert "traceback" not in response.text.lower()

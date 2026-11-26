@@ -1,0 +1,21 @@
+{
+  "id": "s-error-quota",
+  "title": "额度不足→429 且禁 fallback 绕过",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-17",
+    "B0-20"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "scenario": "error_http_mapping",
+    "code": "QUOTA_EXHAUSTED"
+  },
+  "expected_error": null,
+  "expected": {
+    "http": 429
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

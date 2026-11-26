@@ -1,0 +1,29 @@
+{
+  "savedAt": "2026-11-18T16:36:34.3830671+08:00",
+  "purpose": "Qoder UI layout reference",
+  "selectedVariant": "核对工作台",
+  "originalSource": "D:\\APP\\codex\\visualizations\\2026\\11\\18\\01a1ecfb-c44b-7680-9aa8-4d1c619ae14d\\jiexialai-layout-drafts.html",
+  "sourceCopyVerified": true,
+  "files": [
+    {
+      "name": "README.md",
+      "bytes": 2875,
+      "sha256": "C063DE4F501E0BCE0FBD0F8BC22FCF104463636A73F64361EFE2CA740CBC1777"
+    },
+    {
+      "name": "LAYOUT-NOTES.md",
+      "bytes": 2389,
+      "sha256": "C76C48F765302C46123581986AE1D10C1BB671172273ECEE63F9029D132EE427"
+    },
+    {
+      "name": "layout-drafts.fragment.html",
+      "bytes": 36084,
+      "sha256": "9448C7F708CF3AE117E62383DC3A5D4BD8AB9DA3E5D4EF29081D3150FEDB7E39"
+    },
+    {
+      "name": "index.html",
+      "bytes": 129932,
+      "sha256": "274101EE200D8DFE25229D3E489AD289C52D71DDBB0ADB3C65D11E9BCD4C55B4"
+    }
+  ]
+}

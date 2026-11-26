@@ -1,0 +1,74 @@
+{
+  "baseline": {
+    "ok": true,
+    "errors": [],
+    "notes": []
+  },
+  "legacyMissingVersion": {
+    "ok": false,
+    "errors": [
+      {
+        "layer": "B",
+        "message": "v1 会话开始即必须有任务与行动快照",
+        "objectId": "focus-v0",
+        "path": "FocusSession.task_snapshot"
+      },
+      {
+        "layer": "B",
+        "message": "v1 会话必须分别标记任务与行动引用状态",
+        "objectId": "focus-v0",
+        "path": "FocusSession.task_ref_state"
+      }
+    ],
+    "notes": []
+  },
+  "renamedMatter": {
+    "ok": false,
+    "errors": [
+      {
+        "layer": "B",
+        "message": "未知字段 updated_at（契约 additionalProperties:false）",
+        "objectId": "matter-1",
+        "path": "Matter.updated_at"
+      }
+    ],
+    "notes": []
+  },
+  "fullArchive": {
+    "baseline": {
+      "ok": true,
+      "errors": [],
+      "notes": []
+    },
+    "legacyMissingVersion": {
+      "ok": false,
+      "errors": [
+        {
+          "layer": "B",
+          "message": "v1 会话开始即必须有任务与行动快照",
+          "objectId": "focus-v0",
+          "path": "FocusSession.task_snapshot"
+        },
+        {
+          "layer": "B",
+          "message": "v1 会话必须分别标记任务与行动引用状态",
+          "objectId": "focus-v0",
+          "path": "FocusSession.task_ref_state"
+        }
+      ],
+      "notes": []
+    },
+    "renamedMatter": {
+      "ok": false,
+      "errors": [
+        {
+          "layer": "B",
+          "message": "未知字段 updated_at（契约 additionalProperties:false）",
+          "objectId": "matter-1",
+          "path": "Matter.updated_at"
+        }
+      ],
+      "notes": []
+    }
+  }
+}

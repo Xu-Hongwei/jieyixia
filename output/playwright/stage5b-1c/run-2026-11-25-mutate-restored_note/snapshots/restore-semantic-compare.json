@@ -1,0 +1,26 @@
+{
+  "problems": [
+    "doc n-course(note) 内容/引用不一致（全字段比较）字段:title"
+  ],
+  "checked": {
+    "sources": 1,
+    "docs": 5,
+    "threads": 1,
+    "drafts": 1
+  },
+  "docDiffs": [
+    {
+      "id": "n-course",
+      "kind": "note",
+      "diff": [
+        "title"
+      ],
+      "expected": {
+        "title": "虚构课程报告便签"
+      },
+      "actual": {
+        "title": "MUTATED_NOTE_TITLE"
+      }
+    }
+  ]
+}

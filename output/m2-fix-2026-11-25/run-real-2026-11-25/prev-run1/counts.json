@@ -1,0 +1,16 @@
+{
+  "counts": {
+    "analyze": 1,
+    "propose": 7
+  },
+  "proposeRequests": [
+    "e6a6c218-7ce7-4b5c-9fb0-53655fc4d4a7",
+    "8a6543d8-fc8b-447d-8379-a07e4644833a",
+    "23d7543a-970c-452d-89ff-5ab07b0e7bf9",
+    "22f73788-687e-4a0c-8c1c-c48fd590d638",
+    "8e417f37-d29e-4482-aeee-140524f7babf",
+    "31074236-3d9d-4983-93c2-b28f9ee02453",
+    "7aee0ac0-89da-45a7-9640-ed8028ddd549"
+  ],
+  "modelReady": true
+}

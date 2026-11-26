@@ -1,0 +1,53 @@
+{
+  "found": true,
+  "wsId": "ws-restore-e26bf06c-419d-47dc-a70e-0c8e346dd07d",
+  "threads": 1,
+  "drafts": 1,
+  "status": "needs_review",
+  "baselineNull": true,
+  "confCleared": true,
+  "rev": 3,
+  "histLen": 2,
+  "proposalReadable": true,
+  "resultReadable": true,
+  "newIds": true,
+  "bizDocs": 5,
+  "srcDocs": 5,
+  "planItems": 1,
+  "srcPlanItems": 1,
+  "ops": 0,
+  "verifyProblems": [],
+  "verifyPhase": "done",
+  "receipt": {
+    "operation_id": "7a323c6d-ffca-4689-900a-52e68f1cc107",
+    "source_file_hash": "64578c52b0758a2bd84f5b2f20bb8759f7c67874fb9d2d6233f07f0ca1c5df65",
+    "backup_id": "73a4ad5b-d656-497a-9654-614e55fca0b3",
+    "target_name": "虚构恢复验收空间",
+    "id_map_signature": "{\"live\":[[\"a-course\",\"1b5cdb9a-cdad-437e-bb45-2c1c9cb137e0\"],[\"n-course\",\"56f0da44-89c2-45ab-93cd-ca92b2293305\"],[\"p-other\",\"80bbd7e4-fc22-4839-8ea7-33da8e248981\"],[\"s-course\",\"c4f110fb-229a-48b1-8659-ac0a9dd9f7e2\"],[\"t-course\",\"8d8acbba-8c7e-451c-a126-0a3939a181de\"],[\"t-other\",\"b7eda830-dadb-43de-9dc9-57fba7b7dbfa\"],[\"ws-1c-main-id-1\",\"973038e5-a5bd-47e5-890a-6c0aa8cba951\"],[\"ws-1c-main-id-2\",\"1a772091-1fb8-41fa-bd8f-63127c5e1f31\"]],\"history\":[]}",
+    "committed_at": "2026-11-25T06:03:03.648Z",
+    "counts": {
+      "note": 1,
+      "matter": 0,
+      "task": 2,
+      "action": 1,
+      "focus_session": 0,
+      "plan_item": 1
+    },
+    "source_count": 1,
+    "image_count": 1,
+    "assistant_thread_count": 1,
+    "assistant_draft_count": 1
+  },
+  "uuidSeq": [
+    "7a323c6d-ffca-4689-900a-52e68f1cc107",
+    "e26bf06c-419d-47dc-a70e-0c8e346dd07d",
+    "c4f110fb-229a-48b1-8659-ac0a9dd9f7e2",
+    "1b5cdb9a-cdad-437e-bb45-2c1c9cb137e0",
+    "56f0da44-89c2-45ab-93cd-ca92b2293305",
+    "80bbd7e4-fc22-4839-8ea7-33da8e248981",
+    "8d8acbba-8c7e-451c-a126-0a3939a181de",
+    "b7eda830-dadb-43de-9dc9-57fba7b7dbfa",
+    "973038e5-a5bd-47e5-890a-6c0aa8cba951",
+    "1a772091-1fb8-41fa-bd8f-63127c5e1f31"
+  ]
+}

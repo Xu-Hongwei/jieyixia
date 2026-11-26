@@ -1,0 +1,21 @@
+{
+  "id": "s-recheck-cross-midnight",
+  "title": "跨午夜→needs_review 全差异",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-11"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "adoption_recheck",
+    "event": "cross_midnight"
+  },
+  "expected_error": null,
+  "expected": {
+    "outcome": "needs_review",
+    "business_writes": 0
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-18",
+  "browser": "Microsoft Edge isolated session",
+  "widths": [360, 768, 1440],
+  "concepts": ["signal", "orbit", "paper", "desktop"],
+  "views": ["today", "inbox", "focus"],
+  "layoutChecks": 36,
+  "failures": [],
+  "pageErrors": [],
+  "flows": ["field confirmation gate", "create unplanned task", "plan toggle", "timer start/pause", "focus draft navigation", "temporary text capture", "search", "reload resets demo", "gallery"],
+  "scope": "Visual drafts and temporary interactions only. No backend or persistent storage."
+}

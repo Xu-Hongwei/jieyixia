@@ -1,0 +1,79 @@
+{
+  "reviewer": "A",
+  "evidence": "R3-2026-11-18",
+  "prompt": "skills/expressive-frontend-design/references/review-prompt.md",
+  "scope": "same 16 static screenshots; independent review",
+  "applicable_max": 95,
+  "animation_5": "not scored; no motion evidence",
+  "dimension_max": [
+    30,
+    25,
+    20,
+    15,
+    5
+  ],
+  "scores": {
+    "signal": {
+      "dimensions": [
+        28,
+        23,
+        18,
+        12,
+        5
+      ],
+      "total": 86
+    },
+    "orbit": {
+      "dimensions": [
+        28,
+        21,
+        18,
+        14,
+        4
+      ],
+      "total": 85
+    },
+    "paper": {
+      "dimensions": [
+        28,
+        23,
+        16,
+        12,
+        4
+      ],
+      "total": 83
+    },
+    "desktop": {
+      "dimensions": [
+        27,
+        24,
+        17,
+        11,
+        5
+      ],
+      "total": 84
+    }
+  },
+  "concerns_summary": {
+    "signal": [
+      "辅助文字太暗或太小",
+      "手机从原文到行动单路径长",
+      "Today编号与任务名称权重可调整"
+    ],
+    "orbit": [
+      "证据和来源说明偏淡",
+      "手机字段与全文重复导致流程长",
+      "控制台辨识度可通过核对进度强化"
+    ],
+    "paper": [
+      "操作链接与计时控制过轻",
+      "手机正文过于疏排",
+      "旁注关系应保留"
+    ],
+    "desktop": [
+      "手机悬浮导航遮挡局部字段",
+      "状态和提示文字偏淡",
+      "保持自由布局，同时强化核对顺序"
+    ]
+  }
+}

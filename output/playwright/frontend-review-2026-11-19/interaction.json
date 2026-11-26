@@ -1,0 +1,98 @@
+{
+  "checks": [
+    {
+      "name": "finish_in_detail",
+      "db": "done",
+      "completeButtonStillVisible": true
+    },
+    {
+      "name": "rename_after_finish",
+      "dbStatus": "todo",
+      "dbTitle": "审查专用：已完成后修改标题",
+      "uiTitle": "提交机器学习课程报告：多模态遥感图文检索方法与实验结果分析\n截止：截止 11月19日 · 09:00\n事项：机器学习课程\n截止为用户手动输入。\n提交机器学习课程报告：多模态遥感图文检索方法与实验结果分析\n截止 2026年11月19日 09:00 · 用户手动输入\n已逾期\n待办\n机器学习课程\n完成"
+    },
+    {
+      "name": "dialog_focus",
+      "focusInside": false,
+      "active": {
+        "tag": "BUTTON",
+        "text": "无截止任务 · 1展开"
+      }
+    },
+    {
+      "name": "escape_nested_delete",
+      "detailOpen": 0,
+      "confirmOpen": 0,
+      "taskStillExists": true
+    },
+    {
+      "name": "continue_confirm",
+      "active": {
+        "text": "确认",
+        "field": "deadline"
+      }
+    },
+    {
+      "name": "confirm_deadline",
+      "nextLabel": "继续核对 · 3 项",
+      "createEnabled": true
+    }
+  ],
+  "errors": [],
+  "overflow": [
+    {
+      "label": "desktop-today",
+      "sw": 1440,
+      "iw": 1440,
+      "ok": true
+    },
+    {
+      "label": "desktop-collect",
+      "sw": 1440,
+      "iw": 1440,
+      "ok": true
+    },
+    {
+      "label": "desktop-notes",
+      "sw": 1440,
+      "iw": 1440,
+      "ok": true
+    },
+    {
+      "label": "mobile-today",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-collect",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-notes",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-notes-evidence",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "mobile-notes-json",
+      "sw": 390,
+      "iw": 390,
+      "ok": true
+    },
+    {
+      "label": "tablet-notes",
+      "sw": 820,
+      "iw": 820,
+      "ok": true
+    }
+  ]
+}

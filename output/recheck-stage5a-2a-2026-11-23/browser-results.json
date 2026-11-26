@@ -1,0 +1,68 @@
+{
+  "results": [
+    {
+      "probe": "begin-with-unreviewed-or-invalid-history",
+      "invalidHistory": false,
+      "beginCreated": false,
+      "code": "PLAN_REVIEW_REQUIRED"
+    },
+    {
+      "probe": "begin-with-unreviewed-or-invalid-history",
+      "invalidHistory": true,
+      "beginCreated": false,
+      "code": "HISTORY_UNRESOLVED"
+    },
+    {
+      "probe": "changed-input-after-aborted-first-attempt",
+      "first": "SAVE_FAILED",
+      "secondOk": false,
+      "secondCode": "STALE_REQUEST",
+      "sameRequest": true
+    },
+    {
+      "probe": "same-input-after-failed-first-attempt",
+      "ok": true,
+      "action": "a"
+    },
+    {
+      "probe": "fallback-replay-skips-input-validation",
+      "firstEndOk": true,
+      "normalChangedCode": "STALE_REQUEST",
+      "injected": true,
+      "fallback": {
+        "ok": false,
+        "code": "STALE_REQUEST",
+        "message": "请求输入已变化（结果/正文/安排/行动），请重新核对后签发新意图",
+        "workspace_id": "isolated-review",
+        "session_id": "service-3",
+        "request_id": "review-end",
+        "issued_at_ms": 1795399200000
+      },
+      "savedText": "original text",
+      "savedPlanState": "partial"
+    },
+    {
+      "probe": "same-input-fallback-success",
+      "result": {
+        "ok": true,
+        "code": null,
+        "workspace_id": "isolated-review",
+        "session_id": "service-3",
+        "request_id": "review-end",
+        "revision": 2,
+        "issued_at_ms": 1795399200000,
+        "replayed": true
+      }
+    },
+    {
+      "probe": "caller-mutates-input-after-service-call",
+      "acceptedAction": "a",
+      "createdAction": "a2",
+      "ok": true,
+      "replayedOriginal": true,
+      "replayedSessionId": "service-4"
+    }
+  ],
+  "errors": [],
+  "clock": "controlled wallNow, real Chromium IndexedDB"
+}

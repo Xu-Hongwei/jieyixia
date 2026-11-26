@@ -1,0 +1,98 @@
+{
+  "at": "2026-11-24T05:33:58.271Z",
+  "baseDate": "2026-11-24",
+  "D1": "2026-11-25",
+  "D2": "2026-11-26",
+  "D4": "2026-11-28",
+  "zip": {
+    "file": "zip/baseline-normal.zip",
+    "bytes": 4027,
+    "sha256": "409be6a4c369d4fe64218dd09efd4d57a62516248cad259150f1245f2e638e9f"
+  },
+  "keyIds": {
+    "T": "127ce978-2c4c-4b96-8c99-24889d677048",
+    "A1": "93968d88-9f61-4183-93a0-3c8fb655d55b",
+    "A2": "471a041e-9eda-47a6-9a0a-55ea8ed85a0c",
+    "twins": [
+      "24cc902e-ad46-435e-b688-10410fae65db",
+      "f34ae9ff-5ab3-4bea-981b-178d6ca9a9e2"
+    ],
+    "P1": "c1f144af-cd24-4efc-98d4-d26fa9991eba",
+    "P2": "1b7a7560-2d34-4c56-a26e-2072f683e61a",
+    "P3": "89f9edca-ed8a-4686-b067-fed1956661a5",
+    "P4": "d4458ec9-9ba8-4afb-9ad6-b3180366defd",
+    "P5": "f37a89a6-6b58-4e10-babf-f34ba090cb8b",
+    "U": "0329a9a1-daba-405b-82c0-c2e4cf15fdac",
+    "DT": "1a387e1c-f0e5-4282-8d81-35a751a58c8d",
+    "textNote": "f91e0935-8265-438d-a7b9-eeeb9d08d44a",
+    "textSource": "89a0c0d1-834b-4646-8bd3-1a1d7f4c7600",
+    "imgSource": "49800c00-080e-452d-b7c8-94e06ba95fe9",
+    "imgNote": "ed2c78eb-e8ba-460e-b121-cbc2e683d858"
+  },
+  "moveSemantics": "planned 改期为同 ID 原地换日（5A-1 已验收）；moved 终态仅遗留数据出现，由 C18 兼容样本覆盖",
+  "sessions": [
+    {
+      "id": "1fefff6a-1011-4f6e-a9fe-c0c1952488d9",
+      "task_id": "127ce978-2c4c-4b96-8c99-24889d677048",
+      "action_id": "93968d88-9f61-4183-93a0-3c8fb655d55b",
+      "plan_item_id": "1b7a7560-2d34-4c56-a26e-2072f683e61a",
+      "accumulated_ms": 87,
+      "outcome": "blocked",
+      "ended": true
+    },
+    {
+      "id": "9aff6f54-ba41-465c-970c-1a4c5a74a891",
+      "task_id": "127ce978-2c4c-4b96-8c99-24889d677048",
+      "action_id": "93968d88-9f61-4183-93a0-3c8fb655d55b",
+      "plan_item_id": "c1f144af-cd24-4efc-98d4-d26fa9991eba",
+      "accumulated_ms": 40102,
+      "outcome": "partial",
+      "ended": true
+    },
+    {
+      "id": "cf42b38b-9782-4833-be76-5152ed432a38",
+      "task_id": "127ce978-2c4c-4b96-8c99-24889d677048",
+      "action_id": "93968d88-9f61-4183-93a0-3c8fb655d55b",
+      "plan_item_id": "c1f144af-cd24-4efc-98d4-d26fa9991eba",
+      "accumulated_ms": 40158,
+      "outcome": "partial",
+      "ended": true
+    },
+    {
+      "id": "ecf9aa3a-dc79-4050-ad40-a47be1eb8eb0",
+      "task_id": "0329a9a1-daba-405b-82c0-c2e4cf15fdac",
+      "action_id": "d869d20f-4a36-4e79-9284-9dcb2114f859",
+      "plan_item_id": null,
+      "accumulated_ms": 60,
+      "outcome": "done",
+      "ended": true
+    }
+  ],
+  "counts": {
+    "task": 3,
+    "plan_item": 5,
+    "focus_session": 4,
+    "action": 5,
+    "note": 2
+  },
+  "sources": [
+    {
+      "id": "49800c00-080e-452d-b7c8-94e06ba95fe9",
+      "kind": "image",
+      "name": "fixture-test-image.png",
+      "bytes": 70
+    },
+    {
+      "id": "89a0c0d1-834b-4646-8bd3-1a1d7f4c7600",
+      "kind": "text",
+      "name": null,
+      "bytes": 29
+    }
+  ],
+  "aiInterception": {
+    "fixture": "fixtures/01-course-assignment.json expected_analysis",
+    "analyzeCalls": 2,
+    "healthzCalls": 1,
+    "note": "模型请求全部拦截，未调用真实模型或用户后端"
+  }
+}

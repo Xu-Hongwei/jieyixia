@@ -1,0 +1,63 @@
+[
+  {
+    "case": "R1_hard_cap",
+    "passed": true
+  },
+  {
+    "case": "R2_same_day",
+    "passed": true
+  },
+  {
+    "case": "R3_unclipped_order",
+    "passed": true
+  },
+  {
+    "case": "R4_basic_clarify_confirm",
+    "passed": true
+  },
+  {
+    "case": "confirmation_cross_namespace",
+    "expected": "existing task still requires its own confirmation",
+    "actual": [
+      {
+        "task_ref": {
+          "kind": "draft",
+          "key": "t-1"
+        },
+        "title": "fictional new task",
+        "status": "todo",
+        "deadline_value": "2026-11-27",
+        "deadline_precision": "date",
+        "overdue_consent": false
+      },
+      {
+        "task_ref": {
+          "kind": "existing",
+          "id": "t-1"
+        },
+        "title": "虚构目标一",
+        "status": "todo",
+        "deadline_value": "2026-11-27",
+        "deadline_precision": "date",
+        "overdue_consent": false
+      }
+    ],
+    "clarifications": []
+  },
+  {
+    "case": "missing_new_value_clears_deadline",
+    "has_new_value": false,
+    "actual": {
+      "task_ref": {
+        "kind": "draft",
+        "key": "new"
+      },
+      "title": "fictional new task",
+      "status": "todo",
+      "deadline_value": null,
+      "deadline_precision": "none",
+      "overdue_consent": false
+    },
+    "clarifications": []
+  }
+]

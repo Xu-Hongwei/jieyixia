@@ -1,0 +1,101 @@
+{
+  "originalResults": [
+    {
+      "file": "c01-results.json",
+      "count": 18,
+      "failed": 0
+    },
+    {
+      "file": "c03-results.json",
+      "count": 49,
+      "failed": 0
+    },
+    {
+      "file": "c08-results.json",
+      "count": 57,
+      "failed": 0
+    },
+    {
+      "file": "c14-results.json",
+      "count": 85,
+      "failed": 0
+    },
+    {
+      "file": "ui-acceptance-b1-results.json",
+      "count": 69,
+      "failed": 0
+    },
+    {
+      "file": "ui-acceptance-b2-results.json",
+      "count": 32,
+      "failed": 0
+    },
+    {
+      "file": "ui-rfix-results.json",
+      "count": 36,
+      "failed": 0
+    }
+  ],
+  "originalZip": [
+    {
+      "file": "baseline-normal.zip",
+      "bytes": 4055,
+      "sha256": "64366803cdc1af2dd2047c84ea93bf9aba7ac3557421928e5c4398b5505e8be9"
+    },
+    {
+      "file": "deleted-history.zip",
+      "bytes": 3721,
+      "sha256": "2d37c5a6c6f56290707aa26cf7cda6a927c910d8f724db12f10ec8f7feb19356"
+    },
+    {
+      "file": "legacy-compat.zip",
+      "bytes": 4154,
+      "sha256": "5ae1fb9fa32cb3d0ae10650e588e8519bb55edaf644a57aee4644f46b59883a0"
+    },
+    {
+      "file": "offline-loop.zip",
+      "bytes": 4347,
+      "sha256": "6911534680944ce408c1dbdd707bcd2cc80ad7589f87a9a29952c48f75ed5e03"
+    },
+    {
+      "file": "paused-source.zip",
+      "bytes": 4153,
+      "sha256": "0fa71ce1426fddad245d8e8b526908b769b1dad8d36b2acc8caf1b09ac891137"
+    },
+    {
+      "file": "running-source.zip",
+      "bytes": 4162,
+      "sha256": "3c68df2dd9aec89035d3d3d014a2b38548930957a2a7da24079d1a5a08bc4d54"
+    }
+  ],
+  "driverEquality": [
+    {
+      "file": "c01-baseline.mjs",
+      "unchangedExceptOrigin": true
+    },
+    {
+      "file": "c03-delete.mjs",
+      "unchangedExceptOrigin": true
+    },
+    {
+      "file": "c08-restore.mjs",
+      "unchangedExceptOrigin": true
+    },
+    {
+      "file": "c14-anomaly.mjs",
+      "unchangedExceptOrigin": true
+    },
+    {
+      "file": "c19\\ui-acceptance-b1.mjs",
+      "unchangedExceptOrigin": true
+    },
+    {
+      "file": "c19\\ui-acceptance-b2.mjs",
+      "unchangedExceptOrigin": true
+    },
+    {
+      "file": "c19\\ui-rfix.mjs",
+      "unchangedExceptOrigin": true
+    }
+  ]
+}

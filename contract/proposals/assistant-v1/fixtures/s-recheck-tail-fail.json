@@ -1,0 +1,21 @@
+{
+  "id": "s-recheck-tail-fail",
+  "title": "尾写失败→全回滚零写入",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-12"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "adoption_recheck",
+    "event": "tail_write_failure"
+  },
+  "expected_error": null,
+  "expected": {
+    "outcome": "abort_zero_writes",
+    "business_writes": 0
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

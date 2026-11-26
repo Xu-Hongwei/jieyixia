@@ -1,0 +1,24 @@
+{
+  "id": "s-restore-applying",
+  "title": "恢复后 applying 不据备份断言未提交",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-15"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "restore_draft_status",
+    "original_status": "applying"
+  },
+  "expected_error": null,
+  "expected": {
+    "restored_status": "needs_review",
+    "envelope_cleared": true,
+    "baseline_cleared": true,
+    "adoption_auth_cleared": true,
+    "content_kept": true
+  },
+  "notes": "展示原状态待核对；不自动重放"
+}

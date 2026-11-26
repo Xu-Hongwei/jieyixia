@@ -1,0 +1,169 @@
+[
+  {
+    "protocol_version": "1.0",
+    "intent": "new_plan",
+    "previous_draft": null,
+    "request_id": "829c8996-e0d7-4a46-b586-863d6eca662b",
+    "thread_id": "82cbac82-1c9e-4fa8-9298-94165785ffad",
+    "turn_id": "d5368f63-b143-45e9-b705-008280c1c3e5",
+    "client_seq": 1,
+    "workspace_id": "personal",
+    "user_message": "请把这份课程通知拆解为 1 个核心学习任务与不超过 3 个关键行动，并给出每个行动的估时；保持精简，不要展开过多子任务。通知原文截止已逾期，我作为用户明确把截止日期设为 2026-11-30。",
+    "user_input": {
+      "original_user_request": "请把这份课程通知拆解为 1 个核心学习任务与不超过 3 个关键行动，并给出每个行动的估时；保持精简，不要展开过多子任务。通知原文截止已逾期，我作为用户明确把截止日期设为 2026-11-30。",
+      "clarifications": []
+    },
+    "selected_sources": [
+      {
+        "source_id": "1fe37490-93f2-470e-a86d-612db3ae2801",
+        "kind": "image",
+        "fingerprint": {
+          "sha256": "4b7f5e77922f8b51b14b285e8addeddb7b170c0be5a566dc37bcd5cc350edae8",
+          "bytes": 70489
+        },
+        "excerpt": null,
+        "note_candidates": [
+          {
+            "note_id": "ff1f75a8-0879-49dc-a50a-deaf4c07a23b",
+            "field_key": "title",
+            "value": "机器学习课程报告（占总评 30%）",
+            "raw": "机器学习课程报告（占总评 30%）",
+            "origin": "model",
+            "status": "candidate",
+            "derived": false,
+            "quote_text": "机器学习课程报告（占总评 30%）",
+            "precision": null
+          },
+          {
+            "note_id": "ff1f75a8-0879-49dc-a50a-deaf4c07a23b",
+            "field_key": "requirement",
+            "value": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+            "raw": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+            "origin": "model",
+            "status": "candidate",
+            "derived": false,
+            "quote_text": "提交材料：PDF 报告一份 + 可运行代码压缩包",
+            "precision": null
+          },
+          {
+            "note_id": "ff1f75a8-0879-49dc-a50a-deaf4c07a23b",
+            "field_key": "constraints",
+            "value": "报告不少于3000字，须包含至少两组实验对比",
+            "raw": "报告不少于3000字，须包含至少两组实验对比",
+            "origin": "model",
+            "status": "candidate",
+            "derived": false,
+            "quote_text": "报告不少于3000字，须包含至少两组实验对比",
+            "precision": null
+          },
+          {
+            "note_id": "ff1f75a8-0879-49dc-a50a-deaf4c07a23b",
+            "field_key": "submit_to",
+            "value": "通过课程平台「作业」入口提交",
+            "raw": "通过课程平台「作业」入口提交",
+            "origin": "model",
+            "status": "candidate",
+            "derived": false,
+            "quote_text": "通过课程平台「作业」入口提交",
+            "precision": null
+          },
+          {
+            "note_id": "ff1f75a8-0879-49dc-a50a-deaf4c07a23b",
+            "field_key": "reminder",
+            "value": "逾期提交按零分计",
+            "raw": "逾期提交按零分计",
+            "origin": "model",
+            "status": "candidate",
+            "derived": false,
+            "quote_text": "逾期提交按零分计",
+            "precision": null
+          },
+          {
+            "note_id": "ff1f75a8-0879-49dc-a50a-deaf4c07a23b",
+            "field_key": "time_nodes",
+            "value": [
+              {
+                "label": "截止时间",
+                "raw": "2026年11月19日",
+                "value": "2026-11-19",
+                "precision": "date",
+                "tz_known": null,
+                "basis": "explicit",
+                "role": "submission_deadline",
+                "reference_at": null,
+                "reference_source": null,
+                "message_date": null,
+                "derived": false
+              }
+            ],
+            "raw": "截止时间：2026年11月19日",
+            "origin": "model",
+            "status": "candidate",
+            "derived": false,
+            "quote_text": "截止时间：2026年11月19日",
+            "precision": null
+          },
+          {
+            "note_id": "ff1f75a8-0879-49dc-a50a-deaf4c07a23b",
+            "field_key": "deadline",
+            "value": "2026-11-19",
+            "raw": "2026年11月19日",
+            "origin": "model",
+            "status": "candidate",
+            "derived": false,
+            "quote_text": "2026年11月19日",
+            "precision": "date"
+          }
+        ]
+      }
+    ],
+    "selected_tasks": [],
+    "selected_actions": [],
+    "planning_context": {
+      "timezone": "Asia/Shanghai",
+      "today": "2026-11-25",
+      "start_date": "2026-11-25",
+      "horizon_days": 7,
+      "days": [
+        {
+          "date": "2026-11-25",
+          "budget_minutes": 60,
+          "committed_minutes": 0
+        },
+        {
+          "date": "2026-11-26",
+          "budget_minutes": 60,
+          "committed_minutes": 0
+        },
+        {
+          "date": "2026-11-27",
+          "budget_minutes": 60,
+          "committed_minutes": 0
+        },
+        {
+          "date": "2026-11-28",
+          "budget_minutes": 60,
+          "committed_minutes": 0
+        },
+        {
+          "date": "2026-11-29",
+          "budget_minutes": 60,
+          "committed_minutes": 0
+        },
+        {
+          "date": "2026-11-30",
+          "budget_minutes": 60,
+          "committed_minutes": 0
+        },
+        {
+          "date": "2026-12-01",
+          "budget_minutes": 60,
+          "committed_minutes": 0
+        }
+      ],
+      "protected_plans": []
+    },
+    "confirmed_requirements": [],
+    "pending_requirements": []
+  }
+]

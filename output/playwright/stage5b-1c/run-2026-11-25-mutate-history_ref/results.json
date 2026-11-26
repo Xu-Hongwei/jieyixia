@@ -1,0 +1,233 @@
+{
+  "at": "2026-11-25T06:03:06.887Z",
+  "base": "http://127.0.0.1:5177/",
+  "port": 5177,
+  "mutate": "history_ref",
+  "onlyMain": true,
+  "total": 35,
+  "passed": 24,
+  "failed": 1,
+  "skipped": 10,
+  "results": [
+    {
+      "item": "B1C-01",
+      "name": "round1 真实排程 总排133/未排67，complete=false",
+      "pass": true,
+      "detail": "{\"total\":133,\"unsched\":67,\"complete\":false}"
+    },
+    {
+      "item": "B1C-01",
+      "name": "buffer15%+未选中20占用计入；逐日预算/占用/新增/剩余与手算一致",
+      "pass": true,
+      "detail": "{\"daysMatch1\":true,\"segments\":[[\"w-course#1\",\"2026-11-24\",51],[\"w-course#2\",\"2026-11-25\",31],[\"w-course#3\",\"2026-11-27\",51]]}"
+    },
+    {
+      "item": "B1C-02",
+      "name": "未确认缺口阻断 ready（GAP_UNCONFIRMED），持久状态仍 editing",
+      "pass": true,
+      "detail": "{\"ready\":false,\"blockers\":[\"GAP_UNCONFIRMED\"],\"status\":\"editing\",\"complete\":false}"
+    },
+    {
+      "item": "B1C-02",
+      "name": "当前版确认缺口后 ready=true 但 complete=false、未排仍67（R3）",
+      "pass": true,
+      "detail": "{\"ready1\":{\"ok\":true,\"ready\":true,\"complete\":false,\"status\":\"ready\"},\"g2\":{\"unsched\":67,\"complete\":false}}"
+    },
+    {
+      "item": "B1C-03",
+      "name": "确认预算90使旧计算失效：fact_baseline清空、ready阻断、revision不增、旧结果仍可读",
+      "pass": true,
+      "detail": "{\"ok\":true,\"invalidatedDrafts\":[\"ws-1c-main-id-2\"],\"factBaselineNull\":true,\"ready\":false,\"blockers\":[\"FACT_BASELINE_MISSING\"],\"revision\":2,\"status\":\"ready\"}"
+    },
+    {
+      "item": "B1C-03",
+      "name": "重排 round2 总排200/未排0，complete=true，逐日与手算一致",
+      "pass": true,
+      "detail": "{\"total\":200,\"unsched\":0,\"segments\":[[\"w-course#1\",\"2026-11-24\",76],[\"w-course#2\",\"2026-11-25\",56],[\"w-course#3\",\"2026-11-27\",68]]}"
+    },
+    {
+      "item": "B1C-03",
+      "name": "round2 ready=true；历史可读、旧版缺口确认不自动继承到当前版",
+      "pass": true,
+      "detail": "{\"ready2\":true,\"hist\":{\"rev\":3,\"histLen\":2,\"histReadable\":true,\"oldGapConfStale\":true,\"currentGapConf\":false}}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "仅时钟变化同输入重排不消耗 revision（R2）",
+      "pass": true,
+      "detail": "{\"before\":3,\"after\":3}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "硬刷新后从IDB重建读取：revision/状态/历史/可用性/分段逐项一致",
+      "pass": true,
+      "detail": "{\"preRefresh\":{\"rev\":3,\"status\":\"ready\",\"histLen\":2,\"ready\":true,\"segments\":[[\"w-course#1\",\"2026-11-24\",76],[\"w-course#2\",\"2026-11-25\",56],[\"w-course#3\",\"2026-11-27\",68]],\"total\":200},\"postRefresh\":{\"ok\":true,\"rev\":3,\"status\":\"ready\",\"histLen\":2,\"ready\":true,\"segments\":[[\"w-course#1\",\"2026-11-24\",76],[\"w-course#2\",\"2026-11-25\",56],[\"w-course#3\",\"2026-11-27\",68]],\"total\":200}}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "刷新后展示页真实绑定既有草案（非 init 重建）：revision/状态与IDB读回一致",
+      "pass": true,
+      "detail": "{\"ws\":\"ws-1c-main\",\"draftId\":\"ws-1c-main-id-2\",\"threadId\":\"ws-1c-main-id-1\",\"revision\":3,\"status\":\"ready\",\"ready\":true}"
+    },
+    {
+      "item": "B1C-04",
+      "name": "截图 04-refresh-read.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"草案信息\",\"revision（内容版本）：3\",\"草案分段\",\"已排合计 200 分\"]}"
+    },
+    {
+      "item": "B1C-16",
+      "name": "主链路前后业务 docs 全字段（含正文/分钟/便签字段/描述）+sources 全字段+图片SHA一致、ops不增",
+      "pass": true,
+      "detail": "{\"opsBefore\":0,\"opsAfter\":0,\"docsBefore\":5,\"docsAfter\":5,\"draftsBefore\":1,\"draftsAfter\":1}"
+    },
+    {
+      "item": "B1C-16",
+      "name": "主链路全程零模型/后端请求",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1C-05",
+      "name": "真实 DataPage 下载落盘 ZIP（可检视字节>0）",
+      "pass": true,
+      "detail": "bytes=3975"
+    },
+    {
+      "item": "B1C-05",
+      "name": "上传后真实预览：重新核对提示可见",
+      "pass": true,
+      "detail": "recheckHits=1"
+    },
+    {
+      "item": "B1C-05",
+      "name": "恢复到新空间：1线程1草案、业务对象复制、无新PlanItem/ops",
+      "pass": true,
+      "detail": "{\"wsId\":\"ws-restore-28a2d561-99f6-48fb-8c43-c8c61d1be069\",\"threads\":1,\"drafts\":1,\"bizDocs\":5,\"planItems\":1,\"ops\":0}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "生产提交后核对 verifyCommittedRestore 真实运行且零问题（逐记录 canonical 内容/引用/状态/基线/确认/ops）",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复后未应用草案 needs_review、fact_baseline清空、旧确认无执行效力、正文/历史/旧计算可读、新ID",
+      "pass": true,
+      "detail": "{\"status\":\"needs_review\",\"baselineNull\":true,\"confCleared\":true,\"rev\":3}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "恢复 ID 映射与准备阶段冻结签名逐字符一致（实际映射，非猜测）",
+      "pass": true,
+      "detail": "{\"signatureMatch\":true,\"seqLen\":10,\"used\":8,\"liveCount\":8,\"historyCount\":0}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "恢复语义逐项核对：sources字节SHA+全字段、docs全字段、线程消息正文、草案proposal/计算/历史/引用（实际映射，声明对象全部遍历）",
+      "pass": false,
+      "detail": "{\"problems\":[\"draft ws-1c-main-id-2 proposal/计算/历史/引用不一致（全字段比较）\"],\"checked\":{\"sources\":1,\"docs\":5,\"threads\":1,\"drafts\":1},\"docDiffs\":[]}"
+    },
+    {
+      "item": "B1C-05",
+      "name": "原空间恢复前后完整快照一致（docs全字段+sources字节SHA+线程/草案全字段+目录，非仅数量）",
+      "pass": true,
+      "detail": "{\"docs\":5,\"threads\":1,\"drafts\":1,\"ops\":0}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复空间真实重排200/0+当前版就绪+继续编辑保存（映射后业务对象，引用已重映射）",
+      "pass": true,
+      "detail": "{\"stage\":\"done\",\"ok\":true,\"draftId\":\"6a690440-a93d-463b-943e-056910bf0be7\",\"total\":200,\"unsched\":0,\"readyOk\":true,\"ready\":true,\"editBumped\":true,\"editRev\":5,\"assumptionSaved\":true,\"refMapped\":true,\"mappedTaskId\":\"ba373950-3db3-40fe-b735-35d09bdc5a29\"}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复后继续编辑硬刷新不丢（真实IDB读回）",
+      "pass": true,
+      "detail": "{\"assumptionSaved\":true,\"rev\":5}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "恢复空间展示页真实绑定：revision 与继续编辑后一致",
+      "pass": true,
+      "detail": "{\"ws\":\"ws-restore-28a2d561-99f6-48fb-8c43-c8c61d1be069\",\"draftId\":\"6a690440-a93d-463b-943e-056910bf0be7\",\"threadId\":\"1d996171-3489-4eb7-9633-f10305bd3637\",\"revision\":5,\"status\":\"editing\",\"ready\":true}"
+    },
+    {
+      "item": "B1C-06",
+      "name": "截图 10-restored-continue-edit.png 前可见文本断言",
+      "pass": true,
+      "detail": "{\"missing\":[],\"expected\":[\"ws-restore-28a2d561-99f6-48fb-8c43-c8c61d1be069\",\"revision（内容版本）：5\",\"恢复后继续编辑\",\"已排合计 200 分\"]}"
+    },
+    {
+      "item": "B1C-07",
+      "name": "ONLY_MAIN 模式仅跑主链路",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-09",
+      "name": "ONLY_MAIN 模式仅跑主链路",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-10",
+      "name": "ONLY_MAIN 模式仅跑主链路（跨午夜）",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-10",
+      "name": "ONLY_MAIN 模式仅跑主链路（双时区对照）",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-11",
+      "name": "ONLY_MAIN 模式仅跑主链路（双标签并发）",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-11",
+      "name": "ONLY_MAIN 模式仅跑主链路（提交前切空间）",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-12",
+      "name": "ONLY_MAIN 模式仅跑主链路",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-13",
+      "name": "ONLY_MAIN 模式仅跑主链路",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-15",
+      "name": "ONLY_MAIN 模式仅跑主链路",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    },
+    {
+      "item": "B1C-08",
+      "name": "ONLY_MAIN 模式仅跑主链路",
+      "pass": null,
+      "skipped": true,
+      "detail": "ONLY_MAIN 模式未执行（不计 passed）"
+    }
+  ]
+}

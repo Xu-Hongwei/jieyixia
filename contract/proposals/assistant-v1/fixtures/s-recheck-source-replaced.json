@@ -1,0 +1,21 @@
+{
+  "id": "s-recheck-source-replaced",
+  "title": "Source 替换新ID→needs_review",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-11"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "scenario": "adoption_recheck",
+    "event": "source_replaced_new_id"
+  },
+  "expected_error": null,
+  "expected": {
+    "outcome": "needs_review",
+    "business_writes": 0
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

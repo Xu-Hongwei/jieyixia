@@ -1,0 +1,31 @@
+[
+  {
+    "case": "C1_collision_draft_only_formal_pending",
+    "passed": true
+  },
+  {
+    "case": "C1_collision_formal_only_draft_pending",
+    "passed": true
+  },
+  {
+    "case": "C1_collision_both_confirmed_own_values",
+    "passed": true
+  },
+  {
+    "case": "C1_missing_or_bad_scope_rejected",
+    "passed": true
+  },
+  {
+    "case": "C2_missing_fields_rejected",
+    "passed": true
+  },
+  {
+    "case": "C2_undefined_and_roundtrip_rejected",
+    "passed": true
+  },
+  {
+    "case": "C2_explicit_null_means_none",
+    "passed": true
+  }
+]
+ALL C1/C2 CORRECT-EXPECTATION CHECKS PASSED

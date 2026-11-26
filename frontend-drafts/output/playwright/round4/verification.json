@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-18",
+  "revision": "R4",
+  "browser": "Microsoft Edge isolated session",
+  "widths": [
+    360,
+    768,
+    1440
+  ],
+  "layoutChecks": 36,
+  "layoutFailures": [],
+  "pageErrors": [],
+  "coreFlowsVerifiedFor": [
+    "signal",
+    "orbit",
+    "paper",
+    "desktop"
+  ],
+  "coreFlows": [
+    "field confirmation gate",
+    "create unplanned task",
+    "plan item toggle",
+    "timer start/pause",
+    "focus draft across views",
+    "temporary text capture",
+    "long text on phone",
+    "empty search",
+    "refresh resets demo"
+  ],
+  "focusedChecks": {
+    "confirmationFocus": "requirements button retained focus",
+    "originalReentryAnimationsAfterConfirm": 0,
+    "sourceQuoteLinked": true,
+    "manuscriptCreateButtonBottomAt1440x1000": 950.65625,
+    "keyboardMove": "8px",
+    "keyboardHome": "0px",
+    "mobileConfirmationHitTargetClear": true,
+    "mobileJumpToFields": true,
+    "mobileMatrixSourceInitiallyCollapsed": true,
+    "mobileMatrixSourceExpandable": true,
+    "reducedMotionRunningAnimations": 0,
+    "expandedFolderClearOfFooter": true,
+    "longSourceSwitchesToReadingLayout": true,
+    "longSourceAboveFolder": true
+  },
+  "gallery": {
+    "views": 3,
+    "grayscale": true,
+    "deepLinks": true,
+    "imagesLoaded": true,
+    "mobileOverflow": false
+  },
+  "assetBytes": 124808,
+  "review": {
+    "independentReviewers": 3,
+    "evidence": "R3-2026-11-18 baseline only",
+    "applicableMax": 95,
+    "animation5": "unscored"
+  },
+  "scope": "temporary drafts only; no production persistence, backend, GPU or performance benchmark"
+}

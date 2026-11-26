@@ -47,6 +47,17 @@ def render_system_prompt() -> str:
         '  "warnings": [{"code": "短码", "message": "说明", "field_key": "字段名或null"}]',
         "}",
         "",
+        "notice 必须同时输出 time_nodes（全部时间节点，带候选 role）与 deadline；不得只给 deadline。示例：",
+        '{"content_type":"notice","fields":[',
+        '  {"key":"title","value":"课程报告通知","raw":"课程报告通知","status":"candidate","quote":{"text":"课程报告通知"}},',
+        '  {"key":"time_nodes","raw":"","status":"candidate","value":[',
+        '    {"label":"提交截止","raw":"11月13日18:00前提交","value":"2026-11-13T18:00:00","basis":"explicit","role":"submission_deadline"},',
+        '    {"label":"宣讲开始","raw":"11月10日14:30宣讲","value":"2026-11-10T14:30:00","basis":"explicit","role":"event_start"}',
+        '  ]},',
+        '  {"key":"deadline","value":"2026-11-13T18:00:00","raw":"11月13日18:00前提交","status":"candidate","quote":{"text":"11月13日18:00前提交"}}',
+        '],"warnings":[]}',
+        "活动开始/结束用 role=event_start/event_end，提交/完成截止用 role=submission_deadline；角色不确定用 unknown。后端只从 submission_deadline 选 deadline。",
+        "",
         "内容类型判定标准：",
     ]
     for ct, desc in TYPE_DESC.items():

@@ -137,3 +137,35 @@
 
 验证汇总：**129 单测、27 负向守卫、5 fixture、golden 离线 13/13、真模型 HTTP 对照、浏览器逐项证据**。schema 41 定义（+TimeNode）。生成物/fixture 02（改用 user 参照）/HANDOFF/交接包已重建同步。
 仍待办：前端实际签收（不代签）、独立语义测试、产品 P0 前端闭环、Qoder Sites 公网验证。本轮不提交/不推送/不发布。
+
+## 返工修订（2026-11-18，第三轮：5 项遗留问题）
+
+第二轮复测「仍不通过，但部分修复已生效」（保存失败保留输入、用户参照传递、跨时区比较已过）。剩余 5 项本轮全部修复并三重验证。**本节取代上一节中与之冲突的表述**——尤其第二轮「确认推算值置 origin=user」**废止**，回归 D4 定案：确认不改值来源，只有用户实际改值才标 origin=user。
+
+| # | 退回问题 | 修复 | 验证 |
+| --- | --- | --- | --- |
+| 1 | 「明天下午5点前提交」无参照仍生成日期；活动开始被合成为提交截止 | 相对词检测（明天/本周二/…，含数字也识别）：raw 纯相对且无绝对月日 → 强制 basis=relative，无可靠参照 value=null；合成节点 role=unknown（不再伪造 submission_deadline）；提示词补具体 time_nodes 示例与角色口径，真模型现在输出带角色节点 | 真模型 5 例对照：无参照「明天」→ null 且 deadline 缺席；活动→event_start/event_end 不参与选主；显式提交→保留；单测 4 条新例 |
+| 2 | 删除非原子：便签先删、关联清理失败留悬空引用 | db.js `deleteNoteAtomic`：同一 IDB 事务内先写解除关联的任务草稿再删便签，整体提交或整体回滚；失败 UI 不动 | 浏览器注入任务写入失败：便签仍在（含已确认字段）、task.note_ids 未变、横幅明示；恢复后同事务成功：便签删除、关联清空 |
+| 3 | 并发确认丢修改：后一份旧快照覆盖前一次确认 | mutateNote 按文档 id 串行化（promise 链），每次从 docs 最新已提交状态克隆再改 | 浏览器同一 JS tick 双「确认」竞态：两字段都落库 confirmed，无丢修改 |
+| 4 | 确认把未编辑的模型推算值改成 origin=user | 契约放行 derived+confirmed **任意 origin**（仍须非空值）；lab confirmField 只改 status；saveEdit 实际改值才 origin=user | 浏览器竞态落库 {confirmed, origin:model, derived:true, 值未变}；selftest 守卫改为「确认 null 仍拒」 |
+| 5 | 跨年未修：12-31 的「明天」被清空 | 删除「value 年份≠参照年份即置空」与 inferred 一律置空的旧分支；跨年换算合法保留 | 单测：message_date=2026-12-31「明天」→ 2027-01-01T17:00 保留；inferred 跨年同样保留 |
+
+golden 13 份已用新提示词对真模型**重新录制**（全部输出 time_nodes）并离线回归 13/13。语义变化属诚实化而非回归：QQ宣讲会活动时间不再误作截止（event_start）；党课培训「本周二」无可靠参照→留空；奖学金申报两个精度组→deadline_unselectable 待人工选择；竞赛通知反而新选出合法截止。
+验证汇总：**133 单测、27 负向守卫、5 fixture、golden 重录 13/13、真模型 HTTP 5 例对照、浏览器竞态/注入故障逐项证据**（devlog/private-evidence/）。schema 41 定义不变，语义描述更新后生成物已重建。
+仍待办：前端实际签收（不代签）、独立语义测试、产品 P0 前端闭环、Qoder Sites 公网验证。本轮不提交/不推送/不发布。
+
+## 返工修订（2026-11-18，第四轮：inferred 参照漏洞 + 4 项原有待办）
+
+第三轮复测「五项主要反例已通过定向复核」，但整体验收仍差一个关键漏洞与四项原有待办。本轮全部关闭，三重验证（单测 / 真 HTTP / 真浏览器）。
+
+**关键漏洞：basis=inferred 绕过可靠参照**（三次验收第 2 节）。修复不再扩相对词表，改为**结构化来源约束**：凡依赖参照的产出——relative 换算、inferred 推算、以及任何 basis 下的补年份（value 年份不在原文中）——统一要求可靠参照（message_date 自洽 / 请求级 user），缺失则保留原文、值置空。字段级 deadline 同样受补年约束。「三天后」「收到通知后48小时」即使被模型误标 explicit 也被补年检查拦下。跨年路径保留（有可靠参照即保留，不恢复年份相等限制）。
+真模型配对（real_model_round4.txt，6 次真调用）：三例无参照 → 节点 value=null、deadline 缺席；有 user 参照 → 保留 derived/unresolved 候选（三天后→2026-11-20T17:00；48小时→推算值；11月20日→2026-11-20 date 精度）。活动 role、superseded、带偏移绝对时刻比较、跨年均由单测锁定不回归。
+
+**4 项原有待办：**
+1. **仅重试保存分析结果**：runAI 模型成功但 putDoc 失败 → 结果暂存 pendingSave，「重试保存分析结果（不重调模型）」按钮只重新落库。浏览器注入 note 写入失败 + fetch 计数：失败后重试，/api/analyze 总调用数=1，便签落库。
+2. **嵌套 Proxy**：db.js deepRaw 逐层脱代理（Blob/Date/File 原样交给 structuredClone），snapshot 与 App.vue clone 共用。浏览器对「plain 文档内嵌显式 reactive 数组」调真实 putDoc：成功落库、读回非 Proxy（旧代码 DataCloneError）。
+3. **节点机器契约关联**：Field 运行时校验 key=time_nodes → TimeNode[]（含节点日历合法性）；generate.py 导出时并入 JSON Schema if/then（key=time_nodes → value: TimeNode[]|null），jsonschema Draft2020-12 机器验证放行合法/拒绝非法；selftest 新增运行时+schema 双重守卫。TimeNode 契约补日历探针（2026-13-99、+99:99 在契约层即拒）。
+4. **本地偏移校验**：isValidTimeValue 拒绝 +99:99、+08:75（偏移时≤23 分≤59，与后端 fromisoformat 一致），+08:00 接受。浏览器手动截止入口逐例实证。
+
+验证汇总：**148 单测（chunked 用例本机 0.01s，验收侧 25s 停滞未复现）、34 负向守卫、5 fixture、golden 离线 13/13（提示词未改无需重录）、真模型 HTTP 6 例配对、浏览器逐项证据**。golden 语义变化属诚实化：专业实践/竞赛通知等缺年份样本无参照时 deadline 留空（原文保留）。schema 41 定义，Field 增 if/then 机器关联。
+仍待办：前端实际签收（不代签）、独立语义测试、产品 P0 前端闭环、Qoder Sites 公网验证。本轮不提交/不推送/不发布。

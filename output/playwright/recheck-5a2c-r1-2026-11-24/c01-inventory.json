@@ -1,0 +1,112 @@
+{
+  "at": "2026-11-24T05:55:11.539Z",
+  "baseDate": "2026-11-24",
+  "D1": "2026-11-25",
+  "D2": "2026-11-26",
+  "D4": "2026-11-28",
+  "zip": {
+    "file": "zip/baseline-normal.zip",
+    "bytes": 4029,
+    "sha256": "8ab6da8fbc0bf5c1381ff9ba4faed13acc1513b3f1cc85f94afb0cf196948682"
+  },
+  "keyIds": {
+    "T": "1f830d8e-fd60-4442-a566-547500011816",
+    "A1": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+    "A2": "b835283a-714a-41f2-9c1f-45bca6163b17",
+    "twins": [
+      "2057dc81-7b98-4af3-9dba-5db3995fa207",
+      "b0fc3950-00b9-4113-9caa-9f63f273a64d"
+    ],
+    "P1": "0ff0c9da-d0db-4503-9a6b-0d5eb101d486",
+    "P2": "6f58ac31-352e-463b-b171-9ce8cf4836d5",
+    "P3": "48a7a8f9-ea90-4174-bb68-72c474623a69",
+    "P4": "ca4111eb-cfc8-4462-a982-66c459048a74",
+    "P5": "051e41e7-9578-4926-a175-95e9020f79c8",
+    "U": "d1b8053a-0b1a-410a-a2f6-8fa677391b37",
+    "DT": "1260dca2-c6ca-41ec-8f96-153bd81e6e01",
+    "textNote": "8539916f-1c8c-48df-822d-6f2927c3fd21",
+    "textSource": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5",
+    "imgSource": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75",
+    "imgNote": "5125b989-25e0-4235-b6b7-fbe1d577fd14"
+  },
+  "moveSemantics": "planned 改期为同 ID 原地换日（5A-1 已验收）；moved 终态仅遗留数据出现，由 C18 兼容样本覆盖",
+  "sessions": [
+    {
+      "id": "77050b3e-3119-492d-ae8b-7f726c7ce7d7",
+      "task_id": "d1b8053a-0b1a-410a-a2f6-8fa677391b37",
+      "action_id": "01d136ff-f2ce-4bdf-b809-99e27d8ffcfa",
+      "plan_item_id": null,
+      "accumulated_ms": 67,
+      "outcome": "done",
+      "ended": true
+    },
+    {
+      "id": "aa4936c4-7e34-4808-9327-0d72162d357d",
+      "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+      "action_id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+      "plan_item_id": "0ff0c9da-d0db-4503-9a6b-0d5eb101d486",
+      "accumulated_ms": 40113,
+      "outcome": "partial",
+      "ended": true
+    },
+    {
+      "id": "eae1cc32-5c25-45a6-a3eb-cbad8b1962b7",
+      "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+      "action_id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+      "plan_item_id": "6f58ac31-352e-463b-b171-9ce8cf4836d5",
+      "accumulated_ms": 89,
+      "outcome": "blocked",
+      "ended": true
+    },
+    {
+      "id": "f753e467-16e0-42c2-8ee8-967c8f14f754",
+      "task_id": "1f830d8e-fd60-4442-a566-547500011816",
+      "action_id": "5c388986-0dcb-49b3-85f3-e3008675b8b8",
+      "plan_item_id": "0ff0c9da-d0db-4503-9a6b-0d5eb101d486",
+      "accumulated_ms": 40173,
+      "outcome": "partial",
+      "ended": true
+    }
+  ],
+  "p1Segments": {
+    "first": {
+      "id": "f753e467-16e0-42c2-8ee8-967c8f14f754",
+      "started_at": "2026-11-24T05:53:38.150Z",
+      "record_version": 1,
+      "draft_md": "第一段成果：材料清单已梳理出三节提纲。"
+    },
+    "second": {
+      "id": "aa4936c4-7e34-4808-9327-0d72162d357d",
+      "started_at": "2026-11-24T05:54:20.844Z",
+      "record_version": 1,
+      "draft_md": "第二段成果：材料整理完成，可进入初稿。"
+    }
+  },
+  "counts": {
+    "action": 5,
+    "plan_item": 5,
+    "task": 3,
+    "note": 2,
+    "focus_session": 4
+  },
+  "sources": [
+    {
+      "id": "369ce9f1-57ae-46e2-bc03-a1d3daa4f3a5",
+      "kind": "text",
+      "name": null,
+      "bytes": 29
+    },
+    {
+      "id": "e01bb37f-ddc6-4616-961e-acbfc1f8ad75",
+      "kind": "image",
+      "name": "fixture-test-image.png",
+      "bytes": 70
+    }
+  ],
+  "aiInterception": {
+    "fixture": "fixtures/01-course-assignment.json expected_analysis",
+    "analyzeCalls": 2,
+    "healthzCalls": 1,
+    "note": "模型请求全部拦截，未调用真实模型或用户后端"
+  }
+}

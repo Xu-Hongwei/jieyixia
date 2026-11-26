@@ -1,0 +1,67 @@
+{
+  "result": {
+    "originalSessionId": "932e7b0a-0274-4b42-acb4-ddc56a98b511",
+    "tombstones": 200,
+    "originalTombstonePresent": false,
+    "sessionsBefore": 103,
+    "sessionsAfter": 104,
+    "retry": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "86cbe9b7-0a65-40d3-9383-dbc54aa51a5f",
+      "request_id": "original-begin",
+      "revision": 1,
+      "issued_at_ms": 1795288620102,
+      "session": {
+        "id": "86cbe9b7-0a65-40d3-9383-dbc54aa51a5f",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T19:17:00.102Z",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-21T19:17:00.102Z",
+        "task_snapshot": {
+          "title": "隔离审查任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "action_snapshot": {
+          "text": "隔离审查行动",
+          "minutes": 30,
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "draft_seq": 0,
+      "task": {
+        "id": "t",
+        "kind": "task",
+        "workspace_id": "personal",
+        "title": "隔离审查任务",
+        "status": "doing",
+        "note_ids": [],
+        "deadline": {
+          "value": null,
+          "precision": "none"
+        },
+        "created_at": "2026-11-21T02:00:00.000Z",
+        "updated_at": "2026-11-21T19:17:00.102Z",
+        "current_action_id": "a"
+      }
+    }
+  },
+  "errors": []
+}

@@ -1,0 +1,88 @@
+{
+  "id": "f-plan-buffer-over",
+  "title": "buffer_pct=51",
+  "layer": "planning",
+  "mode": "reject",
+  "target": "PlanningInput",
+  "acceptance": [
+    "B0-08"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "algorithm_version": "daily-v1",
+    "timezone": "Asia/Shanghai",
+    "start_date": "2026-11-24",
+    "horizon_days": 7,
+    "buffer_pct": 51,
+    "days": [
+      {
+        "date": "2026-11-24",
+        "budget_minutes": 60
+      },
+      {
+        "date": "2026-11-25",
+        "budget_minutes": 60
+      },
+      {
+        "date": "2026-11-26",
+        "budget_minutes": 60
+      },
+      {
+        "date": "2026-11-27",
+        "budget_minutes": 60
+      },
+      {
+        "date": "2026-11-28",
+        "budget_minutes": 60
+      },
+      {
+        "date": "2026-11-29",
+        "budget_minutes": 60
+      },
+      {
+        "date": "2026-11-30",
+        "budget_minutes": 60
+      }
+    ],
+    "task_facts": [
+      {
+        "task_ref": {
+          "kind": "existing",
+          "id": "t-1"
+        },
+        "title": "虚构目标",
+        "deadline_value": null,
+        "deadline_precision": "none",
+        "overdue_consent": false,
+        "status": "todo"
+      }
+    ],
+    "work_items": [
+      {
+        "key": "w1",
+        "task_ref": {
+          "kind": "existing",
+          "id": "t-1"
+        },
+        "action_ref": {
+          "kind": "draft",
+          "key": "a-w1"
+        },
+        "deliverable": "w1 的虚构产出",
+        "remaining_minutes": 60,
+        "estimate_origin": "model",
+        "splittable": true,
+        "min_segment_minutes": 25,
+        "earliest_date": null,
+        "depends_on": [],
+        "priority": "normal"
+      }
+    ],
+    "occupancy": [],
+    "replacement_ids": [],
+    "extra_work_acknowledged": []
+  },
+  "expected_error": "50",
+  "expected": null,
+  "notes": ""
+}

@@ -1,0 +1,30 @@
+{
+  "checks": [
+    {
+      "name": "slow_pending",
+      "buttonDisabled": true
+    },
+    {
+      "name": "slow_enter_and_new_draft",
+      "count": 1,
+      "putAttempts": 1,
+      "draft": "下一条仍需保留"
+    },
+    {
+      "name": "intentional_same_title",
+      "count": 2
+    },
+    {
+      "name": "failure_keeps_input",
+      "draft": "失败后重试",
+      "count": 0,
+      "buttonEnabled": true
+    },
+    {
+      "name": "retry_once",
+      "count": 1
+    }
+  ],
+  "errors": [],
+  "scope": "isolated Edge; real IndexedDB commits; delayed action transaction completion event; one controlled put failure"
+}

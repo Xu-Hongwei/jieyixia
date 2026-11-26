@@ -1,0 +1,212 @@
+{
+  "date": "2026-11-26",
+  "base": "http://127.0.0.1:5177/",
+  "backend": "http://127.0.0.1:8010",
+  "results": [
+    {
+      "item": "S1",
+      "name": "创建草案未调模型",
+      "pass": true,
+      "detail": "propose=0"
+    },
+    {
+      "item": "S1",
+      "name": "恰好一次 propose、零 analyze",
+      "pass": true,
+      "detail": "propose=1"
+    },
+    {
+      "item": "S1",
+      "name": "请求协议 1.1 + intent replan_task + 单任务上下文",
+      "pass": true,
+      "detail": "{\"pv\":\"1.1\",\"intent\":\"replan_task\"}"
+    },
+    {
+      "item": "S1",
+      "name": "replan_context：替换 p-1/p-2，保留含未选与受保护（不含被替换）",
+      "pass": true,
+      "detail": "{\"kept\":[\"p-foc\",\"p-keep\",\"p-prot\"]}"
+    },
+    {
+      "item": "S1",
+      "name": "有效占用：committed=全占用215−替换75=140；protected 不含被替换",
+      "pass": true,
+      "detail": "{\"committedTotal\":140,\"protectedIds\":[\"p-foc\",\"p-keep\",\"p-other\",\"p-prot\"]}"
+    },
+    {
+      "item": "S1",
+      "name": "进展清单原样进请求（权威输入）；user_input 原话=进展说明",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "桩建议落库：单 link 目标任务 + estimate_origin=model",
+      "pass": true,
+      "detail": "{\"origin\":\"model\"}"
+    },
+    {
+      "item": "S1",
+      "name": "建议块可见（建议，未确认）+ 采用被阻断并提示核对",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "建议块逐条展示可调整的约束（最早/依赖/优先级）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "载入建议回填清单行（文本/分钟/复用 + 最早/依赖/优先级同屏可调整）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "REVIEW",
+      "name": "载入并保存建议不得丢失最早开始日期/优先级/依赖",
+      "pass": true,
+      "detail": "{\"before\":\"2026-11-28\",\"after\":\"2026-11-28\",\"deps\":[\"rw1\"]}"
+    },
+    {
+      "item": "S1",
+      "name": "保存后清单 estimate_origin=user，建议块消失",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "REVIEW",
+      "name": "刷新重开后约束仍可见（最早/优先级/依赖）且不误判未保存",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "核对确认后采用解锁",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "REVIEW",
+      "name": "刷新后重排：最早日期仍约束（全部安排不早于 D(2)）",
+      "pass": true,
+      "detail": "{\"earliest\":\"2026-11-28\",\"scheduledDates\":[\"2026-11-28\",\"2026-11-29\",\"2026-11-29\"]}"
+    },
+    {
+      "item": "REVIEW",
+      "name": "两个互相依赖的工作项均被排入，且后项不早于前项完成日",
+      "pass": true,
+      "detail": "{\"w1\":[\"2026-11-28\",\"2026-11-29\"],\"w2\":[\"2026-11-29\"]}"
+    },
+    {
+      "item": "S1",
+      "name": "原子采用：p-1/p-2 取消且内容保留；未选/受保护/其它任务原样",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S1",
+      "name": "正式安排保留约束：最早不早于 D(2)，结论段不早于报告段",
+      "pass": true,
+      "detail": "{\"report\":[\"2026-11-29\",\"2026-11-28\"],\"concl\":[\"2026-11-29\"]}"
+    },
+    {
+      "item": "S1",
+      "name": "新安排全属目标任务、总量 120；仅新增 1 个新行动；总截止不变",
+      "pass": true,
+      "detail": "{\"newPlans\":3,\"segs\":3,\"actions\":3}"
+    },
+    {
+      "item": "S1",
+      "name": "回执绑定取消集与目标任务；台账恰好一条",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "未知分钟数触发澄清（问题指向该行工作）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "澄清轮也是 replan_task 1.1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "续轮：同草案 replan_task；结构化问答归档（答=90），合成文本渲染",
+      "pass": true,
+      "detail": "{\"n\":2,\"clar\":[{\"assistant_question\":\"「撰写报告正文」还需要多少分钟？未知工作量无法排程。\",\"user_answer\":\"90\"}]}"
+    },
+    {
+      "item": "S2",
+      "name": "回答值成为建议分钟数（仍 model，须核对）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "建议未确认仍阻断采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "载入回填分钟数 90",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S2",
+      "name": "核对保存后 estimate_origin=user",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S3",
+      "name": "生成中保存清单冲突拒写（generating 基线保护）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S3",
+      "name": "保存失败：结果留存待重试，草案未被改写（仍 90/user，版本未变）",
+      "pass": true,
+      "detail": "{\"propose\":1,\"rev\":1}"
+    },
+    {
+      "item": "S3",
+      "name": "重试保存成功：建议落库 model、版本恰 +1；仍只调过一次模型",
+      "pass": true,
+      "detail": "{\"rev\":2,\"before\":1,\"propose\":1}"
+    },
+    {
+      "item": "S3",
+      "name": "建议未确认仍阻断采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "S4",
+      "name": "取消后草案内容保留（本地用户清单不变）",
+      "pass": true,
+      "detail": "{\"status\":\"needs_review\"}"
+    },
+    {
+      "item": "S4",
+      "name": "取消后可再次生成（共 2 次 propose，建议落库）",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "全局",
+      "name": "全程未触碰用户 :8000/:8020 服务",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

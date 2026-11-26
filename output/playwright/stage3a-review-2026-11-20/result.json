@@ -1,0 +1,95 @@
+{
+  "checks": [
+    {
+      "name": "legacy_link",
+      "hash": "#/tasks/t0?return=/today",
+      "title": "提交机器学习课程报告：多模态遥感图文检索方法与实验结果分析"
+    },
+    {
+      "name": "create_two_actions",
+      "actions": [
+        {
+          "id": "580dd92e-7aa7-42dc-9fce-3fb857289ce9",
+          "text": "整理实验结果",
+          "minutes": 30,
+          "workspace": "personal"
+        },
+        {
+          "id": "d4971b36-d201-4c84-bb99-626f7934ea65",
+          "text": "先列提纲",
+          "minutes": 30,
+          "workspace": "personal"
+        }
+      ]
+    },
+    {
+      "name": "set_current",
+      "current": "d4971b36-d201-4c84-bb99-626f7934ea65"
+    },
+    {
+      "name": "complete_action",
+      "taskStatus": "todo",
+      "current": null,
+      "actionDone": true
+    },
+    {
+      "name": "complete_task_independent",
+      "status": "done",
+      "unfinished": 2
+    },
+    {
+      "name": "double_click_success",
+      "count": 2
+    },
+    {
+      "name": "leave_cancel",
+      "stillDetail": true,
+      "input": "尚未保存的任务说明"
+    },
+    {
+      "name": "discard_after_leave",
+      "description": "",
+      "dbDescription": ""
+    },
+    {
+      "name": "next_draft_during_save",
+      "input": "",
+      "newPersisted": 0
+    },
+    {
+      "name": "undo_action",
+      "exists": true
+    },
+    {
+      "name": "delete_task",
+      "taskGone": true,
+      "actionsGone": true,
+      "hash": "#/today"
+    },
+    {
+      "name": "undo_task_actions",
+      "taskBack": true,
+      "actionCount": 5,
+      "expected": 5
+    },
+    {
+      "name": "refresh",
+      "actionCount": 5
+    },
+    {
+      "name": "offline_create",
+      "exists": true
+    },
+    {
+      "name": "mobile_width",
+      "sw": 390,
+      "iw": 390
+    }
+  ],
+  "errors": [],
+  "dialogs": [
+    "有未保存的修改，离开将丢弃这些输入。仍要离开吗？",
+    "有未保存的修改，离开将丢弃这些输入。仍要离开吗？"
+  ],
+  "scope": "isolated Edge, fictional seed, analyze blocked"
+}

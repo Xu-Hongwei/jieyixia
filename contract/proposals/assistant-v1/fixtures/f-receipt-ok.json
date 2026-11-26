@@ -1,0 +1,36 @@
+{
+  "id": "f-receipt-ok",
+  "title": "回执：真实写入计数（本地事务产生）",
+  "layer": "application",
+  "mode": "accept",
+  "target": "ApplicationReceipt",
+  "acceptance": [
+    "B0-12"
+  ],
+  "implement_batch": "5B-2",
+  "payload": {
+    "application_id": "app-1",
+    "draft_id": "d-1",
+    "draft_revision": 1,
+    "input_signature": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "id_map": [
+      {
+        "draft_key": "t-new",
+        "formal_id": "task-formal-1",
+        "object_type": "task"
+      }
+    ],
+    "counts": {
+      "tasks_created": 1,
+      "tasks_updated": 0,
+      "actions_created": 1,
+      "plan_items_created": 2,
+      "source_fields_confirmed": 1
+    },
+    "unscheduled_kept": [],
+    "committed_at": "2026-11-24T10:00:00+08:00"
+  },
+  "expected_error": null,
+  "expected": null,
+  "notes": ""
+}

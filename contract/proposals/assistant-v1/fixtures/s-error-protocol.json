@@ -1,0 +1,21 @@
+{
+  "id": "s-error-protocol",
+  "title": "协议不支持→400",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-02",
+    "B0-17"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "scenario": "error_http_mapping",
+    "code": "PROTOCOL_UNSUPPORTED"
+  },
+  "expected_error": null,
+  "expected": {
+    "http": 400
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

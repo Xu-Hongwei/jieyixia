@@ -1,0 +1,286 @@
+{
+  "before": {
+    "ms": 1795288620102,
+    "original": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "b79b7914-a1ce-494e-bdbd-8c42a97857ac",
+      "request_id": "original-begin",
+      "revision": 1,
+      "issued_at_ms": 1795226400000,
+      "session": {
+        "id": "b79b7914-a1ce-494e-bdbd-8c42a97857ac",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T02:00:00.000Z",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-21T02:00:00.000Z",
+        "task_snapshot": {
+          "title": "隔离审查任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-21T02:00:00.000Z"
+        },
+        "action_snapshot": {
+          "text": "隔离审查行动",
+          "minutes": 30,
+          "captured_at": "2026-11-21T02:00:00.000Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "draft_seq": 0,
+      "task": {
+        "id": "t",
+        "kind": "task",
+        "workspace_id": "personal",
+        "title": "隔离审查任务",
+        "status": "doing",
+        "note_ids": [],
+        "deadline": {
+          "value": null,
+          "precision": "none"
+        },
+        "created_at": "2026-11-21T02:00:00.000Z",
+        "updated_at": "2026-11-21T02:00:00.000Z",
+        "current_action_id": "a"
+      }
+    },
+    "tombstones": 200,
+    "originalTombstonePresent": false,
+    "explicit": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "请求超出重试窗口，请重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "original-begin",
+      "issued_at_ms": 1795226400000
+    },
+    "bare": {
+      "ok": false,
+      "code": "REQUEST_ENVELOPE_REQUIRED",
+      "message": "无法验证该 requestId 的签发信息，请复用原信封重试或重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "original-begin",
+      "issued_at_ms": null
+    },
+    "sameStore": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "请求超出重试窗口，请重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "original-begin",
+      "issued_at_ms": 1795226400000
+    },
+    "count": 103
+  },
+  "after": {
+    "rawBare": {
+      "ok": false,
+      "code": "REQUEST_ENVELOPE_REQUIRED",
+      "message": "无法验证该 requestId 的签发信息，请复用原信封重试或重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "original-begin",
+      "issued_at_ms": null
+    },
+    "rawEnvelope": {
+      "ok": false,
+      "code": "STALE_REQUEST",
+      "message": "请求超出重试窗口，请重新发起",
+      "workspace_id": "personal",
+      "session_id": null,
+      "request_id": "original-begin",
+      "issued_at_ms": 1795226400000
+    },
+    "storeRetry": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "97c89c22-1aa3-44e9-b75f-d320fcd53f78",
+      "request_id": "original-begin",
+      "revision": 1,
+      "issued_at_ms": 1795288620102,
+      "session": {
+        "id": "97c89c22-1aa3-44e9-b75f-d320fcd53f78",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T19:17:00.102Z",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-21T19:17:00.102Z",
+        "task_snapshot": {
+          "title": "隔离审查任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "action_snapshot": {
+          "text": "隔离审查行动",
+          "minutes": 30,
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "draft_seq": 0,
+      "task": {
+        "id": "t",
+        "kind": "task",
+        "workspace_id": "personal",
+        "title": "隔离审查任务",
+        "status": "doing",
+        "note_ids": [],
+        "deadline": {
+          "value": null,
+          "precision": "none"
+        },
+        "created_at": "2026-11-21T02:00:00.000Z",
+        "updated_at": "2026-11-21T19:17:00.102Z",
+        "current_action_id": "a",
+        "matter_id": null
+      }
+    },
+    "countAfterRetry": 104,
+    "ended": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "97c89c22-1aa3-44e9-b75f-d320fcd53f78",
+      "request_id": "83804372-3b84-4b79-9c87-d8fc933e913a",
+      "revision": 2,
+      "issued_at_ms": 1795288620102,
+      "session": {
+        "id": "97c89c22-1aa3-44e9-b75f-d320fcd53f78",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T19:17:00.102Z",
+        "accumulated_ms": 0,
+        "running": false,
+        "draft_md": "重复段",
+        "outcome": "partial",
+        "blocker": null,
+        "ended_at": "2026-11-21T19:17:00.102Z",
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": null,
+        "task_snapshot": {
+          "title": "隔离审查任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "action_snapshot": {
+          "text": "隔离审查行动",
+          "minutes": 30,
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "draft_seq": 1
+    },
+    "fresh": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "1423706c-1a9d-46ae-9e25-c711e3f5e8de",
+      "request_id": "e01db953-40c6-4f96-a6cf-73abb1db0da2",
+      "revision": 1,
+      "issued_at_ms": 1795288620102,
+      "session": {
+        "id": "1423706c-1a9d-46ae-9e25-c711e3f5e8de",
+        "kind": "focus_session",
+        "workspace_id": "personal",
+        "task_id": "t",
+        "action_id": "a",
+        "plan_item_id": null,
+        "started_at": "2026-11-21T19:17:00.102Z",
+        "accumulated_ms": 0,
+        "running": true,
+        "draft_md": "",
+        "outcome": null,
+        "blocker": null,
+        "ended_at": null,
+        "is_demo": false,
+        "record_version": 1,
+        "timer_anchor_at": "2026-11-21T19:17:00.102Z",
+        "task_snapshot": {
+          "title": "隔离审查任务",
+          "matter_name": null,
+          "deadline_value": null,
+          "deadline_precision": "none",
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "action_snapshot": {
+          "text": "隔离审查行动",
+          "minutes": 30,
+          "captured_at": "2026-11-21T19:17:00.102Z"
+        },
+        "task_ref_state": "active",
+        "action_ref_state": "active"
+      },
+      "draft_seq": 0,
+      "task": {
+        "id": "t",
+        "kind": "task",
+        "workspace_id": "personal",
+        "title": "隔离审查任务",
+        "status": "doing",
+        "note_ids": [],
+        "deadline": {
+          "value": null,
+          "precision": "none"
+        },
+        "created_at": "2026-11-21T02:00:00.000Z",
+        "updated_at": "2026-11-21T19:17:00.102Z",
+        "current_action_id": "a",
+        "matter_id": null
+      }
+    }
+  },
+  "binding": {
+    "result": {
+      "ok": true,
+      "code": null,
+      "workspace_id": "personal",
+      "session_id": "1423706c-1a9d-46ae-9e25-c711e3f5e8de",
+      "request_id": "e01db953-40c6-4f96-a6cf-73abb1db0da2",
+      "revision": 1,
+      "issued_at_ms": 1795288620102,
+      "replayed": true
+    },
+    "runningAfter": true,
+    "endedAt": null
+  },
+  "errors": []
+}

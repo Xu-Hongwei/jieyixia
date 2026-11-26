@@ -1,0 +1,21 @@
+{
+  "id": "s-error-output",
+  "title": "模型输出非法→502",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-17",
+    "B0-20"
+  ],
+  "implement_batch": "5B-3",
+  "payload": {
+    "scenario": "error_http_mapping",
+    "code": "MODEL_OUTPUT_INVALID"
+  },
+  "expected_error": null,
+  "expected": {
+    "http": 502
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}

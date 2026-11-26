@@ -1,0 +1,19 @@
+{
+  "state": {
+    "scene": "summer",
+    "lightScene": "webgl",
+    "loop": "24s",
+    "paper": "ready",
+    "canvas": "block",
+    "bodyClass": "workspace round-three desktop collage-maintained collage-planner collage-atmosphere collage-scene-summer"
+  },
+  "frameBytesA": 970629,
+  "frameBytesB": 971278,
+  "frameChanged": true,
+  "mobile": {
+    "scene": "summer",
+    "lightScene": "webgl",
+    "canvas": "block"
+  },
+  "errors": []
+}

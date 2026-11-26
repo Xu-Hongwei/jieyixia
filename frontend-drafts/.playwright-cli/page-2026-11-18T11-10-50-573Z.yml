@@ -1,0 +1,145 @@
+- generic [active] [ref=f28e1]:
+  - generic [ref=f28e2]:
+    - generic [ref=f28e3]:
+      - link "拼贴工作桌 ↘" [ref=f28e4] [cursor=pointer]:
+        - /url: desk.html
+      - generic [ref=f28e5]: 今日便签 / 所有任务
+      - link "其他方向与历史参考 ↗" [ref=f28e6] [cursor=pointer]:
+        - /url: index.html
+      - generic [ref=f28e7]: DESK 02 · 演示
+    - generic [ref=f28e8]:
+      - banner [ref=f28e9]:
+        - link "截下来 ↘" [ref=f28e10] [cursor=pointer]:
+          - /url: desk.html
+          - text: 截下来
+          - generic [ref=f28e11]: ↘
+        - navigation "工作桌" [ref=f28e12]:
+          - button "便签墙 今天" [ref=f28e13] [cursor=pointer]:
+            - text: 便签墙
+            - generic [ref=f28e14]: 今天
+          - button "日程表 全部任务" [ref=f28e15] [cursor=pointer]:
+            - text: 日程表
+            - generic [ref=f28e16]: 全部任务
+        - button "＋ 记一件事" [ref=f28e17] [cursor=pointer]
+      - main [ref=f28e18]:
+        - generic [ref=f28e19]:
+          - generic [ref=f28e20]:
+            - generic [ref=f28e21]:
+              - paragraph [ref=f28e22]: MY LITTLE NOTE WALL / 今日便签墙
+              - heading "今天的事， 贴在这里" [level=1] [ref=f28e23]:
+                - text: 今天的事，贴在这里
+                - generic [aria-hidden] [ref=f28e24]: ✳
+              - text: 把眼前的任务留下，把细节放到背面。
+            - generic [ref=f28e25]:
+              - text: NOVEMBER / 2026
+              - strong [ref=f28e26]:
+                - text: "18"
+                - emphasis [ref=f28e27]: 三
+              - generic [ref=f28e28]: 星期三 · 今天
+          - generic [ref=f28e29]:
+            - article [ref=f28e30]:
+              - generic [ref=f28e31]:
+                - generic [ref=f28e32]:
+                  - generic [ref=f28e33]:
+                    - generic [ref=f28e34]: 课程报告
+                    - generic [ref=f28e35]: 01 / TODAY
+                  - heading "完成机器学习课程报告" [level=2] [ref=f28e36]
+                  - generic [ref=f28e37]:
+                    - text: 截止时间
+                    - paragraph [ref=f28e38]: 11 月 22 日 · 23:59
+                  - generic [ref=f28e39]:
+                    - button "完成任务：完成机器学习课程报告" [ref=f28e40] [cursor=pointer]: 标记完成
+                    - button "翻到背面查看完成机器学习课程报告的要求" [ref=f28e42] [cursor=pointer]:
+                      - text: 翻面看要求
+                      - generic [ref=f28e43]: ↗
+                - generic [aria-hidden] [ref=f28e44]:
+                  - generic [ref=f28e45]:
+                    - generic [ref=f28e46]: 便签背面 / 任务要求
+                    - button [ref=f28e47] [cursor=pointer]: 翻回正面 ↶
+                  - heading [level=3] [ref=f28e48]: 完成机器学习课程报告
+                  - generic [ref=f28e49]:
+                    - text: 要做好的几件事
+                    - list [ref=f28e50]:
+                      - listitem [ref=f28e51]: 介绍方法与相关工作
+                      - listitem [ref=f28e52]: 说明实验设置，整理对比结果
+                      - listitem [ref=f28e53]: 补充结果分析与结论
+                  - generic [ref=f28e54]:
+                    - generic [ref=f28e55]:
+                      - term [ref=f28e56]: 提交 / 产物
+                      - definition [ref=f28e57]: 课程平台 · PDF 文件
+                    - generic [ref=f28e58]:
+                      - term [ref=f28e59]: 来源
+                      - definition [ref=f28e60]: 机器学习课程通知
+            - article [ref=f28e61]:
+              - generic [ref=f28e62]:
+                - generic [ref=f28e63]:
+                  - generic [ref=f28e64]:
+                    - generic [ref=f28e65]: 期末复习
+                    - generic [ref=f28e66]: 02 / TODAY
+                  - heading "复习条件概率与贝叶斯公式" [level=2] [ref=f28e67]
+                  - generic [ref=f28e68]:
+                    - text: 截止时间
+                    - paragraph [ref=f28e69]: 11 月 25 日 · 18:00
+                  - generic [ref=f28e70]:
+                    - button "完成任务：复习条件概率与贝叶斯公式" [ref=f28e71] [cursor=pointer]: 标记完成
+                    - button "翻到背面查看复习条件概率与贝叶斯公式的要求" [ref=f28e73] [cursor=pointer]:
+                      - text: 翻面看要求
+                      - generic [ref=f28e74]: ↗
+                - generic [aria-hidden] [ref=f28e75]:
+                  - generic [ref=f28e76]:
+                    - generic [ref=f28e77]: 便签背面 / 任务要求
+                    - button [ref=f28e78] [cursor=pointer]: 翻回正面 ↶
+                  - heading [level=3] [ref=f28e79]: 复习条件概率与贝叶斯公式
+                  - generic [ref=f28e80]:
+                    - text: 要做好的几件事
+                    - list [ref=f28e81]:
+                      - listitem [ref=f28e82]: 梳理条件概率与全概率公式
+                      - listitem [ref=f28e83]: 完成课后习题 3—8
+                      - listitem [ref=f28e84]: 把易错步骤记进复习笔记
+                  - generic [ref=f28e85]:
+                    - generic [ref=f28e86]:
+                      - term [ref=f28e87]: 提交 / 产物
+                      - definition [ref=f28e88]: 个人复习笔记
+                    - generic [ref=f28e89]:
+                      - term [ref=f28e90]: 来源
+                      - definition [ref=f28e91]: 概率论复习安排
+            - article [ref=f28e92]:
+              - generic [ref=f28e93]:
+                - generic [ref=f28e94]:
+                  - generic [ref=f28e95]:
+                    - generic [ref=f28e96]: 研究实验
+                    - generic [ref=f28e97]: 03 / TODAY
+                  - heading "整理第一组实验数据" [level=2] [ref=f28e98]
+                  - generic [ref=f28e99]:
+                    - text: 截止时间
+                    - paragraph [ref=f28e100]: 11 月 20 日 · 18:00
+                  - generic [ref=f28e101]:
+                    - button "完成任务：整理第一组实验数据" [ref=f28e102] [cursor=pointer]: 标记完成
+                    - button "翻到背面查看整理第一组实验数据的要求" [ref=f28e104] [cursor=pointer]:
+                      - text: 翻面看要求
+                      - generic [ref=f28e105]: ↗
+                - generic [aria-hidden] [ref=f28e106]:
+                  - generic [ref=f28e107]:
+                    - generic [ref=f28e108]: 便签背面 / 任务要求
+                    - button [ref=f28e109] [cursor=pointer]: 翻回正面 ↶
+                  - heading [level=3] [ref=f28e110]: 整理第一组实验数据
+                  - generic [ref=f28e111]:
+                    - text: 要做好的几件事
+                    - list [ref=f28e112]:
+                      - listitem [ref=f28e113]: 检查缺失值与异常样本
+                      - listitem [ref=f28e114]: 统一记录实验参数
+                      - listitem [ref=f28e115]: 整理一张结果对比表
+                  - generic [ref=f28e116]:
+                    - generic [ref=f28e117]:
+                      - term [ref=f28e118]: 提交 / 产物
+                      - definition [ref=f28e119]: 实验记录 · CSV 与图表
+                    - generic [ref=f28e120]:
+                      - term [ref=f28e121]: 来源
+                      - definition [ref=f28e122]: 本周实验计划
+          - generic [ref=f28e123]:
+            - generic [ref=f28e124]:
+              - generic [ref=f28e125]: 今日进度
+              - strong [ref=f28e126]: 0 / 3
+            - paragraph [ref=f28e128]: 正面记住要做什么，背面收好怎么做。虚构任务 · 当前页面临时演示 · 刷新重置
+            - button "看看所有任务 ↗" [ref=f28e129] [cursor=pointer]
+  - status

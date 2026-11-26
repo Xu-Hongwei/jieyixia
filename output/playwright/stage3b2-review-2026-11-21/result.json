@@ -1,0 +1,86 @@
+[
+  {
+    "case": "same_component_parameter_navigation",
+    "url": "http://127.0.0.1:5183/#/today",
+    "dialog": 0,
+    "invalidShown": 1,
+    "persisted": {
+      "id": "1e467ba6-a092-4e30-984a-788f0ed2bcf5",
+      "kind": "focus_session",
+      "workspace_id": "personal",
+      "task_id": "t1",
+      "action_id": "a1",
+      "plan_item_id": null,
+      "started_at": "2026-11-21T13:31:57.022Z",
+      "accumulated_ms": 0,
+      "running": true,
+      "draft_md": "",
+      "outcome": null,
+      "blocker": null,
+      "ended_at": null,
+      "is_demo": false,
+      "record_version": 1,
+      "timer_anchor_at": "2026-11-21T13:31:57.022Z",
+      "task_snapshot": {
+        "title": "完成简历初稿",
+        "matter_name": "求职准备",
+        "deadline_value": "2026-11-25T18:00",
+        "deadline_precision": "datetime",
+        "captured_at": "2026-11-21T13:31:57.022Z"
+      },
+      "action_snapshot": {
+        "text": "写教育背景",
+        "minutes": 25,
+        "captured_at": "2026-11-21T13:31:57.022Z"
+      },
+      "task_ref_state": "active",
+      "action_ref_state": "active"
+    },
+    "textAfterReload": "",
+    "errors": []
+  },
+  {
+    "case": "end_form_labels",
+    "buttons": [
+      "取消",
+      "结束并保存"
+    ]
+  },
+  {
+    "case": "normal_end_navigation",
+    "url": "http://127.0.0.1:5183/#/tasks/t1?recorded=1bd7fc4e-8970-4b07-a660-82358c4c9601",
+    "persisted": {
+      "id": "1bd7fc4e-8970-4b07-a660-82358c4c9601",
+      "kind": "focus_session",
+      "workspace_id": "personal",
+      "task_id": "t1",
+      "action_id": "a1",
+      "plan_item_id": null,
+      "started_at": "2026-11-21T13:31:59.232Z",
+      "accumulated_ms": 91,
+      "running": false,
+      "draft_md": "正常结束成果",
+      "outcome": "partial",
+      "blocker": null,
+      "ended_at": "2026-11-21T13:31:59.323Z",
+      "is_demo": false,
+      "record_version": 1,
+      "timer_anchor_at": null,
+      "task_snapshot": {
+        "title": "完成简历初稿",
+        "matter_name": "求职准备",
+        "deadline_value": "2026-11-25T18:00",
+        "deadline_precision": "datetime",
+        "captured_at": "2026-11-21T13:31:59.232Z"
+      },
+      "action_snapshot": {
+        "text": "写教育背景",
+        "minutes": 25,
+        "captured_at": "2026-11-21T13:31:59.232Z"
+      },
+      "task_ref_state": "active",
+      "action_ref_state": "active"
+    },
+    "errors": []
+  }
+]

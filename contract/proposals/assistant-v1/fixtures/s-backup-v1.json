@@ -1,0 +1,21 @@
+{
+  "id": "s-backup-v1",
+  "title": "v1/0.4.0 旧备份按旧语义恢复",
+  "layer": "scenario",
+  "mode": "expect",
+  "target": "scenario",
+  "acceptance": [
+    "B0-14"
+  ],
+  "implement_batch": "5B-1",
+  "payload": {
+    "scenario": "backup_compat",
+    "backup_format_version": 1,
+    "schema_version": "0.4.0"
+  },
+  "expected_error": null,
+  "expected": {
+    "behavior": "restore_old_semantics_empty_assistant"
+  },
+  "notes": "设计验证：冻结规则表核对，非真实浏览器/数据库验收"
+}
