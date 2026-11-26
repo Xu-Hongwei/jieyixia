@@ -1,0 +1,35 @@
+{
+	admin off
+	persist_config off
+}
+
+{$JXL_SITE} {
+	encode zstd gzip
+
+	@personal {
+		method POST
+		path /api/qwen/verify /api/qwen/analyze /api/qwen/propose
+	}
+	handle @personal {
+		reverse_proxy api:8000 {
+			header_up Authorization "Bearer {$JXL_API_TOKEN}"
+			header_up X-Forwarded-For {remote_host}
+		}
+	}
+	@health {
+		method GET
+		path /api/healthz
+	}
+	handle @health {
+		reverse_proxy api:8000
+	}
+	handle /api/* {
+		respond 404
+	}
+	handle {
+		root * /srv
+		header / Cache-Control "no-cache"
+		header /index.html Cache-Control "no-cache"
+		file_server
+	}
+}

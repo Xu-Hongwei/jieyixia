@@ -1,0 +1,49 @@
+name: jiexialai
+services:
+  api:
+    build: ./api
+    restart: unless-stopped
+    environment:
+      JXL_PROVIDER: fixture
+      JXL_API_TOKEN: ${JXL_API_TOKEN:?Run start.sh first}
+      JXL_MAX_CONCURRENT_ANALYZE: "2"
+      JXL_CORS_ORIGINS: ""
+    command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--proxy-headers", "--forwarded-allow-ips", "${GATEWAY_IP:-172.30.92.2}"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/healthz', timeout=3).close()"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 10s
+    networks:
+      app:
+        ipv4_address: ${API_IP:-172.30.92.3}
+  web:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      JXL_SITE: ${JXL_SITE:?Run start.sh first}
+      JXL_API_TOKEN: ${JXL_API_TOKEN:?Run start.sh first}
+    ports:
+      - "${HTTP_BIND:?Run start.sh first}:80"
+      - "${HTTPS_BIND:?Run start.sh first}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./web:/srv:ro
+      - tls_data:/data
+      - caddy_config:/config
+    networks:
+      app:
+        ipv4_address: ${GATEWAY_IP:-172.30.92.2}
+
+networks:
+  app:
+    ipam:
+      config:
+        - subnet: ${APP_SUBNET:-172.30.92.0/28}
+volumes:
+  tls_data:
+  caddy_config:

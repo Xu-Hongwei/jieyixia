@@ -1,0 +1,14 @@
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:23] "GET / HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:23] code 404, message File not found
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:23] "GET /api/healthz HTTP/1.1" 404 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:25] "GET / HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:25] "GET /assets/index-Dsvp-FPY.css HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:25] "GET /assets/index-Br4pgCCf.js HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:25] code 404, message File not found
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:25] "GET /favicon.ico HTTP/1.1" 404 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:25] code 404, message File not found
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:25] "GET /api/healthz HTTP/1.1" 404 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:27] "GET /assets/AssistantPage-CeMpzGob.js HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:27] "GET /assets/contractSchema-CkE0UOg_.js HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:27] "GET /assets/DataPage-B2LOtyfF.js HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [26/Nov/2026 22:21:41] "GET /assets/course-notice-Ew9Shbyg.png HTTP/1.1" 200 -

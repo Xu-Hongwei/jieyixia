@@ -15,6 +15,7 @@ from .providers import ModelProvider, ModelProposeProvider
 
 router = APIRouter(prefix="/api/qwen", tags=["personal-qwen"])
 HOST = "https://dashscope.aliyuncs.com"
+MODEL = "qwen3.8-flash"
 KEY_HEADER = "X-JXL-Qwen-Key"
 
 
@@ -41,9 +42,10 @@ class PersonalQwenAdapter(OpenAICompatibleAdapter):
             raise
 
 
-def _router(key: str, model: str, max_tokens: int) -> ModelRouter:
-    profile = ModelProfile(name=model, protocol="openai", model=model, api_key_env="",
-                           base_url=HOST + "/compatible-mode/v1", max_tokens=max_tokens, retries=0)
+def _router(key: str, max_tokens: int) -> ModelRouter:
+    profile = ModelProfile(name=MODEL, protocol="openai", model=MODEL, api_key_env="",
+                           base_url=HOST + "/compatible-mode/v1", max_tokens=max_tokens,
+                           retries=0, extra_body={"enable_thinking": False})
     return ModelRouter([PersonalQwenAdapter(profile, key)], attempt_gate=MODEL_QUOTA.consume)
 
 
@@ -52,7 +54,7 @@ def verify(request: Request):
     key = _key(request)
     try:
         with httpx.Client(timeout=8, trust_env=False, follow_redirects=False) as client:
-            response = client.get(HOST + "/api/v1/models", params={"model": "qwen-plus", "page_size": 1},
+            response = client.get(HOST + "/api/v1/models", params={"model": MODEL, "page_size": 1},
                                   headers={"Authorization": "Bearer " + key})
         if response.status_code in (401, 403):
             raise _denied()
@@ -69,11 +71,10 @@ def verify(request: Request):
 
 @router.post("/analyze")
 def personal_analyze(payload: AnalyzeRequest, request: Request) -> AnalyzeResponse:
-    model = "qwen-vl-plus" if payload.image_base64 else "qwen-plus"
-    return analyze(payload, ModelProvider(_router(_key(request), model, 4096)), fail=None)
+    return analyze(payload, ModelProvider(_router(_key(request), 4096)), fail=None)
 
 
 @router.post("/propose")
 async def personal_propose(request: Request) -> AssistantProposeResponse:
-    provider = ModelProposeProvider(_router(_key(request), "qwen-plus", LIMITS["propose_profile_max_tokens"]["value"]))
+    provider = ModelProposeProvider(_router(_key(request), LIMITS["propose_profile_max_tokens"]["value"]))
     return await propose(request, provider, fail=None)

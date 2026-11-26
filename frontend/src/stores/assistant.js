@@ -243,6 +243,28 @@ export const useAssistantStore = defineStore('assistant', () => {
     stale.value = false
   }
 
+  function revisePlanRequest() {
+    const draft = activeDraft.value
+    if (!draft || draft.mode === 'replan') return
+    const saved = requestService.loadInputForm(draft.id)
+    const firstRequest = active.value.thread?.messages?.find(m => m.role === 'user' && m.type === 'text')
+    const next = {
+      userText: firstRequest?.user_input?.original_user_request ?? firstRequest?.content ?? '',
+      sourceIds: (draft.source_refs ?? []).filter(ref => ref.object_type === 'source').map(ref => ref.id),
+      taskIds: [], actionIds: [], excerpts: {}, startDate: null, budgets: {}, unavailable: [],
+      ...saved,
+    }
+    next.sourceIds = next.sourceIds.filter(id => app.sources.some(source => source.id === id))
+    const schedule = draft.planning_input
+    if (schedule?.days?.length) {
+      next.startDate = schedule.start_date
+      next.budgets = Object.fromEntries(schedule.days.map(day => [day.date, day.budget_minutes]))
+      next.unavailable = schedule.days.filter(day => day.budget_minutes === 0).map(day => day.date)
+    }
+    close()
+    input.value = next
+  }
+
   // ---- 演示载入（显式点击）：个人空间先切演示空间并明确提示；日期按点击时北京今天生成。 ----
   async function loadDemo(kind = 'report') {
     busy.value.loading = true
@@ -1030,7 +1052,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     threads, drafts, active, prepared, adoptResult, busy, notice, formDefaults, stale, scheduleClarifications,
     activeDraft, readiness, canAdopt, replanPanelDirty, setReplanForm, clearPrepared,
     input, inputRestore, gen, generating,
-    init, reset, open, close, loadDemo,
+    init, reset, open, close, revisePlanRequest, loadDemo,
     editContent, confirm, confirmDeadline, confirmGap, scheduleGap, confirmOverbook, confirmExtraWork, setManualDeadline,
     startReplan, confirmReplanScope, saveReplanContent, setReplanStart,
     appendUserText, reschedule, prepare, adopt, resolveResult, forkDraft, discardDraft,

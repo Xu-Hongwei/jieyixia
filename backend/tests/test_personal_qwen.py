@@ -18,20 +18,22 @@ def test_verify_requires_valid_key_and_uses_fixed_catalog(client):
         result = client.post("/api/qwen/verify", headers={qwen.KEY_HEADER: key})
         assert result.json() == {"connected": True}
         assert get.call_args.args == (qwen.HOST + "/api/v1/models",)
+        assert get.call_args.kwargs["params"]["model"] == qwen.MODEL
         assert get.call_args.kwargs["headers"] == {"Authorization": "Bearer " + key}
         get.return_value = httpx.Response(403, text=key)
         denied = client.post("/api/qwen/verify", headers={qwen.KEY_HEADER: key})
         assert denied.status_code == 403 and key not in denied.text
 
 
-@pytest.mark.parametrize("image,model", [(None, "qwen-plus"), ("image", "qwen-vl-plus")])
-def test_personal_analysis_keeps_keys_separate(image, model):
+@pytest.mark.parametrize("image", [None, "image"])
+def test_personal_analysis_keeps_keys_separate(image):
     payload = SimpleNamespace(image_base64=image)
     with patch("app.qwen.analyze", side_effect=lambda _, provider, fail: provider):
         providers = [qwen.personal_analyze(payload, SimpleNamespace(headers={qwen.KEY_HEADER: key}))
                      for key in ("sk-unit-test-one", "sk-unit-test-two")]
         adapters = [provider._router._adapters for provider in providers]
-        assert all(len(group) == 1 and group[0].profile.model == model for group in adapters)
+        assert all(len(group) == 1 and group[0].profile.model == "qwen3.8-flash" for group in adapters)
+        assert all(group[0].profile.extra_body == {"enable_thinking": False} for group in adapters)
         assert [group[0]._key for group in adapters] == ["sk-unit-test-one", "sk-unit-test-two"]
         with pytest.raises(ApiFault):
             qwen.personal_analyze(payload, SimpleNamespace(headers={}))

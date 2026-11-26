@@ -38,6 +38,7 @@ const tab = ref('edit')
 const workflowHeader = ref(null)
 watch(tab, async () => {
   await nextTick()
+  if (!draft.value) return
   workflowHeader.value?.querySelector('[aria-current="step"]')?.focus({ preventScroll: true })
   workflowHeader.value?.scrollIntoView({ block: 'start' })
 })
@@ -546,6 +547,18 @@ async function saveExtra() {
 
 // 步骤只控制可见区域；事实确认、排程与采用仍由原服务判断。
 const previewCurrent = computed(() => !!result.value && !store.stale && !contentDirty.value && !windowDirty.value && !store.replanPanelDirty)
+const emptyPlan = computed(() => editable.value && !isReplan.value && previewCurrent.value
+  && !result.value.segments.length && !gapRows.value.length && !estimateUnknown.value.length
+  && readiness.value?.blockers?.some(blocker => blocker.code === 'NO_ADOPTABLE_CHANGES'))
+
+async function reviseEmptyPlan() {
+  if (!emptyPlan.value || !(await guardLeave())) return
+  entryMode.value = 'create'
+  replanEntry.value = null
+  store.revisePlanRequest()
+  await nextTick()
+  document.getElementById('assistant-requirement')?.focus()
+}
 const workflowBusy = computed(() => advancing.value || preparing.value || store.generating || Object.values(store.busy).some(Boolean) || !!replanRef.value?.busy || !!inputRef.value?.busy)
 const replanSteps = [{ key: 'input', label: '提供资料' }, { key: 'edit', label: '核对建议' }, { key: 'preview', label: '预览安排' }, { key: 'adopt', label: '确认加入' }]
 const steps = computed(() => isReplan.value ? replanSteps : [
@@ -826,6 +839,18 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
 
         <!-- 预览区 -->
         <section v-show="tab === 'preview'" class="space-y-4" aria-label="预览安排">
+          <div v-if="emptyPlan" class="space-y-3 border-y py-5">
+            <h3 class="text-xl font-semibold">本次没有新增安排</h3>
+            <p class="text-sm text-muted-foreground">草案已保留。可以补充要做的事和期望日期，再生成方案。</p>
+            <ul v-if="result.excluded_items?.length" class="list-disc pl-5 text-sm">
+              <li v-for="item in result.excluded_items" :key="item.work_item_key">{{ workTitle(item.work_item_key) }} · {{ item.reason }}</li>
+            </ul>
+            <div class="flex flex-wrap gap-2">
+              <Button :disabled="workflowBusy" @click="reviseEmptyPlan">调整要求</Button>
+              <Button variant="outline" :disabled="workflowBusy" @click="router.push('/today')">查看日程</Button>
+            </div>
+          </div>
+          <template v-else>
           <Alert v-if="replanZeroNew" variant="warning">本次还没有新安排。可以为下方未排工作选择时间，也可以返回调整工作量。</Alert>
           <Alert v-if="!previewCurrent" variant="warning">这是上一次预览，请返回核对建议更新后再采用。</Alert>
           <div v-if="estimateUnknown.length || overbookConfirms.length || extraWorkConfirms.length || previewBlockers.length || !result" class="space-y-2 border-b pb-4">
@@ -903,6 +928,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           <p v-if="!isReplan && canAdopt && adoptionCounts" class="text-sm text-muted-foreground">将新增 {{ adoptionCounts.tasks_created }} 个任务、{{ adoptionCounts.actions_created }} 个行动。</p>
           <div class="flex flex-wrap justify-between gap-2 border-t pt-4"><Button variant="outline" @click="tab = 'edit'">修改任务与时间</Button><Button v-if="isReplan" :disabled="!canAdopt" @click="tab = 'adopt'">下一步：确认加入</Button><Button v-else-if="!applied" :disabled="!canAdopt || workflowBusy" @click="openAdopt">将计划加入日程（{{ adoptionCounts?.plan_items_created ?? result?.segments?.length ?? 0 }} 项安排）</Button></div>
           <p v-if="!canAdopt" class="text-sm text-muted-foreground">请处理上方待确认项；修改任务或时间请返回核对建议。</p>
+          </template>
         </section>
         <section v-show="tab === 'adopt' && !applied" class="space-y-4" aria-label="确认加入">
           <div class="rounded-lg border bg-card p-4">
