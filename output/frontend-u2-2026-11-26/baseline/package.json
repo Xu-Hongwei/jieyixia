@@ -1,0 +1,35 @@
+{
+  "name": "jiexialai-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "「截下来」产品前端：收集 → 核对 → 建任务 → 刷新恢复（第一轮闭环）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "vue-tsc --noEmit -p jsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "fflate": "0.8.3",
+    "lucide-vue-next": "^0.525.0",
+    "pinia": "^3.0.3",
+    "reka-ui": "^2.10.4",
+    "tailwind-merge": "^3.3.1",
+    "vue": "^3.5.17",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "fake-indexeddb": "^6.0.1",
+    "playwright-core": "^1.65.1",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.4",
+    "vue-tsc": "^3.0.5"
+  }
+}

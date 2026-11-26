@@ -1,0 +1,646 @@
+[
+  {
+    "path": "src\\App.vue",
+    "sha256": "E579680942E46E705108077FB79FEA003A175A7F6755D23EECD112C51FE0B557"
+  },
+  {
+    "path": "src\\main.js",
+    "sha256": "BBD57AA95365A93F99799D81345BF3838E31459BEC12BBF1EF7FB8067C7E6BB5"
+  },
+  {
+    "path": "src\\app\\router.js",
+    "sha256": "E521AEDC220D24069EBCD84A47A5CEA8E43D086CED812D8817E8F24D98AE0C46"
+  },
+  {
+    "path": "src\\components\\assistant\\GenerationPanel.vue",
+    "sha256": "6838272B14512121D8C228E47BC07BB5AB739059C942A58B24057B13BE176337"
+  },
+  {
+    "path": "src\\components\\assistant\\PlanInput.vue",
+    "sha256": "E61326AFC891804F1EBAC9C532FD93E39411A009A02C11C926CF23C567FF0B4C"
+  },
+  {
+    "path": "src\\components\\assistant\\ReplanPanel.vue",
+    "sha256": "E129A5C0E7B5889AD58293797DEED92AE1865463D7A71170570B5BBF18E6B76F"
+  },
+  {
+    "path": "src\\components\\assistant\\SourceReview.vue",
+    "sha256": "BBD6BE9776696952F2C6C467CD2B3AE171A3698167A00A5FB89859EB0E751895"
+  },
+  {
+    "path": "src\\components\\domain\\ContinueBar.vue",
+    "sha256": "B82030E9A08E070F1E8492DB8720722C6CDF1767B9DC7135D537E64C10AB82FE"
+  },
+  {
+    "path": "src\\components\\domain\\DayDeadlineZone.vue",
+    "sha256": "E6633722CC8DC3214B3CEC0D1B8278568F277C22F3C72AD34A775DAF315FE837"
+  },
+  {
+    "path": "src\\components\\domain\\DayTwoZones.vue",
+    "sha256": "F391DC80A740F8A6ECB8701F8D766A634F32CF273A181E4169D5AD8C45E2F15D"
+  },
+  {
+    "path": "src\\components\\domain\\DayWorkZone.vue",
+    "sha256": "725BE80A76DAA5FA1973D5DB09138B253317270F6B412095A432B9CB93DB05A1"
+  },
+  {
+    "path": "src\\components\\domain\\DeadlineChip.vue",
+    "sha256": "631D11334DFD64B809B40BC3903B5CFFCF15691E52B5DBBA044A6C960892E9B6"
+  },
+  {
+    "path": "src\\components\\domain\\DeleteImpact.vue",
+    "sha256": "D36BA76CB9416C6630116C234F23CC01EF093996081D7308DB133AB58DE52F3C"
+  },
+  {
+    "path": "src\\components\\domain\\EndSessionForm.vue",
+    "sha256": "37FDB2F1567DC5846554D3B56E258C1C4D7460A01A4DED341AAA00FA66BEAF7F"
+  },
+  {
+    "path": "src\\components\\domain\\FieldCard.vue",
+    "sha256": "78751C06B90659A485BF8EB40DE4B58CB33FB77DE3C9000F7B89659EED695B76"
+  },
+  {
+    "path": "src\\components\\domain\\NodeSelect.vue",
+    "sha256": "AE6D2CDC538B9D228EE1B36E1223E5201A7CBF1031D2FC84791D9B1B1DD3605F"
+  },
+  {
+    "path": "src\\components\\domain\\PlanCard.vue",
+    "sha256": "7CE11D014629B438D98418E2AB1087B142692B9813638DDC9F5DB542176DC266"
+  },
+  {
+    "path": "src\\components\\domain\\PlanDetail.vue",
+    "sha256": "A12106580047482F1EDEB8F46CE578D2556B570FAEF60F197CFF1521EE80D511"
+  },
+  {
+    "path": "src\\components\\domain\\PlanEditor.vue",
+    "sha256": "13382628C78B0527C9B9CE3ED0085D50E03033B4BBD8C14AC75A47D0018E1C09"
+  },
+  {
+    "path": "src\\components\\domain\\StartPlanWorkDialog.vue",
+    "sha256": "8A354B43E8395E74C247337696DF51B3613A80681E458809E82BAB3C2C1DAA9A"
+  },
+  {
+    "path": "src\\components\\domain\\TaskListsPanel.vue",
+    "sha256": "D5824C35FD711615EA04DF0C66ADDAD69612F7E1F9794903B305A1A5AB0A1486"
+  },
+  {
+    "path": "src\\components\\domain\\TaskRow.vue",
+    "sha256": "E80E07C4201ECF23869C62105AB3FA688BC92068586F08501EF62C94F59951F4"
+  },
+  {
+    "path": "src\\components\\domain\\WeekView.vue",
+    "sha256": "052B78B418D563EAFBBE307CF45260D347DCB9A5916795F0ADBC21F9B6EB3688"
+  },
+  {
+    "path": "src\\components\\domain\\WorkMaterials.vue",
+    "sha256": "E3495AD077AFBBCEC88264242DD4D460FE8D0D12060E5437453FA449AA64BFD2"
+  },
+  {
+    "path": "src\\components\\domain\\WorkProtectionDialog.vue",
+    "sha256": "8644EEEEE338A0CE15EAD13A2197F6770FFC6A6FF4D12B06F622C30D11CDAF2D"
+  },
+  {
+    "path": "src\\components\\domain\\WorkspaceSwitcher.vue",
+    "sha256": "AE097456F0E63656734D568DC898133218876EB2F9261651D7AB066FD636E322"
+  },
+  {
+    "path": "src\\components\\ui\\Alert.vue",
+    "sha256": "428462CDF894843380773C416F7BF17A81207BAF3345CBC4C0E1957E3D32DB1D"
+  },
+  {
+    "path": "src\\components\\ui\\Badge.vue",
+    "sha256": "725355DDBCB387C513BFC7774ADE3B219DA42D62E989A9DF5A049EBD1757718E"
+  },
+  {
+    "path": "src\\components\\ui\\Button.vue",
+    "sha256": "B5C32B9D5C77F85859B6BAE9D7E3502670CE3E0ECD9A6B5935B99A5FC8A4AA66"
+  },
+  {
+    "path": "src\\components\\ui\\Card.vue",
+    "sha256": "F7BE85176C2E2040E45E142BD7A2DD9E709B517D045754CE239FCC4AF6A1EA2C"
+  },
+  {
+    "path": "src\\components\\ui\\ConfirmDialog.vue",
+    "sha256": "9A96C8349347C5AA65417B907D39AA3B40ECBCB20FB8C8F5F2161BECF7718B1F"
+  },
+  {
+    "path": "src\\components\\ui\\DateInput.vue",
+    "sha256": "1A765D56E4D8452E7765C38F105551D11B63165376E499821A333EB543A84255"
+  },
+  {
+    "path": "src\\components\\ui\\Input.vue",
+    "sha256": "23A9E03C23A212B05BFB822F88E7DCE4E6CBDFEF26F2C3B76987A879718B25AC"
+  },
+  {
+    "path": "src\\components\\ui\\Separator.vue",
+    "sha256": "E0E6789E6EE0A8C864AA34CB3E5E76726061102F777164C0ED5601867A5F91AE"
+  },
+  {
+    "path": "src\\components\\ui\\Textarea.vue",
+    "sha256": "F47D5A717D2059D449014F9D26BAA6805FED83D26E6785DD763288B7046E2236"
+  },
+  {
+    "path": "src\\composables\\usePlanWorkStart.js",
+    "sha256": "D1B534A2EDB4926DAD71F55A4B572CF65442D3D133883B74C5E2A91B2C0EEC24"
+  },
+  {
+    "path": "src\\composables\\useWorkDraft.js",
+    "sha256": "C5D5994F6AD3063120678187EE90583F13F94D4B4FE03EBA4DB1DAA1A815666B"
+  },
+  {
+    "path": "src\\composables\\workLeave.js",
+    "sha256": "8B6EC4ECD4C9E72B8F3C1EE9BFE2D0AF79E9217B9F579EDCB1C638B7A0D19009"
+  },
+  {
+    "path": "src\\domains\\action.js",
+    "sha256": "C9757F582EE5F1B14FBFC47E9EFA2200B60492EE9BB3B42E36515A7ECB956A44"
+  },
+  {
+    "path": "src\\domains\\focus.js",
+    "sha256": "7AAC97ED583574BF4521965DDEDE43A742DF7EE5E335B2B9406F47E8CBC08CFF"
+  },
+  {
+    "path": "src\\domains\\labels.js",
+    "sha256": "AB3DE61201F8C293CD3FC95F9BA225A6FC28F84E7D644B9D77D6D7CF7BB88625"
+  },
+  {
+    "path": "src\\domains\\matter.js",
+    "sha256": "AAF9A66EBBF348037B73EF6252A15511D3180EE9BEEB651B79D5B3B40AAC71DE"
+  },
+  {
+    "path": "src\\domains\\note.js",
+    "sha256": "5A3DCF48C8881C7003F22FF009CB0169EF693D5786BDB5772C8BAEA0C5A66BF9"
+  },
+  {
+    "path": "src\\domains\\organize.js",
+    "sha256": "4754EEEFC062EE0974394DA735328FF5E7055C8E70C6EFE00CAC2906E10B7F17"
+  },
+  {
+    "path": "src\\domains\\plan.js",
+    "sha256": "E27FF17A53FB070262FF0A52E126FFA969AFB917B5582D2E2DC840F5A8640956"
+  },
+  {
+    "path": "src\\domains\\time.js",
+    "sha256": "79C82B022A355947D73607CFB77509D89CFE07E38080B683BA7C0BCB95FE912B"
+  },
+  {
+    "path": "src\\domains\\week.js",
+    "sha256": "A06804070E47AA8A4DC123004A392346AB59E97118CBD9FC32C586774C5E726E"
+  },
+  {
+    "path": "src\\domains\\work.js",
+    "sha256": "240D703CA3CF32AA63A2F1D135DF655A8B228C7726FF31E9B4E44FC590374D5C"
+  },
+  {
+    "path": "src\\domains\\workNavigation.js",
+    "sha256": "FC52DF03E891E96FBF64C6CF3CCE849A34512FC5516961150B0C23F2B6F2A612"
+  },
+  {
+    "path": "src\\domains\\assistant\\application.js",
+    "sha256": "EE4DAE64CA82F17918D00981E43B7E5022F7408848FDA16BB0E2E149F3D3A53E"
+  },
+  {
+    "path": "src\\domains\\assistant\\clarification.js",
+    "sha256": "6063EFA59720C0383B5A7C2BF076181BC76D9DBA10F895B5479310D059B87BA3"
+  },
+  {
+    "path": "src\\domains\\assistant\\draft.js",
+    "sha256": "BB641E10D734A7A9AF30065DB1D896FEF5BE91C36D68CD05311BAE3EE789561E"
+  },
+  {
+    "path": "src\\domains\\assistant\\refs.js",
+    "sha256": "E7967D32683C83D91B27CBFD97F70CDC0F1601E9723CEAEAFBD0F1E04F3A5775"
+  },
+  {
+    "path": "src\\domains\\assistant\\replan.js",
+    "sha256": "1835ABADFEA750742F2C833E75360FC37FCF44D091210D93242630E837D77145"
+  },
+  {
+    "path": "src\\domains\\planning\\normalize.js",
+    "sha256": "3E5EDC78B357759CB736ED8D28C112B36BD2DED3ECAC2C3FA87CF904CF93E0FD"
+  },
+  {
+    "path": "src\\domains\\planning\\protocol.js",
+    "sha256": "CFBEBA797981F59EB3074DCB0EF2B9898C3E6FEFBA19D14683EFE0CDFC26FBBD"
+  },
+  {
+    "path": "src\\domains\\planning\\schedule.js",
+    "sha256": "882C53E166801A554A1DB88581A2CB236BA8514207C7E60C8487F50A4B0CA105"
+  },
+  {
+    "path": "src\\domains\\planning\\validate.js",
+    "sha256": "A2EE4365A5A95988186DCAB85EE53295135772627C1712607AA32E5C71267998"
+  },
+  {
+    "path": "src\\lib\\utils.js",
+    "sha256": "BEDED4CAB01FCFF80C618207DDF92D06AFE6D87FC479A9C656E540A24D1BB5BF"
+  },
+  {
+    "path": "src\\pages\\AssistantPage.vue",
+    "sha256": "60AA54E788D940D011E0DB300EA07107E2DFFAFD0A561BA60E16DA38CF4D1BB5"
+  },
+  {
+    "path": "src\\pages\\CollectPage.vue",
+    "sha256": "564C044E0F99E62A67A50996A691D1919F923D7E264016E7BD7F254665842E79"
+  },
+  {
+    "path": "src\\pages\\DataPage.vue",
+    "sha256": "75FBDE510FDCDD41E45CC2D932A2C8B4CAEF5DE5F1E6690B1C2C089EA3F5CF90"
+  },
+  {
+    "path": "src\\pages\\NotesPage.vue",
+    "sha256": "BEDF5E8498119E33212AE024FD9EC147879BBB3297AAE026B10C71E2E1C93E68"
+  },
+  {
+    "path": "src\\pages\\TaskDetailPage.vue",
+    "sha256": "5C040CAD9CC12D2963D68644FF8B3F9935FC3D64292B83A6EDFE69CF8E4EDD0F"
+  },
+  {
+    "path": "src\\pages\\TodayPage.vue",
+    "sha256": "159E72D121466DA48815D3168F19391072B0418B08A1FD27CA9EB7ECA1E3C2F9"
+  },
+  {
+    "path": "src\\pages\\WorkPage.vue",
+    "sha256": "0F9C9FE8A9B4ECD5A619D20F4F0F31C9D28F60A0293FD0A973EFF5E95D9A79E1"
+  },
+  {
+    "path": "src\\pages\\WorkRecordDetailPage.vue",
+    "sha256": "09AE2E30274B148C17F2A019E4BDD823E8DEB9AB5B192799505CD03DF5A2C5A3"
+  },
+  {
+    "path": "src\\pages\\WorkRecordsPage.vue",
+    "sha256": "9B646D5F48498CB7CE733D6759A3BABFC5508F33F6110B98929D4833FC6F97DC"
+  },
+  {
+    "path": "src\\services\\api\\client.js",
+    "sha256": "6CB02B2E6E5CF0E50C1D68A7F6931C5950F1D8DE7D10AC7E8F3993684B629025"
+  },
+  {
+    "path": "src\\services\\assistant\\applications.js",
+    "sha256": "8808F5A17E90540175687ED3681E8E1E10A71B37544AD32AC0A40118BF35A0B1"
+  },
+  {
+    "path": "src\\services\\assistant\\context.js",
+    "sha256": "B9348A6AD537273CE77226870E3388A35C946E90D2308F0364BFC76E222CF2E0"
+  },
+  {
+    "path": "src\\services\\assistant\\drafts.js",
+    "sha256": "1D50771953EBD19AA45A02AD3585670F6F613F2A9C1EBDEFCB52B4F87156F0CE"
+  },
+  {
+    "path": "src\\services\\assistant\\requests.js",
+    "sha256": "91113779BD68688BB9DC63AD98DEC1668B326EC4D280B0ED9D49C8F02F2401FB"
+  },
+  {
+    "path": "src\\services\\backup\\adapt.js",
+    "sha256": "F47F4FF97E5864B3FD9768C52407056BF6C0777CC1CEE1B90DC1A90DC1741EBD"
+  },
+  {
+    "path": "src\\services\\backup\\contractSchema.js",
+    "sha256": "84CEA287AB53FB569D45D4ADA7F7E47924B36CF37749720012BB6812BE4C2F1A"
+  },
+  {
+    "path": "src\\services\\backup\\export.js",
+    "sha256": "22BD23558B594585CDE895E75EDBCB5F9A86ED3F1D56B77E08DFB0A52D67B451"
+  },
+  {
+    "path": "src\\services\\backup\\format.js",
+    "sha256": "8174ECF3B1CF768CBA43320E7EE5533A77796DAD232C795315FE56A723607E1A"
+  },
+  {
+    "path": "src\\services\\backup\\import.js",
+    "sha256": "ED39A3F415CCB9E6D824009EF9B79FA8FA92A1E94E52A994FD715320631818B0"
+  },
+  {
+    "path": "src\\services\\backup\\recovery.js",
+    "sha256": "3285D0FC4AECCC1B362C0F6963BD5183F1DAFC28DD690193F6FF3FB2B35E766F"
+  },
+  {
+    "path": "src\\services\\backup\\remap.js",
+    "sha256": "7BF131B75A7B833A53A5023708AA62283A14CE886D02BC90D85CEC60DB7741BB"
+  },
+  {
+    "path": "src\\services\\backup\\restore.js",
+    "sha256": "1B317B3A01F03BE36D395AC4661E923135CF1A70A22E545F8C0E4C4B4BF50B7F"
+  },
+  {
+    "path": "src\\services\\backup\\validate.js",
+    "sha256": "C4421C968E131A15B790ADA72B8AD8213CA9A5949913FCCC13E9894FCE3444E3"
+  },
+  {
+    "path": "src\\services\\backup\\zip.js",
+    "sha256": "E3E5A46A46863FB1E2C11595D07C868F07968A01633C95A2AB6548822CE6D8DB"
+  },
+  {
+    "path": "src\\services\\focus\\runtime.js",
+    "sha256": "D1B24BD585EF1DF9C13F7857EC1788E3904BE90C0A850498B7742F59380D3E78"
+  },
+  {
+    "path": "src\\services\\focus\\service.js",
+    "sha256": "40273F569474A610200D15A050E188C84004BAA651C5B088E89D47F37CB7431E"
+  },
+  {
+    "path": "src\\services\\plan\\service.js",
+    "sha256": "98C8D067607FCD9A0346BEE1FCB4F2EFEBD72BFCFC3C01733E35D91EA62AD531"
+  },
+  {
+    "path": "src\\services\\storage\\db.js",
+    "sha256": "B14EE4A6DD0CB7F058D16A6BB15F8E5D4EFE325CA8192BF9469BAC3205313002"
+  },
+  {
+    "path": "src\\stores\\app.js",
+    "sha256": "AD9F5A0759075D3C7C52C4EA6A6043402BFACFECD9D585E0C456A94DD938D871"
+  },
+  {
+    "path": "src\\stores\\assistant.js",
+    "sha256": "71DEC38CCE37364B779B3ED221592B80804A91BAC171F07144FC07749E605665"
+  },
+  {
+    "path": "src\\stores\\focus.js",
+    "sha256": "D542FB1C94A3B7966FD6E9579427A52DD1A0E1EB952C4F6046BABCAE871AE17D"
+  },
+  {
+    "path": "src\\stores\\plan.js",
+    "sha256": "592D332431AB4903B4B8C0445B7C13AEFDF663C866CCD769C16B0D4562672388"
+  },
+  {
+    "path": "src\\styles\\main.css",
+    "sha256": "7B60F74A0A677757DB01EF9B7C6690A366AD8BE94D6A0E69E88592F9D0EC6D89"
+  },
+  {
+    "path": "src\\tests\\action.test.js",
+    "sha256": "3787205A0175F816D808F8CF1727D55142F02508FE16EF31A75250B50DB82016"
+  },
+  {
+    "path": "src\\tests\\assistant.adoption.backup.test.js",
+    "sha256": "FB9FB06951FBFFE861BABC0D647393D3B03BF62E76FC56212CC9F49630CC6237"
+  },
+  {
+    "path": "src\\tests\\assistant.adoption.service.test.js",
+    "sha256": "DA7B01DFD455D6F6BA164D7D2A4A0D2726D2C3441CF23C3519C6EE5280EFD2FE"
+  },
+  {
+    "path": "src\\tests\\assistant.application.test.js",
+    "sha256": "A4A2ACCF5EB9ABA0E97AAF6749F3CECF3AA2C0C047EC105C5801036E0EBB3A0B"
+  },
+  {
+    "path": "src\\tests\\assistant.clarification.test.js",
+    "sha256": "ADF79793502A54F3D28D63A9842744DCEEB7A2F296057AD34BD02C705EFFD1B5"
+  },
+  {
+    "path": "src\\tests\\assistant.draft.test.js",
+    "sha256": "9EC56611BE6397B904BD5A994E227AB99B60E9793BAFE4EB8081025AFF38934E"
+  },
+  {
+    "path": "src\\tests\\assistant.fixtures.js",
+    "sha256": "0DCC758EF92F83E3815E1DDE844B3B1E1486301745BECFB4048E69201A0E6F47"
+  },
+  {
+    "path": "src\\tests\\assistant.generate.store.test.js",
+    "sha256": "BE08D3EF23C6371EF3859871FB3383A8858F69EB94F54C95CD2D4D51A632BE20"
+  },
+  {
+    "path": "src\\tests\\assistant.receive.test.js",
+    "sha256": "8ECF136FF6218B9A16337F928139047A15FB91BF0B924A8D625487419849B95E"
+  },
+  {
+    "path": "src\\tests\\assistant.refs.test.js",
+    "sha256": "DEEF574FFFED9BAE1F3F8C6B6399EBF88E6E9F03B4712CCEED0FBD7AA9706722"
+  },
+  {
+    "path": "src\\tests\\assistant.replan.service.test.js",
+    "sha256": "F6DAE0EE7166899031EF1EBAEC200CD46912D8AAD09A6B2F92D9126BAD91E84A"
+  },
+  {
+    "path": "src\\tests\\assistant.replan.test.js",
+    "sha256": "C57B5859BB444256EC9A77044097538B2382ABC91E7D7368D2E58CAD59082B1A"
+  },
+  {
+    "path": "src\\tests\\assistant.requests.test.js",
+    "sha256": "B7A46DE307461C10540A8C39D10BE3CFE01CD484C4A0A65BF4EC45D9E9C3BC0C"
+  },
+  {
+    "path": "src\\tests\\assistant.service.test.js",
+    "sha256": "EA6369205E8F0A895D488F4308AD396C89CC226955376DF9BA09DDB31853E429"
+  },
+  {
+    "path": "src\\tests\\backup.adapt.test.js",
+    "sha256": "7CC88C7752CEBD5424095D6B0DF9ADE205656E9BBC424EF5D7A89D3ED799465E"
+  },
+  {
+    "path": "src\\tests\\backup.assistant.test.js",
+    "sha256": "19C1486EAF6BB28384086EFD93AB10778C2C08F0219531E0C11B4319202AC47C"
+  },
+  {
+    "path": "src\\tests\\backup.compat.test.js",
+    "sha256": "44DE5ACE13EA5A2B7FD7F0C3E1265AC34DD7DC61F0B8B25AADC7CC6DA50EEE27"
+  },
+  {
+    "path": "src\\tests\\backup.export.test.js",
+    "sha256": "7F9498A789DBA750058C76019E4B3CC6E08F72DC30CAF794FFCA788864FFE762"
+  },
+  {
+    "path": "src\\tests\\backup.format.test.js",
+    "sha256": "0A1FD93291DC11B31856824279713853D24C867BA3E690D1E56BB27BEB721A91"
+  },
+  {
+    "path": "src\\tests\\backup.import.test.js",
+    "sha256": "91391659DA9A97E9A78D751DA49C65EB8EE12C439149B46FC51AFB2EB428D492"
+  },
+  {
+    "path": "src\\tests\\backup.recovery.test.js",
+    "sha256": "DC481B5EB3B9D052731AB2BB041B1BF31018AA5ABF80F002227A8F7AE7C30D60"
+  },
+  {
+    "path": "src\\tests\\backup.remap.test.js",
+    "sha256": "082B588E5FF7F3124B1FBDA5D2CF5E66C6380EEBB1820A48F93FE3602926D6C2"
+  },
+  {
+    "path": "src\\tests\\backup.restore.test.js",
+    "sha256": "1E431B133C46A06C30435E7F0EB75F80724B24524D66623B92F79859AC7A6F39"
+  },
+  {
+    "path": "src\\tests\\backup.smoke.test.js",
+    "sha256": "D4EE325C5197DA4F1BDC600CC59AF7F3F62126F1985C3C9D817907E06324966D"
+  },
+  {
+    "path": "src\\tests\\backup.validate.test.js",
+    "sha256": "1F4FE89466443A000A66D1A60E54A0D0DFB7564CFC6C977E0D1C8DDCD6F0A938"
+  },
+  {
+    "path": "src\\tests\\backup.zipdecode.test.js",
+    "sha256": "358737F5BAB35B18D2863D8D9D4DF7EB0952A901ADC02F4BE4D1774E2C069924"
+  },
+  {
+    "path": "src\\tests\\backupFixtures.js",
+    "sha256": "BB09296E3787D4514390F6ADB905BC66C05F078B3C7A57080AA03C173F45BA17"
+  },
+  {
+    "path": "src\\tests\\contractSchema.test.js",
+    "sha256": "5F52009DC09156D9081695CD83E4F45AABDD9C35998CE7637010FEEFBFC4EE4F"
+  },
+  {
+    "path": "src\\tests\\db.migration.test.js",
+    "sha256": "E03CF7FA34F25537DB49E5EFA947AD652A38501E20EB347023B5D172F915C996"
+  },
+  {
+    "path": "src\\tests\\db.test.js",
+    "sha256": "3714EB0DBD55C58BE2A4F76F9586DE953350DEC4F62B340CBF3EB0B6029B776D"
+  },
+  {
+    "path": "src\\tests\\db.v3migration.test.js",
+    "sha256": "C509305312EB9CFA2FEA8B168CE894667737E86DCFB04F5238817A268F961A67"
+  },
+  {
+    "path": "src\\tests\\db.workspace.test.js",
+    "sha256": "BB36BC92E89926AB3DEF31F5A819106045F420D20BF4E2F5501FE42F466D5931"
+  },
+  {
+    "path": "src\\tests\\focus.plan.service.test.js",
+    "sha256": "4BE6CAF9E81FBA9DFF00C4F7334E891B2C2842CE053BAA9403D921077B6D4152"
+  },
+  {
+    "path": "src\\tests\\focus.plan.test.js",
+    "sha256": "A9D78DD8EF3BF48EF89CE8D857B9237DD65B0EC057A847E5F5342F77D0CA5C6C"
+  },
+  {
+    "path": "src\\tests\\focus.protection.test.js",
+    "sha256": "C7F8AEB7510064878DFEC7EC61DFF6CC1D4D2C365CF073A0B9D97EB42892D411"
+  },
+  {
+    "path": "src\\tests\\focus.runtime.test.js",
+    "sha256": "843DF3DC0ED6A8DEE59D93095D5F3EB2818726DC479A1FC8BDEC875E1BC21303"
+  },
+  {
+    "path": "src\\tests\\focus.service.test.js",
+    "sha256": "893274E0C2B49C16884098BC25B76C085E6739B623763053CC09EFE4DAF808DC"
+  },
+  {
+    "path": "src\\tests\\focus.store.test.js",
+    "sha256": "68FEBD8B87DD571F34DE874DB31999C25FADDE55FCF36736058D05E0FD8AFD87"
+  },
+  {
+    "path": "src\\tests\\focus.test.js",
+    "sha256": "EE6FA8AEEB851484EEFF656F4E91AAA051CF3F3166A15F036EE8821D40BCCA3A"
+  },
+  {
+    "path": "src\\tests\\matter.test.js",
+    "sha256": "B176F9C4DD07C41D01C7D3319452D33600B31A27B9882C6B4397229EE70EE278"
+  },
+  {
+    "path": "src\\tests\\note.test.js",
+    "sha256": "7455075B7C7F7F37384B88C672A5F0CBE06C10FCDF8E6F327CB77B33241CD599"
+  },
+  {
+    "path": "src\\tests\\organize.test.js",
+    "sha256": "4B012EA3970BB9C166550EBA94E0D9F68F738356A36AACF6957441843B1B2F8C"
+  },
+  {
+    "path": "src\\tests\\plan.backup.test.js",
+    "sha256": "2DCDC0E10990AAB9AD1EB129216C0164F39DE71361DE34D21AF386FC7ACE1C63"
+  },
+  {
+    "path": "src\\tests\\plan.protection.test.js",
+    "sha256": "D9542429D0BEC4FEEC76643A982D91E3B11F2AC7DA914355F5F4B6A40608D080"
+  },
+  {
+    "path": "src\\tests\\plan.review.test.js",
+    "sha256": "9D8B0B1201202D7303D3D435B03A54150B882B9D419B10A8E40F5F6A8A3D4DFB"
+  },
+  {
+    "path": "src\\tests\\plan.service.test.js",
+    "sha256": "361CEE7DA35EF964C974113C1553FA712A9F9EE65DDFFEAB0C167116D32BC99F"
+  },
+  {
+    "path": "src\\tests\\plan.store.test.js",
+    "sha256": "70B86D3B92D3723460715C42DCBD0A1C6C0FB075BDE768662EE5CC62B922EABF"
+  },
+  {
+    "path": "src\\tests\\plan.test.js",
+    "sha256": "A05F0F872FC4AD4B4179C9A2C626B78CDB6F0D135C62F1E4CD78CAA2618E6812"
+  },
+  {
+    "path": "src\\tests\\planning.golden.test.js",
+    "sha256": "FC0D9956F048D1E34D68BD419089EB80BC4A0BBB730F819ACB11220B8E2DD324"
+  },
+  {
+    "path": "src\\tests\\planning.helpers.js",
+    "sha256": "32A5F7C5319D217935580DCE1F124C9B49CBF35A8089E347386CB3A6FF5C4AB6"
+  },
+  {
+    "path": "src\\tests\\planning.refs.test.js",
+    "sha256": "85E84A0158878DB5AB00FBF43C3EE7FD17CF0A215847D8A50770974C557ADB2C"
+  },
+  {
+    "path": "src\\tests\\planning.rules.test.js",
+    "sha256": "A3110FFB89F700225C7958375252A13EDA041FB3CD7679FAFE95A5DA862B34FB"
+  },
+  {
+    "path": "src\\tests\\planning.validate.test.js",
+    "sha256": "62D739C179355231EA646D67FE7209F73BD18322BFF1FDD8F66BEC852B55C92F"
+  },
+  {
+    "path": "src\\tests\\planStartEntry.test.js",
+    "sha256": "D9DCC69B30357260FC8F6476056971984C49EF326D9D9392E3B5D3A6AD980F16"
+  },
+  {
+    "path": "src\\tests\\restore.wiring.test.js",
+    "sha256": "B9A176257709BF5D96848E34F1F43E7FC7E5F3F5C85C4F1F7904C990694578B8"
+  },
+  {
+    "path": "src\\tests\\review-stage2.test.js",
+    "sha256": "D3307CF7D33B05241C136BD2B64FE6EDDD1EEA38C69808C556EE9117A5DE8ABC"
+  },
+  {
+    "path": "src\\tests\\store.test.js",
+    "sha256": "03CE5A954D6C76F00BF1D808F8CFA2976298302E536E1EAF969C98CDE6594AFB"
+  },
+  {
+    "path": "src\\tests\\time.test.js",
+    "sha256": "C7EF70A36923410A912734A9057DBD6EB6C5F8E2BE09EF126108110C44BA0CDD"
+  },
+  {
+    "path": "src\\tests\\usePlanWorkStart.test.js",
+    "sha256": "356B148E860452F92DAF34EF4C1F32E63B67432889E60E9CD2B1DCA0FF39AFE7"
+  },
+  {
+    "path": "src\\tests\\useWorkDraft.test.js",
+    "sha256": "87E45B7A8D3DEA71EB258F4B5B2DF75A185EE28F5AD10A4C97395037FB97CAA9"
+  },
+  {
+    "path": "src\\tests\\week.test.js",
+    "sha256": "A6FBCD78C1DBEF51EA864FDBB6BA5302F5BAF70808AAB7F9423704C7BC984298"
+  },
+  {
+    "path": "src\\tests\\work.test.js",
+    "sha256": "9BDA65685398103FF98B10CDFA3757F52C9CE0DBF4E485F7E4011C4F92FC1F2A"
+  },
+  {
+    "path": "src\\tests\\workLeave.test.js",
+    "sha256": "CA9BD79C798486BB11AECF7923C3C31FA284EEADA67DC803AD60458E9BBF1DCF"
+  },
+  {
+    "path": "src\\tests\\workNavigation.test.js",
+    "sha256": "F662D2481AF25D03280649752D5DA6D0078687B7EF54304675A7B30C4F8045D4"
+  },
+  {
+    "path": "index.html",
+    "sha256": "5B6F754D91EE4B44F93689DDC45EF0F717A1C49405859FBCFDAB0D4C90765A94"
+  },
+  {
+    "path": "jsconfig.json",
+    "sha256": "A17EAD609876DEF4DC29A6F7499B2591B6C032D0A58A69B601F8229330DA0365"
+  },
+  {
+    "path": "package-lock.json",
+    "sha256": "B67BBA222AFEF4ABFA82FDC89A465628B588C89595511A99FA9D052D53D8FBAB"
+  },
+  {
+    "path": "package.json",
+    "sha256": "92608259ED21E1CBD196B1413FF47ADD7230B4BEF18C9DD22696484CA9B574E7"
+  },
+  {
+    "path": "vite.config.js",
+    "sha256": "DEDF3C7E39258AEA80E384D9DBC14733B22D6F47AB5C458E9EA8133AD3B2CF73"
+  }
+]

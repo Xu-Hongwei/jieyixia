@@ -1,0 +1,35 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [library] 统一状态筛选和收起的添加区
+PASS [panel] 资料打开关闭保持筛选滚动和焦点
+PASS [panel] 资料库内打开核对不跳页
+PASS [evidence] 原文与核对字段可同时查看
+PASS [guard] 关闭取消保留字段草稿
+PASS [guard] 下一条取消不换对象
+PASS [fields] 字段保存落库
+PASS [fields] 确认截止后原详情保留，待核对列表更新
+PASS [task] 带出处创建任务
+PASS [task] 从任务返回原资料和筛选
+PASS [next] 核对完成后可前往当前筛选下一条
+PASS [delete] 联删展示关联任务范围
+PASS [delete] 取消联删保留对象
+PASS [delete] 确认联删只删便签任务，保留原资料
+PASS [undo] 资料页直接撤销恢复便签与任务
+PASS [offline] 离线保存文字后原地查看
+PASS [upload] 图片选择只保存本地未触发模型
+PASS [retry] 失败资料重试后留在当前面板 — {"counts":{"analyze":1,"propose":0},"status":"draft"}
+PASS [handoff] 交接仅列出选中资料且不自动调用模型
+PASS [handoff] 取消替换仍保留交接选择
+PASS [handoff] 助手只选定明确交接的两份资料
+PASS [handoff] 跨空间交接拒绝
+PASS [handoff] 已删除资料交接拒绝
+PASS [compat] 旧核对深链接保持内容与返回
+PASS [layout] 资料核对面板 360 — {"page":360,"inner":359,"outer":360}
+PASS [layout] 资料核对面板 390 — {"page":390,"inner":389,"outer":390}
+PASS [layout] 资料核对面板 430 — {"page":430,"inner":429,"outer":430}
+PASS [layout] 资料核对面板 768 — {"page":768,"inner":671,"outer":672}
+PASS [layout] 资料核对面板 1440 — {"page":1440,"inner":671,"outer":672}
+PASS [guard] 资料输入取消切空间保留内容
+PASS [isolation] 切空间清空输入和选择
+PASS [isolation] 无付费建议请求及用户服务访问 — {"analyze":1,"propose":0}
+TOTAL 32/32

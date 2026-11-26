@@ -139,7 +139,7 @@ const minutesText = (m) => (m == null ? '未记录' : m === 0 ? '<1分钟' : `${
           <legend class="text-sm font-medium">这项安排的进度</legend>
           <label class="flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm" :class="planProgress === 'partial' && 'border-primary bg-primary/5'">
             <input v-model="planProgress" type="radio" name="plan-progress" value="partial" class="mt-0.5" />
-            <span><strong>还需要继续</strong><span class="block text-xs text-muted-foreground">安排保持部分完成，之后可另安排一天继续。</span></span>
+            <span><strong>还需要继续</strong><span class="block text-xs text-muted-foreground">保留这项安排，之后可以修改或继续工作。</span></span>
           </label>
           <label class="flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm" :class="planProgress === 'done' && 'border-primary bg-primary/5'">
             <input v-model="planProgress" type="radio" name="plan-progress" value="done" class="mt-0.5" />

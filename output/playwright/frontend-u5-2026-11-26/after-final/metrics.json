@@ -1,0 +1,48 @@
+[
+  {
+    "stage": "initial",
+    "resources": [
+      {
+        "url": "index-DVVkkZyj.js",
+        "bytes": 663334,
+        "start": 8
+      },
+      {
+        "url": "index-jobAVjQw.css",
+        "bytes": 38788,
+        "start": 8.199999988079071
+      }
+    ],
+    "domContentLoaded": 92.89999997615814
+  },
+  {
+    "stage": "settled",
+    "resources": [
+      {
+        "url": "index-DVVkkZyj.js",
+        "bytes": 663334,
+        "start": 8
+      },
+      {
+        "url": "index-jobAVjQw.css",
+        "bytes": 38788,
+        "start": 8.199999988079071
+      },
+      {
+        "url": "AssistantPage-Cfc_A_aG.js",
+        "bytes": 166592,
+        "start": 1853.8999999761581
+      },
+      {
+        "url": "contractSchema-DUVgpivB.js",
+        "bytes": 201269,
+        "start": 1854.0999999642372
+      },
+      {
+        "url": "DataPage-BU3Iab3L.js",
+        "bytes": 83569,
+        "start": 1854.199999988079
+      }
+    ]
+  }
+]

@@ -17,6 +17,7 @@ from .model.base import ModelError
 from .model.registry import build_router
 from .observability import configure_logging, log_event, request_id_var
 from .providers import get_provider
+from .qwen import router as qwen_router
 
 
 class BodyLimitMiddleware:
@@ -141,6 +142,8 @@ def create_app() -> FastAPI:
         limit=settings.max_body_bytes,
         overrides={
             "/api/assistant/propose": (propose_body_limit, "请求体超出 512KiB，请缩小选定资料范围；原文已在本地保留"),
+            "/api/qwen/propose": (propose_body_limit, "请求体超出上限，请缩小选定资料范围"),
+            "/api/qwen/verify": (min(1024, settings.max_body_bytes), "连接验证请求过大"),
         },
     )
     app.add_middleware(
@@ -161,6 +164,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(analyze_router)
     app.include_router(propose_router)
+    app.include_router(qwen_router)
     return app
 
 

@@ -34,7 +34,7 @@ const dateRelation = computed(() => {
   const s = state.value
   if (!s || !s.planId) return ''
   if (planDate.value === s.confirmDate) return '今天'
-  return planDate.value < s.confirmDate ? '延后执行（安排日早于今天）' : '提前执行（安排日晚于今天）'
+  return planDate.value < s.confirmDate ? '延后开始' : '提前开始'
 })
 const actionTextOf = (id) => {
   const a = store.actions.find((x) => x.id === id)
@@ -86,14 +86,14 @@ function guardClose(e) {
               <Badge v-if="dateRelation" :variant="dateRelation === '今天' ? 'success' : 'warning'">{{ dateRelation }}</Badge>
             </div>
             <div class="mt-1 break-words">{{ state.expected.action_text }}</div>
-            <div class="mt-0.5 text-xs text-muted-foreground">安排预计 {{ state.expected.planned_minutes }} 分钟 · 安排说明不覆盖行动内容</div>
+            <div class="mt-0.5 text-xs text-muted-foreground">本次安排 {{ state.expected.planned_minutes }} 分钟</div>
           </div>
 
           <div class="rounded-md border p-2.5">
-            <div class="text-xs text-muted-foreground">将执行的行动（按 ID 明确选择，不按文字匹配）</div>
+            <div class="text-xs text-muted-foreground">本次行动</div>
             <template v-if="state.facts">
               <div class="mt-0.5 break-words font-medium">{{ state.facts.actionText }}</div>
-              <div class="mt-0.5 text-xs text-muted-foreground">行动预计 {{ state.facts.actionMinutes }} 分钟</div>
+              <div class="mt-0.5 text-xs text-muted-foreground">整项行动预计 {{ state.facts.actionMinutes }} 分钟</div>
             </template>
             <p v-else class="mt-1 text-xs text-warning-foreground">尚未选择有效当前行动。请先去任务页选择或新增行动，再开始。</p>
           </div>
@@ -105,7 +105,7 @@ function guardClose(e) {
           </label>
           <label v-if="dateMismatch" class="flex items-start gap-2 rounded-md border border-warning bg-warning/10 p-2.5 text-xs">
             <input v-model="state.dateChecked" type="checkbox" class="mt-0.5 accent-primary" />
-            <span>安排日 {{ planDate }} 与今天 {{ state.confirmDate }} 不同（{{ dateRelation }}）。实际开始按真实时钟记录，原安排日不改。跨北京午夜需重新核对。</span>
+            <span>这项工作原定 {{ planDate }}。我确认今天（{{ state.confirmDate }}）开始，保留原安排日期。</span>
           </label>
 
           <!-- 差异重确认：列全变化字段，确认只换到展示过的冻结版本 -->
@@ -149,7 +149,7 @@ function guardClose(e) {
           </div>
 
           <div class="flex flex-wrap items-center gap-2 border-t border-border pt-2.5">
-            <Button v-if="state.planId" size="sm" variant="outline" :disabled="state.busy" @click="c.gotoTask">去任务选择行动</Button>
+            <Button v-if="state.planId && !state.facts && state.phase === 'confirm'" size="sm" variant="outline" :disabled="state.busy" @click="c.gotoTask">选择或添加行动</Button>
             <Button size="sm" variant="outline" :disabled="state.busy" @click="c.cancel">取消</Button>
             <Button
               v-if="state.phase === 'confirm'"
@@ -160,7 +160,7 @@ function guardClose(e) {
               @click="c.submit"
             >{{ state.busy ? '正在开始…' : '确认并开始' }}</Button>
           </div>
-          <p class="text-[11px] text-muted-foreground">开始后进入工作页计时；取消不创建会话。事实变化会要求重新核对，不会静默改绑行动。</p>
+          <p class="text-[11px] text-muted-foreground">开始后进入工作页计时。</p>
         </div>
       </DialogContent>
     </DialogPortal>

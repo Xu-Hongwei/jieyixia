@@ -1,0 +1,28 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [entry] 只展开新计划输入，示例/历史/时间收起
+PASS [entry] 无草案时不能跳过输入
+PASS [input] 原文尚未保存时不能漏发生成
+PASS [guard] 离开取消保留原文和要求
+PASS [guard] 切换规划类型取消仍保留输入
+PASS [entry] 调整入口仅显示任务选择
+PASS [review] 打开草案不会自动确认或排程
+PASS [review] 缺少截止确认时停留核对，不创建安排
+PASS [preview] 保存成功后进入预览且任务编辑隐藏
+PASS [steps] 切换步骤后回到工作区顶部并聚焦当前步骤
+PASS [dirty] 编辑后确认加入锁定，截止按钮不会覆盖未保存标题
+PASS [save] 内容保存失败保留输入且停止排程
+PASS [save] 保存失败不能采用
+PASS [retry] 重试后使用保留的输入生成新预览
+PASS [budget] 无效预算停在核对且不能采用
+PASS [guard] 取消切空间保留预算及原空间
+PASS [guard] 返回草案列表也保护预算
+PASS [budget] 新预算写入排程输入
+PASS [restore] 重新打开回到核对且恢复已保存预算
+PASS [adopt] 进入确认步骤尚未写入正式数据
+PASS [adopt] 取消最终确认不写入安排
+PASS [adopt] 确认后按草案写入且结果入口只有一组
+PASS [adopt] 采用后没有可重复采用按钮
+PASS [restore] 采用后刷新仍只读且未重复写入
+PASS [isolation] 个人空间不受演示采用影响
+TOTAL 25/25

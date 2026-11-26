@@ -1,0 +1,59 @@
+{
+  "results": [
+    {
+      "item": "generate",
+      "name": "选定文字、要求和七天预算进入一次模拟请求",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "generate",
+      "name": "生成后停在核对，未自动排程采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "preview",
+      "name": "手动日期和预算保留，生成建议可预览",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "adopt",
+      "name": "文字到正式任务和跨天安排闭环",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "clarify",
+      "name": "澄清未回答不能继续，不能进入最终采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "clarify",
+      "name": "取消离开保留未提交的澄清回答",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "clarify",
+      "name": "只有明确回答并继续才发起续轮",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "clarify",
+      "name": "已归档澄清允许离开，不锁死页面",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "runner",
+      "name": "验收异常",
+      "pass": false,
+      "detail": "page.waitForFunction: Timeout 20000ms exceeded."
+    }
+  ],
+  "netHits": []
+}

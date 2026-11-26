@@ -92,7 +92,7 @@ export const useAssistantStore = defineStore('assistant', () => {
   })
   // 未保存输入一经出现，旧采用准备/结果立即失效；恢复一致后须重新核对采用。
   watch(replanPanelDirty, (v) => { if (v) clearPrepared() })
-  const readiness = computed(() => active.value?.readiness ?? null)
+  const readiness = computed(() => active.value?.adoptionReadiness ?? active.value?.readiness ?? null)
   const canAdopt = computed(() => {
     const d = activeDraft.value
     return !!d && d.status === 'ready' && !stale.value && readiness.value?.ready && !busy.value.adopting
@@ -111,7 +111,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     const a = active.value
     if (!a || stale.value) return
     if (!['editing', 'needs_clarification', 'needs_review'].includes(a.draft.status)) return
-    if (!a.readiness?.ready) return
+    if (!readiness.value?.ready) return
     const gen = await draftService.setStatus(a.draft.id, { expected: a.baseline.draft, status: 'generating' })
     if (!here(gen) || !gen.ok) return
     await refreshActive()
@@ -333,6 +333,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     field_path: 'deadline', id_scope: 'draft', old_value: null, new_value: newValue,
   }))
   const confirmGap = (workItemKey) => confirm(confBase('gap', workItemKey, { new_value: true }))
+  const scheduleGap = (key, slot) => confirm(confBase('gap', key, { field_path: 'manual_slot', new_value: slot }))
   const confirmOverbook = (date) => confirm(confBase('overbook', date, { new_value: true }))
   const confirmExtraWork = (workItemKey) => confirm(confBase('extra_work', workItemKey, { new_value: true }))
 
@@ -1030,7 +1031,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     activeDraft, readiness, canAdopt, replanPanelDirty, setReplanForm, clearPrepared,
     input, inputRestore, gen, generating,
     init, reset, open, close, loadDemo,
-    editContent, confirm, confirmDeadline, confirmGap, confirmOverbook, confirmExtraWork, setManualDeadline,
+    editContent, confirm, confirmDeadline, confirmGap, scheduleGap, confirmOverbook, confirmExtraWork, setManualDeadline,
     startReplan, confirmReplanScope, saveReplanContent, setReplanStart,
     appendUserText, reschedule, prepare, adopt, resolveResult, forkDraft, discardDraft,
     generate, generateReplan, cancelGeneration, continueClarification, retryGeneration, retrySaveResult, dismissGeneration,

@@ -65,12 +65,14 @@ export function usePlanWorkStart({ onStarted, onGotoTask, onReview, workReturnFo
   })
 
   // 打开面板：冻结目标与事实。无有效当前行动也允许打开（禁用开始，提供去任务选择）。
-  function openFor({ taskId, planId = null }) {
+  function openFor({ taskId, planId = null, actionId = null }) {
     const t = store.tasks.find((x) => x.id === taskId)
     if (!t) return false
     const p = planId ? store.docs.find((d) => d.kind === 'plan_item' && d.id === planId) || null : null
     if (planId && (!p || !isLiveRef(p) || p.task_id !== taskId)) return false
-    const a = store.currentActionOf(t)
+    const a = actionId ? store.actions.find(item => item.id === actionId && item.task_id === t.id &&
+      item.workspace_id === store.workspaceId && !item.done) : store.currentActionOf(t)
+    if (actionId && !a) return false
     const confirmDate = beijingToday()
     state.value = {
       ws: store.workspaceId, taskId, planId: p ? p.id : null,

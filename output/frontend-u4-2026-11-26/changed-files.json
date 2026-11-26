@@ -1,0 +1,37 @@
+[
+  {
+    "path": "frontend/src/components/assistant/GenerationPanel.vue",
+    "sha256": "60e038cf5ce5483b5e42ddd2dfe703546e44b95fdde0c8cb2916eae84dfc503b",
+    "baseline": "output/frontend-u4-2026-11-26/baseline/src/components/assistant/GenerationPanel.vue"
+  },
+  {
+    "path": "frontend/src/components/assistant/PlanInput.vue",
+    "sha256": "0844b2b85a8482dec4998b32110be71d063c3840472dff7d702d54418ddfa62c",
+    "baseline": "output/frontend-u4-2026-11-26/baseline/src/components/assistant/PlanInput.vue"
+  },
+  {
+    "path": "frontend/src/components/assistant/ReplanPanel.vue",
+    "sha256": "63b56ac44ab76372fe15c1e59b90e9bab56cece7df1d403e9be248d6a9841ea6",
+    "baseline": "output/frontend-u4-2026-11-26/baseline/src/components/assistant/ReplanPanel.vue"
+  },
+  {
+    "path": "frontend/src/components/assistant/SourceReview.vue",
+    "sha256": "4f77aab6da96ea0e5868103596689d90d6c709ea13a749c25a58109e2368c546",
+    "baseline": "output/frontend-u4-2026-11-26/baseline/src/components/assistant/SourceReview.vue"
+  },
+  {
+    "path": "frontend/src/pages/AssistantPage.vue",
+    "sha256": "8dc37e0d8fae6153176ed7029e469c65faad581f9d23e867984ae7bdbcde0984",
+    "baseline": "output/frontend-u4-2026-11-26/baseline/src/pages/AssistantPage.vue"
+  },
+  {
+    "path": "frontend/src/services/assistant/drafts.js",
+    "sha256": "8e6b5f0bfe3fb6cd952e2e108f9e7de13ba17df03634545efd5887c677b43bc6",
+    "baseline": "output/frontend-u4-2026-11-26/baseline/src/services/assistant/drafts.js"
+  },
+  {
+    "path": "frontend/src/tests/assistant.receive.test.js",
+    "sha256": "bfc0cb9cbf5a2252f9863e029e733fda55beee0feb1e52e4f2aa45c258c99b41",
+    "baseline": "output/frontend-u4-2026-11-26/baseline/src/tests/assistant.receive.test.js"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "path": "src\\App.vue",
+    "status": "modified",
+    "before": "E579680942E46E705108077FB79FEA003A175A7F6755D23EECD112C51FE0B557",
+    "after": "D9E1499443D0C7879EC4CD813536DB5A901BCFD20286B9D8921FEE9008134FF0"
+  },
+  {
+    "path": "src\\app\\router.js",
+    "status": "modified",
+    "before": "E521AEDC220D24069EBCD84A47A5CEA8E43D086CED812D8817E8F24D98AE0C46",
+    "after": "1042730A6D90C8B26685F2EA363C2EEB1E97AB73F718653F2591FA0363B67F75"
+  },
+  {
+    "path": "src\\components\\domain\\PlanDetail.vue",
+    "status": "modified",
+    "before": "A12106580047482F1EDEB8F46CE578D2556B570FAEF60F197CFF1521EE80D511",
+    "after": "3F79C8EDBE78FF5ABCCEEBCC69CAB15A3A1AFCE8429BB84E8FC424AA71B36E3F"
+  },
+  {
+    "path": "src\\components\\domain\\TaskCreateForm.vue",
+    "status": "added",
+    "before": null,
+    "after": "CD11268358EDFC060D244A1A1693DC536FAB864836EE85895DB1AB9ED26D9169"
+  },
+  {
+    "path": "src\\components\\domain\\TaskListRows.vue",
+    "status": "added",
+    "before": null,
+    "after": "B6DE02EB28FD3AB0A9CE3304BC86A00B925C048BD2EB420CE656DCF477B11D9B"
+  },
+  {
+    "path": "src\\components\\domain\\TaskListsPanel.vue",
+    "status": "modified",
+    "before": "D5824C35FD711615EA04DF0C66ADDAD69612F7E1F9794903B305A1A5AB0A1486",
+    "after": "54354F82BAE31B9EE97A49CA82AA9CB366EA4FD61F9CAF473FEDFAC0CBCDECC3"
+  },
+  {
+    "path": "src\\composables\\workLeave.js",
+    "status": "modified",
+    "before": "8B6EC4ECD4C9E72B8F3C1EE9BFE2D0AF79E9217B9F579EDCB1C638B7A0D19009",
+    "after": "A1BF603EB7F073AE047720E2D169A6D7749BEE0008910B5D81BD62758C496AC7"
+  },
+  {
+    "path": "src\\domains\\taskList.js",
+    "status": "added",
+    "before": null,
+    "after": "0BFA654C2731538DE91E7CE773E6F3353FE1209A8A31DA8E84A6C73A13379FF6"
+  },
+  {
+    "path": "src\\domains\\workNavigation.js",
+    "status": "modified",
+    "before": "39DD67F07C793BFD70EDC8CA21938BFBB4179CE8DE12E2FE240A141E19BAB3E2",
+    "after": "E1F2D014482D8BB8CF2D9F89EA9B06978AD07D780971332386FDD9F6FEB362E5"
+  },
+  {
+    "path": "src\\pages\\TaskDetailPage.vue",
+    "status": "modified",
+    "before": "F2A014BF96325A9348DD65E56FEC20C1EAB71B8FD8C0AA6A29C5415BC72AAB48",
+    "after": "38F58A52FE12507DE3B9F6C62CC6E1278257AA8CCB15EFB40B556CB0D7B9110A"
+  },
+  {
+    "path": "src\\pages\\TasksPage.vue",
+    "status": "added",
+    "before": null,
+    "after": "2459F9F8A6D85362875AE0A926C958F923C66F19BCA767D36B15CCF29FE60B68"
+  },
+  {
+    "path": "src\\tests\\taskList.test.js",
+    "status": "added",
+    "before": null,
+    "after": "9239E9D254027A532B594D4103C6FCF10DD08BA3227E89C728F5E570CF13F094"
+  },
+  {
+    "path": "src\\tests\\workNavigation.test.js",
+    "status": "modified",
+    "before": "852A0BC4E29D43F7CB70105E2145418E75C44A4CD572FACFC5AD7134708BE250",
+    "after": "000B6D743DBF13A7E814C1337554B573A1EA7652895C625EA19B6BD2E8853160"
+  }
+]

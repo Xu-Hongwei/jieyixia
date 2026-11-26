@@ -1,0 +1,37 @@
+[
+  {
+    "path": "src/components/domain/PlanDetail.vue",
+    "status": "modified",
+    "sha256": "80c62ea2fb4f6d9ba3682d0a5ab416577910d269f3a581ac3e981f5bc702b59a"
+  },
+  {
+    "path": "src/components/domain/PlanEditor.vue",
+    "status": "modified",
+    "sha256": "3f5ff22560866ba8162cd21266c689bdcf9f41f2c7c02ec37c0b2e7115aee0d1"
+  },
+  {
+    "path": "src/components/domain/WeekView.vue",
+    "status": "modified",
+    "sha256": "92947fd378d89c53ca3f764b1773881da36be2563f095d4c7a8e1cd8140efa65"
+  },
+  {
+    "path": "src/pages/TaskDetailPage.vue",
+    "status": "modified",
+    "sha256": "352b1f05e0626e29126797d666748c7865fc691fbf1b7745cc470e485755012e"
+  },
+  {
+    "path": "src/pages/TasksPage.vue",
+    "status": "modified",
+    "sha256": "74163d6e6d36801155f073b50d3706b75a18fd444be7bc9d62b7adea8297d73b"
+  },
+  {
+    "path": "src/pages/TodayPage.vue",
+    "status": "modified",
+    "sha256": "71d5db1c78894cb3f5e9fe8bedac06eaf3142ce0bf187fea61614b556e4ee6be"
+  },
+  {
+    "path": "src/components/domain/PlanWorkspace.vue",
+    "status": "added",
+    "sha256": "01e6c5f2ec732f7668f1ceb186b43b46a103b610aed7b343c14bf6644b73c709"
+  }
+]

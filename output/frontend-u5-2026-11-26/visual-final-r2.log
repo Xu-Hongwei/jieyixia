@@ -1,0 +1,10 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [layout] today 1440
+PASS [layout] today 390
+PASS [layout] tasks 1440
+PASS [layout] tasks 390
+PASS [layout] collect 1440
+PASS [layout] collect 390
+PASS [layout] assistant 1440
+PASS [layout] assistant 390

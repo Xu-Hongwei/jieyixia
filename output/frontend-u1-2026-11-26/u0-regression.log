@@ -1,0 +1,23 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [nav] 入口刷新后返回保留任务、安排和来源 — /tasks/t-smoke?plan=p-1&return=%2Ftoday%3Fdate%3D2026-11-27%26view%3Dlist
+FAIL [runner] 验收异常 — locator.click: Error: strict mode violation: getByRole('button', { name: '返回日程', exact: true }) resolved to 2 elements:
+    1) <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs">…</button> aka getByRole('button', { name: '返回日程' }).first()
+    2) <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs ml-auto">返回日程</button> aka getByRole('button', { name: '返回日程' }).nth(1)
+
+locator.click: Error: strict mode violation: getByRole('button', { name: '返回日程', exact: true }) resolved to 2 elements:
+    1) <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs">…</button> aka getByRole('button', { name: '返回日程' }).first()
+    2) <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs ml-auto">返回日程</button> aka getByRole('button', { name: '返回日程' }).nth(1)
+
+Call log:
+  - waiting for getByRole('button', { name: '返回日程', exact: true })
+
+    at E:\qoder\output\frontend-u1-2026-11-26\u0-regression.mjs:233:26 {
+  log: [
+    "  - waiting for getByRole('button', { name: '返回日程', exact: true })"
+  ]
+}
+Call log:
+[2m  - waiting for getByRole('button', { name: '返回日程', exact: true })[22m
+
+TOTAL 1/2

@@ -1,0 +1,831 @@
+--- baseline/components/assistant/GenerationPanel.vue
++++ frontend/src/components/assistant/GenerationPanel.vue
+@@ -1,7 +1,7 @@
+ <script setup>
+ // M2 生成状态面板：进度/取消、失败重试、保存失败留结果重试、澄清集中作答。
+ // 只读 store.gen 阶段机；所有付费请求由 store 编排，这里不直接调 API。
+-import { reactive, watch } from 'vue'
++import { computed, reactive, watch } from 'vue'
+ import { Loader2, XCircle } from 'lucide-vue-next'
+ import Button from '@/components/ui/Button.vue'
+ import Input from '@/components/ui/Input.vue'
+@@ -10,6 +10,9 @@
+ 
+ const store = useAssistantStore()
+ const answers = reactive({})
++const hasUnsaved = computed(() => store.gen?.phase === 'clarification' && Object.values(answers).some(value => String(value).trim()))
++function discard() { for (const key of Object.keys(answers)) delete answers[key] }
++defineExpose({ hasUnsaved, discard })
+ // 新一轮（requestId 变化）清空上一轮答案，不把旧回答混入新澄清。
+ watch(() => store.gen?.requestId, () => { for (const k of Object.keys(answers)) delete answers[k] })
+ 
+--- baseline/components/assistant/PlanInput.vue
++++ frontend/src/components/assistant/PlanInput.vue
+@@ -20,11 +20,22 @@
+ const pasteText = ref('')
+ const showRelated = ref(false)
+ const fileInput = ref(null)
++const savingSource = ref(false)
+ const today = computed(() => beijingToday())
+ const input = store.input
+ const dates = computed(() => Array.from({ length: 7 }, (_, i) => beijingAddDays(input.startDate || today.value, i)))
+ const selectedCount = computed(() => input.sourceIds.length)
+-const canGenerate = computed(() => !store.generating && (input.sourceIds.length > 0 || input.userText.trim().length > 0))
++const canGenerate = computed(() => !store.generating && !savingSource.value && !pasteText.value.trim() && (input.sourceIds.length > 0 || input.userText.trim().length > 0))
++const timeSummary = computed(() => {
++  const budgets = dates.value.map(date => input.unavailable.includes(date) ? 0 : Number(input.budgets[date] == null || input.budgets[date] === '' ? store.formDefaults.budget : input.budgets[date]))
++  return budgets.every(n => Number.isInteger(n) && n >= 0 && n <= 1440) ? `${budgets.reduce((sum, n) => sum + n, 0)} 分钟` : '请检查时间输入'
++})
++const hasUnsaved = computed(() => !!pasteText.value.trim() || !!input.userText.trim() || input.sourceIds.length > 0 || input.taskIds.length > 0 || !!input.startDate || Object.keys(input.budgets).length > 0 || input.unavailable.length > 0)
++function discard() {
++  pasteText.value = ''
++  Object.assign(input, { userText: '', sourceIds: [], taskIds: [], actionIds: [], budgets: {}, unavailable: [], startDate: null, excerpts: {} })
++}
++defineExpose({ hasUnsaved, discard, busy: savingSource })
+ 
+ const sourceLabel = (s) => {
+   if (s.kind === 'text') {
+@@ -38,20 +49,27 @@
+ async function onFiles(e) {
+   const files = Array.from(e.target.files || [])
+   e.target.value = ''
+-  if (!files.length) return
+-  const results = await app.saveImageFiles(files)
+-  const okIds = results.filter((r) => r.ok).map((r) => r.record.id)
+-  input.sourceIds = [...new Set([...input.sourceIds, ...okIds])]
+-  const failed = results.filter((r) => !r.ok)
+-  if (failed.length) store.say('warning', `${failed.length} 份图片未保存：${failed.map((f) => `${f.name}（${f.message}）`).join('；')}`)
++  if (!files.length || savingSource.value || store.generating) return
++  savingSource.value = true
++  try {
++    const results = await app.saveImageFiles(files)
++    const okIds = results.filter((r) => r.ok).map((r) => r.record.id)
++    input.sourceIds = [...new Set([...input.sourceIds, ...okIds])]
++    const failed = results.filter((r) => !r.ok)
++    if (failed.length) store.say('warning', `${failed.length} 份图片未保存：${failed.map((f) => `${f.name}（${f.message}）`).join('；')}`)
++  } finally { savingSource.value = false }
+ }
+ async function savePaste() {
+   const text = pasteText.value.trim()
+   if (!text) return
+-  const r = await app.saveText(text)
+-  if (!r.ok) { store.say('warning', r.message || '文字保存失败'); return }
+-  input.sourceIds = [...new Set([...input.sourceIds, r.record.id])]
+-  pasteText.value = ''
++  if (savingSource.value) return
++  savingSource.value = true
++  try {
++    const r = await app.saveText(text)
++    if (!r.ok) { store.say('warning', r.message || '文字保存失败'); return }
++    input.sourceIds = [...new Set([...input.sourceIds, r.record.id])]
++    pasteText.value = ''
++  } finally { savingSource.value = false }
+ }
+ function toggleSource(id) {
+   const i = input.sourceIds.indexOf(id)
+@@ -80,20 +98,20 @@
+ </script>
+ 
+ <template>
+-  <div class="rounded-lg border bg-card p-4">
+-    <h2 class="flex items-center gap-2 text-base font-semibold"><Sparkles class="size-4" />真实生成：资料 → 理解 → 任务建议</h2>
+-    <p class="mt-1 text-sm text-muted-foreground">资料先保存到本地当前空间；模型只收到你明确选定的内容。建议需核对并本地排程后，明确采用才成为正式安排。</p>
++  <div class="py-2">
++    <h2 class="text-base font-semibold">提供资料与需求</h2>
++    <p class="mt-1 text-sm text-muted-foreground">只发送你选定的内容，生成后可修改。</p>
+ 
+     <div class="mt-3 space-y-3">
+       <div>
+         <div class="flex flex-wrap items-center gap-2">
+-          <Button size="sm" variant="outline" :disabled="store.generating" @click="fileInput?.click()"><Upload class="size-4" />上传截图</Button>
++          <Button size="sm" variant="outline" :disabled="store.generating || savingSource" @click="fileInput?.click()"><Upload class="size-4" />上传截图</Button>
+           <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" aria-label="上传截图" @change="onFiles" />
+-          <span class="text-xs text-muted-foreground">已选 {{ selectedCount }} / {{ MAX_SELECTED_SOURCES }} 份；一次生成最多自动分析 3 份新图片，超出提示分批。</span>
++          <span class="text-xs text-muted-foreground">已选 {{ selectedCount }} / {{ MAX_SELECTED_SOURCES }} 份 · 新图片每批最多 3 份</span>
+         </div>
+         <div class="mt-2 flex gap-2">
+-          <Textarea v-model="pasteText" :disabled="store.generating" placeholder="粘贴原文（虚构通知、要求等）…" class="min-h-16 flex-1" />
+-          <Button size="sm" variant="secondary" class="self-end" :disabled="store.generating || !pasteText.trim()" @click="savePaste">保存文字</Button>
++          <Textarea v-model="pasteText" :disabled="store.generating || savingSource" placeholder="粘贴通知、要求或原文…" class="min-h-16 flex-1" />
++          <Button size="sm" variant="secondary" class="self-end" :disabled="store.generating || savingSource || !pasteText.trim()" @click="savePaste">保存文字</Button>
+         </div>
+       </div>
+ 
+@@ -113,14 +131,14 @@
+       </div>
+ 
+       <div>
+-        <label class="text-xs font-medium text-muted-foreground" for="assistant-requirement">补充要求（可编辑；留空用默认句）</label>
++        <label class="text-xs font-medium text-muted-foreground" for="assistant-requirement">你想完成什么？有什么要求？</label>
+         <Textarea id="assistant-requirement" v-model="input.userText" :disabled="store.generating" :placeholder="DEFAULT_USER_MESSAGE" class="mt-1 min-h-16" />
+       </div>
+ 
+       <div class="rounded-md border p-2">
+         <button type="button" class="flex w-full items-center gap-2 text-xs font-medium text-muted-foreground" @click="showRelated = !showRelated">
+           <ChevronDown v-if="showRelated" class="size-4" /><ChevronRight v-else class="size-4" />
+-          关联已有任务/行动（可选；只有勾选的对象可被关联/复用，默认新建）
++          关联已有任务（可选）
+         </button>
+         <div v-if="showRelated" class="mt-2 space-y-2">
+           <p v-if="!app.tasks.length" class="text-xs text-muted-foreground">当前空间还没有任务。</p>
+@@ -142,28 +160,30 @@
+         </div>
+       </div>
+ 
+-      <div class="rounded-md border p-2">
+-        <div class="text-xs font-medium text-muted-foreground">七日可用时间（北京时间；起始默认今天，每次生成重新读取）</div>
++      <details class="border-y py-3">
++        <summary class="cursor-pointer text-sm font-medium">可用时间 · {{ input.startDate || today }} 起七天 · 共 {{ timeSummary }} <span class="font-normal text-muted-foreground">编辑</span></summary>
+         <div class="mt-1 flex items-center gap-2">
+           <DateInput v-model="input.startDate" :disabled="store.generating" aria-label="生成排程起始日期" class="w-44" />
+           <span class="text-xs text-muted-foreground">留空 = 今天（{{ today }}）</span>
+         </div>
+         <div class="mt-2 space-y-1">
+-          <div v-for="date in dates" :key="date" class="flex items-center gap-2 text-sm">
++          <div v-for="date in dates" :key="date" class="flex flex-wrap items-center gap-2 text-sm">
+             <span class="w-28 shrink-0 text-xs text-muted-foreground">{{ date }}</span>
+             <Input v-model="input.budgets[date]" :disabled="store.generating || input.unavailable.includes(date)" class="h-8 w-24" inputmode="numeric" :placeholder="String(store.formDefaults.budget)" :aria-label="`${date} 预算分钟`" />
+-            <span class="text-xs text-muted-foreground">分钟（留空用默认 {{ store.formDefaults.budget }}）</span>
++            <span class="text-xs text-muted-foreground">分钟</span>
+             <label class="ml-auto flex items-center gap-1 text-xs">
+               <input type="checkbox" :checked="input.unavailable.includes(date)" :disabled="store.generating" @change="toggleUnavailable(date)" />不可用
+             </label>
+           </div>
+         </div>
+-      </div>
++        <p class="mt-2 text-xs text-muted-foreground">北京时间；留空默认每天 {{ store.formDefaults.budget }} 分钟。</p>
++      </details>
+ 
+       <div class="flex items-center gap-2">
+         <Button :disabled="!canGenerate" @click="store.generate()"><Sparkles class="size-4" />生成方案</Button>
+         <span v-if="store.generating" class="text-xs text-muted-foreground">生成进行中，重复点击不会产生并行请求。</span>
+       </div>
++      <p v-if="pasteText.trim()" class="text-xs text-muted-foreground">请先保存上方文字，再生成方案。</p>
+ 
+       <GenerationPanel />
+     </div>
+--- baseline/components/assistant/ReplanPanel.vue
++++ frontend/src/components/assistant/ReplanPanel.vue
+@@ -156,6 +156,9 @@
+   statement: statement.value,
+   rows: rows.map((r) => ({ ...r })),
+ }))
++const initialSignature = liveSignature.value
++const hasUnsaved = computed(() => props.draft ? store.replanPanelDirty : liveSignature.value !== initialSignature)
++function discard() { initFromDraft() }
+ watch([() => props.draft?.id ?? null, liveSignature, editable], () => {
+   if (!props.draft || !editable.value) { store.setReplanForm(null); return }
+   store.setReplanForm({ draftId: props.draft.id, signature: liveSignature.value })
+@@ -184,6 +187,7 @@
+ }
+ 
+ const busy = ref(false)
++defineExpose({ hasUnsaved, discard, busy })
+ // 助手建议清单（M3）：模型接收后 estimate_origin=model 的工作项只是建议；
+ // 用户核对并「保存改排内容」后才重建为 estimate_origin=user 的本次清单，方可采用。
+ const modelSuggestion = computed(() => {
+@@ -260,7 +264,7 @@
+   try {
+     if (props.draft) {
+       const r = await store.saveReplanContent({ replacementIds: selected.value, progress: form.progress, constraints: form.constraints })
+-      if (r.ok) store.say('info', '改排内容已保存；请再次「重新排程」更新预览。')
++      if (r.ok) store.say('info', '改排内容已保存；请再次「保存并预览」更新预览。')
+     } else {
+       const r = await store.startReplan({ taskId: taskId.value, replacementIds: selected.value, progress: form.progress, constraints: form.constraints })
+       if (r.ok) emit('started')
+@@ -288,7 +292,7 @@
+       <p v-if="task.status === 'done'" class="mt-2 text-sm text-destructive">任务已完成，不能改排。</p>
+       <template v-else>
+         <div class="mt-3 rounded-md border p-2">
+-          <div class="text-xs font-medium text-muted-foreground">行动完成情况（只读参考；完成状态请到原任务页操作）</div>
++          <div class="text-xs font-medium text-muted-foreground">行动进展</div>
+           <ul class="mt-1 space-y-0.5 text-xs">
+             <li v-for="a in taskActions" :key="a.id" class="flex items-center gap-2">
+               <Badge :variant="a.done ? 'success' : 'secondary'">{{ a.done ? '已完成' : '未完成' }}</Badge>
+@@ -318,7 +322,7 @@
+         <div class="mt-3 space-y-2">
+           <label class="block text-xs font-medium text-muted-foreground">进展说明（一句话）</label>
+           <Textarea v-model="statement" :disabled="!editable" placeholder="例如：资料读完了，报告还需安排 90 分钟，周四没空" />
+-          <div class="text-xs font-medium text-muted-foreground">本次待安排清单（已含所选旧安排对应的未完工作；不含保留安排继续覆盖的工作）</div>
++          <div class="text-xs font-medium text-muted-foreground">本次待安排工作（包含所选旧安排的剩余工作）</div>
+           <div v-for="(r, i) in rows" :key="i" class="space-y-1 rounded-md border p-2">
+             <div class="flex items-center gap-2">
+               <Input v-model="r.text" :disabled="!editable" class="flex-1" :aria-label="`第 ${i + 1} 行工作内容`" placeholder="工作内容" />
+@@ -371,9 +375,9 @@
+             <ListChecks class="size-4" />{{ draft ? '保存改排内容' : '创建改排草案' }}
+           </Button>
+           <Button v-if="draft" variant="secondary" :disabled="!editable || busy || store.generating || store.replanPanelDirty" @click="store.generateReplan()">请助手整理剩余工作</Button>
+-          <span v-if="draft" class="text-xs text-muted-foreground">保存后请再次「重新排程」；旧预览与采用确认随之失效。</span>
+-        </div>
+-        <p v-if="draft && store.replanPanelDirty" class="mt-2 text-xs text-amber-700">改排面板有未保存修改：旧方案不能采用，请先「保存改排内容」并重新排程。</p>
++          <span v-if="draft" class="text-xs text-muted-foreground">保存后请再次「保存并预览」；旧预览与采用确认随之失效。</span>
++        </div>
++        <p v-if="draft && store.replanPanelDirty" class="mt-2 text-xs text-amber-700">改排面板有未保存修改：旧方案不能采用，请先「保存改排内容」，再保存并预览。</p>
+       </template>
+     </template>
+   </div>
+--- baseline/components/assistant/SourceReview.vue
++++ frontend/src/components/assistant/SourceReview.vue
+@@ -52,8 +52,8 @@
+ 
+ <template>
+   <div v-if="entries.length" class="rounded-lg border bg-card p-4">
+-    <h3 class="flex items-center gap-2 text-sm font-semibold"><FileImage class="size-4" />资料核对（独立于采用）</h3>
+-    <p class="mt-1 text-xs text-muted-foreground">模型识别可能出错：请对照原文核对字段。确认只把字段标记为事实，不改值；核对后请「重新排程」再确认任务截止。</p>
++    <h3 class="flex items-center gap-2 text-sm font-semibold"><FileImage class="size-4" />核对资料</h3>
++    <p class="mt-1 text-xs text-muted-foreground">对照原文确认事实，任务截止在下方单独核对。</p>
+     <div v-for="e in entries" :key="e.id" class="mt-3 rounded-md border p-3">
+       <div class="flex items-center gap-2 text-sm font-medium">
+         <FileImage v-if="e.source?.kind === 'image'" class="size-4 text-muted-foreground" />
+--- baseline/pages/AssistantPage.vue
++++ frontend/src/pages/AssistantPage.vue
+@@ -1,7 +1,7 @@
+ <script setup>
+-import { computed, reactive, ref, watch } from 'vue'
+-import { useRoute, useRouter } from 'vue-router'
+-import { Bot, CalendarCheck, ChevronDown, ChevronRight, ListChecks, RefreshCw } from 'lucide-vue-next'
++import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
++import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
++import { ChevronDown, ChevronRight, ListChecks } from 'lucide-vue-next'
+ import Button from '@/components/ui/Button.vue'
+ import Input from '@/components/ui/Input.vue'
+ import Textarea from '@/components/ui/Textarea.vue'
+@@ -21,6 +21,8 @@
+ import { confirmTaskDeadline } from '@/domains/planning/normalize'
+ import { replanPreview } from '@/domains/assistant/replan'
+ import { schedulePath, taskPath, resolveReplanReturn } from '@/domains/workNavigation'
++import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
++import { registerWorkLeave, requestWorkLeave } from '@/composables/workLeave'
+ 
+ const store = useAssistantStore()
+ const app = useAppStore()
+@@ -28,6 +30,19 @@
+ const route = useRoute()
+ 
+ const tab = ref('edit')
++const workflowHeader = ref(null)
++watch(tab, async () => {
++  await nextTick()
++  workflowHeader.value?.querySelector('[aria-current="step"]')?.focus({ preventScroll: true })
++  workflowHeader.value?.scrollIntoView({ block: 'start' })
++})
++const entryMode = ref('create')
++const inputRef = ref(null)
++const replanRef = ref(null)
++const generationRef = ref(null)
++const advancing = ref(false)
++const preparing = ref(false)
++const windowBaseline = ref('')
+ const form = reactive({ startDate: '', budgets: {}, unavailable: [] })
+ const edit = reactive({ tasks: {}, actions: {}, work: {} })
+ const extraText = ref('')
+@@ -65,6 +80,7 @@
+   const sourceTaskId = store.activeDraft?.replan_scope?.task_id
+   if (!sourceTaskId || sourceTaskId !== route.query.replanTask) return
+   replanEntry.value = null
++  entryMode.value = 'create'
+   replanPick.value = ''
+   if (route.query.replanTask) router.replace({ path: '/assistant', query: {
+     return: resolveReplanReturn(route.query.return, sourceTaskId, {
+@@ -283,7 +299,7 @@
+   if (!dirty || !adoptOpen.value) return
+   adoptOpen.value = false
+   store.clearPrepared()
+-  store.say('warning', '改排面板有未保存修改，旧方案不能采用；请先「保存改排内容」并重新排程。')
++  store.say('warning', '改排面板有未保存修改，旧方案不能采用；请先保存改排内容，再预览安排。')
+ })
+ 
+ function initWindow() {
+@@ -305,6 +321,7 @@
+     form.budgets[date] = String(day ? day.budget_minutes : fallback)
+     if (day ? day.budget_minutes === 0 : store.input.unavailable.includes(date)) form.unavailable.push(date)
+   }
++  windowBaseline.value = JSON.stringify(form)
+ }
+ // reset=true 全量重建（打开草案/重排后）；reset=false 合并刷新：保留用户输入，只更新 initial 基线。
+ function initContent(reset = true) {
+@@ -377,7 +394,7 @@
+ 
+ async function saveChanges() {
+   const p = proposal.value
+-  if (!p || saving) return
++  if (!p || saving) return false
+   // R3：任何 await 之前冻结完整表单快照；后续步骤只读快照，watch/服务刷新不得改写待提交值。
+   const frozen = {
+     tasks: Object.fromEntries(Object.entries(edit.tasks).map(([k, v]) => [k, { ...v }])),
+@@ -387,17 +404,17 @@
+   // F3：空标题/空正文是非法编辑，禁止保存（不得用旧值回退掩盖用户尚未完成的编辑）。
+   for (const t of p.task_proposals ?? []) {
+     if (t.op !== 'create') continue
+-    if (!frozen.tasks[t.key].title.trim()) { store.say('warning', `任务「${t.title || t.key}」的标题不能为空；请填写后再保存`); return }
++    if (!frozen.tasks[t.key].title.trim()) { store.say('warning', `任务「${t.title || t.key}」的标题不能为空；请填写后再保存`); return false }
+   }
+   for (const a of p.action_proposals ?? []) {
+     if (a.op !== 'create') continue
+-    if (!frozen.actions[a.key].text.trim()) { store.say('warning', `行动「${a.text || a.key}」的正文不能为空；请填写后再保存`); return }
++    if (!frozen.actions[a.key].text.trim()) { store.say('warning', `行动「${a.text || a.key}」的正文不能为空；请填写后再保存`); return false }
+     const m = Number(frozen.actions[a.key].minutes)
+-    if (!Number.isInteger(m) || m <= 0) { store.say('warning', `行动「${a.text}」的估时必须是正整数分钟`); return }
++    if (!Number.isInteger(m) || m <= 0) { store.say('warning', `行动「${a.text}」的估时必须是正整数分钟`); return false }
+   }
+   for (const w of p.work_items ?? []) {
+     const v = frozen.work[w.key].remaining
+-    if (v !== '' && (!Number.isInteger(Number(v)) || Number(v) <= 0)) { store.say('warning', `工作项 ${w.key} 的剩余分钟必须是正整数或留空（未知）`); return }
++    if (v !== '' && (!Number.isInteger(Number(v)) || Number(v) <= 0)) { store.say('warning', `工作项 ${w.key} 的剩余分钟必须是正整数或留空（未知）`); return false }
+   }
+   const next = {
+     ...p,
+@@ -408,7 +425,7 @@
+   saving = true
+   try {
+     const r = await store.editContent({ proposal: next })
+-    if (!r.ok) return
++    if (!r.ok) return false
+     const failed = []
+     for (const t of p.task_proposals ?? []) {
+       if (t.op !== 'create') continue
+@@ -421,9 +438,10 @@
+     if (failed.length > 0) {
+       // 部分失败：保留全部表单输入供重试，明确报告；不无条件重置表单假装成功。
+       store.say('warning', `以下任务的截止修改未保存：${failed.join('、')}。其余内容已保存，请基于当前表单重试`)
+-      return
++      return false
+     }
+     initContent(false)
++    return true
+   } finally {
+     saving = false
+   }
+@@ -437,7 +455,7 @@
+     const n = Number(raw)
+     if (raw === '' || raw == null || !Number.isInteger(n) || n < 0 || n > 1440) {
+       store.say('warning', `${date} 的每日预算必须是 0–1440 的整数分钟（不可用日请勾选「不可用」）`)
+-      return
++      return false
+     }
+     budgets[date] = n
+   }
+@@ -446,25 +464,28 @@
+     const start = form.startDate || draft.value.replan_scope.start_date
+     if (start !== draft.value.replan_scope.start_date) {
+       const r = await store.setReplanStart(start)
+-      if (!r.ok) return
++      if (!r.ok) return false
+     }
+-    await store.reschedule({ startDate: start, budgets, unavailable: [...form.unavailable] })
+-    return
+-  }
+-  await store.reschedule({ startDate: form.startDate || today.value, budgets, unavailable: [...form.unavailable] })
++    return (await store.reschedule({ startDate: start, budgets, unavailable: [...form.unavailable] })).ok
++  }
++  return (await store.reschedule({ startDate: form.startDate || today.value, budgets, unavailable: [...form.unavailable] })).ok
+ }
+ 
+ async function openAdopt() {
+-  if (store.replanPanelDirty) { store.say('warning', '改排面板有未保存修改，旧方案不能采用；请先「保存改排内容」并重新排程'); return }
++  if (workflowBusy.value) return
++  if (store.replanPanelDirty) { store.say('warning', '改排面板有未保存修改，旧方案不能采用；请先「保存改排内容」，再保存并预览'); return }
+   if (!canAdopt.value) return
+-  const r = await store.prepare()
+-  if (r.ok && store.prepared) adoptOpen.value = true
++  preparing.value = true
++  try {
++    const r = await store.prepare()
++    if (r.ok && store.prepared) adoptOpen.value = true
++  } finally { preparing.value = false }
+ }
+ async function doAdopt() {
+   adoptOpen.value = false
+   if (!canAdopt.value) {
+     store.say('warning', store.replanPanelDirty
+-      ? '改排面板有未保存修改，旧方案不能采用；请先「保存改排内容」并重新排程'
++      ? '改排面板有未保存修改，旧方案不能采用；请先「保存改排内容」，再保存并预览'
+       : requiredMissing.value.length ? '必填项为空，采用已禁用；请填写或改回原值' : '有未保存修改或预算窗口未重排，采用已禁用')
+     return
+   }
+@@ -476,6 +497,48 @@
+   const r = await store.appendUserText(`补充要求（仅文本留存，不参与解析）：${text}`)
+   if (r.ok) { extraText.value = ''; store.say('info', '补充要求已作为文本保存到线程；初版不解析该文本。') }
+ }
++
++// 步骤只控制可见区域；事实确认、排程与采用仍由原服务判断。
++const previewCurrent = computed(() => !!result.value && !store.stale && !contentDirty.value && !windowDirty.value && !store.replanPanelDirty)
++const workflowBusy = computed(() => advancing.value || preparing.value || store.generating || Object.values(store.busy).some(Boolean) || !!replanRef.value?.busy || !!inputRef.value?.busy)
++const steps = [{ key: 'input', label: '提供资料' }, { key: 'edit', label: '核对建议' }, { key: 'preview', label: '预览安排' }, { key: 'adopt', label: '确认加入' }]
++const stepEnabled = (key) => key === 'input' ? !draft.value : !!draft.value && (key === 'edit' || (key === 'preview' ? !!result.value : canAdopt.value || applied.value))
++watch(() => draft.value?.id, () => { tab.value = applied.value ? 'adopt' : 'edit' })
++watch(canAdopt, (ok) => {
++  if (ok || applied.value) return
++  adoptOpen.value = false
++  if (tab.value === 'adopt') tab.value = result.value ? 'preview' : 'edit'
++})
++async function saveAndPreview() {
++  if (!editable.value || workflowBusy.value) return
++  if (store.replanPanelDirty) { store.say('warning', '请先保存改排内容，再预览安排。'); return }
++  advancing.value = true
++  try {
++    if (!isReplan.value && contentDirty.value && !(await saveChanges())) return
++    if (!(await reschedule())) return
++    store.notice = null
++    tab.value = 'preview'
++  } catch (err) {
++    store.say('warning', `未能完成预览：${err.message || '请稍后重试'}。输入已保留。`)
++  } finally { advancing.value = false }
++}
++const { discardOpen: leaveOpen, guardLeave, settle: settleLeave } = useUnsavedGuard(
++  () => contentDirty.value || windowDirty.value || (!!draft.value && !planningInput.value && JSON.stringify(form) !== windowBaseline.value) || !!extraText.value.trim() || !!inputRef.value?.hasUnsaved || !!replanRef.value?.hasUnsaved || !!generationRef.value?.hasUnsaved,
++  () => workflowBusy.value || store.gen?.phase === 'save_failed' || draft.value?.status === 'applying',
++  () => { initContent(); initWindow(); extraText.value = ''; inputRef.value?.discard(); replanRef.value?.discard(); generationRef.value?.discard() },
++)
++const unregister = registerWorkLeave(guardLeave)
++onBeforeUnmount(unregister)
++onBeforeRouteLeave(requestWorkLeave)
++onBeforeRouteUpdate(async (to, from) => {
++  // 创建改排草案后的内部 URL 整理不丢输入；切换另一任务/资料才检查。
++  if ((to.query.replanTask && to.query.replanTask !== from.query.replanTask) || (to.query.sources && JSON.stringify(to.query.sources) !== JSON.stringify(from.query.sources))) return guardLeave()
++  return true
++})
++async function closeDraft() { if (await guardLeave()) store.close() }
++async function chooseMode(mode) { if (entryMode.value !== mode && await guardLeave()) entryMode.value = mode }
++async function openSaved(id) { if (await guardLeave()) await store.open(id) }
++async function loadExample(name) { if (await guardLeave()) await store.loadDemo(name) }
+ 
+ const threadTitle = (d) => store.threads.find((t) => t.id === d.thread_id)?.title || '未命名线程'
+ const outcome = computed(() => store.adoptResult?.outcome ?? null)
+@@ -493,25 +556,31 @@
+     <template v-else><p role="alert" class="text-sm">{{ materialHandoff.message }}</p><Button size="sm" variant="outline" @click="dismissMaterials">关闭提示</Button></template>
+   </section>
+   <ConfirmDialog v-model="materialConfirm" title="用所选资料开始新计划？" confirm-label="替换输入并继续" cancel-label="保留当前输入" :confirm-disabled="handoffBusy || !materialHandoff?.ok" @confirm="acceptMaterials">当前未提交的输入将被替换；已保存草案保留。所选资料尚不会发送给模型。</ConfirmDialog>
+-  <div class="mx-auto max-w-6xl space-y-4">
+-    <Alert variant="info" class="flex items-center gap-2">
+-      <Bot class="size-4 shrink-0" />
+-      本地规划助手 · 真实模型理解 + 本地规则排程。模型只给建议；核对、确认并明确采用后才成为正式安排。
+-    </Alert>
++  <div class="mx-auto max-w-3xl space-y-4">
++    <header ref="workflowHeader" class="scroll-mt-20 space-y-4">
++      <h1 class="text-2xl font-semibold">规划助手</h1>
++      <nav aria-label="规划步骤" class="grid grid-cols-4 border-b">
++        <button v-for="(step, i) in steps" :key="step.key" type="button" :disabled="!stepEnabled(step.key) || workflowBusy" :aria-current="(!draft ? step.key === 'input' : tab === step.key) ? 'step' : undefined" class="min-w-0 border-b-2 px-1 py-3 text-sm transition-colors disabled:cursor-default" :class="(!draft ? step.key === 'input' : tab === step.key) ? 'border-primary font-semibold text-primary' : 'border-transparent text-muted-foreground enabled:hover:text-foreground disabled:opacity-45'" @click="tab = step.key"><span class="block text-xs sm:inline">{{ i + 1 }}</span> {{ step.label }}</button>
++      </nav>
++    </header>
+     <Alert v-if="app.aiDown" variant="warning">模型服务当前不可用：生成会失败并保留输入；本地手动编辑与排程照常。</Alert>
+-    <Alert v-if="store.notice" :variant="store.notice.tone === 'info' ? 'info' : 'warning'">{{ store.notice.text }}</Alert>
++    <Alert v-if="store.notice" :variant="store.notice.tone === 'info' ? 'info' : 'warning'">{{ store.notice.text.replaceAll('「重新排程」', '「保存并预览」') }}</Alert>
+ 
+     <!-- 入口：真实输入（当前空间）/ 显式载入演示 / 继续已有草案；绝不自动播种 -->
+     <section v-if="!draft" class="space-y-4">
+       <template v-if="replanEntry">
+-        <ReplanPanel :task-id="replanEntry" @started="onReplanStarted" />
+-        <Button variant="ghost" size="sm" @click="cancelReplanEntry">← 返回新建计划</Button>
++        <ReplanPanel ref="replanRef" :task-id="replanEntry" @started="onReplanStarted" />
++        <Button variant="ghost" size="sm" @click="async () => { if (await guardLeave()) cancelReplanEntry() }">← 返回新建计划</Button>
+       </template>
+       <template v-else>
+-        <PlanInput :key="app.workspaceId + materialInputRevision" />
+-        <div class="rounded-lg border bg-card p-4">
+-          <h2 class="text-base font-semibold">调整已有任务（改排）</h2>
+-          <p class="mt-1 text-sm text-muted-foreground">一次只调整一个任务的后续安排：勾选允许替换的旧安排，填写本次工作量；总截止不变，受保护安排不动。</p>
++        <div class="flex gap-2" aria-label="规划类型">
++          <Button :variant="entryMode === 'create' ? 'default' : 'outline'" :disabled="workflowBusy" @click="chooseMode('create')">制定新计划</Button>
++          <Button :variant="entryMode === 'replan' ? 'default' : 'outline'" :disabled="workflowBusy" @click="chooseMode('replan')">调整已有计划</Button>
++        </div>
++        <PlanInput v-show="entryMode === 'create'" ref="inputRef" :key="app.workspaceId + materialInputRevision" />
++        <div v-if="entryMode === 'replan'" class="py-4">
++          <h2 class="text-base font-semibold">选择要调整的任务</h2>
++          <p class="mt-1 text-sm text-muted-foreground">调整后续安排，保留任务总截止。</p>
+           <div class="mt-3 flex flex-wrap items-center gap-2">
+             <select v-model="replanPick" class="h-9 rounded-md border bg-background px-2 text-sm" aria-label="选择要调整的任务">
+               <option value="" disabled>选择任务…</option>
+@@ -521,20 +590,20 @@
+           </div>
+           <p v-if="!openTasks.length" class="mt-2 text-xs text-muted-foreground">当前空间没有未完成的任务。</p>
+         </div>
+-        <div class="rounded-lg border bg-card p-4">
+-          <h2 class="text-base font-semibold">开始</h2>
+-          <p class="mt-1 text-sm text-muted-foreground">载入虚构演示案例（在演示空间运行，与个人数据隔离），或继续本空间已有草案。</p>
++        <details class="border-t pt-4">
++          <summary class="cursor-pointer text-sm font-medium">试试示例</summary>
++          <p class="mt-1 text-sm text-muted-foreground">虚构案例将在独立演示空间打开。</p>
+           <div class="mt-3 flex flex-wrap gap-2">
+-            <Button :disabled="store.busy.loading" @click="store.loadDemo('report')">载入演示：跨天周报</Button>
+-            <Button variant="secondary" :disabled="store.busy.loading" @click="store.loadDemo('tight')">载入演示：容量紧张</Button>
++            <Button :disabled="store.busy.loading" @click="loadExample('report')">载入演示：跨天周报</Button>
++            <Button variant="secondary" :disabled="store.busy.loading" @click="loadExample('tight')">载入演示：容量紧张</Button>
+           </div>
+-        </div>
+-        <div class="rounded-lg border bg-card p-4">
+-          <h2 class="text-base font-semibold">继续已有草案（{{ store.drafts.length }}）</h2>
++        </details>
++        <details class="border-t pt-4">
++          <summary class="cursor-pointer text-sm font-medium">继续已有草案（{{ store.drafts.length }}）</summary>
+           <p v-if="!store.drafts.length" class="mt-2 text-sm text-muted-foreground">当前空间还没有草案。</p>
+           <ul v-else class="mt-2 divide-y">
+             <li v-for="d in store.drafts" :key="d.id">
+-              <button type="button" class="flex w-full items-center gap-2 py-2 text-left text-sm hover:bg-accent" @click="store.open(d.id)">
++              <button type="button" class="flex w-full items-center gap-2 py-2 text-left text-sm hover:bg-accent" @click="openSaved(d.id)">
+                 <span class="min-w-0 flex-1 truncate">{{ threadTitle(d) }} · 第 {{ d.revision }} 版</span>
+                 <Badge v-if="d.mode === 'replan'" variant="outline">改排</Badge>
+                 <Badge :variant="statusVariant(d.status)">{{ STATUS_LABELS[d.status] ?? d.status }}</Badge>
+@@ -542,13 +611,13 @@
+               </button>
+             </li>
+           </ul>
+-        </div>
++        </details>
+       </template>
+     </section>
+ 
+     <template v-else>
+       <div class="flex flex-wrap items-center gap-2">
+-        <Button variant="ghost" size="sm" @click="store.close()">← 返回列表</Button>
++        <Button variant="ghost" size="sm" @click="closeDraft">← 返回列表</Button>
+         <h2 class="text-base font-semibold">{{ threadTitle(draft) }} · 第 {{ draft.revision }} 版</h2>
+         <Badge v-if="isReplan" variant="outline">改排</Badge>
+         <Badge :variant="statusVariant(draft.status)">{{ STATUS_LABELS[draft.status] ?? draft.status }}</Badge>
+@@ -577,23 +646,16 @@
+       <Alert v-if="unsupported.length" variant="destructive">
+         含初版不支持的操作：{{ unsupported.join('、') }}。采用已阻断；请改为新建任务/行动，或放弃该修改。
+       </Alert>
+-      <Alert v-if="store.stale" variant="warning">更改尚未重新排程：预览仍是旧计算，采用已禁用。请先「重新排程」。</Alert>
+-      <Alert v-if="store.replanPanelDirty" variant="warning">改排面板有未保存修改：旧方案不能采用。请先「保存改排内容」并重新排程。</Alert>
+-      <Alert v-else-if="!store.stale && (contentDirty || windowDirty)" variant="warning">有未保存修改或预算窗口未重排，采用已禁用。请先「保存修改」并「重新排程」。</Alert>
++      <Alert v-if="store.stale" variant="warning">更改尚未重新排程：预览仍是旧计算，采用已禁用。请返回核对建议，保存并预览。</Alert>
++      <Alert v-if="store.replanPanelDirty" variant="warning">改排面板有未保存修改：旧方案不能采用。请先「保存改排内容」，再保存并预览。</Alert>
++      <Alert v-else-if="!store.stale && (contentDirty || windowDirty)" variant="warning">有未保存修改或预算窗口未重排，采用已禁用。请返回核对建议，保存并预览。</Alert>
+       <Alert v-if="editable && requiredMissing.length" variant="destructive">必填项为空：{{ requiredMissing.join('、') }}。标题/行动正文不能为空，保存与采用已禁用；请填写或改回原值。</Alert>
+ 
+       <!-- 本轮真实生成状态（澄清/失败/留存结果）：完成后进入下方核对与预览 -->
+-      <GenerationPanel v-if="store.gen && store.gen.draftId === draft.id && store.gen.phase !== 'done'" />
++      <GenerationPanel v-if="store.gen && store.gen.draftId === draft.id && store.gen.phase !== 'done'" ref="generationRef" />
+ 
+       <!-- 采用结果 -->
+-      <Alert v-if="outcome === 'committed' || outcome === 'already_committed'" variant="success">
+-        {{ outcome === 'already_committed' ? '该计划已成功采用（重复点击未重复写入）。' : '采用成功，已写入正式任务/行动/安排。' }}
+-        <div class="mt-2 flex gap-2">
+-          <Button size="sm" @click="router.push(adoptedLinks.schedule)">查看日程</Button>
+-          <Button size="sm" variant="secondary" @click="router.push(adoptedLinks.task)">查看任务</Button>
+-        </div>
+-      </Alert>
+-      <Alert v-else-if="outcome === 'needs_recheck'" variant="warning">
++      <Alert v-if="outcome === 'needs_recheck'" variant="warning">
+         需重新核对：空间事实或证据在采用前发生变化，本次确定未提交。
+         <ul class="mt-1 list-disc pl-5 text-xs">
+           <li v-for="(d, i) in store.adoptResult.diffs ?? []" :key="i">{{ d.code }}：{{ d.message }}</li>
+@@ -601,40 +663,34 @@
+       </Alert>
+       <Alert v-else-if="outcome === 'not_committed'" variant="warning">确定未提交：{{ store.adoptResult.message }}</Alert>
+ 
+-      <!-- 移动端切换 -->
+-      <div class="flex gap-1 md:hidden">
+-        <Button :variant="tab === 'edit' ? 'default' : 'outline'" size="sm" @click="tab = 'edit'">编辑</Button>
+-        <Button :variant="tab === 'preview' ? 'default' : 'outline'" size="sm" @click="tab = 'preview'">预览</Button>
+-      </div>
+-
+-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+-        <!-- 编辑区：移动端按 tab 显隐（class 而非内联 style，桌面 md 恒显） -->
+-        <section :class="tab === 'edit' ? 'space-y-4' : 'hidden space-y-4 md:block'">
++      <div class="space-y-4">
++        <section v-show="tab === 'edit'" class="space-y-5" aria-label="核对建议">
++          <fieldset :disabled="workflowBusy" class="min-w-0 space-y-5">
+           <SourceReview :draft="draft" />
+           <!-- 改排草案：范围/清单由改排面板编辑（建议随清单重建），不走通用任务/行动编辑。 -->
+-          <ReplanPanel v-if="isReplan" :draft="draft" />
++          <ReplanPanel v-if="isReplan" ref="replanRef" :draft="draft" />
+           <div v-if="!isReplan" class="rounded-lg border bg-card p-4">
+             <h3 class="flex items-center gap-2 text-sm font-semibold"><ListChecks class="size-4" />任务与行动</h3>
+             <p v-if="!proposal" class="mt-2 text-sm text-muted-foreground">无建议内容。</p>
+             <div v-for="t in createTasks" :key="t.key" class="mt-3 space-y-2 rounded-md border p-3">
+-              <div class="text-xs text-muted-foreground">新建任务 · {{ t.key }}</div>
++              <div class="text-xs text-muted-foreground">任务</div>
+               <Input v-model="edit.tasks[t.key].title" :disabled="!editable" aria-label="任务标题" />
+               <div class="flex items-center gap-2">
+                 <DateInput v-model="edit.tasks[t.key].deadline" :disabled="!editable" placeholder="无截止" class="flex-1" :aria-label="`任务 ${t.key} 截止`" />
+                 <Button variant="ghost" size="sm" :disabled="!editable" @click="edit.tasks[t.key].deadline = ''">无截止</Button>
+               </div>
+               <div v-if="(t.deadline_candidates ?? []).length" class="text-xs text-muted-foreground">
+-                模型候选：{{ t.deadline_candidates.map((c) => c.value ?? '无').join('、') }}（保存修改会按你的输入重新确认）
++                模型候选：{{ t.deadline_candidates.map((c) => c.value ?? '无').join('、') }}（可修改）
+               </div>
+             </div>
+             <div v-for="t in linkTasks" :key="t.key" class="mt-3 rounded-md border p-3 text-sm">
+               <div class="text-xs text-muted-foreground">关联既有任务（不改对象）</div>
+               <div>{{ taskTitle({ kind: 'existing', id: t.target_id }) }}</div>
+-              <div class="text-xs text-muted-foreground">沿用正式截止；初版不支持在此修改既有任务。</div>
++              <div class="text-xs text-muted-foreground">沿用原任务截止。</div>
+             </div>
+             <div v-for="a in proposal?.action_proposals ?? []" :key="a.key" class="mt-3 space-y-1 rounded-md border p-3">
+               <template v-if="a.op === 'create'">
+-                <div class="text-xs text-muted-foreground">新建行动 · {{ a.key }} → {{ taskTitle(a.task_ref) }}</div>
++                <div class="text-xs text-muted-foreground">行动 · {{ taskTitle(a.task_ref) }}</div>
+                 <Input v-model="edit.actions[a.key].text" :disabled="!editable" aria-label="行动内容" />
+                 <label class="flex items-center gap-2 text-xs text-muted-foreground">估时（分钟）
+                   <Input v-model="edit.actions[a.key].minutes" :disabled="!editable" class="h-8 w-24" inputmode="numeric" />
+@@ -646,23 +702,21 @@
+               </template>
+             </div>
+             <div v-for="w in proposal?.work_items ?? []" :key="w.key" class="mt-3 space-y-1 rounded-md border p-3">
+-              <div class="text-xs text-muted-foreground">工作项 {{ w.key }} · {{ w.deliverable }}</div>
++              <div class="text-xs text-muted-foreground">待安排工作 · {{ w.deliverable }}</div>
+               <label class="flex items-center gap-2 text-xs text-muted-foreground">剩余分钟（留空=未知）
+                 <Input v-model="edit.work[w.key].remaining" :disabled="!editable" class="h-8 w-24" inputmode="numeric" />
+               </label>
+             </div>
+-            <div class="mt-3 flex gap-2">
+-              <Button :disabled="!editable || store.busy.saving || requiredMissing.length > 0" @click="saveChanges">保存修改</Button>
+-            </div>
++
+           </div>
+ 
+-          <div class="rounded-lg border bg-card p-4">
+-            <h3 class="flex items-center gap-2 text-sm font-semibold"><CalendarCheck class="size-4" />排程窗口</h3>
++          <details class="border-y py-4" :open="store.inputRestore === 'missing' && !draft.planning_input">
++            <summary class="cursor-pointer text-sm font-semibold">可用时间 · {{ form.startDate }} 起七天 <span class="font-normal text-muted-foreground">编辑</span></summary>
+             <p v-if="store.inputRestore === 'missing' && !draft.planning_input" class="mt-2 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-800">未找到该草案已保存的可用时间输入；当前为默认预算（非已恢复的用户设置），请补填后再排程。</p>
+             <label class="mt-2 block text-xs text-muted-foreground">起始日期（北京时间）</label>
+             <DateInput v-model="form.startDate" :disabled="!editable" aria-label="排程起始日期" />
+             <div class="mt-2 space-y-1">
+-              <div v-for="date in formDates" :key="date" class="flex items-center gap-2 text-sm">
++              <div v-for="date in formDates" :key="date" class="flex flex-wrap items-center gap-2 text-sm">
+                 <span class="w-28 shrink-0 text-xs text-muted-foreground">{{ date }}</span>
+                 <Input v-model="form.budgets[date]" :disabled="!editable || form.unavailable.includes(date)" class="h-8 w-24" inputmode="numeric" :aria-label="`${date} 预算分钟`" />
+                 <span class="text-xs text-muted-foreground">分钟</span>
+@@ -671,51 +725,54 @@
+                 </label>
+               </div>
+             </div>
+-            <div class="mt-3 flex items-center gap-2">
+-              <Button :disabled="!editable || store.busy.rescheduling" @click="reschedule">
+-                <RefreshCw class="size-4" />{{ store.busy.rescheduling ? '排程中…' : '重新排程' }}
+-              </Button>
+-              <span v-if="store.busy.rescheduling" class="text-xs text-muted-foreground">按当前空间事实计算</span>
+-            </div>
+-          </div>
++          </details>
+ 
+           <div class="rounded-lg border bg-card p-4">
+             <button type="button" class="flex w-full items-center gap-2 text-sm font-semibold" @click="showExtra = !showExtra">
+-              <ChevronDown v-if="showExtra" class="size-4" /><ChevronRight v-else class="size-4" />补充要求（仅文本）
++              <ChevronDown v-if="showExtra" class="size-4" /><ChevronRight v-else class="size-4" />备注（不参与安排）
+             </button>
+             <div v-if="showExtra" class="mt-2 space-y-2">
+-              <p class="text-xs text-muted-foreground">初版只把这段文字保存到线程，明确不解析、不影响排程。</p>
++              <p class="text-xs text-muted-foreground">备注仅留存，不改变安排；可用时间请在上方修改。</p>
+               <Textarea v-model="extraText" :disabled="!editable" placeholder="例如：周五下午有组会（仅记录，不会自动扣减容量）" />
+               <Button size="sm" variant="secondary" :disabled="!editable || !extraText.trim()" @click="saveExtra">保存为文本</Button>
+             </div>
+           </div>
++          </fieldset>
+         </section>
+ 
+-        <!-- 预览区 -->
+-        <section :class="tab === 'preview' ? 'space-y-4' : 'hidden space-y-4 md:block'">
+-          <div class="rounded-lg border bg-card p-4">
++          <div v-show="(tab === 'edit' || tab === 'preview') && (replanScopeConf || deadlineConfirms.length || extraWorkPreConfirms.length || (tab === 'edit' && otherBlockers.length))" class="space-y-2" aria-label="排程前核对">
+             <h3 class="text-sm font-semibold">核对与确认</h3>
+             <!-- M3 替换范围确认：取消所选旧安排 + 清单不含保留安排覆盖的工作；版本 bump 后须重新确认 -->
+             <div v-if="replanScopeConf" class="mt-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-sm">
+               <div>确认替换范围：将取消所选 {{ replanScopeConf.replacement_ids.length }} 条旧安排（{{ replanTaskTitle }}）；本次清单不包含保留安排继续覆盖的工作。总截止不变。</div>
+-              <Button size="sm" variant="secondary" class="mt-1" @click="store.confirmReplanScope()">确认替换范围</Button>
++              <Button size="sm" variant="secondary" class="mt-1" :disabled="!editable || store.replanPanelDirty || workflowBusy" @click="store.confirmReplanScope()">确认替换范围</Button>
+             </div>
+             <!-- 额外工作（D12）阻断排程：须在排程前确认，不依赖排程结果。确认后请再次「重新排程」。 -->
+             <div v-for="k in extraWorkPreConfirms" :key="'pre-' + k" class="mt-2 flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-sm">
+-              <span class="flex-1">{{ k }}：既有任务在窗口已有安排，须先确认本次为额外尚未安排工作，再重新排程</span>
+-              <Button size="sm" variant="secondary" :disabled="!editable" @click="store.confirmExtraWork(k)">确认额外工作</Button>
++              <span class="flex-1">{{ k }}：既有任务在窗口已有安排，须先确认本次为额外尚未安排工作，再保存并预览</span>
++              <Button size="sm" variant="secondary" :disabled="!editable || contentDirty || store.replanPanelDirty || workflowBusy" @click="store.confirmExtraWork(k)">确认额外工作</Button>
+             </div>
+             <!-- 截止确认不依赖排程结果：normalize 要求先确认截止候选，首次排程前也必须可确认 -->
+             <div v-for="x in deadlineConfirms" :key="x.task.key" class="mt-2 rounded-md border p-2 text-sm">
+               <div>任务「{{ x.task.title }}」截止候选待确认：</div>
+               <div class="mt-1 flex flex-wrap gap-1">
+-                <Button v-for="c in x.task.deadline_candidates.filter((c) => (c.precision ?? 'none') !== 'none')" :key="c.value" size="sm" variant="secondary" :disabled="!editable" @click="store.confirmDeadline(x.task.key, { value: c.value, precision: c.precision })">
++                <Button v-for="c in x.task.deadline_candidates.filter((c) => (c.precision ?? 'none') !== 'none')" :key="c.value" size="sm" variant="secondary" :disabled="!editable || contentDirty || workflowBusy" @click="store.confirmDeadline(x.task.key, { value: c.value, precision: c.precision })">
+                   确认 {{ c.value }}
+                 </Button>
+-                <Button size="sm" variant="outline" :disabled="!editable" @click="store.confirmDeadline(x.task.key, null)">明确无截止</Button>
+-              </div>
+-            </div>
+-            <p v-if="!result" class="mt-2 text-sm text-muted-foreground">尚未排程：保存修改后点「重新排程」。</p>
++                <Button size="sm" variant="outline" :disabled="!editable || contentDirty || workflowBusy" @click="store.confirmDeadline(x.task.key, null)">明确无截止</Button>
++              </div>
++            </div>
++            <ul v-if="otherBlockers.length && tab === 'edit'" class="list-disc pl-5 text-sm"><li v-for="(b, i) in otherBlockers" :key="i">{{ b.message }}</li></ul>
++          </div>
++          <div v-show="tab === 'edit'" class="flex justify-end border-t pt-4"><Button :disabled="!editable || workflowBusy || requiredMissing.length > 0 || store.replanPanelDirty" @click="saveAndPreview">{{ advancing ? '正在准备预览…' : '保存并预览' }}</Button></div>
++
++        <!-- 预览区 -->
++        <section v-show="tab === 'preview'" class="space-y-4" aria-label="预览安排">
++          <Alert v-if="replanZeroNew" variant="warning">本次没有新安排，无法采用。请返回核对建议调整工作量或可用时间。</Alert>
++          <Alert v-if="!previewCurrent" variant="warning">这是上一次预览，请返回核对建议更新后再采用。</Alert>
++          <div v-if="estimateUnknown.length || gapConfirms.length || overbookConfirms.length || extraWorkConfirms.length || readiness?.blockers?.length || canAdopt" class="space-y-2 border-b pb-4">
++            <h3 class="text-sm font-semibold">安排核对</h3>
++            <p v-if="!result" class="mt-2 text-sm text-muted-foreground">尚未排程：返回核对建议，点击「保存并预览」。</p>
+             <template v-else>
+               <div v-if="estimateUnknown.length" class="mt-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900">
+                 估时未知（请在编辑区填写剩余分钟）：{{ estimateUnknown.map((u) => u.work_item_key).join('、') }}
+@@ -730,17 +787,17 @@
+               </div>
+               <div v-for="k in extraWorkConfirms" :key="k" class="mt-2 flex items-center gap-2 rounded-md border p-2 text-sm">
+                 <span class="flex-1">{{ k }}：既有任务在窗口已有安排，须确认本次为额外尚未安排工作</span>
+-                <Button size="sm" variant="secondary" :disabled="!editable" @click="store.confirmExtraWork(k)">确认额外工作</Button>
+-              </div>
+-              <ul v-if="otherBlockers.length" class="mt-2 list-disc pl-5 text-xs text-muted-foreground">
+-                <li v-for="(b, i) in otherBlockers" :key="i">{{ b.message }}</li>
++                <Button size="sm" variant="secondary" :disabled="!editable || contentDirty || store.replanPanelDirty || workflowBusy" @click="store.confirmExtraWork(k)">确认额外工作</Button>
++              </div>
++              <ul v-if="readiness?.blockers?.length" class="mt-2 list-disc pl-5 text-xs text-muted-foreground">
++                <li v-for="(b, i) in readiness.blockers" :key="i">{{ b.message }}</li>
+               </ul>
+               <p v-if="canAdopt" class="mt-2 text-sm text-emerald-700">就绪核对通过，可采用。</p>
+             </template>
+           </div>
+ 
+           <div class="rounded-lg border bg-card p-4">
+-            <h3 class="text-sm font-semibold">七天预览（按日竖排）</h3>
++            <h3 class="text-sm font-semibold">每日安排</h3>
+             <p v-if="!result" class="mt-2 text-sm text-muted-foreground">排程后这里显示每日安排与容量。</p>
+             <div v-else class="mt-2 space-y-3">
+               <div v-for="day in result.days" :key="day.date" class="rounded-md border p-2">
+@@ -803,12 +860,18 @@
+             </div>
+           </div>
+ 
++          <div class="flex flex-wrap justify-between gap-2 border-t pt-4"><Button variant="outline" @click="tab = 'edit'">返回核对建议</Button><Button :disabled="!canAdopt" @click="tab = 'adopt'">下一步：确认加入</Button></div>
++          <p v-if="!canAdopt" class="text-sm text-muted-foreground">请处理上方待确认项；修改任务或时间请返回核对建议。</p>
++        </section>
++        <section v-show="tab === 'adopt' && !applied" class="space-y-4" aria-label="确认加入">
+           <div class="rounded-lg border bg-card p-4">
+-            <h3 class="text-sm font-semibold">采用</h3>
+-            <p class="mt-1 text-xs text-muted-foreground">一次保存为正式 Task / Action / PlanItem；重复点击不会重复写入。</p>
+-            <Button class="mt-2" :disabled="!canAdopt" @click="openAdopt">采用计划</Button>
++            <h3 class="text-base font-semibold">将建议加入日程</h3>
++            <p class="mt-1 text-xs text-muted-foreground">确认后保存任务、行动和每日安排。</p>
++            <p class="mt-3 text-sm">{{ result?.segments?.length ?? 0 }} 条新安排<span v-if="isReplan">，替换 {{ replanView?.replacedCount ?? 0 }} 条旧安排</span><span v-if="result?.unscheduled?.length">，{{ result.unscheduled.length }} 项工作仍未排入</span>。</p>
++            <Button variant="outline" class="mr-2 mt-3" @click="tab = 'preview'">返回预览安排</Button>
++            <Button class="mt-2" :disabled="!canAdopt || workflowBusy" @click="openAdopt">采用计划</Button>
+             <p v-if="replanZeroNew" class="mt-1 text-xs text-amber-700">新安排为零：不提供改排采用（避免整批清空）。请修改清单/预算后重新排程，或使用既有单项取消操作。</p>
+-            <p v-if="store.replanPanelDirty" class="mt-1 text-xs text-amber-700">改排面板有未保存修改：请先「保存改排内容」并重新排程，旧方案不能采用。</p>
++            <p v-if="store.replanPanelDirty" class="mt-1 text-xs text-amber-700">改排面板有未保存修改：请先「保存改排内容」，再保存并预览，旧方案不能采用。</p>
+             <p v-else-if="replanUnconfirmed" class="mt-1 text-xs text-amber-700">助手建议清单尚未核对确认：请在改排面板核对各项分钟数与总量，载入并「保存改排内容」后再排程采用。</p>
+             <p v-else-if="!canAdopt && draft.status === 'ready' && (store.stale || contentDirty || windowDirty || requiredMissing.length)" class="mt-1 text-xs text-amber-700">{{ store.stale ? '更改尚未重新排程。' : requiredMissing.length ? '必填项为空，请填写或改回原值。' : '有未保存修改或预算窗口未重排。' }}</p>
+           </div>
+@@ -829,6 +892,7 @@
+         采用后草案只读。保存失败整体回滚，不会出现旧安排取消了、新安排没保存的情况。
+       </template>
+     </ConfirmDialog>
++    <ConfirmDialog v-model="leaveOpen" title="放弃未保存的修改？" confirm-label="放弃修改并继续" cancel-label="继续编辑" @confirm="settleLeave(true)">已保存草案保留；当前未保存的输入将丢失。</ConfirmDialog>
+     <ConfirmDialog v-model="discardOpen" title="放弃草案" confirm-label="放弃" @confirm="store.discardDraft(); discardOpen = false">
+       放弃后草案只读，可「新建草案」复制内容重来。不会删除任何已采用的正式对象。
+     </ConfirmDialog>
+--- baseline/services/assistant/drafts.js
++++ frontend/src/services/assistant/drafts.js
+@@ -72,7 +72,10 @@
+         const applied = await transformAssistantAtomic((latest, ctx) => assertPutsShape(job(latest, ctx)))
+         return { ...(applied.info || {}), workspace_id: applied.workspace_id }
+       } catch (err) {
+-        const out = { ok: false, code: (err && err.code) || 'SAVE_FAILED', message: (err && err.message) || '保存失败', workspace_id: wsAtCall }
++        // DOMException.code 是浏览器数字编号（如额度不足为 22），不是领域错误码。
++        // 写入异常统一保留为可重试保存失败，避免生成结果被当作冲突而丢弃。
++        const code = typeof err?.code === 'string' && err.code ? err.code : 'SAVE_FAILED'
++        const out = { ok: false, code, message: (err && err.message) || '保存失败', workspace_id: wsAtCall }
+         for (const k of ['current', 'blockers', 'errors', 'clarifications']) if (err && err[k] !== undefined) out[k] = err[k]
+         return out
+       }
+--- baseline/tests/assistant.receive.test.js
++++ frontend/src/tests/assistant.receive.test.js
+@@ -1,5 +1,5 @@
+ // M2 结果接收服务单测（fake-indexeddb）：版本/空间/线程约束、线程归档同事务、幂等、冲突不写。
+-import { IDBFactory } from 'fake-indexeddb'
++import { IDBFactory, IDBObjectStore } from 'fake-indexeddb'
+ import { beforeEach, describe, expect, it, vi } from 'vitest'
+ import { mkProposal } from './planning.helpers.js'
+ 
+@@ -35,6 +35,27 @@
+ }
+ 
+ describe('proposal 接收', () => {
++  it('浏览器额度不足保留为 SAVE_FAILED，事务回滚且恢复后可保存同一结果', async () => {
++    const { frozen } = await generatingDraft()
++    const response = resp(frozen)
++    const original = IDBObjectStore.prototype.put
++    const spy = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (value, ...args) {
++      if (this.name === 'assistant_drafts') throw new DOMException('存储额度不足', 'QuotaExceededError')
++      return original.call(this, value, ...args)
++    })
++    try {
++      const failed = await svc.receiveResult(frozen.id, { expected: frozen, response })
++      expect(failed).toMatchObject({ ok: false, code: 'SAVE_FAILED' })
++      const current = await svc.get(frozen.id)
++      expect(current.draft).toEqual(frozen)
++      expect(current.thread.messages).toHaveLength(0)
++    } finally { spy.mockRestore() }
++    const saved = await svc.receiveResult(frozen.id, { expected: frozen, response })
++    expect(saved.ok).toBe(true)
++    const current = await svc.get(frozen.id)
++    expect(current.draft.status).toBe('needs_review')
++    expect(current.thread.messages).toHaveLength(1)
++  })
+   it('generating → needs_review + revision+1；线程归档 proposal_card 同事务', async () => {
+     const { frozen } = await generatingDraft()
+     const r = await svc.receiveResult(frozen.id, { expected: frozen, response: resp(frozen) })

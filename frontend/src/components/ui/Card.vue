@@ -7,7 +7,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div :class="cn('rounded-xl border bg-card text-card-foreground shadow-sm', props.class)">
+  <div :class="cn('rounded-xl border bg-card text-card-foreground', props.class)">
     <div v-if="$slots.header" :class="cn('flex flex-col gap-1.5', flush ? 'px-5 py-3.5' : 'p-5 pb-3')">
       <slot name="header" />
     </div>

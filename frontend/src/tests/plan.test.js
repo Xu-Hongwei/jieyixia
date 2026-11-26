@@ -135,6 +135,12 @@ describe('A02 无截止任务 + 待安排分类读全量计划（不只看当前
 })
 
 describe('A06 相同内容是提醒不是永久去重', () => {
+  it('另一页面刚加了同日工作时，先重新核对，再显式追加不同说明的安排', () => {
+    const latest = [task(), plan({ id: 'exist', date: '2026-11-23', action_text: '确认后的时间地点信息' })]
+    const input = createInput({ planItemId: 'second', date: '2026-11-23', actionText: '确认宣讲会具体时间与地点', plannedMinutes: 20 })
+    expect(codeOf(() => createPlan(latest, env(), { ...input, expectedDayPlanIds: [] }))).toBe('DAY_PLANS_CHANGED')
+    expect(createPlan(latest, env(), { ...input, expectedDayPlanIds: ['exist'] }).puts[0].id).toBe('second')
+  })
   it('同任务+日期+规范化说明已有活条目 → DUPLICATE_PLAN 零写入并带匹配 ID', () => {
     const latest = [task(), plan({ id: 'exist', date: '2026-11-23', action_text: '撰写正文' })]
     const r = createPlan(latest, env(), createInput({ planItemId: 'dup', date: '2026-11-23', actionText: '  撰写正文  ' }))
@@ -199,23 +205,33 @@ describe('A07 未执行安排的编辑/改期/取消：ID 与顺序稳定、总�
   })
 })
 
-describe('A08 真实会话历史保护：未结束拦变更、已结束拦原地改写', () => {
-  it('任何未结束会话（含暂停）→ UNFINISHED_FOCUS 附会话 ID，拦编辑/改期/取消/进度', () => {
+describe('A08 有工作记录的安排编辑与历史保护', () => {
+  it('暂停后可以修改说明，正在计时仍拦编辑；未结束会话继续拦改期/取消/进度', () => {
     const p = plan()
     const paused = session({ ended_at: null, running: false, outcome: null })
     const latest = [task(), p, paused]
     const args = { planItemId: 'plan-1', expected: snap(p) }
-    expect(codeOf(() => editPlan(latest, env(), { ...args, actionText: 'x' }))).toBe('UNFINISHED_FOCUS')
+    expect(editPlan(latest, env(), { ...args, actionText: 'x' }).puts).toEqual([{ ...p, action_text: 'x' }])
+    const running = [task(), p, { ...paused, running: true, timer_anchor_at: paused.started_at }]
+    expect(codeOf(() => editPlan(running, env(), { ...args, actionText: 'x' }))).toBe('UNFINISHED_FOCUS')
     expect(codeOf(() => movePlan(latest, env(), { ...args, date: '2026-11-24' }))).toBe('UNFINISHED_FOCUS')
     expect(codeOf(() => cancelPlan(latest, env(), { ...args, confirm: true }))).toBe('UNFINISHED_FOCUS')
     expect(codeOf(() => confirmProgressPlan(latest, env(), { ...args, progress: 'done' }))).toBe('UNFINISHED_FOCUS')
-    try { editPlan(latest, env(), { ...args, actionText: 'x' }) } catch (e) { expect(e.sessionIds).toEqual(['sess-1']) }
+    try { editPlan(running, env(), { ...args, actionText: 'x' }) } catch (e) { expect(e.sessionIds).toEqual(['sess-1']) }
   })
-  it('已结束会话 → PLAN_HAS_HISTORY，拦原地改日期/说明/估时', () => {
+  it('旧待执行安排与结束记录不一致时，先核对进度', () => {
     const p = plan()
     const latest = [task(), p, session()]
     expect(codeOf(() => editPlan(latest, env(), { planItemId: 'plan-1', expected: snap(p), actionText: 'x' }))).toBe('PLAN_HAS_HISTORY')
     expect(codeOf(() => movePlan(latest, env(), { planItemId: 'plan-1', expected: snap(p), date: '2026-11-24' }))).toBe('PLAN_HAS_HISTORY')
+  })
+  it('部分完成后编辑原安排只更新说明与估时，保留实际用时、状态和会话', () => {
+    const p = plan({ state: 'partial', actual_minutes: 10, focus_session_id: 'sess-1' })
+    const ended = session()
+    const r = editPlan([task(), p, ended], env(), { planItemId: p.id, expected: snap(p), actionText: '核对地点', plannedMinutes: 20 })
+    expect(r.puts).toEqual([{ ...p, action_text: '核对地点', planned_minutes: 20 }])
+    expect(r.deletes).toEqual([])
+    expect(codeOf(() => editPlan([task(), p, { ...ended, accumulated_ms: -1 }], env(), { planItemId: p.id, expected: snap(p), plannedMinutes: 20 }))).toBe('HISTORY_UNRESOLVED')
   })
   it('会话归属按 plan_item_id+task+workspace 命中，不看快捷 focus_session_id/actual_minutes', () => {
     const p = plan({ focus_session_id: null, actual_minutes: null })

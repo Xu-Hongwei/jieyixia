@@ -1,0 +1,71 @@
+{
+  "results": [
+    {
+      "item": "start",
+      "name": "无当前行动时确认开始禁用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "start",
+      "name": "取消开始不创建会话且回到详情",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "save",
+      "name": "安排保存失败保留输入和重试入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "save",
+      "name": "离线原请求重试正确保存一次",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "cancel",
+      "name": "取消确认框不改变安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "cancel",
+      "name": "确认取消保留任务和安排历史",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "history",
+      "name": "已取消安排无编辑与改期入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "progress",
+      "name": "部分完成后保留另安排一天入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "start",
+      "name": "选择行动后开始确认可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "start",
+      "name": "确认开始进入工作并绑定原安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "isolation",
+      "name": "无模型请求与用户服务访问",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

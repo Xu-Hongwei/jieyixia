@@ -10,8 +10,9 @@ import { isValidDate } from './time'
 import { weekStartOf } from './week'
 import { BUCKET_ORDER } from './organize'
 import { isLiveRef } from './plan'
+import { taskListPath } from './taskList'
 
-const COLLECT_KEYS = ['q', 'kind', 'content', 'status', 'from', 'to', 'sort']
+const COLLECT_KEYS = ['q', 'kind', 'content', 'status', 'from', 'to', 'sort', 'source']
 
 const enc = encodeURIComponent
 const buildQuery = (pairs) => {
@@ -58,6 +59,7 @@ function parseAt(raw, ctx, top) {
     if (q.plan && !findDoc(docs, q.plan, 'plan_item', ws)) return null
     return schedulePath(q, todayStr)
   }
+  if (path === '/tasks') return taskListPath(Object.fromEntries(usp))
   if (path === '/collect') {
     const pairs = COLLECT_KEYS.map((k) => [k, usp.get(k) || ''])
     return `/collect${buildQuery(pairs)}`
@@ -111,6 +113,15 @@ export function parseReturnPath(raw, ctx) {
   }
 }
 
+// 改排只允许返回当前任务；复用既有校验保留 plan 和有限的一层来源。
+// 旧入口/其它任务/非法地址回退当前任务，任务已删除或跨空间则回日程。
+export function resolveReplanReturn(raw, taskId, ctx) {
+  if (!findDoc(ctx.docs, taskId, 'task', ctx.ws)) return '/today'
+  const fallback = taskPath(taskId)
+  const parsed = parseReturnPath(raw, ctx)
+  return parsed && parsed.split('?')[0] === fallback ? parsed : fallback
+}
+
 // —— 安全回退（§4 规则 5）：return 丢失/非法时按真实对象构造目标，不猜测来源 ——
 // 会话有真实安排关联 → 当前空间日程定位该安排；独立会话 → 所属任务；对象不存在 → 当前空间日程。
 export function resolveWorkReturn(raw, session, ctx) {
@@ -125,7 +136,17 @@ export function resolveWorkReturn(raw, session, ctx) {
   }
   return '/today'
 }
-export const resolveTaskReturn = (raw, ctx) => parseReturnPath(raw, ctx) ?? '/today'
+export const resolveTaskReturn = (raw, ctx) => parseReturnPath(raw, ctx) ?? '/tasks'
+
+// 已校验的来源地址对应的目的地名称；导航归属由 route.meta.section 单独决定。
+export function taskReturnLabel(path) {
+  const base = path.split('?')[0]
+  if (base === '/tasks') return '返回任务列表'
+  if (base === '/collect') return '返回资料库'
+  if (base.startsWith('/notes')) return '返回资料核对'
+  if (base.startsWith('/work-records')) return '返回工作记录'
+  return '返回日程'
+}
 
 // —— 任务页显式执行安排上下文（§4 规则 1/2）：只认 plan 参数，不从 return 字符串推断 ——
 // 返回 { status: 'none' } | { status: 'ok', plan } | { status: 'invalid', reason }。

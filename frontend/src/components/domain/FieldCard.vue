@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Check, Pencil } from 'lucide-vue-next'
 import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
@@ -21,6 +21,15 @@ const statusVariant = { candidate: 'warning', confirmed: 'success', unresolved: 
 const editing = ref(false)
 const editValue = ref('')
 const nodeEdit = ref(null)
+const saving = ref(false)
+const hasUnsaved = computed(() => editing.value || !!nodeEdit.value)
+function discardEdits() { editing.value = false; nodeEdit.value = null }
+defineExpose({ hasUnsaved, saving, discardEdits })
+async function confirmField() {
+  if (saving.value) return
+  saving.value = true
+  try { await store.confirmField(props.note, props.field.key) } finally { saving.value = false }
+}
 
 const roleItems = Object.entries(ROLE_LABELS).map(([value, labelText]) => ({ value, label: labelText }))
 const basisItems = Object.entries(BASIS_LABELS).map(([value, labelText]) => ({ value, label: labelText }))
@@ -37,8 +46,12 @@ function startEdit() {
   editing.value = true
 }
 async function saveEdit() {
-  const ok = await store.saveEdit(props.note, props.field.key, editValue.value)
-  if (ok) editing.value = false
+  if (saving.value) return
+  saving.value = true
+  try {
+    const ok = await store.saveEdit(props.note, props.field.key, editValue.value)
+    if (ok) editing.value = false
+  } finally { saving.value = false }
 }
 
 function displayValue(f) {
@@ -68,17 +81,21 @@ async function saveNodeEdit() {
   for (const k of ['reference_at', 'message_date']) {
     if (e[k] && !isValidDate(e[k])) return store.say('warning', '参照 / 消息日期须为合法的 YYYY-MM-DD')
   }
+  if (saving.value) return
+  saving.value = true
+  try {
   const ok = await store.saveNodeEdit(props.note, e.index, {
     ...e,
     value: v,
     reference_source: e.reference_source === 'none' ? '' : e.reference_source,
   })
   if (ok) nodeEdit.value = null
+  } finally { saving.value = false }
 }
 </script>
 
 <template>
-  <div
+  <fieldset :disabled="saving" :aria-busy="saving"
     class="min-w-0 space-y-1.5 rounded-md border border-border/70 bg-background p-3"
     :class="field.key === 'deadline' && 'border-primary/40'"
     :data-field-key="field.key"
@@ -92,8 +109,8 @@ async function saveNodeEdit() {
       <Badge v-if="field.precision === 'datetime' && field.tz_known === false" variant="warning">时区未知</Badge>
       <Badge v-if="field.origin === 'user'" variant="secondary" title="origin=user">用户修改</Badge>
       <span class="flex-1" />
-      <Button v-if="canConfirm(field)" size="sm" variant="outline" @click="store.confirmField(note, field.key)"><Check />确认</Button>
-      <Button v-if="field.key !== 'time_nodes'" size="sm" variant="ghost" @click="startEdit"><Pencil />编辑</Button>
+      <Button :disabled="saving" v-if="canConfirm(field)" size="sm" variant="outline" @click="confirmField"><Check />确认</Button>
+      <Button :disabled="saving" v-if="field.key !== 'time_nodes'" size="sm" variant="ghost" @click="startEdit"><Pencil />编辑</Button>
     </div>
 
     <template v-if="editing">
@@ -109,7 +126,7 @@ async function saveNodeEdit() {
           <Badge v-else-if="n.basis && n.basis !== 'explicit'" variant="outline" :title="n.basis">{{ label(BASIS_LABELS, n.basis) }}</Badge>
           <Badge variant="outline" :title="n.role">{{ label(ROLE_LABELS, n.role || 'unknown') }}</Badge>
           <span class="flex-1" />
-          <Button size="sm" variant="ghost" @click="startNodeEdit(i)"><Pencil />编辑节点</Button>
+          <Button :disabled="saving" size="sm" variant="ghost" @click="startNodeEdit(i)"><Pencil />编辑节点</Button>
         </div>
         <div class="break-words text-xs text-muted-foreground">原文：{{ n.raw }}</div>
         <div v-if="n.reference_at" class="text-xs text-muted-foreground">
@@ -124,8 +141,8 @@ async function saveNodeEdit() {
           <NodeSelect v-model="nodeEdit.reference_source" :items="refItems" placeholder="参照来源" />
           <DateInput v-model="nodeEdit.message_date" placeholder="消息日期（可空）" />
           <div class="flex gap-2">
-            <Button size="sm" @click="saveNodeEdit">保存节点</Button>
-            <Button size="sm" variant="ghost" @click="nodeEdit = null">取消</Button>
+            <Button :disabled="saving" size="sm" @click="saveNodeEdit">保存节点</Button>
+            <Button :disabled="saving" size="sm" variant="ghost" @click="nodeEdit = null">取消</Button>
           </div>
         </div>
       </div>
@@ -134,12 +151,12 @@ async function saveNodeEdit() {
 
     <div v-if="field.quote" class="break-words border-l-2 border-border pl-2 text-xs text-muted-foreground">原文引用：「{{ field.quote.text }}」</div>
     <div v-if="editing" class="flex gap-2">
-      <Button size="sm" @click="saveEdit">保存修改</Button>
-      <Button size="sm" variant="ghost" @click="editing = false">取消</Button>
+      <Button :disabled="saving" size="sm" @click="saveEdit">保存修改</Button>
+      <Button :disabled="saving" size="sm" variant="ghost" @click="editing = false">取消</Button>
     </div>
     <details class="text-xs">
       <summary class="cursor-pointer text-muted-foreground">查看原始数据</summary>
       <pre class="mt-1 overflow-auto rounded-md bg-muted p-2">{{ JSON.stringify(field, null, 2) }}</pre>
     </details>
-  </div>
+  </fieldset>
 </template>

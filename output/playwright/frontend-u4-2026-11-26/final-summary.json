@@ -1,0 +1,44 @@
+[
+  {
+    "run": "browser-final",
+    "passed": 30,
+    "total": 30,
+    "failed": [],
+    "user_service_hits": 0
+  },
+  {
+    "run": "workflow-final-r2",
+    "passed": 25,
+    "total": 25,
+    "failed": [],
+    "user_service_hits": 0
+  },
+  {
+    "run": "generation-quota-final",
+    "passed": 11,
+    "total": 11,
+    "failed": [],
+    "user_service_hits": 0
+  },
+  {
+    "run": "u1-regression-r2",
+    "passed": 34,
+    "total": 34,
+    "failed": [],
+    "user_service_hits": 0
+  },
+  {
+    "run": "u2-regression",
+    "passed": 29,
+    "total": 29,
+    "failed": [],
+    "user_service_hits": 0
+  },
+  {
+    "run": "u3-regression",
+    "passed": 32,
+    "total": 32,
+    "failed": [],
+    "user_service_hits": 0
+  }
+]

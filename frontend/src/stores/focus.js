@@ -51,7 +51,8 @@ export const useFocusStore = defineStore('focus', () => {
       await loadWorkspace()
       // begin/end-done/计划联动结束会改写任务/行动/安排文档：同步刷新 app.docs，日程与任务详情不读旧快照。
       // partial/blocked 计划结束同样改 PlanItem；成功 replay 只回摘要，也按归属重读刷新。
-      if (result.ok && (result.task || result.action || result.planItem || result.replayed)) await app.reloadDocs()
+      // 安排的编辑入口也读取 docs 中的会话；离开工作页前同步暂停/恢复结果。
+      if (result.ok && (op === 'pause' || op === 'resume' || result.task || result.action || result.planItem || result.replayed)) await app.reloadDocs()
     }
     return result
   }

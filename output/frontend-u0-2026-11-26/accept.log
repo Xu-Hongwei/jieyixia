@@ -1,0 +1,85 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [nav] 入口刷新后返回保留任务、安排和来源 — /tasks/t-smoke?plan=p-1&return=%2Ftoday%3Fdate%3D2026-11-27%26view%3Dlist
+PASS [nav] 回到原日期及列表 — /today?date=2026-11-27&view=list
+PASS [layout] 改排入口 360 — {"width":360,"scroll":360}
+PASS [layout] 改排入口 390 — {"width":390,"scroll":390}
+PASS [layout] 改排入口 430 — {"width":430,"scroll":430}
+FAIL [nav] 创建草案后仍保留原任务返回地址 — /assistant?replanTask=t-smoke&return=/tasks/t-smoke?plan=p-1%26return=%252Ftoday%253Fdate%253D2026-11-27%2526view%253Dlist
+WAIT TIMEOUT「继续已有草案（1）」BODY:
+ 截
+截下来
+个人空间
+演示空间
+个人空间 · 本地存储
+日程
+资料库
+待核对
+助手
+数据管理
+数据仅存本浏览器
+刷新 / 重开可恢复
+助手
+模型就绪
+本地规划助手 · 真实模型理解 + 本地规则排程。模型只给建议；核对、确认并明确采用后才成为正式安排。
+调整后续安排 · 选择替换范围
+虚构：课程报告
+总截止：2026年12月2日
+本轮不修改截止
+原任务页
+行动完成情况（只读参考；完成状态请到原任务页操作）
+已完成
+阅读资料
+60 分钟
+未完成
+撰写报告正文
+90 分钟
+本轮七日窗口（2026-11-26 起）：勾选允许替换的旧安排
+2026-11-26
+整理资料（旧安排）
+30 分钟
+2026-11-27
+写报告初稿（旧安排）
+45 分钟
+2026-11-28
+核对数据（保留）
+20 分钟
+2026-11-29
+已投入的安排
+30 分钟
+已有投入记录
+2026-11-30
+有专注记录的安排
+30 分钟
+有专注会话引用
+
+本次将替换 0 条、保留 5 条（未选与受保护安排继续占用容量）。
+
+进展说明（一句话）
+本次待安排清单（已含所选旧安排对应的未完工作；不含保留安排继续覆盖的工作）
+新增行动（将新增）
+复用：撰写报告正文
+分钟
+可拆分
+最小段
+最早开始
+选择日期 · 今天 2026-11-26
+优先级
+低
+普通
+高
+依赖行
+
+新增行动分钟数未知：请补充分钟数，或改为复用既有行动。
+
+添加一行
+创建改排草案
+← 返回新建计划
+FAIL [runner] 验收异常 — page.waitForFunction: Timeout 20000ms exceeded.
+page.waitForFunction: Timeout 20000ms exceeded.
+    at waitText (E:\qoder\output\frontend-u0-2026-11-26\accept.mjs:173:16)
+    at E:\qoder\output\frontend-u0-2026-11-26\accept.mjs:250:9 {
+  log: [],
+  name: 'TimeoutError'
+}
+TOTAL 5/7

@@ -3,6 +3,8 @@
 // 限额数值来自 contract/limits.json（单一来源）；形状校验复用正式 schema（validateAgainstDef）。
 // 复用判定绑定「内容指纹 + 来源 → 实际分析结果」，不是「存在便签即复用」；绑定缺失/失配 → 重分析一次建立。
 import limitsDoc from '@contract/limits.json'
+import { MAX_SELECTED_SOURCES } from '../../domains/assistant/limits'
+export { MAX_SELECTED_SOURCES } from '../../domains/assistant/limits'
 import { canonicalJson } from '../../domains/assistant/draft'
 import {
   parseClarificationHistory, renderUserInputText,
@@ -13,7 +15,6 @@ import { sha256Hex } from '../backup/format'
 import { validateAgainstDef } from '../backup/contractSchema'
 
 const L = limitsDoc.limits
-export const MAX_SELECTED_SOURCES = L.max_selected_sources.value
 export const MAX_AUTO_ANALYZE = L.max_new_images_per_batch.value
 export const MAX_EXCERPT_CHARS = L.max_source_excerpt_chars.value
 export const MAX_USER_MESSAGE_CHARS = L.max_user_message_chars.value

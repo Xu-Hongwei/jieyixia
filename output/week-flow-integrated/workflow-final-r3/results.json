@@ -1,0 +1,161 @@
+{
+  "results": [
+    {
+      "item": "entry",
+      "name": "只展开新计划输入，示例/历史/时间收起",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "entry",
+      "name": "无草案时不能跳过输入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "input",
+      "name": "原文尚未保存时不能漏发生成",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "离开取消保留原文和要求",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "切换规划类型取消仍保留输入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "entry",
+      "name": "调整入口仅显示任务选择",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "review",
+      "name": "打开草案不会自动确认或排程",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "review",
+      "name": "缺少截止确认时停留核对，不创建安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "preview",
+      "name": "保存成功后进入预览且任务编辑隐藏",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "steps",
+      "name": "切换步骤后回到工作区顶部并聚焦当前步骤",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "dirty",
+      "name": "编辑后确认加入锁定，截止按钮不会覆盖未保存标题",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "save",
+      "name": "内容保存失败保留输入且停止排程",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "save",
+      "name": "保存失败不能采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "retry",
+      "name": "重试后使用保留的输入生成新预览",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "budget",
+      "name": "无效预算停在核对且不能采用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "取消切空间保留预算及原空间",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "返回草案列表也保护预算",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "budget",
+      "name": "新预算写入排程输入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "restore",
+      "name": "重新打开回到核对且恢复已保存预算",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "adopt",
+      "name": "进入确认步骤尚未写入正式数据",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "agenda",
+      "name": "确认页逐条列出真实行动和分钟数",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "adopt",
+      "name": "取消最终确认不写入安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "adopt",
+      "name": "确认后按草案写入且结果入口只有一组",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "adopt",
+      "name": "采用后没有可重复采用按钮",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "restore",
+      "name": "采用后刷新仍只读且未重复写入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "isolation",
+      "name": "个人空间不受演示采用影响",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

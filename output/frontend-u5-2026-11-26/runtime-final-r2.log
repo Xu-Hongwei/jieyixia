@@ -1,0 +1,37 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [offline] 未缓存助手断网有提示，原任务页面仍在
+PASS [offline] 断网时禁止重新加载，保留已打开的本地页面
+PASS [guard] 页面重试取消时保留未保存任务
+PASS [recovery] 恢复网络后重试原目标成功，错误提示消失
+PASS [offline] 空闲预加载后断网仍能打开数据页并导出备份
+PASS [offline] 断网创建任务实际落库
+PASS [offline] 已加载助手可离线重新打开
+PASS [loading] 慢加载有短提示，完成后收起
+PASS [deadline] 逾期截止同时显示文字和醒目左边框
+PASS [layout] today 360
+PASS [layout] today 390
+PASS [layout] today 430
+PASS [layout] today 768
+PASS [layout] today 1440
+PASS [layout] tasks 360
+PASS [layout] tasks 390
+PASS [layout] tasks 430
+PASS [layout] tasks 768
+PASS [layout] tasks 1440
+PASS [layout] collect 360
+PASS [layout] collect 390
+PASS [layout] collect 430
+PASS [layout] collect 768
+PASS [layout] collect 1440
+PASS [layout] assistant 360
+PASS [layout] assistant 390
+PASS [layout] assistant 430
+PASS [layout] assistant 768
+PASS [layout] assistant 1440
+PASS [input] 手机输入字号不小于16px
+PASS [input] 短视口可以滚动让保存按钮露出底栏上方
+PASS [dialog] 短视口确认框在屏幕内且有取消操作
+PASS [accessibility] 减少动态效果时保留可见焦点
+PASS [isolation] 未访问用户服务
+TOTAL 34/34

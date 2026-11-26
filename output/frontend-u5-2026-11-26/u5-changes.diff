@@ -1,0 +1,543 @@
+--- baseline/app/router.js
++++ frontend/src/app/router.js
+@@ -1,4 +1,6 @@
+ import { createRouter, createWebHashHistory } from 'vue-router'
++import { ref } from 'vue'
++import { resetWorkLeaveApproval } from '@/composables/workLeave'
+ import TodayPage from '@/pages/TodayPage.vue'
+ import CollectPage from '@/pages/CollectPage.vue'
+ import NotesPage from '@/pages/NotesPage.vue'
+@@ -7,8 +9,26 @@
+ import WorkPage from '@/pages/WorkPage.vue'
+ import WorkRecordsPage from '@/pages/WorkRecordsPage.vue'
+ import WorkRecordDetailPage from '@/pages/WorkRecordDetailPage.vue'
+-import DataPage from '@/pages/DataPage.vue'
+-import AssistantPage from '@/pages/AssistantPage.vue'
++
++// 日常本地页面随入口加载；助手与备份按需加载，空闲时预热当前会话。
++const loadAssistant = () => import('@/pages/AssistantPage.vue')
++const loadData = () => import('@/pages/DataPage.vue')
++export const routeLoadError = ref(null)
++export const routePending = ref('')
++let navigationId = 0
++let targetPath = ''
++const loadPage = async (title, loader) => {
++  const id = navigationId
++  const timer = setTimeout(() => { if (id === navigationId) routePending.value = title }, 200)
++  try { return await loader() } finally {
++    clearTimeout(timer)
++    if (id === navigationId) routePending.value = ''
++  }
++}
++export function warmOptionalPages() {
++  // 网络失败只保留按需重试；不缓存业务数据，也不注册长期缓存或服务工作线程。
++  return Promise.allSettled([loadAssistant(), loadData()])
++}
+ 
+ // 滚动位置按工作区 + 路由保存：返回/后退恢复列表位置，不把临时状态塞进 URL。
+ const scrollKey = (route) => {
+@@ -27,12 +47,12 @@
+     { path: '/collect', name: 'library', component: CollectPage, meta: { title: '资料库', section: 'library' } },
+     { path: '/notes', name: 'review', component: NotesPage, meta: { title: '资料核对', section: 'library' } },
+     { path: '/notes/:id', name: 'review-note', component: NotesPage, meta: { title: '资料核对', section: 'library' } },
+-    { path: '/assistant', name: 'assistant', component: AssistantPage, meta: { title: '助手', section: 'assistant' } },
++    { path: '/assistant', name: 'assistant', component: () => loadPage('助手', loadAssistant), meta: { title: '助手', section: 'assistant' } },
+     { path: '/tasks/:id', name: 'task-detail', component: TaskDetailPage, meta: { title: '任务详情', section: 'tasks' } },
+     { path: '/work/:sessionId', name: 'work', component: WorkPage, meta: { title: '执行工作', section: 'schedule' } },
+     { path: '/work-records', name: 'work-records', component: WorkRecordsPage, meta: { title: '工作记录', section: 'schedule' } },
+     { path: '/work-records/:sessionId', name: 'work-record-detail', component: WorkRecordDetailPage, meta: { title: '工作记录详情', section: 'schedule' } },
+-    { path: '/data', name: 'data', component: DataPage, meta: { title: '数据管理', section: 'data' } },
++    { path: '/data', name: 'data', component: () => loadPage('数据管理', loadData), meta: { title: '数据管理', section: 'data' } },
+   ],
+   scrollBehavior(to, from, savedPosition) {
+     if (to.path === '/collect' && from.path === '/collect') {
+@@ -53,7 +73,24 @@
+ })
+ 
+ router.beforeEach((to, from) => {
++  navigationId += 1
++  targetPath = to.fullPath
++  routePending.value = ''
+   if (from.matched.length) {
+     try { sessionStorage.setItem(scrollKey(from), String(window.scrollY)) } catch { /* 忽略 */ }
+   }
+ })
++
++router.afterEach((to, _from, failure) => {
++  if (failure) resetWorkLeaveApproval()
++  if (to.fullPath !== targetPath) return
++  routePending.value = ''
++  if (!failure) routeLoadError.value = null
++})
++router.onError((_error, to) => {
++  // 跳转失败不会卸载旧页面；清除已经消费过的离开许可，保护后续新编辑。
++  resetWorkLeaveApproval()
++  if (to.fullPath !== targetPath) return
++  routePending.value = ''
++  routeLoadError.value = { path: to.fullPath, title: to.meta.title || '页面' }
++})
+--- baseline/App.vue
++++ frontend/src/App.vue
+@@ -1,9 +1,12 @@
+ <script setup>
+-import { computed, onMounted, watch } from 'vue'
++import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+ import { Bot, CalendarDays, Database, Library, ListChecks } from 'lucide-vue-next'
+ import Alert from '@/components/ui/Alert.vue'
+ import Badge from '@/components/ui/Badge.vue'
++import Button from '@/components/ui/Button.vue'
++import { routeLoadError, routePending, warmOptionalPages } from '@/app/router'
++import { requestWorkLeave } from '@/composables/workLeave'
+ import WorkspaceSwitcher from '@/components/domain/WorkspaceSwitcher.vue'
+ import WorkProtectionDialog from '@/components/domain/WorkProtectionDialog.vue'
+ import { useAppStore } from '@/stores/app'
+@@ -18,6 +21,27 @@
+   { to: '/assistant', section: 'assistant', label: '助手', icon: Bot },
+ ]
+ onMounted(() => store.init())
++let warmTimer
++const online = ref(navigator.onLine)
++const updateOnline = () => { online.value = navigator.onLine }
++onMounted(() => {
++  window.addEventListener('online', updateOnline)
++  window.addEventListener('offline', updateOnline)
++  warmTimer = setTimeout(() => { if (navigator.onLine) void warmOptionalPages() }, 1800)
++})
++onBeforeUnmount(() => {
++  clearTimeout(warmTimer)
++  window.removeEventListener('online', updateOnline)
++  window.removeEventListener('offline', updateOnline)
++})
++async function retryPage() {
++  const target = routeLoadError.value?.path
++  if (!target || !navigator.onLine || !(await requestWorkLeave())) return
++  // 浏览器可能记住失败的模块导入；重新打开目标页清掉失败记录。
++  // 先走当前表单的离开保护，不静默丢弃失败后继续编辑的内容。
++  window.location.replace(router.resolve(target).href)
++  window.location.reload()
++}
+ 
+ // 待核对角标按便签数（待核对 + 分析失败）；字段数只是单张便签内的进度，不混用。
+ const reviewNoteCount = computed(() => store.noteBuckets.pending.length + store.noteBuckets.failed.length)
+@@ -67,7 +91,7 @@
+     </aside>
+ 
+     <div class="min-w-0 flex-1">
+-      <header class="flex flex-wrap items-center gap-2 border-b px-4 py-3">
++      <header class="flex min-h-14 flex-wrap items-center gap-2 border-b bg-card/70 px-4 py-3 sm:px-6 lg:px-8">
+         <span class="text-sm font-medium">{{ route.meta.title }}</span>
+         <WorkspaceSwitcher compact class="md:hidden" />
+         <RouterLink to="/data" class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent md:hidden" active-class="bg-accent font-medium text-foreground" title="数据管理">
+@@ -84,7 +108,15 @@
+         <Alert :variant="store.banner.tone">{{ store.banner.msg }}</Alert>
+       </div>
+ 
+-      <main class="p-4 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-4">
++      <div v-if="routePending || routeLoadError" class="px-4 pt-3 sm:px-6 lg:px-8">
++        <Alert v-if="routeLoadError" variant="warning" class="flex flex-wrap items-center gap-3">
++          <span class="min-w-0 flex-1">{{ routeLoadError.title }}暂时无法打开。联网后重试将重新打开页面，已保存数据保留。</span>
++          <Button size="sm" variant="outline" :disabled="!online" @click="retryPage">重试打开</Button>
++        </Alert>
++        <p v-else role="status" class="text-sm text-muted-foreground">正在打开{{ routePending }}…</p>
++      </div>
++
++      <main class="p-4 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:px-6 sm:pt-6 lg:px-8 md:pb-8">
+         <RouterView />
+       </main>
+     </div>
+--- baseline/components/domain/DeadlineChip.vue
++++ frontend/src/components/domain/DeadlineChip.vue
+@@ -12,12 +12,12 @@
+ <template>
+   <button
+     type="button"
+-    class="w-full rounded-md border px-2 py-1.5 text-left transition-colors"
++    class="w-full rounded-md border px-2.5 py-2.5 text-left transition-colors"
+     :class="
+       props.entry.done
+         ? 'border-border/60 bg-muted/40 opacity-70'
+         : props.entry.overdue
+-          ? 'border-border/70 border-l-2 border-l-destructive bg-background hover:border-destructive/60'
++          ? 'border-destructive/25 border-l-2 border-l-destructive bg-red-50 hover:border-destructive/60'
+           : 'border-border/70 bg-background hover:border-primary/50'
+     "
+     :aria-label="`任务详情：${props.entry.task.title}`"
+@@ -27,8 +27,8 @@
+       <span class="font-date text-xs font-semibold" :class="props.entry.overdue && !props.entry.done ? 'text-destructive' : 'text-muted-foreground'">
+         {{ slotClock(props.entry.minutes) || '当日截止' }}
+       </span>
+-      <span v-if="props.entry.done" class="text-[10px] font-medium text-success-foreground">已完成</span>
+-      <span v-else-if="props.entry.overdue" class="text-[10px] font-medium text-destructive">已逾期</span>
++      <span v-if="props.entry.done" class="text-xs font-medium text-success-foreground">已完成</span>
++      <span v-else-if="props.entry.overdue" class="text-xs font-medium text-destructive">已逾期</span>
+     </div>
+     <div class="mt-0.5 line-clamp-2 break-words text-sm font-medium leading-snug" :class="props.entry.done && 'line-through'">
+       {{ props.entry.task.title }}
+--- baseline/components/domain/MaterialPanel.vue
++++ frontend/src/components/domain/MaterialPanel.vue
+@@ -49,7 +49,7 @@
+   <DialogRoot :open="!!sourceId" @update:open="value => { if (!value) close() }">
+     <DialogPortal>
+       <DialogOverlay class="fixed inset-0 z-[45] bg-black/25" />
+-      <DialogContent class="fixed inset-y-0 right-0 z-[45] h-dvh w-full overflow-y-auto overscroll-contain border-l bg-background p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl outline-none sm:max-w-2xl" :aria-describedby="undefined" @close-auto-focus="restoreFocus">
++      <DialogContent class="fixed inset-y-0 right-0 z-[45] panel-scroll h-dvh w-full overflow-y-auto overscroll-contain border-l bg-background p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl outline-none sm:max-w-2xl" :aria-describedby="undefined" @close-auto-focus="restoreFocus">
+         <DialogTitle class="sr-only">资料详情</DialogTitle>
+         <div class="mb-3 flex justify-end"><Button variant="ghost" size="icon" aria-label="关闭资料详情" @click="close"><X /></Button></div>
+         <NoteReview v-if="note" ref="review" embedded :note-id="note.id" :next-id="nextId" :return-to="returnTo" @open-note="id => emit('open-note', id)" />
+--- baseline/components/domain/PlanCard.vue
++++ frontend/src/components/domain/PlanCard.vue
+@@ -25,22 +25,22 @@
+ <template>
+   <button
+     type="button"
+-    class="w-full rounded-md border border-border/70 bg-background px-2 py-1.5 text-left transition-colors hover:border-primary/50"
++    class="w-full rounded-md border border-border/70 bg-background px-2.5 py-2.5 text-left transition-colors hover:border-primary/50"
+     :aria-label="`安排详情：${props.plan.action_text}`"
+     @click="emit('open', props.plan.id)"
+   >
+     <div class="line-clamp-2 break-words text-sm font-medium leading-snug">{{ props.plan.action_text }}</div>
+     <div class="mt-0.5 truncate text-xs text-muted-foreground">{{ props.task ? props.task.title : '原任务已删除' }}</div>
+-    <div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground">
++    <div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
+       <span class="font-date">预计 {{ props.plan.planned_minutes }} 分</span>
+-      <span>· 实际 {{ planActualLabel(summary) }}</span>
+-      <Badge v-if="props.plan.state === 'partial'" variant="secondary" class="px-1 py-0 text-[10px]">部分完成</Badge>
+-      <Badge v-if="summary && !summary.authoritative" variant="warning" class="px-1 py-0 text-[10px]">待核对</Badge>
+-      <Badge v-if="summary && summary.cacheMismatch" variant="warning" class="px-1 py-0 text-[10px]" title="缓存与明细不一致：仅提示，不自动改写">缓存差异</Badge>
++      <span>实际 {{ planActualLabel(summary) }}</span>
++      <Badge v-if="props.plan.state === 'partial'" variant="secondary" class="px-1 py-0 text-xs">部分完成</Badge>
++      <Badge v-if="summary && !summary.authoritative" variant="warning" class="px-1 py-0 text-xs">待核对</Badge>
++      <Badge v-if="summary && summary.cacheMismatch" variant="warning" class="px-1 py-0 text-xs" title="缓存与明细不一致：仅提示，不自动改写">缓存差异</Badge>
+     </div>
+     <div
+       v-if="deadlineLabel || (risk && risk.kind !== 'no_deadline')"
+-      class="mt-0.5 break-words text-[11px] leading-snug"
++      class="mt-0.5 break-words text-xs leading-snug"
+       :class="lateRisk ? 'text-destructive' : 'text-muted-foreground'"
+     >
+       {{ deadlineLabel }}<template v-if="risk && risk.kind === 'after_deadline'"> · 晚于截止</template><template v-else-if="risk && risk.overdue"> · 已逾期</template><template v-else-if="risk && (risk.kind === 'due_same_day' || risk.kind === 'due_same_day_timed')"> · 当日截止</template>
+--- baseline/components/domain/PlanWorkspace.vue
++++ frontend/src/components/domain/PlanWorkspace.vue
+@@ -55,7 +55,7 @@
+   <DialogRoot :open="open" @update:open="value => { if (!value) close() }">
+     <DialogPortal>
+       <DialogOverlay class="fixed inset-0 z-[45] bg-black/25" />
+-      <DialogContent class="fixed inset-y-0 right-0 z-[45] h-dvh w-full overflow-y-auto overscroll-contain border-l bg-background p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl outline-none sm:max-w-xl" :aria-describedby="undefined" @close-auto-focus="restoreFocus">
++      <DialogContent class="fixed inset-y-0 right-0 z-[45] panel-scroll h-dvh w-full overflow-y-auto overscroll-contain border-l bg-background p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl outline-none sm:max-w-xl" :aria-describedby="undefined" @close-auto-focus="restoreFocus">
+         <DialogTitle class="sr-only">{{ creatingTask ? '新建任务并继续安排' : editor ? '编辑工作安排' : '工作安排详情' }}</DialogTitle>
+         <div class="mb-3 flex justify-end"><Button size="icon" variant="ghost" aria-label="关闭工作面板" @click="close"><X /></Button></div>
+         <p v-if="taskSaved && !creatingTask" class="mb-3 text-sm text-muted-foreground" role="status">任务已保存。取消安排不会删除任务。</p>
+--- baseline/components/domain/TaskListRows.vue
++++ frontend/src/components/domain/TaskListRows.vue
+@@ -17,13 +17,15 @@
+ 
+ <template>
+   <div class="divide-y divide-border">
+-    <div v-for="task in tasks" :key="task.id" class="py-3" data-task-row>
+-      <div class="flex flex-wrap items-center gap-2">
+-        <RouterLink :to="taskPath(task.id, { return: returnTo })" class="min-w-0 flex-1 basis-40 break-words text-sm font-medium underline-offset-2 hover:underline" :aria-label="'任务详情：' + task.title">{{ task.title }}</RouterLink>
++    <div v-for="task in tasks" :key="task.id" class="py-4" data-task-row>
++      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
++        <RouterLink :to="taskPath(task.id, { return: returnTo })" class="min-w-0 flex-1 break-words text-base font-medium underline-offset-2 hover:underline" :aria-label="'任务详情：' + task.title">{{ task.title }}</RouterLink>
++        <div class="flex flex-wrap items-center gap-2">
+         <Badge v-if="isOverdue(task, new Date(now))" variant="destructive">已逾期</Badge>
+         <Badge :variant="task.status === 'done' ? 'success' : 'secondary'">{{ label(STATUS_LABELS, task.status) }}</Badge>
+         <span class="text-xs text-muted-foreground">{{ task.deadline?.value ? formatWhen(task.deadline.value, task.deadline.precision) : '无截止' }}</span>
+         <Button v-if="task.status !== 'done'" size="sm" variant="outline" :aria-label="'安排工作：' + task.title" @click="$emit('arrange', task)">安排</Button>
++        </div>
+       </div>
+       <div v-if="pastPlans[task.id]?.length" class="mt-2 flex flex-wrap gap-2">
+         <button v-for="plan in pastPlans[task.id]" :key="plan.id" type="button" class="rounded border px-2 py-1 text-xs hover:bg-accent" :aria-label="'安排详情：' + plan.action_text" @click="$emit('open-plan', { planId: plan.id, date: plan.date })">{{ plan.date }} · {{ label(PLAN_STATE_LABELS, plan.state) }}</button>
+--- baseline/components/domain/WeekView.vue
++++ frontend/src/components/domain/WeekView.vue
+@@ -97,7 +97,7 @@
+         <div class="flex flex-wrap items-center gap-2">
+           <div class="min-w-0 flex-1 basis-40">
+             <div class="font-date text-xl font-semibold">{{ weekRangeLabel(start) }}</div>
+-            <p class="text-xs text-muted-foreground">{{ yearLabel }} · 上方每日工作 · 下方每日截止 · 北京时间</p>
++            <p class="text-xs text-muted-foreground">{{ yearLabel }} · 北京时间</p>
+           </div>
+           <div class="flex items-center gap-1">
+             <Button size="sm" variant="outline" aria-label="上一周" title="上一周" @click="goDate(beijingAddDays(start, -7))"><ChevronLeft /></Button>
+--- baseline/components/ui/Alert.vue
++++ frontend/src/components/ui/Alert.vue
+@@ -17,7 +17,7 @@
+ <template>
+   <div
+     :role="props.variant === 'destructive' ? 'alert' : 'status'"
+-    :class="cn('rounded-md border px-3 py-2 text-sm', variants[props.variant], props.class)"
++    :class="cn('break-words rounded-md border px-3 py-2.5 text-sm leading-relaxed', variants[props.variant], props.class)"
+   >
+     <slot />
+   </div>
+--- baseline/components/ui/Button.vue
++++ frontend/src/components/ui/Button.vue
+@@ -17,9 +17,9 @@
+ }
+ const sizes = {
+   default: 'h-9 px-4 py-2',
+-  sm: 'h-8 rounded-md px-3 text-xs',
++  sm: 'h-8 rounded-md px-3 text-sm',
+   lg: 'h-10 rounded-md px-6',
+-  icon: 'size-9',
++  icon: 'ui-button-icon size-9',
+ }
+ </script>
+ 
+@@ -28,7 +28,7 @@
+     :disabled="props.disabled"
+     :class="
+       cn(
+-        'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
++        'ui-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+         variants[props.variant],
+         sizes[props.size],
+         props.class,
+--- baseline/components/ui/Card.vue
++++ frontend/src/components/ui/Card.vue
+@@ -7,7 +7,7 @@
+ </script>
+ 
+ <template>
+-  <div :class="cn('rounded-xl border bg-card text-card-foreground shadow-sm', props.class)">
++  <div :class="cn('rounded-xl border bg-card text-card-foreground', props.class)">
+     <div v-if="$slots.header" :class="cn('flex flex-col gap-1.5', flush ? 'px-5 py-3.5' : 'p-5 pb-3')">
+       <slot name="header" />
+     </div>
+--- baseline/components/ui/ConfirmDialog.vue
++++ frontend/src/components/ui/ConfirmDialog.vue
+@@ -21,16 +21,16 @@
+     <AlertDialogPortal>
+       <AlertDialogOverlay class="fixed inset-0 z-50 bg-black/50" />
+       <AlertDialogContent
+-        class="fixed left-1/2 top-1/2 z-50 w-[min(92vw,26rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card p-4 shadow-lg"
++        class="fixed left-1/2 top-1/2 z-50 max-h-[85dvh] w-[min(92vw,28rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-card p-5 shadow-lg"
+       >
+         <AlertDialogTitle class="text-base font-semibold">{{ props.title }}</AlertDialogTitle>
+         <AlertDialogDescription class="mt-2 text-sm text-muted-foreground">
+           <slot>此操作不可自动撤销，请确认。</slot>
+         </AlertDialogDescription>
+-        <div class="mt-4 flex justify-end gap-2">
+-          <AlertDialogCancel class="rounded-md border px-3 py-1.5 text-sm hover:bg-accent">{{ props.cancelLabel }}</AlertDialogCancel>
++        <div class="mt-5 flex flex-wrap justify-end gap-2">
++          <AlertDialogCancel class="min-h-10 rounded-md border px-3 py-2 text-sm hover:bg-accent">{{ props.cancelLabel }}</AlertDialogCancel>
+           <AlertDialogAction
+-            class="rounded-md px-3 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
++            class="min-h-10 rounded-md px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+             :class="props.tone === 'primary' ? 'bg-primary hover:bg-primary/90' : 'bg-red-600 hover:bg-red-700'"
+             :disabled="props.confirmDisabled"
+             @click="emit('confirm')"
+--- baseline/components/ui/Input.vue
++++ frontend/src/components/ui/Input.vue
+@@ -9,7 +9,7 @@
+     v-model="model"
+     :class="
+       cn(
+-        'flex h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
++        'flex h-9 w-full min-w-0 rounded-md border border-input bg-card px-3 py-1 text-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+         props.class,
+       )
+     "
+--- baseline/components/ui/Textarea.vue
++++ frontend/src/components/ui/Textarea.vue
+@@ -9,7 +9,7 @@
+     v-model="model"
+     :class="
+       cn(
+-        'flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
++        'flex min-h-16 w-full rounded-md border border-input bg-card px-3 py-2 text-sm leading-relaxed transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+         props.class,
+       )
+     "
+--- baseline/domains/assistant/limits.js
++++ frontend/src/domains/assistant/limits.js
+@@ -0,0 +1,4 @@
++import limitsDoc from '@contract/limits.json'
++
++// 资料选择只需要这一数值，不应把生成请求与契约校验器带入资料页。
++export const MAX_SELECTED_SOURCES = limitsDoc.limits.max_selected_sources.value
+--- baseline/pages/AssistantPage.vue
++++ frontend/src/pages/AssistantPage.vue
+@@ -143,6 +143,8 @@
+   if (ref.kind === 'existing') return app.docs.find((d) => d.id === ref.id && d.kind === 'task')?.title ?? ref.id
+   return (proposal.value?.task_proposals ?? []).find((t) => t.key === ref.key)?.title ?? ref.key
+ }
++
++const workTitle = key => (proposal.value?.work_items ?? []).find(item => item.key === key)?.deliverable || '待核对工作'
+ 
+ // 待确认面板：缺口/过载/额外工作/截止逐项独立确认（确认≠改值）。
+ const deadlineConfirms = computed(() => createTasks.value
+@@ -749,7 +751,7 @@
+             </div>
+             <!-- 额外工作（D12）阻断排程：须在排程前确认，不依赖排程结果。确认后请再次「重新排程」。 -->
+             <div v-for="k in extraWorkPreConfirms" :key="'pre-' + k" class="mt-2 flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-sm">
+-              <span class="flex-1">{{ k }}：既有任务在窗口已有安排，须先确认本次为额外尚未安排工作，再保存并预览</span>
++              <span class="flex-1">{{ workTitle(k) }}：既有任务在窗口已有安排，须先确认本次为额外尚未安排工作，再保存并预览</span>
+               <Button size="sm" variant="secondary" :disabled="!editable || contentDirty || store.replanPanelDirty || workflowBusy" @click="store.confirmExtraWork(k)">确认额外工作</Button>
+             </div>
+             <!-- 截止确认不依赖排程结果：normalize 要求先确认截止候选，首次排程前也必须可确认 -->
+@@ -775,10 +777,10 @@
+             <p v-if="!result" class="mt-2 text-sm text-muted-foreground">尚未排程：返回核对建议，点击「保存并预览」。</p>
+             <template v-else>
+               <div v-if="estimateUnknown.length" class="mt-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900">
+-                估时未知（请在编辑区填写剩余分钟）：{{ estimateUnknown.map((u) => u.work_item_key).join('、') }}
++                估时未知（请在编辑区填写剩余分钟）：{{ estimateUnknown.map((u) => workTitle(u.work_item_key)).join('、') }}
+               </div>
+               <div v-for="u in gapConfirms" :key="u.work_item_key" class="mt-2 flex items-center gap-2 rounded-md border p-2 text-sm">
+-                <span class="flex-1">未排：{{ u.work_item_key }} 剩 {{ u.remaining_minutes }} 分钟（{{ REASON_LABELS[u.reason] ?? u.reason }}）</span>
++                <span class="flex-1">未排：{{ workTitle(u.work_item_key) }} 剩 {{ u.remaining_minutes }} 分钟（{{ REASON_LABELS[u.reason] ?? u.reason }}）</span>
+                 <Button size="sm" variant="secondary" :disabled="!editable" @click="store.confirmGap(u.work_item_key)">确认仍有未排</Button>
+               </div>
+               <div v-for="d in overbookConfirms" :key="d.date" class="mt-2 flex items-center gap-2 rounded-md border p-2 text-sm">
+@@ -786,7 +788,7 @@
+                 <Button size="sm" variant="secondary" :disabled="!editable" @click="store.confirmOverbook(d.date)">确认过载</Button>
+               </div>
+               <div v-for="k in extraWorkConfirms" :key="k" class="mt-2 flex items-center gap-2 rounded-md border p-2 text-sm">
+-                <span class="flex-1">{{ k }}：既有任务在窗口已有安排，须确认本次为额外尚未安排工作</span>
++                <span class="flex-1">{{ workTitle(k) }}：既有任务在窗口已有安排，须确认本次为额外尚未安排工作</span>
+                 <Button size="sm" variant="secondary" :disabled="!editable || contentDirty || store.replanPanelDirty || workflowBusy" @click="store.confirmExtraWork(k)">确认额外工作</Button>
+               </div>
+               <ul v-if="readiness?.blockers?.length" class="mt-2 list-disc pl-5 text-xs text-muted-foreground">
+@@ -820,7 +822,7 @@
+               <div v-if="result.unscheduled?.length" class="rounded-md border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900">
+                 <div class="font-medium">未排工作</div>
+                 <ul class="list-disc pl-5 text-xs">
+-                  <li v-for="u in result.unscheduled" :key="u.work_item_key">{{ u.work_item_key }}：{{ u.remaining_minutes }} 分钟（{{ REASON_LABELS[u.reason] ?? u.reason }}）</li>
++                  <li v-for="u in result.unscheduled" :key="u.work_item_key">{{ workTitle(u.work_item_key) }}：{{ u.remaining_minutes }} 分钟（{{ REASON_LABELS[u.reason] ?? u.reason }}）</li>
+                 </ul>
+               </div>
+               <ul v-if="result.warnings?.length" class="list-disc pl-5 text-xs text-muted-foreground">
+--- baseline/pages/CollectPage.vue
++++ frontend/src/pages/CollectPage.vue
+@@ -15,7 +15,7 @@
+ import MaterialPanel from '@/components/domain/MaterialPanel.vue'
+ import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
+ import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
+-import { MAX_SELECTED_SOURCES } from '@/services/assistant/requests'
++import { MAX_SELECTED_SOURCES } from '@/domains/assistant/limits'
+ import { useAppStore } from '@/stores/app'
+ import { beijingInstantLabel, isValidDate } from '@/domains/time'
+ import { BUCKET_LABELS, byCaptured, matterNotesOf, matterTasksOf, matterTitleOf, rowMatches, sourceRow } from '@/domains/organize'
+@@ -335,8 +335,8 @@
+ </script>
+ 
+ <template>
+-  <div @drop="onDrop" @dragover.prevent>
+-  <header class="mb-4 flex items-center justify-between gap-3"><h1 class="text-xl font-semibold">资料</h1><Button :aria-expanded="addOpen" @click="openAdd"><Upload />添加资料</Button></header>
++  <div class="mx-auto max-w-6xl" @drop="onDrop" @dragover.prevent>
++  <header class="mb-4 flex items-center justify-between gap-3"><h1 class="text-2xl font-semibold">资料</h1><Button :aria-expanded="addOpen" @click="openAdd"><Upload />添加资料</Button></header>
+   <Card v-if="addOpen" class="mb-4">
+     <template #header>
+       <div class="flex items-center justify-between"><span class="text-base font-semibold">添加资料</span><Button size="sm" variant="ghost" aria-label="收起添加资料" @click="async () => { if (await guardDraft()) addOpen = false }"><X /></Button></div>
+--- baseline/pages/TasksPage.vue
++++ frontend/src/pages/TasksPage.vue
+@@ -83,7 +83,7 @@
+ 
+ <template>
+   <div class="mx-auto max-w-6xl space-y-5">
+-    <header class="flex items-center justify-between gap-3"><h1 class="text-xl font-semibold">任务</h1><Button :aria-expanded="createOpen" @click="openCreate"><Plus />新建任务</Button></header>
++    <header class="flex items-center justify-between gap-3"><h1 class="text-2xl font-semibold">任务</h1><Button :aria-expanded="createOpen" @click="openCreate"><Plus />新建任务</Button></header>
+     <TaskCreateForm v-if="createOpen" :key="app.workspaceId" ref="createRef" @saved="onCreated" @close="createOpen = false" />
+     <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="detailId" @close="editor = null; detailId = ''" @saved="onPlanSaved"
+       @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
+--- baseline/pages/TodayPage.vue
++++ frontend/src/pages/TodayPage.vue
+@@ -156,28 +156,28 @@
+ </script>
+ 
+ <template>
+-  <div class="space-y-4">
++  <div class="mx-auto max-w-6xl space-y-5">
+     <!-- 工具栏：日期、视图与记录入口；列表视图补充安排入口。窄屏控制组整组换行；
+          每个控件不收缩、文字不断行，避免 360px 下被挤成单字竖排。 -->
+     <div class="flex flex-wrap items-center gap-2">
+-      <div class="font-date whitespace-nowrap text-lg font-semibold">
++      <div class="font-date whitespace-nowrap text-xl font-semibold">
+         {{ store.todayLabel }}<span class="ml-1.5 font-sans text-xs font-normal text-muted-foreground">北京时间</span>
+       </div>
+       <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+-        <RouterLink to="/work-records" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border bg-card px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent" title="回看已结束的工作记录">
++        <RouterLink to="/work-records" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent" title="回看已结束的工作记录">
+           <ClipboardList class="size-3.5" />工作记录
+         </RouterLink>
+         <div class="flex shrink-0 gap-0.5 rounded-md border bg-card p-0.5" role="group" aria-label="任务视图切换">
+           <button
+             type="button"
+-            class="w-14 whitespace-nowrap rounded px-2 py-1 text-xs font-medium"
++            class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
+             :class="view === 'week' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
+             :aria-pressed="view === 'week'"
+             @click="view = 'week'"
+           >周视图</button>
+           <button
+             type="button"
+-            class="w-14 whitespace-nowrap rounded px-2 py-1 text-xs font-medium"
++            class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
+             :class="view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
+             :aria-pressed="view === 'list'"
+             @click="view = 'list'"
+--- baseline/services/assistant/requests.js
++++ frontend/src/services/assistant/requests.js
+@@ -3,6 +3,8 @@
+ // 限额数值来自 contract/limits.json（单一来源）；形状校验复用正式 schema（validateAgainstDef）。
+ // 复用判定绑定「内容指纹 + 来源 → 实际分析结果」，不是「存在便签即复用」；绑定缺失/失配 → 重分析一次建立。
+ import limitsDoc from '@contract/limits.json'
++import { MAX_SELECTED_SOURCES } from '../../domains/assistant/limits'
++export { MAX_SELECTED_SOURCES } from '../../domains/assistant/limits'
+ import { canonicalJson } from '../../domains/assistant/draft'
+ import {
+   parseClarificationHistory, renderUserInputText,
+@@ -13,7 +15,6 @@
+ import { validateAgainstDef } from '../backup/contractSchema'
+ 
+ const L = limitsDoc.limits
+-export const MAX_SELECTED_SOURCES = L.max_selected_sources.value
+ export const MAX_AUTO_ANALYZE = L.max_new_images_per_batch.value
+ export const MAX_EXCERPT_CHARS = L.max_source_excerpt_chars.value
+ export const MAX_USER_MESSAGE_CHARS = L.max_user_message_chars.value
+--- baseline/styles/main.css
++++ frontend/src/styles/main.css
+@@ -3,6 +3,7 @@
+ @custom-variant dark (&:is(.dark *));
+ 
+ @theme inline {
++  --font-sans: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+   --color-background: var(--background);
+   --color-foreground: var(--foreground);
+   --color-card: var(--card);
+@@ -88,10 +89,16 @@
+     @apply border-border outline-ring/50;
+   }
+   body {
+-    @apply bg-background text-foreground antialiased;
++    @apply bg-background text-foreground font-sans text-sm leading-relaxed antialiased;
+     /* 极淡纸纹：静态、低透明度，不参与文字对比 */
+     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.28 0 0 0 0 0.2 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+   }
++  :where(button, a, summary, select):focus-visible {
++    outline: 2px solid var(--ring);
++    outline-offset: 3px;
++  }
++  :where(input[type="checkbox"], input[type="radio"]) { accent-color: var(--primary); }
++  :where(h1, h2, h3) { text-wrap: balance; }
+ }
+ @layer utilities {
+   /* 日期数字用衬线+等宽数字，与正文黑体形成第二组字体关系 */
+@@ -115,6 +122,16 @@
+   .scroll-slim::-webkit-scrollbar-track {
+     background: transparent;
+   }
++  .panel-scroll { scroll-padding-block: 1.5rem; }
++}
++
++/* 小屏输入保持 16px，避免输入时浏览器放大；触摸按钮留出独立点击高度。 */
++@media (max-width: 767px) {
++  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea, select {
++    font-size: 16px;
++  }
++  .ui-button { min-height: 40px; }
++  .ui-button-icon { min-width: 40px; }
+ }
+ 
+ /* 系统「减少动态效果」：关掉过渡/动画，弹窗与定位仍即时可用（5A-1 U21）。 */

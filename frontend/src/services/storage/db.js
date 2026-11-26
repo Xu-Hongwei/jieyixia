@@ -153,6 +153,12 @@ export const allDocs = async () => {
   return { workspace_id: ctx.ws, records: records.filter((r) => inWorkspace(r, ctx.ws)) }
 }
 
+export const workspaceAssistantDrafts = async () => {
+  const ctx = captureContext()
+  const records = await tx('assistant_drafts', 'readonly', (s) => s.index('by_workspace').getAll(ctx.ws), ctx)
+  return { workspace_id: ctx.ws, records }
+}
+
 // 一致只读快照（备份导出用，开工单 §4/§9.1）：sources/docs/workspaces/assistant_threads/assistant_drafts
 // 在同一只读事务内读取，是同一时间点的固定快照，而非串行读取假设同一时刻。事务内绝不 await
 // 压缩/哈希/文件读取（避免事务提前结束）；序列化/哈希/压缩一律在事务提交后于内存进行。

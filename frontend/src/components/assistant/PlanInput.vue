@@ -13,6 +13,7 @@ import { useAssistantStore, DEFAULT_USER_MESSAGE } from '@/stores/assistant'
 import { useAppStore } from '@/stores/app'
 import { beijingToday, beijingAddDays, formatWhen } from '@/domains/time'
 import { MAX_SELECTED_SOURCES } from '@/services/assistant/requests'
+import { requireQwen } from '@/services/api/qwenConnection'
 
 const store = useAssistantStore()
 const app = useAppStore()
@@ -20,11 +21,22 @@ const app = useAppStore()
 const pasteText = ref('')
 const showRelated = ref(false)
 const fileInput = ref(null)
+const savingSource = ref(false)
 const today = computed(() => beijingToday())
 const input = store.input
 const dates = computed(() => Array.from({ length: 7 }, (_, i) => beijingAddDays(input.startDate || today.value, i)))
 const selectedCount = computed(() => input.sourceIds.length)
-const canGenerate = computed(() => !store.generating && (input.sourceIds.length > 0 || input.userText.trim().length > 0))
+const canGenerate = computed(() => !store.generating && !savingSource.value && (pasteText.value.trim() ? input.sourceIds.length < MAX_SELECTED_SOURCES : (input.sourceIds.length > 0 || input.userText.trim().length > 0)))
+const timeSummary = computed(() => {
+  const budgets = dates.value.map(date => input.unavailable.includes(date) ? 0 : Number(input.budgets[date] == null || input.budgets[date] === '' ? store.formDefaults.budget : input.budgets[date]))
+  return budgets.every(n => Number.isInteger(n) && n >= 0 && n <= 1440) ? `${budgets.reduce((sum, n) => sum + n, 0)} 分钟` : '请检查时间输入'
+})
+const hasUnsaved = computed(() => !!pasteText.value.trim() || !!input.userText.trim() || input.sourceIds.length > 0 || input.taskIds.length > 0 || !!input.startDate || Object.keys(input.budgets).length > 0 || input.unavailable.length > 0)
+function discard() {
+  pasteText.value = ''
+  Object.assign(input, { userText: '', sourceIds: [], taskIds: [], actionIds: [], budgets: {}, unavailable: [], startDate: null, excerpts: {} })
+}
+defineExpose({ hasUnsaved, discard, busy: savingSource })
 
 const sourceLabel = (s) => {
   if (s.kind === 'text') {
@@ -38,20 +50,38 @@ const noteOf = (sourceId) => app.notes.find((n) => n.source_id === sourceId) ?? 
 async function onFiles(e) {
   const files = Array.from(e.target.files || [])
   e.target.value = ''
-  if (!files.length) return
-  const results = await app.saveImageFiles(files)
-  const okIds = results.filter((r) => r.ok).map((r) => r.record.id)
-  input.sourceIds = [...new Set([...input.sourceIds, ...okIds])]
-  const failed = results.filter((r) => !r.ok)
-  if (failed.length) store.say('warning', `${failed.length} 份图片未保存：${failed.map((f) => `${f.name}（${f.message}）`).join('；')}`)
+  if (!files.length || savingSource.value || store.generating) return
+  savingSource.value = true
+  try {
+    const ws = app.workspaceId
+    const results = await app.saveImageFiles(files)
+    if (ws !== app.workspaceId) return
+    const okIds = results.filter((r) => r.ok).map((r) => r.record.id)
+    input.sourceIds = [...new Set([...input.sourceIds, ...okIds])]
+    const failed = results.filter((r) => !r.ok)
+    if (failed.length) store.say('warning', `${failed.length} 份图片未保存：${failed.map((f) => `${f.name}（${f.message}）`).join('；')}`)
+    else if (okIds.length) store.say('info', `已在本地保存并选中 ${okIds.length} 张截图。点击「生成方案」时才发送。`)
+  } finally { savingSource.value = false }
 }
 async function savePaste() {
   const text = pasteText.value.trim()
   if (!text) return
-  const r = await app.saveText(text)
-  if (!r.ok) { store.say('warning', r.message || '文字保存失败'); return }
-  input.sourceIds = [...new Set([...input.sourceIds, r.record.id])]
-  pasteText.value = ''
+  if (savingSource.value) return
+  savingSource.value = true
+  try {
+    const ws = app.workspaceId
+    const r = await app.saveText(text)
+    if (ws !== app.workspaceId) return false
+    if (!r.ok) { store.say('warning', r.message || '文字保存失败'); return }
+    input.sourceIds = [...new Set([...input.sourceIds, r.record.id])]
+    pasteText.value = ''
+    return true
+  } finally { savingSource.value = false }
+}
+async function generateWithText() {
+  if (!canGenerate.value || !requireQwen()) return
+  if (pasteText.value.trim() && !(await savePaste())) return
+  await store.generate()
 }
 function toggleSource(id) {
   const i = input.sourceIds.indexOf(id)
@@ -80,20 +110,20 @@ function toggleUnavailable(date) {
 </script>
 
 <template>
-  <div class="rounded-lg border bg-card p-4">
-    <h2 class="flex items-center gap-2 text-base font-semibold"><Sparkles class="size-4" />真实生成：资料 → 理解 → 任务建议</h2>
-    <p class="mt-1 text-sm text-muted-foreground">资料先保存到本地当前空间；模型只收到你明确选定的内容。建议需核对并本地排程后，明确采用才成为正式安排。</p>
+  <div class="py-2">
+    <h2 class="text-base font-semibold">提供资料与需求</h2>
+    <p class="mt-1 text-sm text-muted-foreground">只发送你选定的内容，生成后可修改。</p>
 
     <div class="mt-3 space-y-3">
       <div>
         <div class="flex flex-wrap items-center gap-2">
-          <Button size="sm" variant="outline" :disabled="store.generating" @click="fileInput?.click()"><Upload class="size-4" />上传截图</Button>
+          <Button size="sm" variant="outline" :disabled="store.generating || savingSource" @click="fileInput?.click()"><Upload class="size-4" />上传截图</Button>
           <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" aria-label="上传截图" @change="onFiles" />
-          <span class="text-xs text-muted-foreground">已选 {{ selectedCount }} / {{ MAX_SELECTED_SOURCES }} 份；一次生成最多自动分析 3 份新图片，超出提示分批。</span>
+          <span class="text-xs text-muted-foreground">已选 {{ selectedCount }} / {{ MAX_SELECTED_SOURCES }} 份 · 新图片每批最多 3 份</span>
         </div>
         <div class="mt-2 flex gap-2">
-          <Textarea v-model="pasteText" :disabled="store.generating" placeholder="粘贴原文（虚构通知、要求等）…" class="min-h-16 flex-1" />
-          <Button size="sm" variant="secondary" class="self-end" :disabled="store.generating || !pasteText.trim()" @click="savePaste">保存文字</Button>
+          <Textarea v-model="pasteText" :disabled="store.generating || savingSource" placeholder="粘贴通知、要求或原文…" class="min-h-16 flex-1" />
+          <Button size="sm" variant="secondary" class="self-end" :disabled="store.generating || savingSource || !pasteText.trim()" @click="savePaste">保存文字</Button>
         </div>
       </div>
 
@@ -113,14 +143,14 @@ function toggleUnavailable(date) {
       </div>
 
       <div>
-        <label class="text-xs font-medium text-muted-foreground" for="assistant-requirement">补充要求（可编辑；留空用默认句）</label>
+        <label class="text-xs font-medium text-muted-foreground" for="assistant-requirement">你想完成什么？有什么要求？</label>
         <Textarea id="assistant-requirement" v-model="input.userText" :disabled="store.generating" :placeholder="DEFAULT_USER_MESSAGE" class="mt-1 min-h-16" />
       </div>
 
       <div class="rounded-md border p-2">
         <button type="button" class="flex w-full items-center gap-2 text-xs font-medium text-muted-foreground" @click="showRelated = !showRelated">
           <ChevronDown v-if="showRelated" class="size-4" /><ChevronRight v-else class="size-4" />
-          关联已有任务/行动（可选；只有勾选的对象可被关联/复用，默认新建）
+          关联已有任务（可选）
         </button>
         <div v-if="showRelated" class="mt-2 space-y-2">
           <p v-if="!app.tasks.length" class="text-xs text-muted-foreground">当前空间还没有任务。</p>
@@ -142,28 +172,30 @@ function toggleUnavailable(date) {
         </div>
       </div>
 
-      <div class="rounded-md border p-2">
-        <div class="text-xs font-medium text-muted-foreground">七日可用时间（北京时间；起始默认今天，每次生成重新读取）</div>
+      <details class="border-y py-3">
+        <summary class="cursor-pointer text-sm font-medium">可用时间 · {{ input.startDate || today }} 起七天 · 共 {{ timeSummary }} <span class="font-normal text-muted-foreground">编辑</span></summary>
         <div class="mt-1 flex items-center gap-2">
           <DateInput v-model="input.startDate" :disabled="store.generating" aria-label="生成排程起始日期" class="w-44" />
           <span class="text-xs text-muted-foreground">留空 = 今天（{{ today }}）</span>
         </div>
         <div class="mt-2 space-y-1">
-          <div v-for="date in dates" :key="date" class="flex items-center gap-2 text-sm">
+          <div v-for="date in dates" :key="date" class="flex flex-wrap items-center gap-2 text-sm">
             <span class="w-28 shrink-0 text-xs text-muted-foreground">{{ date }}</span>
             <Input v-model="input.budgets[date]" :disabled="store.generating || input.unavailable.includes(date)" class="h-8 w-24" inputmode="numeric" :placeholder="String(store.formDefaults.budget)" :aria-label="`${date} 预算分钟`" />
-            <span class="text-xs text-muted-foreground">分钟（留空用默认 {{ store.formDefaults.budget }}）</span>
+            <span class="text-xs text-muted-foreground">分钟</span>
             <label class="ml-auto flex items-center gap-1 text-xs">
               <input type="checkbox" :checked="input.unavailable.includes(date)" :disabled="store.generating" @change="toggleUnavailable(date)" />不可用
             </label>
           </div>
         </div>
-      </div>
+        <p class="mt-2 text-xs text-muted-foreground">北京时间；留空默认每天 {{ store.formDefaults.budget }} 分钟。</p>
+      </details>
 
       <div class="flex items-center gap-2">
-        <Button :disabled="!canGenerate" @click="store.generate()"><Sparkles class="size-4" />生成方案</Button>
+        <Button :disabled="!canGenerate" @click="generateWithText"><Sparkles class="size-4" />生成方案</Button>
         <span v-if="store.generating" class="text-xs text-muted-foreground">生成进行中，重复点击不会产生并行请求。</span>
       </div>
+      <p v-if="pasteText.trim()" class="text-xs text-muted-foreground">{{ selectedCount >= MAX_SELECTED_SOURCES ? "资料数量已满，请先取消选择一份。" : "生成时会一并保存这段文字。" }}</p>
 
       <GenerationPanel />
     </div>

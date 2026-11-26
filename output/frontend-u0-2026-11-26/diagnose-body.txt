@@ -1,0 +1,30 @@
+let exitCode = 0
+const observations = []
+try {
+  const { context, page } = await newScene('u0-before')
+  await boot(page)
+  const original = '/tasks/t-smoke?plan=p-1&return=' + encodeURIComponent('/today?date=' + D(1) + '&view=list')
+  await page.goto(BASE + '#' + original)
+  await btn(page, '调整后续安排').click()
+  await waitText(page, '调整后续安排 · 选择替换范围')
+  await btn(page, '原任务页').click()
+  observations.push({kind:'task-return',original,actual:page.url()})
+  await btn(page, '返回原列表').click()
+  observations.push({kind:'schedule-return',actual:page.url()})
+  await page.goto(BASE + '#/assistant')
+  await btn(page, '载入演示：跨天周报').click()
+  await page.setViewportSize({width:390,height:844})
+  await page.waitForTimeout(350)
+  const inspect = () => page.evaluate(() => ({width:document.documentElement.scrollWidth,viewport:innerWidth,overflow:[...document.querySelectorAll('main *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).slice(0,20).map(e=>({tag:e.tagName,classes:e.className,width:e.getBoundingClientRect().width,scroll:e.scrollWidth,min:getComputedStyle(e).minWidth,columns:getComputedStyle(e).gridTemplateColumns}))}))
+  observations.push({kind:'overflow-before',...await inspect()})
+  await shot(page,'before-overflow.png')
+  await page.locator('main .grid.gap-4.md\\:grid-cols-2').evaluate(el=>{el.style.gridTemplateColumns='minmax(0,1fr)'})
+  observations.push({kind:'one-grid-track-constrained',...await inspect()})
+  await shot(page,'diagnostic-track-constrained.png')
+  await context.close()
+} catch(e) {console.error(e);exitCode=1} finally {
+  writeFileSync(join(RUN,'observations.json'),JSON.stringify(observations,null,2))
+  writeFileSync(join(RUN,'backend.log'),backendLog);writeFileSync(join(RUN,'vite.log'),viteLog)
+  await browser.close();vite.kill();backend.kill()
+}
+process.exit(exitCode)

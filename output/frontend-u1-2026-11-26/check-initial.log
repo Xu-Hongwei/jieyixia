@@ -1,0 +1,7 @@
+
+> jiexialai-frontend@0.1.0 check
+> vue-tsc --noEmit -p jsconfig.json
+
+src/pages/TasksPage.vue(83,269): error TS2339: Property 'value' does not exist on type 'EventTarget'.
+src/pages/TasksPage.vue(84,296): error TS2339: Property 'value' does not exist on type 'EventTarget'.
+src/pages/TasksPage.vue(85,162): error TS2339: Property 'checked' does not exist on type 'EventTarget'.

@@ -1,0 +1,2 @@
+from pathlib import Path
+p=Path('frontend/src/pages/AssistantPage.vue');s=p.read_text(encoding='utf8');pos=s.index('// 待确认面板：');s=s[:pos]+"const workTitle = key => (proposal.value?.work_items ?? []).find(item => item.key === key)?.deliverable || '待核对工作'\n\n"+s[pos:];s=s.replace('{{ k }}：既有任务','{{ workTitle(k) }}：既有任务').replace('estimateUnknown.map((u) => u.work_item_key)','estimateUnknown.map((u) => workTitle(u.work_item_key))').replace('{{ u.work_item_key }}','{{ workTitle(u.work_item_key) }}');p.write_text(s,encoding='utf8')

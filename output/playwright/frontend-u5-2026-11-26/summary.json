@@ -1,0 +1,74 @@
+[
+  {
+    "suite": "browser-final",
+    "passed": 30,
+    "total": 30,
+    "failed": [],
+    "netHits": [],
+    "evidence": "browser-final/results.json"
+  },
+  {
+    "suite": "workflow-final-r3",
+    "passed": 25,
+    "total": 25,
+    "failed": [],
+    "netHits": [],
+    "evidence": "workflow-final-r3/results.json"
+  },
+  {
+    "suite": "generation-quota-final",
+    "passed": 11,
+    "total": 11,
+    "failed": [],
+    "netHits": [],
+    "evidence": "generation-quota-final/results.json"
+  },
+  {
+    "suite": "u1-regression-r2",
+    "passed": 34,
+    "total": 34,
+    "failed": [],
+    "netHits": [],
+    "evidence": "u1-regression-r2/results.json"
+  },
+  {
+    "suite": "u2-regression",
+    "passed": 29,
+    "total": 29,
+    "failed": [],
+    "netHits": [],
+    "evidence": "u2-regression/results.json"
+  },
+  {
+    "suite": "u3-regression",
+    "passed": 32,
+    "total": 32,
+    "failed": [],
+    "netHits": [],
+    "evidence": "u3-regression/results.json"
+  },
+  {
+    "suite": "execution-extra",
+    "passed": 13,
+    "total": 13,
+    "failed": [],
+    "netHits": [],
+    "evidence": "execution-extra/results.json"
+  },
+  {
+    "suite": "runtime-final-r2",
+    "passed": 34,
+    "total": 34,
+    "failed": [],
+    "netHits": [],
+    "evidence": "runtime-final-r2/results.json"
+  },
+  {
+    "suite": "after-final-r2",
+    "passed": 8,
+    "total": 8,
+    "failed": [],
+    "netHits": [],
+    "evidence": "after-final-r2/results.json"
+  }
+]

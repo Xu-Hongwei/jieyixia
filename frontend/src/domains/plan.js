@@ -62,7 +62,7 @@ function assertNoUnfinishedPlan(docs, p) {
 function assertNoPlanHistory(docs, p) {
   const hits = endedSessionsForPlan(docs, p)
   if (hits.length) {
-    fail('PLAN_HAS_HISTORY', '该安排已有结束的工作记录，不能原地改日期/说明/预计分钟；继续工作请另建安排', { sessionIds: hits.map((s) => s.id) })
+    fail('PLAN_HAS_HISTORY', '该安排已有工作记录，请保留原日期；后续工作可另安排一天', { sessionIds: hits.map((s) => s.id) })
   }
 }
 
@@ -303,6 +303,11 @@ export const existingUnfinishedSessionForPlan = (docs, planItemId) => {
 
 // create：创建 planned，无任何 Focus 引用。ID 在同一次保存意图中预先固定（input.planItemId）。
 // 日期由服务在意图形成时固定进输入（缺省读实时北京今天），重试不因跨午夜换日。
+export function dayPlansForTask(docs, ws, taskId, date) {
+  return docs.filter(p => p.kind === 'plan_item' && p.workspace_id === ws && p.task_id === taskId && p.date === date
+    && isLiveRef(p) && !['cancelled', 'moved'].includes(p.state)).sort((a, b) => a.order - b.order)
+}
+
 export function createPlan(latest, env, input) {
   const task = findDoc(latest, input.taskId, 'task')
   if (!task || task.workspace_id !== env.ws) fail('RELATION_INVALID', '任务不存在或不属于当前空间')
@@ -312,6 +317,12 @@ export function createPlan(latest, env, input) {
   const date = cleanDate(input.date)
   const minutes = cleanPlannedMinutes(input.plannedMinutes)
   const text = cleanActionText(input.actionText)
+  if (input.expectedDayPlanIds) {
+    const ids = dayPlansForTask(latest, env.ws, task.id, date).map(p => p.id).sort()
+    if (JSON.stringify(ids) !== JSON.stringify(input.expectedDayPlanIds)) {
+      fail('DAY_PLANS_CHANGED', '当天安排已变化，请查看最新安排后再保存。')
+    }
+  }
 
   // 相同内容是提醒不是永久去重（6.2）：同任务+日期+规范化说明已有非 cancelled 活条目 → DUPLICATE_PLAN 零写入。
   const matches = latest.filter(
@@ -335,15 +346,28 @@ export function createPlan(latest, env, input) {
   return { puts: [item], deletes: [], info: { planItem: item, risk, blockedTask: task.status === 'blocked' } }
 }
 
-// edit：仅 active、planned 且没有任何关联 Focus；只改说明/预计分钟。
+// 编辑只写安排说明和总预计分钟。界面和写事务共用资格判断，避免开框后计时已恢复仍然提交。
+export function planEditBlock(docs, item) {
+  if (!isLiveRef(item)) return { code: 'PLAN_NOT_EXECUTABLE', message: '原任务已删除' }
+  if (!LIVE_PLAN_STATES.includes(item.state)) return { code: 'PLAN_TERMINAL', message: '已结束的安排只读' }
+  const open = unfinishedSessionsForPlan(docs, item)
+  if (open.length > 1 || open.some(s => s.record_version !== 1 || s.running !== false || s.timer_anchor_at != null)) {
+    return { code: 'UNFINISHED_FOCUS', message: '请先回到工作页暂停计时或处理未结束的记录', sessionIds: open.map(s => s.id) }
+  }
+  const history = summarizePlanTime(item, docs)
+  if (!history.authoritative) return { code: 'HISTORY_UNRESOLVED', message: '请先核对异常的工作记录', problems: history.problems }
+  if (item.state === 'planned' && history.endedSessionCount > 0) {
+    return { code: 'PLAN_HAS_HISTORY', message: '请先核对已有进度，再修改安排', sessionIds: history.endedSessionIds }
+  }
+  return null
+}
+
 export function editPlan(latest, env, input) {
   const item = findPlan(latest, input.planItemId)
   if (!item || item.workspace_id !== env.ws) fail('RELATION_INVALID', '安排不存在或不属于当前空间')
-  if (!isLiveRef(item)) fail('PLAN_NOT_EXECUTABLE', '历史安排只读，不能编辑')
-  if (item.state !== 'planned') fail('PLAN_TERMINAL', '只有未执行（planned）安排可编辑说明/估时；继续工作请另建安排')
+  const block = planEditBlock(latest, item)
+  if (block) fail(block.code, block.message, block)
   assertTaskMutable(latest, item, env.ws)
-  assertNoUnfinishedPlan(latest, item)
-  assertNoPlanHistory(latest, item)
   assertSnapshot(item, input.expected)
   const draft = { ...item }
   let changed = false
@@ -353,7 +377,7 @@ export function editPlan(latest, env, input) {
   return { puts: [draft], deletes: [], info: { planItem: draft } }
 }
 
-// move：同 edit 资格；保留 ID，改日期及目标日 order；总截止不变。同日改期是无操作。
+// 改期仅限无会话的待执行安排，保留 ID，改日期及目标日 order；总截止不变。
 export function movePlan(latest, env, input) {
   const item = findPlan(latest, input.planItemId)
   if (!item || item.workspace_id !== env.ws) fail('RELATION_INVALID', '安排不存在或不属于当前空间')

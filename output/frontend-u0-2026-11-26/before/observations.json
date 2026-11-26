@@ -1,0 +1,184 @@
+[
+  {
+    "kind": "task-return",
+    "original": "/tasks/t-smoke?plan=p-1&return=%2Ftoday%3Fdate%3D2026-11-27%26view%3Dlist",
+    "actual": "http://127.0.0.1:5177/#/tasks/t-smoke"
+  },
+  {
+    "kind": "schedule-return",
+    "actual": "http://127.0.0.1:5177/#/today"
+  },
+  {
+    "kind": "overflow-before",
+    "width": 531,
+    "viewport": 390,
+    "overflow": [
+      {
+        "tag": "SECTION",
+        "classes": "space-y-4",
+        "width": 515.390625,
+        "scroll": 515,
+        "min": "auto",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "rounded-lg border bg-card p-4",
+        "width": 515.390625,
+        "scroll": 513,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "H3",
+        "classes": "flex items-center gap-2 text-sm font-semibold",
+        "width": 481.390625,
+        "scroll": 481,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "P",
+        "classes": "mt-1 text-xs text-muted-foreground",
+        "width": 481.390625,
+        "scroll": 481,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "mt-3 rounded-md border p-3",
+        "width": 481.390625,
+        "scroll": 479,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "flex items-center gap-2 text-sm font-medium",
+        "width": 455.390625,
+        "scroll": 455,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "SPAN",
+        "classes": "min-w-0 flex-1 truncate",
+        "width": 431.390625,
+        "scroll": 431,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DETAILS",
+        "classes": "mt-2 text-xs",
+        "width": 455.390625,
+        "scroll": 455,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "SUMMARY",
+        "classes": "cursor-pointer text-muted-foreground",
+        "width": 455.390625,
+        "scroll": 455,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "PRE",
+        "classes": "mt-1 max-h-48 overflow-y-auto whitespace-pre-wrap rounded bg-muted p-2",
+        "width": 455.390625,
+        "scroll": 455,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "P",
+        "classes": "mt-2 text-xs text-muted-foreground",
+        "width": 455.390625,
+        "scroll": 455,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "rounded-lg border bg-card p-4",
+        "width": 515.390625,
+        "scroll": 513,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "H3",
+        "classes": "flex items-center gap-2 text-sm font-semibold",
+        "width": 481.390625,
+        "scroll": 481,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "mt-3 space-y-2 rounded-md border p-3",
+        "width": 481.390625,
+        "scroll": 479,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "text-xs text-muted-foreground",
+        "width": 455.390625,
+        "scroll": 455,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "INPUT",
+        "classes": "flex h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50",
+        "width": 455.390625,
+        "scroll": 453,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "flex items-center gap-2",
+        "width": 455.390625,
+        "scroll": 455,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "DIV",
+        "classes": "flex h-9 w-full min-w-0 items-center rounded-md border border-input bg-transparent shadow-xs transition-colors focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 flex-1",
+        "width": 387.390625,
+        "scroll": 385,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "BUTTON",
+        "classes": "flex h-full min-w-0 flex-1 items-center gap-2 rounded-md px-3 py-1 text-left text-sm outline-none",
+        "width": 357.390625,
+        "scroll": 357,
+        "min": "0px",
+        "columns": "none"
+      },
+      {
+        "tag": "SPAN",
+        "classes": "min-w-0 flex-1 truncate",
+        "width": 309.390625,
+        "scroll": 309,
+        "min": "0px",
+        "columns": "none"
+      }
+    ]
+  },
+  {
+    "kind": "one-grid-track-constrained",
+    "width": 390,
+    "viewport": 390,
+    "overflow": []
+  }
+]

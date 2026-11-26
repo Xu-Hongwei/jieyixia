@@ -8,6 +8,7 @@
 import { refToken } from '../planning/protocol'
 import { confirmTaskDeadline } from '../planning/normalize'
 import { canonicalJson } from './draft'
+import { scheduleWithManualSlots } from './manualSchedule'
 import { userAuthoredSegments, userInputSegments } from './clarification'
 
 const fail = (code, message) => { throw Object.assign(new Error(message), { code }) }
@@ -83,7 +84,10 @@ function deadlineForCreate(tp, draft, fact, notes = [], userMessages = []) {
   }
   const matching = confs.filter((c) => c.object_id_or_key === tp.key && c.id_scope === 'draft')
   const confirmedAt = matching.reduce((m, c) => (c.confirmed_at > m ? c.confirmed_at : m), matching[0].confirmed_at)
-  const value = fact.deadline_value
+  return { ...deadlineSource(tp, fact.deadline_value, precision, notes, userMessages), confirmed_at: confirmedAt }
+}
+
+export function deadlineSource(tp, value, precision, notes, userMessages) {
   // 出处语义（M1 审查 R6 / 复验 F1）：确认≠改值。manual 必须有用户输入证据（origin=user 候选 +
   // 用户消息引用）；模型候选必须定位到「已确认且值/精度匹配」的具体便签字段，便签存在不等于字段核对。
   // 无匹配候选不自动视为用户输入；无合法字段不自动转 manual——一律显式阻断走核对路径。
@@ -106,7 +110,7 @@ function deadlineForCreate(tp, draft, fact, notes = [], userMessages = []) {
     if (!grounded) {
       fail('DEADLINE_PROVENANCE_REQUIRED', `任务「${tp.title}」的用户设定截止缺少可核对的用户消息原话；请在对话中重新提交明确截止（旧澄清记录仅供展示）后重排`)
     }
-    return { value, precision, source: 'manual', from_note_id: null, confirmed_at: confirmedAt }
+    return { value, precision, source: 'manual', from_note_id: null }
   }
   let noteId = null
   for (const ev of candidate.evidence_refs ?? []) {
@@ -125,7 +129,7 @@ function deadlineForCreate(tp, draft, fact, notes = [], userMessages = []) {
   if (!noteId) {
     fail('DEADLINE_PROVENANCE_REQUIRED', `任务「${tp.title}」的模型建议截止没有已确认且匹配的便签字段出处；请在便签页核对并确认截止字段后重排`)
   }
-  return { value, precision, source: 'note', from_note_id: noteId, confirmed_at: confirmedAt }
+  return { value, precision, source: 'note', from_note_id: noteId }
 }
 
 // F1 要求 4：候选截止可能引用的便签字段（note_field 直指 + source_excerpt 同源便签的 deadline 字段），
@@ -160,7 +164,7 @@ export function buildAdoptionPlan(draft, { workspaceId, now, newId, orderBase = 
   checkAdoptionSupported(draft)
   const proposal = draft.proposal
   const input = draft.planning_input
-  const result = draft.planning_result
+  const result = scheduleWithManualSlots(draft)
   if (!input || !result) fail('NO_COMPUTATION', '缺少同版排程输入/结果，无法采用')
 
   const excludedKeys = new Set([
@@ -243,7 +247,7 @@ export function buildAdoptionPlan(draft, { workspaceId, now, newId, orderBase = 
         description: tp.description ?? '',
         completion_criteria: tp.completion_criteria ?? null,
         deadline,
-        note_ids: deadline.source === 'note' && deadline.from_note_id ? [deadline.from_note_id] : [],
+        note_ids: 'source' in deadline && deadline.source === 'note' && deadline.from_note_id ? [deadline.from_note_id] : [],
         matter_id: null,
         status: 'todo',
         created_at: now,

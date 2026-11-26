@@ -1,0 +1,17 @@
+{
+  "results": [
+    {
+      "item": "offline",
+      "name": "未缓存助手断网有提示，原任务页面仍在",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "runner",
+      "name": "异常",
+      "pass": false,
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('alertdialog').getByRole('button', { name: '继续编辑', exact: true })\u001b[22m\n"
+    }
+  ],
+  "netHits": []
+}

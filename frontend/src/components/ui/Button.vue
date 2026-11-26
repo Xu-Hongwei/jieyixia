@@ -17,9 +17,9 @@ const variants = {
 }
 const sizes = {
   default: 'h-9 px-4 py-2',
-  sm: 'h-8 rounded-md px-3 text-xs',
+  sm: 'h-8 rounded-md px-3 text-sm',
   lg: 'h-10 rounded-md px-6',
-  icon: 'size-9',
+  icon: 'ui-button-icon size-9',
 }
 </script>
 
@@ -28,7 +28,7 @@ const sizes = {
     :disabled="props.disabled"
     :class="
       cn(
-        'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+        'ui-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
         variants[props.variant],
         sizes[props.size],
         props.class,

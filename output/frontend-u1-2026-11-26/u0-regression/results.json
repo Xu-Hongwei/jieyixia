@@ -1,0 +1,18 @@
+{
+  "results": [
+    {
+      "item": "nav",
+      "name": "入口刷新后返回保留任务、安排和来源",
+      "pass": true,
+      "detail": "/tasks/t-smoke?plan=p-1&return=%2Ftoday%3Fdate%3D2026-11-27%26view%3Dlist"
+    },
+    {
+      "item": "runner",
+      "name": "验收异常",
+      "pass": false,
+      "detail": "locator.click: Error: strict mode violation: getByRole('button', { name: '返回日程', exact: true }) resolved to 2 elements:\n    1) <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs\">…</button> aka getByRole('button', { name: '返回日程' }).first()\n    2) <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs ml-auto\">返回日程</button> aka getByRole('button', { name: '返回日程' }).nth(1)\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '返回日程', exact: true })\u001b[22m\n"
+    }
+  ],
+  "measurements": [],
+  "netHits": []
+}

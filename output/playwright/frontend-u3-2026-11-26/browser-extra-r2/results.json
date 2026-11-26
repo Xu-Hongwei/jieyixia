@@ -1,0 +1,83 @@
+{
+  "results": [
+    {
+      "item": "evidence",
+      "name": "切换资料后原文严格匹配当前对象",
+      "pass": true,
+      "detail": "虚构核对资料二"
+    },
+    {
+      "item": "save",
+      "name": "资料保存失败保留输入且未落库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "save",
+      "name": "核对字段写入失败保留草稿和原事实",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "后退取消保留资料字段",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "Escape确认放弃后关闭资料面板",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "compat",
+      "name": "旧核对页切空间也保护未保存输入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "compat",
+      "name": "无效资料深链接回到列表",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "资料列表 360",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "资料列表 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "资料列表 430",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "资料列表 768",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "资料列表 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "isolation",
+      "name": "额外检查零模型请求和用户服务访问",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

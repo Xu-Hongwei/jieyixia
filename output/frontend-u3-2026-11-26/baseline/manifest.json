@@ -1,0 +1,670 @@
+[
+  {
+    "path": "src/App.vue",
+    "sha256": "d9e1499443d0c7879ec4cd813536db5a901bcfd20286b9d8921fee9008134ff0"
+  },
+  {
+    "path": "src/main.js",
+    "sha256": "bbd57aa95365a93f99799d81345bf3838e31459bec12bbf1ef7fb8067c7e6bb5"
+  },
+  {
+    "path": "src/app/router.js",
+    "sha256": "1042730a6d90c8b26685f2ea363c2eeb1e97ab73f718653f2591fa0363b67f75"
+  },
+  {
+    "path": "src/composables/usePlanWorkStart.js",
+    "sha256": "d1b534a2edb4926dad71f55a4b572cf65442d3d133883b74c5e2a91b2c0eec24"
+  },
+  {
+    "path": "src/composables/useWorkDraft.js",
+    "sha256": "c5d5994f6ad3063120678187ee90583f13f94d4b4fe03eba4db1daa1a815666b"
+  },
+  {
+    "path": "src/composables/workLeave.js",
+    "sha256": "a1bf603eb7f073ae047720e2d169a6d7749bee0008910b5d81bd62758c496ac7"
+  },
+  {
+    "path": "src/domains/action.js",
+    "sha256": "c9757f582ee5f1b14fbfc47e9efa2200b60492ee9bb3b42e36515a7ecb956a44"
+  },
+  {
+    "path": "src/domains/focus.js",
+    "sha256": "7aac97ed583574bf4521965ddede43a742df7ee5e335b2b9406f47e8cbc08cff"
+  },
+  {
+    "path": "src/domains/labels.js",
+    "sha256": "ab3de61201f8c293cd3fc95f9ba225a6fc28f84e7d644b9d77d6d7cf7bb88625"
+  },
+  {
+    "path": "src/domains/matter.js",
+    "sha256": "aaf9a66ebbf348037b73ef6252a15511d3180ee9beeb651b79d5b3b40aac71de"
+  },
+  {
+    "path": "src/domains/note.js",
+    "sha256": "5a3dcf48c8881c7003f22ff009cb0169ef693d5786bdb5772c8baea0c5a66bf9"
+  },
+  {
+    "path": "src/domains/organize.js",
+    "sha256": "4754eeefc062ee0974394da735328ff5e7055c8e70c6efe00cac2906e10b7f17"
+  },
+  {
+    "path": "src/domains/plan.js",
+    "sha256": "e27ff17a53fb070262ff0a52e126ffa969afb917b5582d2e2dc840f5a8640956"
+  },
+  {
+    "path": "src/domains/taskList.js",
+    "sha256": "0bfa654c2731538de91e7ce773e6f3353fe1209a8a31da8e84a6c73a13379ff6"
+  },
+  {
+    "path": "src/domains/time.js",
+    "sha256": "79c82b022a355947d73607cfb77509d89cfe07e38080b683ba7c0bcb95fe912b"
+  },
+  {
+    "path": "src/domains/week.js",
+    "sha256": "a06804070e47aa8a4dc123004a392346ab59e97118cbd9fc32c586774c5e726e"
+  },
+  {
+    "path": "src/domains/work.js",
+    "sha256": "240d703ca3cf32aa63a2f1d135df655a8b228c7726ff31e9b4e44fc590374d5c"
+  },
+  {
+    "path": "src/domains/workNavigation.js",
+    "sha256": "e1f2d014482d8bb8cf2d9f89ea9b06978ad07d780971332386fdd9f6feb362e5"
+  },
+  {
+    "path": "src/lib/utils.js",
+    "sha256": "beded4cab01fcff80c618207ddf92d06afe6d87fc479a9c656e540a24d1bb5bf"
+  },
+  {
+    "path": "src/pages/AssistantPage.vue",
+    "sha256": "5b60a07ce8148a6157b9fe0be03ae81a125f9afe9cdec9d72e8d3a44b5631ab4"
+  },
+  {
+    "path": "src/pages/CollectPage.vue",
+    "sha256": "564c044e0f99e62a67a50996a691d1919f923d7e264016e7bd7f254665842e79"
+  },
+  {
+    "path": "src/pages/DataPage.vue",
+    "sha256": "75fbde510fdcdd41e45cc2d932a2c8b4caef5de5f1e6690b1c2c089ea3f5cf90"
+  },
+  {
+    "path": "src/pages/NotesPage.vue",
+    "sha256": "bedf5e8498119e33212ae024fd9ec147879bbb3297aae026b10c71e2e1c93e68"
+  },
+  {
+    "path": "src/pages/TaskDetailPage.vue",
+    "sha256": "352b1f05e0626e29126797d666748c7865fc691fbf1b7745cc470e485755012e"
+  },
+  {
+    "path": "src/pages/TasksPage.vue",
+    "sha256": "74163d6e6d36801155f073b50d3706b75a18fd444be7bc9d62b7adea8297d73b"
+  },
+  {
+    "path": "src/pages/TodayPage.vue",
+    "sha256": "71d5db1c78894cb3f5e9fe8bedac06eaf3142ce0bf187fea61614b556e4ee6be"
+  },
+  {
+    "path": "src/pages/WorkPage.vue",
+    "sha256": "0f9c9fe8a9b4ecd5a619d20f4f0f31c9d28f60a0293fd0a973eff5e95d9a79e1"
+  },
+  {
+    "path": "src/pages/WorkRecordDetailPage.vue",
+    "sha256": "09ae2e30274b148c17f2a019e4bdd823e8deb9ab5b192799505cd03df5a2c5a3"
+  },
+  {
+    "path": "src/pages/WorkRecordsPage.vue",
+    "sha256": "9b646d5f48498cb7ce733d6759a3babfc5508f33f6110b98929d4833fc6f97dc"
+  },
+  {
+    "path": "src/stores/app.js",
+    "sha256": "ad9f5a0759075d3c7c52c4ea6a6043402bfacfecd9d585e0c456a94dd938d871"
+  },
+  {
+    "path": "src/stores/assistant.js",
+    "sha256": "71dec38cce37364b779b3ed221592b80804a91bac171f07144fc07749e605665"
+  },
+  {
+    "path": "src/stores/focus.js",
+    "sha256": "d542fb1c94a3b7966fd6e9579427a52dd1a0e1eb952c4f6046babcae871ae17d"
+  },
+  {
+    "path": "src/stores/plan.js",
+    "sha256": "592d332431ab4903b4b8c0445b7c13aefdf663c866ccd769c16b0d4562672388"
+  },
+  {
+    "path": "src/styles/main.css",
+    "sha256": "7b60f74a0a677757db01ef9b7c6690a366ad8be94d6a0e69e88592f9d0ec6d89"
+  },
+  {
+    "path": "src/tests/action.test.js",
+    "sha256": "3787205a0175f816d808f8cf1727d55142f02508fe16ef31a75250b50db82016"
+  },
+  {
+    "path": "src/tests/assistant.adoption.backup.test.js",
+    "sha256": "fb9fb06951fbffe861babc0d647393d3b03bf62e76fc56212cc9f49630cc6237"
+  },
+  {
+    "path": "src/tests/assistant.adoption.service.test.js",
+    "sha256": "da7b01dfd455d6f6ba164d7d2a4a0d2726d2c3441cf23c3519c6ee5280efd2fe"
+  },
+  {
+    "path": "src/tests/assistant.application.test.js",
+    "sha256": "a4a2accf5eb9aba0e97aaf6749f3cecf3aa2c0c047ec105c5801036e0ebb3a0b"
+  },
+  {
+    "path": "src/tests/assistant.clarification.test.js",
+    "sha256": "adf79793502a54f3d28d63a9842744dceeb7a2f296057ad34bd02c705effd1b5"
+  },
+  {
+    "path": "src/tests/assistant.draft.test.js",
+    "sha256": "9ec56611be6397b904bd5a994e227ab99b60e9793bafe4eb8081025aff38934e"
+  },
+  {
+    "path": "src/tests/assistant.fixtures.js",
+    "sha256": "0dcc758ef92f83e3815e1dde844b3b1e1486301745becfb4048e69201a0e6f47"
+  },
+  {
+    "path": "src/tests/assistant.generate.store.test.js",
+    "sha256": "be08d3ef23c6371ef3859871fb3383a8858f69eb94f54c95cd2d4d51a632be20"
+  },
+  {
+    "path": "src/tests/assistant.receive.test.js",
+    "sha256": "8ecf136ff6218b9a16337f928139047a15fb91bf0b924a8d625487419849b95e"
+  },
+  {
+    "path": "src/tests/assistant.refs.test.js",
+    "sha256": "deef574fffed9bae1f3f8c6b6399ebf88e6e9f03b4712cceed0fbd7aa9706722"
+  },
+  {
+    "path": "src/tests/assistant.replan.service.test.js",
+    "sha256": "f6dae0ee7166899031ef1ebaec200cd46912d8aad09a6b2f92d9126bad91e84a"
+  },
+  {
+    "path": "src/tests/assistant.replan.test.js",
+    "sha256": "c57b5859bb444256ec9a77044097538b2382abc91e7d7368d2e58cad59082b1a"
+  },
+  {
+    "path": "src/tests/assistant.requests.test.js",
+    "sha256": "b7a46de307461c10540a8c39d10be3cfe01cd484c4a0a65bf4ec45d9e9c3bc0c"
+  },
+  {
+    "path": "src/tests/assistant.service.test.js",
+    "sha256": "ea6369205e8f0a895d488f4308ad396c89cc226955376df9ba09ddb31853e429"
+  },
+  {
+    "path": "src/tests/backup.adapt.test.js",
+    "sha256": "7cc88c7752cebd5424095d6b0df9ade205656e9bbc424ef5d7a89d3ed799465e"
+  },
+  {
+    "path": "src/tests/backup.assistant.test.js",
+    "sha256": "19c1486eaf6bb28384086efd93ab10778c2c08f0219531e0c11b4319202ac47c"
+  },
+  {
+    "path": "src/tests/backup.compat.test.js",
+    "sha256": "44de5ace13ea5a2b7fd7f0c3e1265ac34dd7dc61f0b8b25aadc7cc6da50eee27"
+  },
+  {
+    "path": "src/tests/backup.export.test.js",
+    "sha256": "7f9498a789dba750058c76019e4b3cc6e08f72dc30caf794ffca788864ffe762"
+  },
+  {
+    "path": "src/tests/backup.format.test.js",
+    "sha256": "0a1fd93291dc11b31856824279713853d24c867ba3e690d1e56bb27beb721a91"
+  },
+  {
+    "path": "src/tests/backup.import.test.js",
+    "sha256": "91391659da9a97e9a78d751da49c65eb8ee12c439149b46fc51afb2eb428d492"
+  },
+  {
+    "path": "src/tests/backup.recovery.test.js",
+    "sha256": "dc481b5eb3b9d052731ab2bb041b1bf31018aa5abf80f002227a8f7ae7c30d60"
+  },
+  {
+    "path": "src/tests/backup.remap.test.js",
+    "sha256": "082b588e5ff7f3124b1fbda5d2cf5e66c6380eebb1820a48f93fe3602926d6c2"
+  },
+  {
+    "path": "src/tests/backup.restore.test.js",
+    "sha256": "1e431b133c46a06c30435e7f0eb75f80724b24524d66623b92f79859ac7a6f39"
+  },
+  {
+    "path": "src/tests/backup.smoke.test.js",
+    "sha256": "d4ee325c5197da4f1bdc600cc59af7f3f62126f1985c3c9d817907e06324966d"
+  },
+  {
+    "path": "src/tests/backup.validate.test.js",
+    "sha256": "1f4fe89466443a000a66d1a60e54a0d0dfb7564cfc6c977e0d1c8ddcd6f0a938"
+  },
+  {
+    "path": "src/tests/backup.zipdecode.test.js",
+    "sha256": "358737f5bab35b18d2863d8d9d4df7eb0952a901adc02f4be4d1774e2c069924"
+  },
+  {
+    "path": "src/tests/backupFixtures.js",
+    "sha256": "bb09296e3787d4514390f6adb905bc66c05f078b3c7a57080aa03c173f45ba17"
+  },
+  {
+    "path": "src/tests/contractSchema.test.js",
+    "sha256": "5f52009dc09156d9081695cd83e4f45aabdd9c35998ce7637010feefbfc4ee4f"
+  },
+  {
+    "path": "src/tests/db.migration.test.js",
+    "sha256": "e03cf7fa34f25537db49e5efa947ad652a38501e20eb347023b5d172f915c996"
+  },
+  {
+    "path": "src/tests/db.test.js",
+    "sha256": "3714eb0dbd55c58be2a4f76f9586de953350dec4f62b340cbf3eb0b6029b776d"
+  },
+  {
+    "path": "src/tests/db.v3migration.test.js",
+    "sha256": "c509305312eb9cfa2fea8b168ce894667737e86dcfb04f5238817a268f961a67"
+  },
+  {
+    "path": "src/tests/db.workspace.test.js",
+    "sha256": "bb36bc92e89926ab3def31f5a819106045f420d20bf4e2f5501fe42f466d5931"
+  },
+  {
+    "path": "src/tests/focus.plan.service.test.js",
+    "sha256": "4be6caf9e81fba9dff00c4f7334e891b2c2842ce053baa9403d921077b6d4152"
+  },
+  {
+    "path": "src/tests/focus.plan.test.js",
+    "sha256": "a9d78dd8ef3bf48ef89ce8d857b9237dd65b0ec057a847e5f5342f77d0ca5c6c"
+  },
+  {
+    "path": "src/tests/focus.protection.test.js",
+    "sha256": "c7f8aeb7510064878dfec7ec61dff6cc1d4d2c365cf073a0b9d97eb42892d411"
+  },
+  {
+    "path": "src/tests/focus.runtime.test.js",
+    "sha256": "843df3dc0ed6a8dee59d93095d5f3eb2818726dc479a1fc8bdec875e1bc21303"
+  },
+  {
+    "path": "src/tests/focus.service.test.js",
+    "sha256": "893274e0c2b49c16884098bc25b76c085e6739b623763053cc09efe4daf808dc"
+  },
+  {
+    "path": "src/tests/focus.store.test.js",
+    "sha256": "68febd8b87dd571f34de874db31999c25fadde55fcf36736058d05e0fd8afd87"
+  },
+  {
+    "path": "src/tests/focus.test.js",
+    "sha256": "ee6fa8aeeb851484eeff656f4e91aaa051cf3f3166a15f036ee8821d40bcca3a"
+  },
+  {
+    "path": "src/tests/matter.test.js",
+    "sha256": "b176f9c4dd07c41d01c7d3319452d33600b31a27b9882c6b4397229ee70ee278"
+  },
+  {
+    "path": "src/tests/note.test.js",
+    "sha256": "7455075b7c7f7f37384b88c672a5f0cbe06c10fcdf8e6f327cb77b33241cd599"
+  },
+  {
+    "path": "src/tests/organize.test.js",
+    "sha256": "4b012ea3970bb9c166550eba94e0d9f68f738356a36aacf6957441843b1b2f8c"
+  },
+  {
+    "path": "src/tests/plan.backup.test.js",
+    "sha256": "2dcdc0e10990aab9ad1eb129216c0164f39de71361de34d21af386fc7ace1c63"
+  },
+  {
+    "path": "src/tests/plan.protection.test.js",
+    "sha256": "d9542429d0bec4feec76643a982d91e3b11f2ac7da914355f5f4b6a40608d080"
+  },
+  {
+    "path": "src/tests/plan.review.test.js",
+    "sha256": "9d8b0b1201202d7303d3d435b03a54150b882b9d419b10a8e40f5f6a8a3d4dfb"
+  },
+  {
+    "path": "src/tests/plan.service.test.js",
+    "sha256": "361cee7da35ef964c974113c1553fa712a9f9ee65ddffeab0c167116d32bc99f"
+  },
+  {
+    "path": "src/tests/plan.store.test.js",
+    "sha256": "70b86d3b92d3723460715c42dcbd0a1c6c0fb075bde768662ee5cc62b922eabf"
+  },
+  {
+    "path": "src/tests/plan.test.js",
+    "sha256": "a05f0f872fc4ad4b4179c9a2c626b78cdb6f0d135c62f1e4cd78caa2618e6812"
+  },
+  {
+    "path": "src/tests/planning.golden.test.js",
+    "sha256": "fc0d9956f048d1e34d68bd419089eb80bc4a0bbb730f819acb11220b8e2dd324"
+  },
+  {
+    "path": "src/tests/planning.helpers.js",
+    "sha256": "32a5f7c5319d217935580dce1f124c9b49cbf35a8089e347386cb3a6ff5c4ab6"
+  },
+  {
+    "path": "src/tests/planning.refs.test.js",
+    "sha256": "85e84a0158878db5ab00fbf43c3ee7fd17cf0a215847d8a50770974c557adb2c"
+  },
+  {
+    "path": "src/tests/planning.rules.test.js",
+    "sha256": "a3110ffb89f700225c7958375252a13eda041fb3cd7679fafe95a5da862b34fb"
+  },
+  {
+    "path": "src/tests/planning.validate.test.js",
+    "sha256": "62d739c179355231ea646d67fe7209f73bd18322bff1fdd8f66bec852b55c92f"
+  },
+  {
+    "path": "src/tests/planStartEntry.test.js",
+    "sha256": "d9dcc69b30357260fc8f6476056971984c49ef326d9d9392e3b5d3a6ad980f16"
+  },
+  {
+    "path": "src/tests/restore.wiring.test.js",
+    "sha256": "b9a176257709bf5d96848e34f1f43e7fc7e5f3f5c85c4f1f7904c990694578b8"
+  },
+  {
+    "path": "src/tests/review-stage2.test.js",
+    "sha256": "d3307cf7d33b05241c136bd2b64fe6eddd1eea38c69808c556ee9117a5de8abc"
+  },
+  {
+    "path": "src/tests/store.test.js",
+    "sha256": "03ce5a954d6c76f00bf1d808f8cfa2976298302e536e1eaf969c98cde6594afb"
+  },
+  {
+    "path": "src/tests/taskList.test.js",
+    "sha256": "9239e9d254027a532b594d4103c6fcf10dd08ba3227e89c728f5e570cf13f094"
+  },
+  {
+    "path": "src/tests/time.test.js",
+    "sha256": "c7ef70a36923410a912734a9057dbd6eb6c5f8e2be09ef126108110c44ba0cdd"
+  },
+  {
+    "path": "src/tests/usePlanWorkStart.test.js",
+    "sha256": "356b148e860452f92daf34ef4c1f32e63b67432889e60e9cd2b1dca0ff39afe7"
+  },
+  {
+    "path": "src/tests/useWorkDraft.test.js",
+    "sha256": "87e45b7a8d3dea71eb258f4b5b2df75a185ee28f5ad10a4c97395037fb97caa9"
+  },
+  {
+    "path": "src/tests/week.test.js",
+    "sha256": "a6fbcd78c1dbef51ea864fdbb6ba5302f5baf70808aab7f9423704c7bc984298"
+  },
+  {
+    "path": "src/tests/work.test.js",
+    "sha256": "9bda65685398103ff98b10cdfa3757f52c9ce0dbf4e485f7e4011c4f92fc1f2a"
+  },
+  {
+    "path": "src/tests/workLeave.test.js",
+    "sha256": "ca9bd79c798486bb11aecf7923c3c31fa284eeada67dc803ad60458e9bbf1dcf"
+  },
+  {
+    "path": "src/tests/workNavigation.test.js",
+    "sha256": "000b6d743dbf13a7e814c1337554b573a1ea7652895c625ea19b6bd2e8853160"
+  },
+  {
+    "path": "src/components/assistant/GenerationPanel.vue",
+    "sha256": "6838272b14512121d8c228e47bc07bb5ab739059c942a58b24057b13be176337"
+  },
+  {
+    "path": "src/components/assistant/PlanInput.vue",
+    "sha256": "e61326afc891804f1ebac9c532fd93e39411a009a02c11c926cf23c567ff0b4c"
+  },
+  {
+    "path": "src/components/assistant/ReplanPanel.vue",
+    "sha256": "63e490cf35a7fa82eb63bb18a8e5cac70b94f3e0f139bfd5be564e0d2cf56dd1"
+  },
+  {
+    "path": "src/components/assistant/SourceReview.vue",
+    "sha256": "bbd6be9776696952f2c6c467cd2b3ae171a3698167a00a5fb89859eb0e751895"
+  },
+  {
+    "path": "src/components/domain/ContinueBar.vue",
+    "sha256": "b82030e9a08e070f1e8492db8720722c6cdf1767b9dc7135d537e64c10ab82fe"
+  },
+  {
+    "path": "src/components/domain/DayDeadlineZone.vue",
+    "sha256": "e6633722cc8dc3214b3cec0d1b8278568f277c22f3c72ad34a775daf315fe837"
+  },
+  {
+    "path": "src/components/domain/DayTwoZones.vue",
+    "sha256": "f391dc80a740f8a6ecb8701f8d766a634f32cf273a181e4169d5ad8c45e2f15d"
+  },
+  {
+    "path": "src/components/domain/DayWorkZone.vue",
+    "sha256": "725be80a76daa5fa1973d5db09138b253317270f6b412095a432b9cb93db05a1"
+  },
+  {
+    "path": "src/components/domain/DeadlineChip.vue",
+    "sha256": "631d11334dfd64b809b40bc3903b5cffcf15691e52b5dbba044a6c960892e9b6"
+  },
+  {
+    "path": "src/components/domain/DeleteImpact.vue",
+    "sha256": "d36ba76cb9416c6630116c234f23cc01ef093996081d7308db133ab58de52f3c"
+  },
+  {
+    "path": "src/components/domain/EndSessionForm.vue",
+    "sha256": "37fdb2f1567dc5846554d3b56e258c1c4d7460a01a4ded341aaa00fa66beaf7f"
+  },
+  {
+    "path": "src/components/domain/FieldCard.vue",
+    "sha256": "78751c06b90659a485bf8eb40de4b58cb33fb77de3c9000f7b89659eed695b76"
+  },
+  {
+    "path": "src/components/domain/NodeSelect.vue",
+    "sha256": "ae6d2cdc538b9d228ee1b36e1223e5201a7cbf1031d2fc84791d9b1b1dd3605f"
+  },
+  {
+    "path": "src/components/domain/PlanCard.vue",
+    "sha256": "7ce11d014629b438d98418e2ab1087b142692b9813638ddc9f5db542176dc266"
+  },
+  {
+    "path": "src/components/domain/PlanDetail.vue",
+    "sha256": "80c62ea2fb4f6d9ba3682d0a5ab416577910d269f3a581ac3e981f5bc702b59a"
+  },
+  {
+    "path": "src/components/domain/PlanEditor.vue",
+    "sha256": "3f5ff22560866ba8162cd21266c689bdcf9f41f2c7c02ec37c0b2e7115aee0d1"
+  },
+  {
+    "path": "src/components/domain/PlanWorkspace.vue",
+    "sha256": "01e6c5f2ec732f7668f1ceb186b43b46a103b610aed7b343c14bf6644b73c709"
+  },
+  {
+    "path": "src/components/domain/StartPlanWorkDialog.vue",
+    "sha256": "8a354b43e8395e74c247337696df51b3613a80681e458809e82bab3c2c1daa9a"
+  },
+  {
+    "path": "src/components/domain/TaskCreateForm.vue",
+    "sha256": "cd11268358edfc060d244a1a1693dc536fab864836ee85895db1ab9ed26d9169"
+  },
+  {
+    "path": "src/components/domain/TaskListRows.vue",
+    "sha256": "b6de02eb28fd3ab0a9ce3304bc86a00b925c048bd2eb420ce656dcf477b11d9b"
+  },
+  {
+    "path": "src/components/domain/TaskListsPanel.vue",
+    "sha256": "54354f82bae31b9ee97a49ca82aa9cb366ea4fd61f9caf473fedfac0cbcdecc3"
+  },
+  {
+    "path": "src/components/domain/TaskRow.vue",
+    "sha256": "e80e07c4201ecf23869c62105ab3fa688bc92068586f08501ef62c94f59951f4"
+  },
+  {
+    "path": "src/components/domain/WeekView.vue",
+    "sha256": "92947fd378d89c53ca3f764b1773881da36be2563f095d4c7a8e1cd8140efa65"
+  },
+  {
+    "path": "src/components/domain/WorkMaterials.vue",
+    "sha256": "e3495ad077afbbcec88264242dd4d460fe8d0d12060e5437453fa449aa64bfd2"
+  },
+  {
+    "path": "src/components/domain/WorkProtectionDialog.vue",
+    "sha256": "8644eeeee338a0ce15ead13a2197f6770ffc6a6ff4d12b06f622c30d11cdaf2d"
+  },
+  {
+    "path": "src/components/domain/WorkspaceSwitcher.vue",
+    "sha256": "ae097456f0e63656734d568dc898133218876eb2f9261651d7ab066fd636e322"
+  },
+  {
+    "path": "src/components/ui/Alert.vue",
+    "sha256": "428462cdf894843380773c416f7bf17a81207baf3345cbc4c0e1957e3d32db1d"
+  },
+  {
+    "path": "src/components/ui/Badge.vue",
+    "sha256": "725355ddbcb387c513bfc7774ade3b219da42d62e989a9df5a049ebd1757718e"
+  },
+  {
+    "path": "src/components/ui/Button.vue",
+    "sha256": "b5c32b9d5c77f85859b6bae9d7e3502670ce3e0ecd9a6b5935b99a5fc8a4aa66"
+  },
+  {
+    "path": "src/components/ui/Card.vue",
+    "sha256": "f7be85176c2e2040e45e142bd7a2dd9e709b517d045754ce239fcc4af6a1ea2c"
+  },
+  {
+    "path": "src/components/ui/ConfirmDialog.vue",
+    "sha256": "9a96c8349347c5aa65417b907d39aa3b40ecbcb20fb8c8f5f2161becf7718b1f"
+  },
+  {
+    "path": "src/components/ui/DateInput.vue",
+    "sha256": "1a765d56e4d8452e7765c38f105551d11b63165376e499821a333eb543a84255"
+  },
+  {
+    "path": "src/components/ui/Input.vue",
+    "sha256": "23a9e03c23a212b05bfb822f88e7dce4e6cbdfef26f2c3b76987a879718b25ac"
+  },
+  {
+    "path": "src/components/ui/Separator.vue",
+    "sha256": "e0e6789e6ee0a8c864aa34cb3e5e76726061102f777164c0ed5601867a5f91ae"
+  },
+  {
+    "path": "src/components/ui/Textarea.vue",
+    "sha256": "f47d5a717d2059d449014f9d26baa6805fed83d26e6785dd763288b7046e2236"
+  },
+  {
+    "path": "src/domains/assistant/application.js",
+    "sha256": "ee4dae64ca82f17918d00981e43b7e5022f7408848fda16bb0e2e149f3d3a53e"
+  },
+  {
+    "path": "src/domains/assistant/clarification.js",
+    "sha256": "6063efa59720c0383b5a7c2bf076181bc76d9dba10f895b5479310d059b87ba3"
+  },
+  {
+    "path": "src/domains/assistant/draft.js",
+    "sha256": "bb641e10d734a7a9af30065db1d896fef5be91c36d68cd05311bae3ee789561e"
+  },
+  {
+    "path": "src/domains/assistant/refs.js",
+    "sha256": "e7967d32683c83d91b27cbfd97f70cdc0f1601e9723ceaeafbd0f1e04f3a5775"
+  },
+  {
+    "path": "src/domains/assistant/replan.js",
+    "sha256": "1835abadfea750742f2c833e75360fc37fcf44d091210d93242630e837d77145"
+  },
+  {
+    "path": "src/domains/planning/normalize.js",
+    "sha256": "3e5edc78b357759cb736ed8d28c112b36bd2ded3ecac2c3fa87cf904cf93e0fd"
+  },
+  {
+    "path": "src/domains/planning/protocol.js",
+    "sha256": "cfbeba797981f59eb3074dcb0ef2b9898c3e6fefba19d14683efe0cdfc26fbbd"
+  },
+  {
+    "path": "src/domains/planning/schedule.js",
+    "sha256": "882c53e166801a554a1db88581a2cb236ba8514207c7e60c8487f50a4b0ca105"
+  },
+  {
+    "path": "src/domains/planning/validate.js",
+    "sha256": "a2ee4365a5a95988186dcab85ee53295135772627c1712607aa32e5c71267998"
+  },
+  {
+    "path": "src/services/api/client.js",
+    "sha256": "6cb02b2e6e5cf0e50c1d68a7f6931c5950f1d8de7d10ac7e8f3993684b629025"
+  },
+  {
+    "path": "src/services/assistant/applications.js",
+    "sha256": "8808f5a17e90540175687ed3681e8e1e10a71b37544ad32ac0a40118bf35a0b1"
+  },
+  {
+    "path": "src/services/assistant/context.js",
+    "sha256": "b9348a6ad537273ce77226870e3388a35c946e90d2308f0364bfc76e222cf2e0"
+  },
+  {
+    "path": "src/services/assistant/drafts.js",
+    "sha256": "1d50771953ebd19aa45a02ad3585670f6f613f2a9c1ebdefcb52b4f87156f0ce"
+  },
+  {
+    "path": "src/services/assistant/requests.js",
+    "sha256": "91113779bd68688bb9dc63ad98dec1668b326ec4d280b0ed9d49c8f02f2401fb"
+  },
+  {
+    "path": "src/services/backup/adapt.js",
+    "sha256": "f47f4ff97e5864b3fd9768c52407056bf6c0777cc1cee1b90dc1a90dc1741ebd"
+  },
+  {
+    "path": "src/services/backup/contractSchema.js",
+    "sha256": "84cea287ab53fb569d45d4ada7f7e47924b36cf37749720012bb6812be4c2f1a"
+  },
+  {
+    "path": "src/services/backup/export.js",
+    "sha256": "22bd23558b594585cde895e75edbcb5f9a86ed3f1d56b77e08dfb0a52d67b451"
+  },
+  {
+    "path": "src/services/backup/format.js",
+    "sha256": "8174ecf3b1cf768cba43320e7ee5533a77796dad232c795315fe56a723607e1a"
+  },
+  {
+    "path": "src/services/backup/import.js",
+    "sha256": "ed39a3f415ccb9e6d824009ef9b79fa8fa92a1e94e52a994fd715320631818b0"
+  },
+  {
+    "path": "src/services/backup/recovery.js",
+    "sha256": "3285d0fc4aeccc1b362c0f6963bd5183f1dafc28dd690193f6ff3fb2b35e766f"
+  },
+  {
+    "path": "src/services/backup/remap.js",
+    "sha256": "7bf131b75a7b833a53a5023708aa62283a14ce886d02bc90d85cec60db7741bb"
+  },
+  {
+    "path": "src/services/backup/restore.js",
+    "sha256": "1b317b3a01f03be36d395ac4661e923135cf1a70a22e545f8c0e4c4b4bf50b7f"
+  },
+  {
+    "path": "src/services/backup/validate.js",
+    "sha256": "c4421c968e131a15b790ada72b8ad8213ca9a5949913fccc13e9894fce3444e3"
+  },
+  {
+    "path": "src/services/backup/zip.js",
+    "sha256": "e3e5a46a46863fb1e2c11595d07c868f07968a01633c95a2ab6548822ce6d8db"
+  },
+  {
+    "path": "src/services/focus/runtime.js",
+    "sha256": "d1b24bd585ef1df9c13f7857ec1788e3904be90c0a850498b7742f59380d3e78"
+  },
+  {
+    "path": "src/services/focus/service.js",
+    "sha256": "40273f569474a610200d15a050e188c84004baa651c5b088e89d47f37cb7431e"
+  },
+  {
+    "path": "src/services/plan/service.js",
+    "sha256": "98c8d067607fcd9a0346bee1fcb4f2efebd72bfcfc3c01733e35d91ea62ad531"
+  },
+  {
+    "path": "src/services/storage/db.js",
+    "sha256": "b14ee4a6dd0cb7f058d16a6bb15f8e5d4efe325ca8192bf9469bac3205313002"
+  },
+  {
+    "path": "package.json",
+    "sha256": "92608259ed21e1cbd196b1413ff47add7230b4bef18c9dd22696484ca9b574e7"
+  },
+  {
+    "path": "package-lock.json",
+    "sha256": "b67bba222afef4abfa82fdc89a465628b588c89595511a99fa9d052d53d8fbab"
+  },
+  {
+    "path": "vite.config.js",
+    "sha256": "dedf3c7e39258aea80e384d9dbc14733b22d6f47ab5c458e9ea8133ad3b2cf73"
+  },
+  {
+    "path": "jsconfig.json",
+    "sha256": "a17ead609876def4dc29a6f7499b2591b6c032d0a58a69b601f8229330da0365"
+  },
+  {
+    "path": "index.html",
+    "sha256": "5b6f754d91ee4b44f93689ddc45ef0f717a1c49405859fbcfdab0d4c90765a94"
+  }
+]

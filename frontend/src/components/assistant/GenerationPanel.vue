@@ -1,7 +1,7 @@
 <script setup>
 // M2 生成状态面板：进度/取消、失败重试、保存失败留结果重试、澄清集中作答。
 // 只读 store.gen 阶段机；所有付费请求由 store 编排，这里不直接调 API。
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { Loader2, XCircle } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import Input from '@/components/ui/Input.vue'
@@ -10,6 +10,9 @@ import { useAssistantStore } from '@/stores/assistant'
 
 const store = useAssistantStore()
 const answers = reactive({})
+const hasUnsaved = computed(() => store.gen?.phase === 'clarification' && Object.values(answers).some(value => String(value).trim()))
+function discard() { for (const key of Object.keys(answers)) delete answers[key] }
+defineExpose({ hasUnsaved, discard })
 // 新一轮（requestId 变化）清空上一轮答案，不把旧回答混入新澄清。
 watch(() => store.gen?.requestId, () => { for (const k of Object.keys(answers)) delete answers[k] })
 

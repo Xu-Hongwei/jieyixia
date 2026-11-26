@@ -173,6 +173,8 @@ describe('apply：单事务整体提交与去重', () => {
     expect(action.task_id).toBe(task.id)
     const plan = docs.find((x) => x.kind === 'plan_item')
     expect(plan.task_id).toBe(task.id)
+    const { adoptedActionForPlan } = await import('../composables/useScheduledAction')
+    expect(adoptedActionForPlan((await db.workspaceAssistantDrafts()).records, plan.id)).toEqual({ actionId: action.id })
     expect(plan.order).toBe(6) // 既有 p-old order 5 之后
     expect(plan.state).toBe('planned')
     const snap = await db.readAssistantSnapshot()
@@ -387,6 +389,40 @@ describe('刷新结算与结果核实（回执是权威）', () => {
 })
 
 describe('缺口/过载独立确认后才可采用', () => {
+  it('手选缺口时间后只补剩余量，刷新、采用、查回行动和改排选项一致', async () => {
+    await seedBusiness()
+    const c = await dsvc.create({ proposal: mkProposal({ evidence_refs: [EV_SRC] }) })
+    const r = await dsvc.reschedule(c.draft.id, { expected: c.draft, context: mkContext([40, 0, 0, 0, 0, 0, 0]) })
+    const gap = r.draft.planning_result.unscheduled[0]
+    expect(gap.remaining_minutes).toBe(26)
+    const choice = { ...conf('gap', 'w1', r.draft.revision, 'manual'), field_path: 'manual_slot',
+      new_value: { date: '2026-11-25', time: '14:00', allowExtra: false } }
+    const send = () => dsvc.confirm(c.draft.id, { expected: r.draft, confirmation: choice })
+    expect((await send()).code).toBe('MANUAL_SLOT_INVALID')
+    choice.new_value.allowExtra = true
+    expect((await send()).ok).toBe(true)
+    const reloaded = (await dsvc.get(c.draft.id)).baseline.draft
+    const gen = await dsvc.setStatus(c.draft.id, { expected: reloaded, status: 'generating' })
+    const ready = await dsvc.setStatus(c.draft.id, { expected: gen.draft, status: 'ready' })
+    const prepared = await asvc.prepare(c.draft.id, { expected: ready.draft })
+    expect(prepared.envelope.planned_gaps).toEqual([])
+    expect(prepared.envelope.write_set.plan_items_create.map(p => p.planned_minutes)).toEqual([34, 26])
+    expect(await newDocs()).toHaveLength(0)
+    const applied = await asvc.apply(c.draft.id, { expected: ready.draft, envelope: prepared.envelope })
+    expect(applied.ok, JSON.stringify(applied)).toBe(true)
+    const plans = await newDocs()
+    const manual = plans.find(p => p.date === '2026-11-25')
+    expect(manual.action_text).toContain('14:00')
+    const { adoptedPlanActions, unallocatedActions } = await import('../domains/assistant/scheduledActions')
+    const drafts = (await db.workspaceAssistantDrafts()).records
+    const bindings = adoptedPlanActions(drafts)
+    expect(bindings.get(manual.id)).toBe('a-1')
+    const actions = [{ id: 'a-1', minutes: 60 }, { id: 'a-2', minutes: 10 }, { id: 'done', done: true, minutes: 20 }]
+    expect(unallocatedActions(actions, plans, bindings, new Set()).map(a => a.id)).toEqual(['a-2'])
+    expect(unallocatedActions(actions, plans, bindings, new Set([manual.id]))[0].remaining).toBe(26)
+    manual.state = 'cancelled'
+    expect(unallocatedActions(actions, plans, bindings, new Set())[0].remaining).toBe(26)
+  })
   it('既有过载日 + 未排工作：逐项确认后 envelope 双确认标记为真；采用保留未排事实', async () => {
     await seedBusiness()
     await db.putDoc(planDoc('p-big', { planned_minutes: 200, order: 1 }))
@@ -512,6 +548,9 @@ describe('M1 审查回归：提交内容必须与冻结草案一致', () => {
 describe('M1 复验 F1：截止出处必须是已确认且匹配的具体便签字段', () => {
   it('F1：便签 fields=[] → prepare DEADLINE_PROVENANCE_REQUIRED，零写入（复验原反例）', async () => {
     const d = await readyCreateDraft([])
+    const before = await dsvc.get(d.id)
+    expect(before.adoptionReadiness.ready).toBe(false)
+    expect(before.adoptionReadiness.blockers[0].code).toBe('DEADLINE_PROVENANCE_REQUIRED')
     const p = await asvc.prepare(d.id, { expected: d })
     expect(p.ok).toBe(false)
     expect(p.code).toBe('DEADLINE_PROVENANCE_REQUIRED')

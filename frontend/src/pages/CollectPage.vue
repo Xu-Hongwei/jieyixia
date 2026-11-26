@@ -1,6 +1,7 @@
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { requireQwen } from '@/services/api/qwenConnection'
+import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
+import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronRight, FolderPlus, Pencil, RefreshCw, Search, SlidersHorizontal, Sparkles, Trash2, Upload, X } from 'lucide-vue-next'
 import Alert from '@/components/ui/Alert.vue'
 import Badge from '@/components/ui/Badge.vue'
@@ -12,6 +13,10 @@ import Input from '@/components/ui/Input.vue'
 import NodeSelect from '@/components/domain/NodeSelect.vue'
 import TaskRow from '@/components/domain/TaskRow.vue'
 import Textarea from '@/components/ui/Textarea.vue'
+import MaterialPanel from '@/components/domain/MaterialPanel.vue'
+import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
+import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
+import { MAX_SELECTED_SOURCES } from '@/domains/assistant/limits'
 import { useAppStore } from '@/stores/app'
 import { beijingInstantLabel, isValidDate } from '@/domains/time'
 import { BUCKET_LABELS, byCaptured, matterNotesOf, matterTasksOf, matterTitleOf, rowMatches, sourceRow } from '@/domains/organize'
@@ -94,7 +99,7 @@ function stateQuery() {
 const sameQuery = (a, b) => FILTER_KEYS.every((k) => (a[k] || '') === (b[k] || ''))
 watch([query, kindFilter, contentFilter, statusFilter, fromDate, toDate, sortDir], () => {
   const next = stateQuery()
-  if (!sameQuery(next, routeFilterQuery())) router.replace({ query: next })
+  if (!sameQuery(next, routeFilterQuery())) router.replace({ query: { ...next, ...(panelId.value ? { source: panelId.value } : {}) } })
 })
 watch(() => route.query, () => {
   const rq = routeFilterQuery()
@@ -156,18 +161,64 @@ function rowStatusText(row) {
   if (!row.note) return '未分析'
   return BUCKET_LABELS[row.bucket]
 }
-// 打开便签带上返回上下文：核对页「返回资料库」回到当前筛选列表。
-function noteLink(noteId) {
-  return { path: '/notes/' + noteId, query: { from: 'collect', return: route.fullPath } }
+// 详情只改变 source 参数，列表筛选和滚动保留。
+const panelRef = ref(null)
+const panelId = computed(() => typeof route.query.source === 'string' ? route.query.source : '')
+const queueIds = ref([])
+const selectedIds = ref([])
+const localBusy = ref(false)
+const nextNoteId = computed(() => {
+  const i = queueIds.value.indexOf(panelId.value)
+  const live = new Set(inboxRows.value.map(r => r.source.id))
+  for (const id of queueIds.value.slice(i + 1)) {
+    const n = store.notes.find(n => n.source_id === id)
+    if (n && live.has(id)) return n.id
+  }
+  return ''
+})
+function closePanel() { const q = { ...route.query }; delete q.source; router.replace({ query: q }) }
+async function openRow(row) {
+  if (panelRef.value && !(await panelRef.value.guardLeave())) return
+  queueIds.value = inboxRows.value.map(r => r.source.id)
+  await router.replace({ query: { ...route.query, source: row.source.id } })
 }
-async function analyzeRow(row) {
-  store.pendingId = row.source.id
-  const result = await store.runAnalysis(row.source.id, referenceAt.value)
-  if (result && result.noteId) router.push(noteLink(result.noteId))
+function openNote(id) {
+  const note = store.notes.find(n => n.id === id)
+  if (note) router.replace({ query: { ...route.query, source: note.source_id } })
 }
-function openRow(row) {
-  if (row.note) router.push(noteLink(row.note.id))
+watch([() => store.ready, panelId, () => store.sources], () => {
+  if (!store.ready || !panelId.value) return
+  if (!store.sources.some(s => s.id === panelId.value)) {
+    store.say('warning', '资料已不存在或不属于当前空间'); closePanel(); return
+  }
+  if (!queueIds.value.includes(panelId.value)) queueIds.value = inboxRows.value.map(r => r.source.id)
+}, { immediate: true })
+function toggleSelected(id) {
+  if (selectedIds.value.includes(id)) selectedIds.value = selectedIds.value.filter(x => x !== id)
+  else if (selectedIds.value.length < MAX_SELECTED_SOURCES) selectedIds.value.push(id)
+  else store.say('warning', `一次最多选择 ${MAX_SELECTED_SOURCES} 份资料`)
 }
+const selectedSources = computed(() => selectedIds.value.map(id => store.sources.find(s => s.id === id)).filter(Boolean))
+function sourceTitle(source) { return source.kind === 'image' ? source.name : (source.text || '').split('\n')[0] || '文字资料' }
+function planSelected() {
+  const ids = selectedSources.value.map(s => s.id)
+  if (!ids.length || ids.length !== selectedIds.value.length) { store.say('warning', '所选资料已变化，请重新选择'); return }
+  router.push({ path: '/assistant', query: { sources: ids, workspace: store.workspaceId } })
+}
+const statusCounts = computed(() => Object.fromEntries(STATUS_ITEMS.map(item => [item.value, item.value === 'all' ? store.sources.length : store.sources.filter(s => sourceRow(s, store.notes.find(n => n.source_id === s.id) || null, '').bucket === item.value).length])))
+const { discardOpen, guardLeave: guardDraft, settle } = useUnsavedGuard(
+  () => !!textDraft.value.trim() || !!referenceAt.value || !!matterName.value.trim() || !!renamingMatter.value,
+  () => store.busy || localBusy.value,
+  () => { textDraft.value = ''; referenceAt.value = ''; matterName.value = ''; renamingMatter.value = null },
+)
+async function guardLeave() {
+  if (panelRef.value && !(await panelRef.value.guardLeave())) return false
+  return guardDraft()
+}
+const unregister = registerWorkLeave(guardLeave)
+onBeforeUnmount(unregister)
+onBeforeRouteLeave(requestWorkLeave)
+onBeforeRouteUpdate(async (to, from) => to.query.source !== from.query.source && panelRef.value ? panelRef.value.guardLeave() : true)
 
 watch(() => store.pendingSource, (s) => {
   if (pendingUrl.value) URL.revokeObjectURL(pendingUrl.value)
@@ -180,40 +231,53 @@ watch(() => store.workspaceId, () => {
   referenceAt.value = ''
   addOpen.value = false
   filtersOpen.value = false
+  selectedIds.value = []; queueIds.value = []; renamingMatter.value = null; matterName.value = ''
+  resetWorkLeaveApproval()
   clearFilters()
+  if (panelId.value) closePanel()
 })
 
 async function runAI() {
-  const draft = textDraft.value.trim()
-  let source = store.pendingSource
-  // 文字草稿先落本地再调 AI（先保存原始资料）；图片在选择时已落本地，直接分析待处理图片
-  if (draft && (!source || (source.kind === 'text' && source.text !== draft))) {
-    const saved = await store.collectText(draft)
-    if (!saved) return
-    textDraft.value = ''
-    source = store.pendingSource
-  }
-  if (!source) return store.say('warning', '先收集一份截图或文字')
-  const result = await store.runAnalysis(source.id, referenceAt.value)
-  // 成功或 422 生成失败记录时都跳转到便签（失败记录提供「重试分析」下一步）；
-  // 503/413/网络/落库失败 noteId 为 null，留在收集页看横幅与重试入口。
-  if (result && result.noteId) router.push(noteLink(result.noteId))
+  if (store.busy || localBusy.value || !requireQwen()) return
+  localBusy.value = true
+  try {
+    const draft = textDraft.value.trim()
+    let source = store.pendingSource
+    // 有文字输入时明确处理文字；已保存的图片仍在资料库中。
+    if (draft && (!source || source.kind !== 'text' || source.text !== draft)) {
+      const saved = await store.collectText(draft)
+      if (!saved) return
+      textDraft.value = ''; source = store.pendingSource
+    }
+    if (!source) return store.say('warning', '先添加截图或文字')
+    const result = await store.runAnalysis(source.id, referenceAt.value)
+    if (result?.noteId) { referenceAt.value = ''; addOpen.value = false; openNote(result.noteId) }
+  } finally { localBusy.value = false }
 }
 async function retrySave() {
   const result = await store.retrySave()
-  if (result && result.ok) router.push(noteLink(result.noteId))
+  if (result && result.ok) openNote(result.noteId)
 }
 async function saveText() {
-  const ok = await store.collectText(textDraft.value)
-  if (ok) textDraft.value = ''
+  if (localBusy.value) return
+  localBusy.value = true
+  try {
+    const ok = await store.collectText(textDraft.value)
+    if (ok) { textDraft.value = ''; addOpen.value = false; if (store.pendingSource) openRow({ source: store.pendingSource }) }
+  } finally { localBusy.value = false }
+}
+async function saveImages(files) {
+  if (localBusy.value) return
+  localBusy.value = true
+  try { await store.collectFiles(files) } finally { localBusy.value = false }
 }
 
 function onPaste(e) {
-  if (e.target.closest('textarea, input')) return
+  if (store.isDemo || panelId.value || e.target.closest?.('textarea, input')) return
   const files = e.clipboardData && e.clipboardData.files
   if (files && files.length) {
     e.preventDefault()
-    store.collectFiles(files)
+    saveImages(files)
   } else {
     const text = e.clipboardData && e.clipboardData.getData('text')
     if (text) {
@@ -224,11 +288,12 @@ function onPaste(e) {
 }
 const onDrop = (e) => {
   e.preventDefault()
-  store.collectFiles(e.dataTransfer.files)
+  if (store.isDemo || panelId.value) return
+  saveImages(e.dataTransfer.files)
 }
 function onFileChange(e) {
   const input = /** @type {HTMLInputElement} */ (e.target)
-  store.collectFiles(input.files)
+  saveImages(input.files)
   input.value = ''
 }
 onMounted(() => window.addEventListener('paste', onPaste))
@@ -271,69 +336,61 @@ async function confirmDeleteMatter() {
 </script>
 
 <template>
-  <Card @drop="onDrop" @dragover.prevent>
+  <div class="mx-auto max-w-6xl" @drop="onDrop" @dragover.prevent>
+  <header class="mb-4 flex items-center justify-between gap-3"><h1 class="text-2xl font-semibold">资料</h1><RouterLink v-if="store.isDemo" to="/assistant" class="text-sm text-primary underline">查看操作演示</RouterLink><Button v-else :aria-expanded="addOpen" @click="openAdd"><Upload />添加资料</Button></header>
+  <Card v-if="!store.isDemo && addOpen" class="mb-4">
     <template #header>
-      <div class="text-base font-semibold">添加资料</div>
-      <p class="text-xs text-muted-foreground">Ctrl+V 粘贴截图 / 拖入 / 选择文件 / 粘贴文字。原图先落本地，再决定是否 AI 整理。</p>
+      <div class="flex items-center justify-between"><span class="text-base font-semibold">添加资料</span><Button size="sm" variant="ghost" aria-label="收起添加资料" @click="async () => { if (await guardDraft()) addOpen = false }"><X /></Button></div>
     </template>
     <div class="space-y-3">
       <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple class="hidden" @change="onFileChange" />
 
-      <!-- 收起态：文字入口整行（手机不被按钮挤压），图片 / AI 第二行 -->
-      <div v-if="!addOpen" class="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          class="h-9 w-full basis-full rounded-md border border-input bg-card px-3 text-left text-sm text-muted-foreground hover:border-ring"
-          aria-label="添加文字资料"
-          @click="openAdd"
-        >粘贴 / 输入文字，或 Ctrl+V 贴图…</button>
-        <Button variant="outline" @click="fileInput.click()"><Upload />选择图片</Button>
-        <Button v-if="!store.aiDown" :disabled="store.busy" @click="runAI"><Sparkles />{{ store.busy ? '分析中…' : 'AI 整理' }}</Button>
-      </div>
-
       <!-- 展开态：完整输入区 -->
-      <template v-else>
+      <div>
         <div class="flex flex-wrap gap-2">
           <Button variant="outline" @click="fileInput.click()"><Upload />选择图片</Button>
-          <Button variant="outline" @click="saveText">仅保存文字</Button>
-          <Button v-if="!store.aiDown" :disabled="store.busy" @click="runAI"><Sparkles />{{ store.busy ? '分析中…' : 'AI 整理' }}</Button>
+          <Button variant="outline" :disabled="localBusy || !textDraft.trim()" @click="saveText">仅保存文字</Button>
+          <Button v-if="!store.aiDown" :disabled="store.busy || localBusy || (!textDraft.trim() && !store.pendingSource)" @click="runAI"><Sparkles />{{ store.busy ? '分析中…' : textDraft.trim() ? '保存文字并提取' : '提取图片信息' }}</Button>
           <Button v-if="store.pendingSave" variant="outline" :disabled="store.busy" @click="retrySave"><RefreshCw />重试保存分析结果（不重调模型）</Button>
-          <Button v-if="!textDraft && !store.pendingSource" size="sm" variant="ghost" class="ml-auto" @click="addOpen = false">收起</Button>
         </div>
-        <Alert v-if="store.aiDown" variant="warning">模型不可用：AI 入口已隐藏；「仅保存」与本地浏览不受影响。</Alert>
+        <Alert v-if="store.aiDown" variant="warning">当前离线，仍可保存和查看资料。</Alert>
         <p v-if="store.pendingSave" class="text-xs text-muted-foreground">上次 AI 分析成功但本地保存失败，结果已暂存（刷新不丢）；重试只重新落库，不会再次请求模型。</p>
-        <Textarea v-model="textDraft" placeholder="或粘贴 / 输入纯文字…" class="min-h-24" aria-label="文字资料" />
+        <p v-if="!store.aiDown" class="text-xs text-muted-foreground">提取信息会将当前资料发送给模型；仅保存不会发送。</p>
+        <Textarea :disabled="localBusy || store.busy" v-model="textDraft" placeholder="或粘贴 / 输入纯文字…" class="min-h-24" aria-label="文字资料" />
         <div class="flex flex-wrap items-center gap-2">
           <DateInput v-model="referenceAt" placeholder="参照日期（可选）" class="max-w-xs" />
-          <span class="text-xs text-muted-foreground">相对时间（明天/下周三）的换算参照；不填则无可靠参照时留空。保存日不作参照。</span>
+          <span class="text-xs text-muted-foreground">用于理解“明天”等相对日期。</span>
         </div>
         <div v-if="store.pendingSource" class="rounded-md border p-3 space-y-2">
           <div class="text-sm text-muted-foreground">待处理：{{ store.pendingSource.kind === 'image' ? store.pendingSource.name : '文字资料' }} · {{ beijingInstantLabel(store.pendingSource.captured_at) }}</div>
           <img v-if="pendingUrl" :src="pendingUrl" alt="待处理截图" class="max-h-64 rounded-md border" />
           <pre v-else class="overflow-auto whitespace-pre-wrap break-words rounded-md bg-muted p-2 text-xs">{{ store.pendingSource.text }}</pre>
         </div>
-      </template>
+      </div>
     </div>
   </Card>
 
-  <Card class="mt-4">
+  <Card>
     <template #header>
-      <div class="text-base font-semibold">资料库 · {{ inboxRows.length }} / {{ store.sources.length }} 份</div>
-      <p class="text-xs text-muted-foreground">本地搜索与筛选（刷新 / 返回保留）；不做整图 OCR 或远程检索。</p>
+      <div class="text-base font-semibold">资料库 · {{ inboxRows.length }} 份</div>
     </template>
     <div class="space-y-3">
+      <div class="flex flex-wrap gap-1 border-b pb-3" aria-label="资料状态筛选"><button v-for="item in STATUS_ITEMS" :key="item.value" type="button" class="rounded-md px-3 py-2 text-sm" :class="statusFilter === item.value ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-muted'" :aria-pressed="statusFilter === item.value" @click="statusFilter = item.value">{{ item.label }} <span class="ml-1 tabular-nums">{{ statusCounts[item.value] }}</span></button></div>
+      <div v-if="selectedIds.length" class="space-y-2 rounded-md bg-accent/50 p-3" aria-label="已选资料">
+        <div class="flex flex-wrap items-center gap-2"><span class="flex-1 text-sm">已选 {{ selectedIds.length }} 份</span><Button size="sm" @click="planSelected">用所选资料制定计划</Button><Button size="sm" variant="ghost" @click="selectedIds = []">清空选择</Button></div>
+        <div class="flex flex-wrap gap-2"><button v-for="source in selectedSources" :key="source.id" type="button" class="max-w-full truncate text-xs underline" :aria-label="`取消选择：${sourceTitle(source)}`" @click="toggleSelected(source.id)">{{ sourceTitle(source) }} ×</button></div>
+      </div>
       <div class="flex flex-wrap items-center gap-2">
         <div class="relative min-w-40 flex-1">
           <Search class="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             v-model="query"
-            placeholder="搜索文件名 / 正文 / 字段原文 / 摘要 / 关键词 / 事项…"
+            placeholder="搜索资料名称或内容"
             class="pl-8"
             aria-label="搜索资料库"
             title="命中文件名 / 正文 / 便签标题 / 摘要 / 字段原文与引用 / 关键词 / 事项名称"
           />
         </div>
-        <div class="w-28"><NodeSelect v-model="statusFilter" :items="STATUS_ITEMS" placeholder="全部状态" /></div>
         <div class="w-28"><NodeSelect v-model="sortDir" :items="SORT_ITEMS" placeholder="最新优先" /></div>
         <Button variant="outline" :aria-expanded="filtersOpen" @click="filtersOpen = !filtersOpen">
           <SlidersHorizontal />筛选<span v-if="advancedCount" class="ml-0.5 rounded-full bg-primary px-1.5 text-xs text-primary-foreground">{{ advancedCount }}</span>
@@ -365,28 +422,17 @@ async function confirmDeleteMatter() {
         <Button size="sm" variant="ghost" @click="clearFilters">清除筛选</Button>
       </div>
 
-      <div class="space-y-2">
-        <div v-for="row in inboxRows" :key="row.source.id" class="flex flex-wrap items-center gap-3 rounded-md border border-border/70 bg-background p-3">
-          <div class="min-w-0 flex-1 basis-40">
-            <div class="truncate text-sm font-medium">{{ row.source.kind === 'image' ? row.source.name : (row.source.text || '').split('\n')[0] }}</div>
-            <div class="text-xs text-muted-foreground">
-              {{ row.source.kind === 'image' ? '截图' : '文字' }} · 收集于 {{ beijingInstantLabel(row.source.captured_at) }}
-              <template v-if="row.note"> · 便签「{{ row.note.title }}」</template>
-              <template v-if="row.matterTitle"> · 事项「{{ row.matterTitle }}」</template>
-            </div>
-          </div>
+      <div class="divide-y" aria-label="资料列表">
+        <div v-for="row in inboxRows" :key="row.source.id" :data-source-row="row.source.id" class="flex items-center gap-3 py-3">
+          <input v-if="!store.isDemo" type="checkbox" :checked="selectedIds.includes(row.source.id)" :aria-label="`选择资料：${sourceTitle(row.source)}`" @change="toggleSelected(row.source.id)" />
+          <button type="button" class="min-w-0 flex-1 rounded-md px-1 py-1 text-left hover:bg-accent" :aria-label="`查看资料：${sourceTitle(row.source)}`" @click="openRow(row)">
+            <div class="truncate text-sm font-medium">{{ row.note ? row.note.title : sourceTitle(row.source) }}</div>
+            <div class="mt-1 truncate text-xs text-muted-foreground">{{ row.source.kind === 'image' ? '截图' : '文字' }} · {{ beijingInstantLabel(row.source.captured_at) }}<template v-if="row.matterTitle"> · {{ row.matterTitle }}</template></div>
+          </button>
           <Badge :variant="bucketVariant[row.bucket]">{{ rowStatusText(row) }}</Badge>
-          <Badge v-if="row.note && row.note.status === 'reviewed' && row.bucket === 'pending'" variant="secondary" :title="row.note.status">{{ label(STATUS_LABELS, row.note.status) }}</Badge>
-          <Button v-if="row.note" size="sm" variant="outline" @click="openRow(row)">查看便签</Button>
-          <Button v-if="row.note && !store.aiDown" size="sm" variant="ghost" :disabled="store.busy" aria-label="重新分析" title="重新分析（可调模型）" @click="analyzeRow(row)">
-            <RefreshCw />
-          </Button>
-          <Button v-if="!row.note && !store.aiDown" size="sm" variant="outline" :disabled="store.busy" @click="analyzeRow(row)">
-            <Sparkles />AI 整理
-          </Button>
         </div>
         <p v-if="!inboxRows.length" class="text-sm text-muted-foreground">
-          {{ store.sources.length ? '没有匹配的资料：换个关键词或放宽筛选。' : '资料库还是空的：上方粘贴截图或文字开始。' }}
+          {{ store.sources.length ? '没有匹配的资料，试试其他关键词或筛选条件。' : store.isDemo ? '课程通知收在助手的操作演示里。' : '还没有资料。点「添加资料」保存第一张截图或一段文字。' }}
         </p>
       </div>
     </div>
@@ -400,7 +446,7 @@ async function confirmDeleteMatter() {
         <ChevronDown v-if="mattersOpen" class="size-4" />
         <ChevronRight v-else class="size-4" />
       </button>
-      <p v-if="mattersOpen" class="text-sm text-muted-foreground">事项用于手动归组便签与任务（非 AI），展开可查看资料角色与相关任务。删除事项只解除归组。</p>
+      <p v-if="mattersOpen" class="text-sm text-muted-foreground">删除事项只解除归组，保留资料与任务。</p>
     </template>
     <div v-if="mattersOpen" class="space-y-3">
       <div class="flex flex-wrap items-center gap-2">
@@ -430,10 +476,10 @@ async function confirmDeleteMatter() {
             <div class="space-y-1">
               <div class="text-xs font-medium text-muted-foreground">资料与角色</div>
               <div v-for="n in matterNotesOf(store.docs, m.id)" :key="n.id" class="flex flex-wrap items-center gap-2">
-                <RouterLink :to="'/notes/' + n.id" class="min-w-0 flex-1 basis-40 truncate underline">{{ n.title }}</RouterLink>
+                <button type="button" class="min-w-0 flex-1 basis-40 truncate text-left underline" @click="openNote(n.id)">{{ n.title }}</button>
                 <Badge variant="secondary">{{ n.matter_role ? label(MATTER_ROLE_LABELS, n.matter_role) : '未指定角色' }}</Badge>
               </div>
-              <p v-if="!matterNotesOf(store.docs, m.id).length" class="text-xs text-muted-foreground">还没有便签归入；在待核对页选择所属事项与资料角色。</p>
+              <p v-if="!matterNotesOf(store.docs, m.id).length" class="text-xs text-muted-foreground">暂无关联资料。</p>
             </div>
             <div class="space-y-1">
               <div class="text-xs font-medium text-muted-foreground">相关任务</div>
@@ -447,6 +493,9 @@ async function confirmDeleteMatter() {
     </div>
   </Card>
 
+  <div v-if="store.lastDeleted" class="mt-4 flex flex-wrap items-center gap-2 rounded-md border p-3 text-sm"><span class="flex-1">{{ store.lastDeleted.kind === 'note' ? '便签已删除，原始资料保留' : '最近删除可恢复' }}</span><Button size="sm" variant="outline" @click="store.undoDelete()">撤销删除</Button></div>
+  <MaterialPanel ref="panelRef" :source-id="panelId" :next-id="nextNoteId" :return-to="route.fullPath" @close="closePanel" @open-note="openNote" />
+  <ConfirmDialog v-model="discardOpen" title="放弃未保存的资料输入？" confirm-label="放弃修改" cancel-label="继续编辑" @confirm="settle(true)">输入尚未保存，离开后将清空。</ConfirmDialog>
   <ConfirmDialog
     v-model="deleteMatterOpen"
     title="删除事项"
@@ -460,4 +509,5 @@ async function confirmDeleteMatter() {
       <li>专注与计划记录保留。取消则不做任何修改。</li>
     </ul>
   </ConfirmDialog>
+  </div>
 </template>

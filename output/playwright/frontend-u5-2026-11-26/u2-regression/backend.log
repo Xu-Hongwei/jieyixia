@@ -1,0 +1,9 @@
+INFO:     Started server process [44388]
+INFO:     Waiting for application startup.
+{"event": "startup", "provider": "fixture", "source_ids": ["src-01", "src-02", "src-03", "src-04"], "max_body_bytes": 8388608, "cors_origins": ["http://127.0.0.1:5177", "http://localhost:5177"], "auth_enabled": true, "rate_limit_per_min": 60, "max_concurrent_analyze": 4, "max_model_calls_per_day": 1000, "propose_budget_s": 120.0, "propose_max_attempts": 2, "propose_max_body_bytes": 524288}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+INFO:     127.0.0.1:62724 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62737 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62740 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52739 - "GET /api/healthz HTTP/1.1" 200 OK

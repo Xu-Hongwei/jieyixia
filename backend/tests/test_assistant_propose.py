@@ -100,6 +100,21 @@ def vendor(payload: dict) -> httpx.Response:
     return httpx.Response(200, json={"choices": [{"message": {"content": json.dumps(payload, ensure_ascii=False)}}]})
 
 
+def test_personal_qwen_propose_uses_own_key_and_contract(client, monkeypatch):
+    from app.qwen import HOST, KEY_HEADER, PersonalQwenAdapter
+
+    def respond(self, url, headers, payload, deadline=None):
+        assert url == HOST + "/compatible-mode/v1/chat/completions"
+        assert headers["Authorization"] == "Bearer sk-personal-unit-test"
+        assert payload["model"] == "qwen-plus"
+        return vendor(proposal_payload()).json()
+
+    monkeypatch.setattr(PersonalQwenAdapter, "_post", respond)
+    response = client.post("/api/qwen/propose", headers={KEY_HEADER: "sk-personal-unit-test"}, json=mk_request())
+    assert response.status_code == 200, response.text
+    assert response.json()["payload"]["kind"] == "proposal"
+
+
 def proposal_payload(source_id: str | None = None, turn_id: str = "turn-t1") -> dict:
     if source_id:
         ev = {"kind": "source_excerpt", "source_id": source_id, "excerpt": "周五交报告"}

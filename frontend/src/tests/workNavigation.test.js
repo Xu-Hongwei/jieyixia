@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   cleanScheduleQuery, schedulePath, taskPath, workPath, recordPath,
-  parseReturnPath, resolveWorkReturn, resolveTaskReturn, planContextForTask, scheduleLocateQuery, planScheduleReturn,
+  parseReturnPath, resolveWorkReturn, resolveTaskReturn, resolveReplanReturn, planContextForTask, scheduleLocateQuery, planScheduleReturn,
 } from '@/domains/workNavigation'
 
 const WS = 'personal'
@@ -21,6 +21,25 @@ const docs = [
 ]
 const ctx = { docs, ws: WS, todayStr: TODAY }
 const session = (id) => docs.find((d) => d.id === id)
+
+describe('改排返回上下文', () => {
+  it('保留当前任务的安排、日程日期与列表视图', () => {
+    const raw = taskPath('t1', { plan: 'p1', return: '/today?date=2026-11-25&view=list' })
+    expect(resolveReplanReturn(raw, 't1', ctx)).toBe(raw)
+  })
+  it('保留资料筛选来源并剔除临时参数', () => {
+    const raw = taskPath('t1', { return: '/collect?q=report&status=failed&create=1' })
+    expect(resolveReplanReturn(raw, 't1', ctx)).toBe(taskPath('t1', { return: '/collect?q=report&status=failed' }))
+  })
+  it.each([undefined, '//evil.example', '/tasks/t2', '/today', '/tasks/t1?plan=p2',
+    '/tasks/t1?plan=pOther', '/tasks/t1?return=%2Ftasks%2Ft2', '/tasks/t1?return=https%3A%2F%2Fevil.example'])('非法或非当前任务来源安全回退：%s', (raw) => {
+    expect(resolveReplanReturn(raw, 't1', ctx)).toBe('/tasks/t1')
+  })
+  it('任务不存在或不属于当前空间时回日程', () => {
+    expect(resolveReplanReturn('/tasks/missing', 'missing', ctx)).toBe('/today')
+    expect(resolveReplanReturn('/tasks/t1', 't1', { ...ctx, ws: 'demo' })).toBe('/today')
+  })
+})
 
 describe('cleanScheduleQuery / schedulePath', () => {
   it('默认值省略：view=week 与今天日期不写入；list 与非今天保留', () => {
@@ -50,7 +69,7 @@ describe('parseReturnPath 精确匹配与归属', () => {
     expect(parseReturnPath('/today?return=%2Ftasks%2Ft1', ctx)).toBe('/today')
   })
   it('外站/协议相对/反斜杠/fragment/未匹配路径一律拒绝', () => {
-    for (const bad of ['https://evil.example/x', '//evil.example', '/\\evil', '/today#x', '/data', '/work/s1', '/tasks', '/tasks/', '/tasks/t1/extra', '', null, 42, '/todayx']) {
+    for (const bad of ['https://evil.example/x', '//evil.example', '/\\evil', '/today#x', '/data', '/work/s1', '/tasks/t1/extra', '', null, 42, '/todayx']) {
       expect(parseReturnPath(bad, ctx)).toBeNull()
     }
   })
@@ -94,10 +113,10 @@ describe('resolveWorkReturn / resolveTaskReturn 安全回退', () => {
     expect(resolveWorkReturn('https://evil.example', session('s1'), ctx)).toBe('/today?date=2026-11-25&plan=p1')
     expect(resolveWorkReturn(null, session('s2'), ctx)).toBe('/tasks/t2')
   })
-  it('对象不存在或无会话 → 当前空间日程；task 页回退日程', () => {
+  it('对象不存在或无会话 → 当前空间日程；task 页回退任务列表', () => {
     expect(resolveWorkReturn(null, { task_id: 'gone', plan_item_id: 'gone' }, ctx)).toBe('/today')
     expect(resolveWorkReturn(null, null, ctx)).toBe('/today')
-    expect(resolveTaskReturn('/tasks/gone', ctx)).toBe('/today')
+    expect(resolveTaskReturn('/tasks/gone', ctx)).toBe('/tasks')
   })
 })
 

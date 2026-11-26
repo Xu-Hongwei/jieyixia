@@ -1,0 +1,117 @@
+
+> jiexialai-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+ ✓ src/tests/planning.rules.test.js (53 tests) 268ms
+ ✓ src/tests/db.v3migration.test.js (10 tests) 397ms
+ ✓ src/tests/db.workspace.test.js (10 tests) 437ms
+ ✓ src/tests/assistant.adoption.backup.test.js (1 test) 718ms
+   ✓ M1.3 真实采用 → v2 备份 → 恢复新空间 > 全量往返：逐对象真实映射比对；applied 只读去授权；0 ops；不重放；原空间不变  717ms
+ ✓ src/tests/plan.backup.test.js (7 tests) 481ms
+ ✓ src/tests/plan.service.test.js (19 tests) 1066ms
+ ✓ src/tests/backup.import.test.js (17 tests) 121ms
+ ✓ src/tests/backup.restore.test.js (19 tests) 947ms
+ ✓ src/tests/store.test.js (32 tests) 193ms
+ ✓ src/tests/backup.validate.test.js (26 tests) 108ms
+ ✓ src/tests/assistant.generate.store.test.js (21 tests) 777ms
+ ✓ src/tests/assistant.receive.test.js (10 tests) 1822ms
+   ✓ proposal 接收 > 浏览器额度不足保留为 SAVE_FAILED，事务回滚且恢复后可保存同一结果  478ms
+ ✓ src/tests/focus.store.test.js (13 tests) 93ms
+ ✓ src/tests/focus.protection.test.js (27 tests) 83ms
+ ✓ src/tests/backup.format.test.js (11 tests) 69ms
+ ✓ src/tests/backup.export.test.js (23 tests) 1918ms
+   ✓ 4-1 导出：生产链下载前完整校验（P2 整改） > JSON 限额边界值：sources.json 恰为 25MiB 仍合法导出（不误拒）  668ms
+   ✓ 4-1 导出：生产链下载前完整校验（P2 整改） > 图片限额边界值：单图恰为 25MiB 仍合法导出，原图字节与类型保留  590ms
+ ✓ src/tests/plan.store.test.js (7 tests) 78ms
+ ✓ src/tests/backup.compat.test.js (13 tests) 50ms
+ ✓ src/tests/usePlanWorkStart.test.js (7 tests) 83ms
+ ✓ src/tests/planning.refs.test.js (98 tests) 47ms
+ ✓ src/tests/assistant.draft.test.js (44 tests) 55ms
+ ✓ src/tests/planning.golden.test.js (24 tests) 33ms
+ ✓ src/tests/focus.plan.service.test.js (38 tests) 2683ms
+ ✓ src/tests/action.test.js (35 tests) 24ms
+ ✓ src/tests/review-stage2.test.js (5 tests) 30ms
+ ✓ src/tests/focus.test.js (33 tests) 21ms
+ ✓ src/tests/focus.plan.test.js (40 tests) 26ms
+ ✓ src/tests/assistant.replan.service.test.js (13 tests) 3201ms
+   ✓ 本地替换闭环 > 范围确认→重排→采用：取消+新增同事务；未选安排/总截止/既有行动不变  575ms
+   ✓ 漂移与失败保护 > 新增写入中途失败 → 取消也整体回滚；同意图重试复用冻结信封成功  447ms
+   ✓ fork：改排草案复制 > 保留模式/范围/进展，清除计算与替换基线及旧授权  427ms
+ ✓ src/tests/plan.protection.test.js (16 tests) 21ms
+ ✓ src/tests/focus.service.test.js (40 tests) 3344ms
+   ✓ F5 信封协议反例（原始公开服务入口：淘汰/实例重建/缺签发信息） > ≥201 条墓碑淘汰后：裸旧 ID 与原信封都不新建会话；实例重建后仍拒；新信封正常下一段  337ms
+ ✓ src/tests/assistant.application.test.js (55 tests) 30ms
+ ✓ src/tests/assistant.requests.test.js (28 tests) 52ms
+ ✓ src/tests/backup.remap.test.js (7 tests) 26ms
+ ✓ src/tests/db.test.js (8 tests) 20ms
+ ✓ src/tests/assistant.refs.test.js (6 tests) 14ms
+ ✓ src/tests/planning.validate.test.js (50 tests) 21ms
+ ✓ src/tests/backup.smoke.test.js (6 tests) 11ms
+ ✓ src/tests/plan.test.js (47 tests) 18ms
+ ✓ src/tests/backup.zipdecode.test.js (24 tests) 3676ms
+   ✓ 4-2 R1a 受限解码：容器级拒绝（解压前） > 条目数超上限 → ZIP_ENTRY_LIMIT  562ms
+   ✓ 4-2 R1a 受限解码：实际输出限额（zip bomb 防护） > 高压缩比 JSON 超单文件上限：按实际输出停止，不全量分配  558ms
+   ✓ 4-2 R1a 受限解码：实际输出限额（zip bomb 防护） > 尺寸谎报（声明极小）但实际展开超限：仍按实际输出停止  518ms
+   ✓ 4-2 R1a 受限解码：实际输出限额（zip bomb 防护） > 图片超单文件上限 → ZIP_OUTPUT_LIMIT  719ms
+   ✓ 4-2 R1a 受限解码：实际输出限额（zip bomb 防护） > 单文件恰为上限不误拒（边界）  963ms
+   ✓ 4-2 R1a 受限解码：可取消与资源释放 > 解压途中 abort → ZIP_CANCELLED，不再产出后续条目  319ms
+ ✓ src/tests/backup.recovery.test.js (6 tests) 16ms
+ ✓ src/tests/useWorkDraft.test.js (14 tests) 22ms
+ ✓ src/tests/organize.test.js (22 tests) 7ms
+ ✓ src/tests/assistant.replan.test.js (54 tests) 20ms
+ ✓ src/tests/time.test.js (39 tests) 8ms
+ ✓ src/tests/workNavigation.test.js (33 tests) 9ms
+ ✓ src/tests/matter.test.js (24 tests) 11ms
+ ✓ src/tests/focus.runtime.test.js (6 tests) 8ms
+ ✓ src/tests/backup.adapt.test.js (8 tests) 9ms
+ ✓ src/tests/db.migration.test.js (1 test) 9ms
+ ✓ src/tests/contractSchema.test.js (5 tests) 6ms
+ ✓ src/tests/work.test.js (8 tests) 6ms
+ ✓ src/tests/note.test.js (12 tests) 6ms
+ ✓ src/tests/week.test.js (14 tests) 5ms
+ ✓ src/tests/workLeave.test.js (6 tests) 5ms
+ ✓ src/tests/materialHandoff.test.js (6 tests) 3ms
+ ✓ src/tests/taskList.test.js (4 tests) 5ms
+ ✓ src/tests/assistant.clarification.test.js (9 tests) 6ms
+ ✓ src/tests/planStartEntry.test.js (15 tests) 6ms
+ ✓ src/tests/plan.review.test.js (59 tests) 4790ms
+ ✓ src/tests/restore.wiring.test.js (15 tests) 5127ms
+   ✓ 4-2 R3a store 目录接入（§7） > switchWorkspace 到不存在的恢复 ID：报告不存在，绝不自动建「个人空间」壳  466ms
+   ✓ 4-2 R3a store 目录接入（§7） > init：持久化当前空间已不在目录 → 解释并回到个人空间，不静默建壳  313ms
+   ✓ 4-2 R3a store 目录接入（§7） > 切换到已存在恢复空间成功，workspaceKind=restore，名称取自目录  331ms
+   ✓ 4-2 R3a 恢复控制器：检查/预览/取消（零写入零目录零切空间） > 选择→检查→预览：摘要齐全，零业务写入、零目录  310ms
+   ✓ 4-2 R3a 恢复控制器：检查/预览/取消（零写入零目录零切空间） > 取消检查：phase 回 idle，零写入零目录  578ms
+   ✓ 4-2 R3a 恢复控制器：检查/预览/取消（零写入零目录零切空间） > 第二个文件递增作业号并取消旧解析：旧结果晚到不复现  549ms
+   ✓ 4-2 R3a 恢复控制器：检查/预览/取消（零写入零目录零切空间） > setRestoreName 仅预览阶段有效  454ms
+   ✓ 4-2 R3a 恢复控制器：确认/提交/完成/重试 > 确认恢复：冻结意图→单事务提交→done，核对通过，不切全局空间  521ms
+   ✓ 4-2 R3a 恢复控制器：确认/提交/完成/重试 > 双击确认：第二次 busy，目录恰好一份  327ms
+   ✓ 4-2 R3a 恢复控制器：确认/提交/完成/重试 > 提交失败可同意图重试：复用冻结 prepared（同 operationId），修复后成功只一份  349ms
+ ✓ src/tests/assistant.adoption.service.test.js (28 tests) 5609ms
+   ✓ prepare：固定快照冻结，零写入 > ready 草案 prepare 成功且不写任何库；editing 拒绝 NOT_READY  649ms
+   ✓ 刷新结算与结果核实（回执是权威） > applying/applied/result_unknown 禁止追加确认；applying/result_unknown 禁止放弃  335ms
+   ✓ M1 审查回归：提交内容必须与冻结草案一致 > R1：篡改准备结果分钟 60→999 → apply 拒绝，零写入，草案仍 ready、无台账  377ms
+   ✓ M1 审查回归：提交内容必须与冻结草案一致 > R1：深拷贝冻结——提交后调用方再改对象不影响本次落库内容  339ms
+   ✓ M1 审查回归：提交内容必须与冻结草案一致 > R5：复用行动在预览后被改正文/估时 → needs_recheck，零业务写入，applying→needs_review  350ms
+   ✓ M1 审查回归：提交内容必须与冻结草案一致 > R4：真实保存的排除草案 → prepare 显式 NO_ADOPTABLE_CHANGES，零写入  313ms
+ ✓ src/tests/backup.assistant.test.js (22 tests) 5212ms
+   ✓ B1B-16 损坏包拒绝（容器归属/版本组合/载荷形状/计数） > 合法 v2 助手包通过（负向用例的干净基线）  455ms
+   ✓ B1B-16 损坏包拒绝（容器归属/版本组合/载荷形状/计数） > 草案归属线程缺失 → 容器归属损坏拒绝整包，不静默丢草案  339ms
+   ✓ B1B-16 损坏包拒绝（容器归属/版本组合/载荷形状/计数） > 线程不在同一空间 → 拒绝（B 层归属 + C 层容器）  409ms
+   ✓ B1B-16 损坏包拒绝（容器归属/版本组合/载荷形状/计数） > v1 归档携带助手载荷 → 显式拒绝  396ms
+   ✓ B1B-16 损坏包拒绝（容器归属/版本组合/载荷形状/计数） > 助手 wrapper schema_version 不符 → 拒绝  477ms
+   ✓ B1B-17 恢复状态语义：未应用去授权待核对，applied 只读，discarded 保持 > 九态全表：状态映射 + 清基线/确认 + 内容与历史保留  378ms
+ ✓ src/tests/assistant.service.test.js (65 tests) 6336ms
+   ✓ 配对原子创建与读取 > 线程+草案同一事务保存；本地赋 ID/时间；get 返回基线/引用/ready  405ms
+   ✓ 重新排程（真实 normalize/schedule/validate） > 正例：写入同版 input/result + 事实基线指纹；ready 推导通过  353ms
+   ✓ 线程消息与要求 > 两页先后追加都保留（基于事务内最新）；同 id 同内容幂等  352ms
+   ✓ R1 事实新鲜度（服务 get / setStatus 事务内再核对） > 跨午夜：时钟推进到次日，get 与 setStatus ready 均 WINDOW_STALE 阻断  301ms
+   ✓ R1 事实新鲜度（服务 get / setStatus 事务内再核对） > TOCTOU：get 判 ready 后、提交前事实被改 → 事务内再核对 READY_BLOCKED，不写 ready  363ms
+
+ Test Files  63 passed (63)
+      Tests  1418 passed (1418)
+   Start at  18:13:01
+   Duration  7.81s (transform 4.12s, setup 0ms, collect 24.81s, tests 50.30s, environment 10ms, prepare 12.45s)
+

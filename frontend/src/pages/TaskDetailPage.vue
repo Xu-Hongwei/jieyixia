@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, CalendarClock, Check, Pencil, Play, Plus, Trash2, X } from 'lucide-vue-next'
 import {
@@ -16,18 +16,19 @@ import NodeSelect from '@/components/domain/NodeSelect.vue'
 import ContinueBar from '@/components/domain/ContinueBar.vue'
 import DeleteImpact from '@/components/domain/DeleteImpact.vue'
 import PlanCard from '@/components/domain/PlanCard.vue'
-import PlanDetail from '@/components/domain/PlanDetail.vue'
-import PlanEditor from '@/components/domain/PlanEditor.vue'
+import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
+import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
 import StartPlanWorkDialog from '@/components/domain/StartPlanWorkDialog.vue'
 import Textarea from '@/components/ui/Textarea.vue'
 import { useAppStore } from '@/stores/app'
 import { useFocusStore } from '@/stores/focus'
 import { usePlanWorkStart, planStartEntry } from '@/composables/usePlanWorkStart'
+import { useScheduledAction } from '@/composables/useScheduledAction'
 import { ACTION_DEFAULT_MINUTES } from '@/domains/action'
 import { deleteImpactSnapshot } from '@/domains/matter'
 import { endedSessionsSorted, formatDurationMs, sessionActionText, sessionTitle } from '@/domains/work'
 import { beijingDateStr, beijingInstantLabel, formatWhen } from '@/domains/time'
-import { resolveTaskReturn, planContextForTask, planScheduleReturn, schedulePath, taskPath, workPath, recordPath } from '@/domains/workNavigation'
+import { resolveTaskReturn, resolveReplanReturn, taskReturnLabel, planContextForTask, planScheduleReturn, schedulePath, taskPath, workPath, recordPath } from '@/domains/workNavigation'
 import { STATUS_LABELS, PLAN_STATE_LABELS, SESSION_OUTCOME_LABELS, label } from '@/domains/labels'
 
 const store = useAppStore()
@@ -42,16 +43,21 @@ const taskActions = computed(() => (task.value ? store.actionsOf(task.value.id) 
 const currentAction = computed(() => (task.value ? store.currentActionOf(task.value) : null))
 const unfinishedCount = computed(() => taskActions.value.filter((a) => !a.done).length)
 
-// 返回上下文：精确匹配站内路径 + 已知查询参数 + 当前空间归属；非法/丢失回退当前空间日程。
+// 返回上下文：精确匹配站内路径 + 已知查询参数 + 当前空间归属；非法/丢失回退当前空间任务总览。
 const todayStr = computed(() => beijingDateStr(new Date(store.nowTick)))
 const navCtx = computed(() => ({ docs: store.docs, ws: store.workspaceId, todayStr: todayStr.value }))
 const returnPath = computed(() => resolveTaskReturn(route.query.return, navCtx.value))
 // 本页规范化地址（供工作页/记录页 return）：不带临时操作参数，不反复包 fullPath。
 const taskReturn = computed(() => taskPath(taskId.value, { return: returnPath.value }))
+const replanLink = computed(() => ({
+  path: '/assistant',
+  query: { replanTask: taskId.value, return: resolveReplanReturn(route.fullPath, taskId.value, navCtx.value) },
+}))
 
 // —— 显式执行安排上下文（§4 规则 1/2）：只认 plan 参数，不从 return 字符串推断；URL 不是授权 ——
 const planCtx = computed(() => planContextForTask(route.query, taskId.value, navCtx.value))
 const planCtxPlan = computed(() => (planCtx.value.status === 'ok' ? planCtx.value.plan : null))
+const { action: scheduledAction, status: bindingStatus } = useScheduledAction(planCtxPlan, task)
 const planCtxInvalidText = computed(() => {
   const r = planCtx.value
   if (r.status !== 'invalid') return ''
@@ -364,7 +370,14 @@ function startWork() {
   if (dirty.value) resetDrafts()
   // 显式安排上下文：共享确认面板（blocked/非当日确认在面板内），不再走独立 doBegin。
   if (planCtxPlan.value) {
-    startCtrl.openFor({ taskId: task.value.id, planId: planCtxPlan.value.id })
+    if (bindingStatus.value === 'loading') return
+    if (!scheduledAction.value) {
+      detailPlanId.value = planCtxPlan.value.id
+      return
+    }
+    if (startCtrl.openFor({ taskId: task.value.id, planId: planCtxPlan.value.id, actionId: scheduledAction.value.id }) && startCtrl.canConfirm.value) {
+      void startCtrl.submit()
+    }
     return
   }
   if (!currentAction.value) return
@@ -463,6 +476,8 @@ const taskPlans = computed(() =>
   store.docs
     .filter((d) => d.kind === 'plan_item' && d.task_id === taskId.value)
     .sort((a, b) => (a.date === b.date ? (a.order ?? 0) - (b.order ?? 0) : a.date < b.date ? -1 : 1)))
+const showAllPlans = ref(false)
+const visibleTaskPlans = computed(() => showAllPlans.value ? taskPlans.value : taskPlans.value.filter(p => p.date >= todayStr.value && ['planned', 'partial'].includes(p.state)).slice(0, 3))
 const detailPlanId = ref('')
 const detailPlan = computed(() =>
   (detailPlanId.value ? store.docs.find((d) => d.kind === 'plan_item' && d.id === detailPlanId.value) || null : null))
@@ -484,20 +499,27 @@ function onPlanSaved(payload) {
   editor.value = null
   detailPlanId.value = payload.planId
 }
-function onGotoCreateTask() {
+async function openDetail(id) {
+  if (editorRef.value && !(await editorRef.value.guardLeave())) return
   editor.value = null
-  router.push({ path: '/today', query: { create: '1' } })
+  detailPlanId.value = id
 }
 // 草稿不串任务/工作区：切换即关闭编辑器与详情（离开守卫已先结算草稿）。
-watch(taskId, () => { editor.value = null; detailPlanId.value = '' })
-watch(() => store.workspaceId, () => { editor.value = null; detailPlanId.value = '' })
+watch(taskId, () => { editor.value = null; detailPlanId.value = ''; showAllPlans.value = false })
+watch(() => store.workspaceId, () => { editor.value = null; detailPlanId.value = ''; showAllPlans.value = false; resetWorkLeaveApproval() })
 // 离开保护叠加：先结算编辑器草稿（放弃/继续），再任务脏输入；两者都放行才离开。
 async function guardLeave() {
   if (editorRef.value && !(await editorRef.value.guardLeave())) return false
   return confirmLeaveIfDirty()
 }
-onBeforeRouteLeave(guardLeave)
-onBeforeRouteUpdate(guardLeave)
+const unregister = registerWorkLeave(guardLeave)
+onBeforeUnmount(unregister)
+onBeforeRouteLeave(requestWorkLeave)
+onBeforeRouteUpdate(async (to, from) => {
+  const allowed = await guardLeave()
+  if (allowed && to.fullPath !== from.fullPath) { editor.value = null; detailPlanId.value = '' }
+  return allowed
+})
 
 const deleteActionTarget = ref(null)
 const deleteActionOpen = ref(false)
@@ -570,7 +592,7 @@ function deleteGotoWork(r) {
 <template>
   <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-2">
-      <Button size="sm" variant="outline" @click="router.push(returnPath)"><ArrowLeft />返回原列表</Button>
+      <Button size="sm" variant="outline" @click="router.push(returnPath)"><ArrowLeft />{{ taskReturnLabel(returnPath) }}</Button>
       <span class="ml-auto text-xs" :class="saveState === 'error' ? 'text-destructive' : 'text-muted-foreground'" aria-live="polite">{{ saveStateText }}</span>
     </div>
 
@@ -582,14 +604,13 @@ function deleteGotoWork(r) {
         <span class="font-medium">为这项安排选择行动</span>
         <span class="font-date text-xs text-muted-foreground">{{ planCtxPlan.date }}</span>
         <Badge :variant="planCtxPlan.state === 'partial' ? 'warning' : 'secondary'">{{ label(PLAN_STATE_LABELS, planCtxPlan.state) }}</Badge>
-        <Button size="sm" variant="ghost" class="ml-auto" @click="router.push(planCtxScheduleTarget)">返回日程</Button>
+        <Button size="sm" variant="ghost" class="ml-auto" @click="router.push(planCtxScheduleTarget)">在日程中查看</Button>
       </div>
       <p class="mt-1 break-words text-sm">{{ planCtxPlan.action_text }}</p>
       <p class="mt-1 text-xs text-muted-foreground">预计 {{ planCtxPlan.planned_minutes }} 分钟 · 安排说明不覆盖行动内容；请在下方明确选择或新增实际行动后开始。</p>
     </Card>
     <Alert v-else-if="planCtxInvalidText" variant="warning">
       {{ planCtxInvalidText }}
-      <Button size="sm" variant="outline" class="ml-2" @click="router.push(planCtxScheduleTarget)">返回日程</Button>
     </Alert>
 
     <Alert v-if="recordedSession" variant="success">
@@ -612,7 +633,7 @@ function deleteGotoWork(r) {
             <Button size="sm" variant="ghost" aria-label="重命名任务" title="重命名" @click="startRename"><Pencil /></Button>
           </template>
           <Badge :variant="task.status === 'done' ? 'success' : 'secondary'" :title="task.status">{{ label(STATUS_LABELS, task.status) }}</Badge>
-          <Button v-if="task.status !== 'done'" size="sm" @click="requestFinish"><Check />完成任务</Button>
+          <Button v-if="task.status !== 'done'" size="sm" variant="outline" @click="requestFinish"><Check />完成任务</Button>
           <Button v-else size="sm" variant="outline" @click="reopen">重新打开</Button>
           <Button size="sm" variant="destructive" aria-label="删除任务" title="删除任务" @click="openDeleteTask"><Trash2 /></Button>
         </div>
@@ -650,13 +671,13 @@ function deleteGotoWork(r) {
               <div v-if="currentAction" class="flex flex-wrap items-center gap-2">
                 <div class="min-w-0 flex-1 basis-40">
                   <div class="break-words text-sm font-medium">{{ currentAction.text }}</div>
-                  <div class="mt-0.5 text-xs text-muted-foreground">预计 {{ currentAction.minutes }} 分钟 · 用户手动填写</div>
+                  <div class="mt-0.5 text-xs text-muted-foreground">预计 {{ currentAction.minutes }} 分钟</div>
                 </div>
                 <Button size="sm" variant="outline" @click="toggleDone(currentAction)"><Check />完成行动</Button>
                 <Button size="sm" variant="outline" @click="clearCurrent">取消当前</Button>
               </div>
               <div v-else-if="taskActions.length" class="text-sm text-muted-foreground">
-                尚未选择当前行动。请在下方行动列表中显式选择下一步，不会自动替你指定。
+                从下方行动列表选择下一步。
               </div>
               <div v-else class="space-y-2">
                 <p class="text-sm text-muted-foreground">还没有行动。添加下一步，把任务拆成可以开始的小步骤。</p>
@@ -685,14 +706,13 @@ function deleteGotoWork(r) {
                   <span class="text-xs text-warning-foreground">历史用时存在异常待核对，先处理相关记录后才能开始。</span>
                 </template>
                 <template v-else-if="planEntry.kind === 'start'">
-                  <Button size="sm" @click="startPlanEntryAction"><Play />开始这项安排</Button>
-                  <span class="text-xs text-muted-foreground">打开确认面板：明确将执行的行动后才开始。</span>
+                  <Button size="sm" :disabled="bindingStatus === 'loading' || !!startCtrl.state.value?.busy" @click="startPlanEntryAction"><Play />开始这项安排</Button>
+                  <span v-if="scheduledAction" class="text-xs text-muted-foreground">执行行动 · {{ scheduledAction.text }}</span>
                 </template>
                 <span v-else class="text-xs text-muted-foreground">{{ planEntryReasonText }}</span>
               </div>
               <!-- 失效安排上下文：不静默降级独立工作；返回日程，或显式「改为独立工作」确认后才开始 -->
               <div v-else-if="planCtx.status === 'invalid'" class="mt-2 flex flex-wrap items-center gap-2 border-t border-dashed pt-2">
-                <Button size="sm" variant="outline" @click="router.push(planCtxScheduleTarget)">返回日程</Button>
                 <Button v-if="currentAction" size="sm" variant="outline" @click="requestIndependent">改为独立工作</Button>
                 <span class="text-xs text-warning-foreground">安排上下文失效，直接开始不会关联任何安排；改为独立工作需明确确认。</span>
               </div>
@@ -770,34 +790,29 @@ function deleteGotoWork(r) {
           <Card>
             <template #header>
               <div class="flex flex-wrap items-center gap-2">
-                <span class="text-base font-semibold">跨日安排 · {{ taskPlans.length }}</span>
-                <Button v-if="task.status !== 'done'" size="sm" variant="outline" class="ml-auto" @click="router.push({ path: '/assistant', query: { replanTask: task.id } })"><CalendarClock />调整后续安排</Button>
+                <span class="text-base font-semibold">近期安排</span>
+                <Button v-if="task.status !== 'done'" size="sm" variant="outline" class="ml-auto" @click="router.push(replanLink)"><CalendarClock />调整后续安排</Button>
                 <Button v-if="task.status !== 'done'" size="sm" variant="outline" @click="openEditor({ mode: 'create', taskId: task.id, locked: true })"><Plus />安排工作</Button>
               </div>
-              <p class="text-xs text-muted-foreground">安排只说明「这天准备做什么」，不改任务截止与行动。已完成任务的安排为只读历史。</p>
             </template>
             <div class="space-y-2">
-              <div v-for="p in taskPlans" :key="p.id" class="space-y-1">
+              <div v-for="p in visibleTaskPlans" :key="p.id" class="space-y-1">
                 <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span class="font-date font-medium">{{ p.date }}</span>
                   <Badge :variant="p.state === 'done' ? 'success' : p.state === 'partial' ? 'warning' : 'secondary'">{{ label(PLAN_STATE_LABELS, p.state) }}</Badge>
                   <span v-if="p.task_ref_state === 'deleted'">原任务已删除</span>
                 </div>
-                <PlanCard :plan="p" :task="task" @open="detailPlanId = $event" />
+                <PlanCard :plan="p" :task="task" @open="openDetail" />
               </div>
-              <p v-if="!taskPlans.length" class="text-sm text-muted-foreground">还没有安排。「安排工作」固定本任务、默认北京今天。</p>
+              <p v-if="!visibleTaskPlans.length" class="text-sm text-muted-foreground">暂无{{ showAllPlans ? '' : '后续' }}安排。</p>
+              <button v-if="showAllPlans || taskPlans.length > visibleTaskPlans.length" type="button" class="text-sm text-muted-foreground underline" :aria-expanded="showAllPlans" @click="showAllPlans = !showAllPlans">{{ showAllPlans ? '收起历史安排' : `查看全部 ${taskPlans.length} 项安排` }}</button>
             </div>
           </Card>
 
           <!-- 本任务已结束工作：快照标题/行动、北京起止、实际用时、结果；删除任务后仍可在独立记录页回看 -->
-          <Card v-if="taskSessions.length">
-            <template #header>
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="text-base font-semibold">工作记录 · {{ taskSessions.length }} 段</span>
-                <span class="text-xs text-muted-foreground">合计 <span class="font-date tabular-nums">{{ formatDurationMs(taskTotalMs) }}</span></span>
-                <RouterLink to="/work-records" class="ml-auto text-xs underline">全部工作记录</RouterLink>
-              </div>
-            </template>
+          <details v-if="taskSessions.length" class="rounded-lg border bg-card p-4">
+            <summary class="mb-3 cursor-pointer text-base font-semibold">工作记录 · {{ taskSessions.length }} 段</summary>
+            <div class="mb-3 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground"><span>合计 {{ formatDurationMs(taskTotalMs) }}</span><RouterLink to="/work-records" class="underline">全部工作记录</RouterLink></div>
             <ul class="space-y-2">
               <li v-for="s in taskSessions" :key="s.id" class="rounded-md border p-2.5 text-sm">
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -815,15 +830,13 @@ function deleteGotoWork(r) {
                 <p v-if="s.outcome === 'blocked' && s.blocker" class="mt-1 break-words text-xs text-warning-foreground">卡点：{{ s.blocker }}</p>
               </li>
             </ul>
-          </Card>
+          </details>
         </div>
 
         <div class="space-y-4">
           <!-- 说明与完成标准 -->
-          <Card>
-            <template #header>
-              <div class="text-base font-semibold">说明与完成标准</div>
-            </template>
+          <details class="rounded-lg border bg-card p-4">
+            <summary class="mb-3 cursor-pointer text-base font-semibold">说明与完成标准</summary>
             <div class="space-y-3">
               <div>
                 <Textarea v-model="draftDescription" class="min-h-20" placeholder="任务说明（交付什么、交给谁…）" aria-label="任务说明" />
@@ -834,53 +847,26 @@ function deleteGotoWork(r) {
                 <Button size="sm" variant="outline" class="mt-1.5" @click="saveCriteria">保存完成标准</Button>
               </div>
             </div>
-          </Card>
+          </details>
 
           <!-- 关联资料：只读出处，不改便签事实 -->
-          <Card>
-            <template #header>
-              <div class="text-base font-semibold">关联资料</div>
-            </template>
+          <details class="rounded-lg border bg-card p-4">
+            <summary class="mb-3 cursor-pointer text-base font-semibold">关联资料</summary>
             <div class="space-y-1.5">
               <div v-for="n in relatedNotes" :key="n.id">
                 <RouterLink :to="noteLink(n)" class="text-sm underline">便签「{{ n.title }}」</RouterLink>
               </div>
-              <p v-if="!relatedNotes.length" class="text-sm text-muted-foreground">没有关联便签；截止为用户手动输入或独立创建。</p>
+              <p v-if="!relatedNotes.length" class="text-sm text-muted-foreground">暂无关联资料。</p>
             </div>
-          </Card>
+          </details>
         </div>
       </div>
     </template>
 
     <!-- 共享安排编辑器/详情：与日程页同一组件；保存后定位本任务清单内的目标卡片 -->
-    <PlanEditor
-      v-if="editor"
-      :key="editor.key"
-      ref="editorRef"
-      :mode="editor.mode"
-      :plan-id="editor.planId || ''"
-      :task-id="editor.taskId || ''"
-      :date="editor.date || ''"
-      :lock-task="!!editor.locked"
-      @close="editor = null"
-      @saved="onPlanSaved"
-      @goto-create-task="onGotoCreateTask"
-    />
-    <div v-if="detailPlanId" class="space-y-1">
-      <RouterLink
-        v-if="detailPlan"
-        :to="schedulePath({ date: detailPlan.date, plan: detailPlanId }, todayStr)"
-        class="text-xs underline"
-      >在日程表中查看该安排</RouterLink>
-      <PlanDetail
-        :plan-id="detailPlanId"
-        @close="detailPlanId = ''"
-        @edit="(id) => openEditor({ mode: 'edit', planId: id })"
-        @move="(id) => openEditor({ mode: 'move', planId: id })"
-        @another="(id) => openEditor({ mode: 'another', planId: id })"
-        @op-done="(p) => { detailPlanId = p.planId }"
-      />
-    </div>
+    <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="detailPlanId" @close="editor = null; detailPlanId = ''" @saved="onPlanSaved"
+      @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
+      @another="id => openEditor({ mode: 'another', planId: id })" @op-done="onPlanSaved" />
 
     <ConfirmDialog v-model="finishConfirmOpen" title="完成任务" confirm-label="确认整体完成" @confirm="confirmFinish">
       还有 {{ unfinishedCount }} 个行动未完成。完成任务不会自动把它们标为完成；之后仍可重新打开任务。

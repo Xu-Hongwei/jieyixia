@@ -17,7 +17,7 @@ const variants = {
 <template>
   <div
     :role="props.variant === 'destructive' ? 'alert' : 'status'"
-    :class="cn('rounded-md border px-3 py-2 text-sm', variants[props.variant], props.class)"
+    :class="cn('break-words rounded-md border px-3 py-2.5 text-sm leading-relaxed', variants[props.variant], props.class)"
   >
     <slot />
   </div>

@@ -1,0 +1,179 @@
+{
+  "results": [
+    {
+      "item": "offline",
+      "name": "未缓存助手断网有提示，原任务页面仍在",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "recovery",
+      "name": "恢复网络后重试原目标成功，错误提示消失",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "offline",
+      "name": "空闲预加载后断网仍能打开数据页并导出备份",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "offline",
+      "name": "断网创建任务实际落库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "offline",
+      "name": "已加载助手可离线重新打开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "loading",
+      "name": "慢加载有短提示，完成后收起",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "today 360",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "today 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "today 430",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "today 768",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "today 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "tasks 360",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "tasks 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "tasks 430",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "tasks 768",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "tasks 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "collect 360",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "collect 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "collect 430",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "collect 768",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "collect 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "assistant 360",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "assistant 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "assistant 430",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "assistant 768",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "assistant 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "input",
+      "name": "手机输入字号不小于16px",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "input",
+      "name": "短视口可以滚动让保存按钮露出底栏上方",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "runner",
+      "name": "异常",
+      "pass": false,
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('navigation', { name: '主导航', exact: true }).getByRole('link', { name: '日程', exact: true })\u001b[22m\n"
+    }
+  ],
+  "netHits": []
+}

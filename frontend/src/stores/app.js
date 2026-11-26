@@ -229,10 +229,15 @@ export const useAppStore = defineStore('app', () => {
     await useFocusStore().loadWorkspace()
     ready.value = true
     startClock()
+    await refreshHealth()
+  }
+
+  async function refreshHealth() {
     const h = await healthz()
     if (h.ok) {
       health.value = h.body
-      aiDown.value = !h.body.model_ready
+      // Personal credentials use a request-scoped provider even without a server model profile.
+      aiDown.value = false
     } else {
       health.value = null
       aiDown.value = true
@@ -277,7 +282,12 @@ export const useAppStore = defineStore('app', () => {
   // 不依赖 pendingId/selectNote，无 UI 副作用。collectFiles/collectText 委托同一实现，行为不变。
   async function saveImageFiles(files) {
     const out = []
+    const ws = workspaceId.value
     for (const file of files) {
+      if (workspaceId.value !== ws || isDemo.value) {
+        out.push({ ok: false, code: 'workspace_unavailable', name: file.name, message: '请在原个人工作区添加资料' })
+        continue
+      }
       if (!file.type.startsWith('image/')) {
         out.push({ ok: false, code: 'unsupported', name: file.name, message: `不支持的类型：${file.type || file.name}` })
         continue
@@ -377,6 +387,7 @@ export const useAppStore = defineStore('app', () => {
   // 幂等：同一 source 重分析更新既有便签；落库失败暂存，重试仅落库不重调模型。
   // 分析期间切空间：结果暂存回原空间的待保存键，绝不写进新空间（S1）。
   async function runAnalysis(sourceId, referenceAt) {
+    if (isDemo.value) return fail()
     const ws = workspaceId.value
     const source = sources.value.find((s) => s.id === sourceId)
     if (!source) {
@@ -419,6 +430,10 @@ export const useAppStore = defineStore('app', () => {
         say('success', `AI 草稿已生成：${note.fields.length} 个字段，待你核对确认`)
         return { ok: true, noteId: note.id }
       }
+      if (result.code === 'unknown_source') {
+        say('warning', '资料已在本地保存。当前服务仅支持内置案例，分析个人资料需要连接真实模型。')
+        return fail()
+      }
       if (result.status === 422) {
         const existing = notes.value.find((n) => n.source_id === source.id)
         if (existing) {
@@ -446,8 +461,7 @@ export const useAppStore = defineStore('app', () => {
         return { ok: false, noteId: note.id }
       }
       if (result.status === 503) {
-        aiDown.value = true
-        say('warning', '模型不可用：AI 入口已隐藏，「仅保存」与本地浏览不受影响')
+        say('warning', result.message || '模型暂时不可用，请稍后重试。')
         return fail()
       }
       if (result.status === 413) {
@@ -458,7 +472,7 @@ export const useAppStore = defineStore('app', () => {
         say('destructive', `网络错误：${result.message}（本地数据不受影响）`)
         return fail()
       }
-      say('destructive', `意外状态 ${result.status}`)
+      say('warning', result.message || `请求未完成（${result.status}）`)
       return fail()
     } finally {
       busy.value = false
@@ -487,6 +501,7 @@ export const useAppStore = defineStore('app', () => {
   // M2 助手专用分析：明确返回结果（含可取消），不做 selectNote/pendingId/say 等 UI 副作用。
   // 保存失败时把已得便签一并返回，调用方可仅重试落库（saveAnalysisNote），不重调模型。
   async function analyzeForAssistant(sourceId, /** @type {{ signal?: AbortSignal }} */ { signal } = {}) {
+    if (isDemo.value) return { ok: false, code: 'DEMO_SPACE', message: '演示空间使用内置案例' }
     const ws = workspaceId.value
     const source = sources.value.find((s) => s.id === sourceId)
     if (!source) return { ok: false, code: 'SOURCE_MISSING', message: '资料不存在或不属于当前空间' }
@@ -496,6 +511,7 @@ export const useAppStore = defineStore('app', () => {
     const result = await analyze(payload, { signal })
     if (result.kind === 'cancelled') return { ok: false, code: 'cancelled', message: '分析已取消' }
     if (!result.ok) {
+      if (result.code === 'unknown_source') return { ok: false, code: result.code, message: '当前服务仅支持内置案例，分析个人资料需要连接真实模型' }
       return { ok: false, code: result.code || 'analyze_failed', status: result.status, kind: result.kind, message: result.message || `分析失败（${result.status}）` }
     }
     const existing = notes.value.find((n) => n.source_id === source.id) || null
@@ -1146,7 +1162,7 @@ export const useAppStore = defineStore('app', () => {
     workspaceId, workspaces, currentWorkspace, isDemo, isRestore, workspaceKind,
     notes, tasks, matters, actions, selectedNote, pendingSource, unconfirmedCount,
     nowTick, todayLabel, taskBuckets, noteBuckets, failedNotes,
-    say, clearWorkBlock, init, reload, reloadDocs, selectNote, switchWorkspace, refreshWorkspaces, collectFiles, collectText, runAnalysis, retrySave,
+    say, clearWorkBlock, init, refreshHealth, reload, reloadDocs, selectNote, switchWorkspace, refreshWorkspaces, collectFiles, collectText, runAnalysis, retrySave,
     saveImageFiles, saveText, analyzeForAssistant, saveAnalysisNote,
     confirmField, saveEdit, saveNodeEdit, reviewNote, createTask, createTaskManual, finishTask, deleteNote,
     undoDelete, deleteTask, renameTask, createStandaloneTask, createMatter, renameMatter, deleteMatter, setMatter, setNoteRole,

@@ -3,6 +3,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: "Segoe UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -88,10 +89,16 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground font-sans text-sm leading-relaxed antialiased;
     /* 极淡纸纹：静态、低透明度，不参与文字对比 */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.28 0 0 0 0 0.2 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+  :where(button, a, summary, select):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+  }
+  :where(input[type="checkbox"], input[type="radio"]) { accent-color: var(--primary); }
+  :where(h1, h2, h3) { text-wrap: balance; }
 }
 @layer utilities {
   /* 日期数字用衬线+等宽数字，与正文黑体形成第二组字体关系 */
@@ -115,6 +122,16 @@
   .scroll-slim::-webkit-scrollbar-track {
     background: transparent;
   }
+  .panel-scroll { scroll-padding-block: 1.5rem; }
+}
+
+/* 小屏输入保持 16px，避免输入时浏览器放大；触摸按钮留出独立点击高度。 */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), textarea, select {
+    font-size: 16px;
+  }
+  .ui-button { min-height: 40px; }
+  .ui-button-icon { min-width: 40px; }
 }
 
 /* 系统「减少动态效果」：关掉过渡/动画，弹窗与定位仍即时可用（5A-1 U21）。 */

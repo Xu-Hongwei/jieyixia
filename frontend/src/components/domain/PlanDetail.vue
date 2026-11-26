@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { X } from 'lucide-vue-next'
 import Badge from '@/components/ui/Badge.vue'
@@ -11,20 +11,22 @@ import { useAppStore } from '@/stores/app'
 import { useFocusStore } from '@/stores/focus'
 import { usePlanStore } from '@/stores/plan'
 import { usePlanWorkStart, planStartEntry } from '@/composables/usePlanWorkStart'
-import { LIVE_PLAN_STATES, endedSessionsForPlan, historySignature, isLiveRef, planRisk, planSnapshot, unfinishedSessionsForPlan } from '@/domains/plan'
+import { useScheduledAction } from '@/composables/useScheduledAction'
+import { LIVE_PLAN_STATES, endedSessionsForPlan, historySignature, isLiveRef, planEditBlock, planRisk, planSnapshot, unfinishedSessionsForPlan } from '@/domains/plan'
 import { beijingDateStr, beijingInstantLabel } from '@/domains/time'
 import { endedSessionsSorted, formatDurationMs } from '@/domains/work'
 import { slotDeadlineLabel } from '@/domains/week'
 import { planScheduleReturn, recordPath, taskPath, workPath } from '@/domains/workNavigation'
+import { taskListPath } from '@/domains/taskList'
 import { PLAN_PROBLEM_LABELS, PLAN_STATE_LABELS, SESSION_OUTCOME_LABELS, label, planActualLabel, planStaleRows } from '@/domains/labels'
 
 // 安排详情：事实全部读 app.docs live，不缓存副本。
 // 实际用时只认权威摘要：异常→待核对块；缓存差异→明确提示不自动写。
 // 开始/回到工作主入口（5A-2B §3.1）：同安排未结束→回到真实会话；冲突→先处理；资格满足→共享确认面板。
-// 操作资格（5A-1 §5.2）：planned 无历史→编辑/改期/取消/确认；有已结束历史或 partial→确认/取消/另安排一天；
-// 终态→只读历史+可另建；未结束会话/异常摘要→禁所有变更，先处理。
+// 说明与估时的编辑资格与任务列表、写事务共用 planEditBlock；改期、取消和进度各自检查历史。
 const props = defineProps({
   planId: { type: String, required: true },
+  showClose: { type: Boolean, default: true },
 })
 const emit = defineEmits(['close', 'edit', 'move', 'another', 'op-done'])
 const store = useAppStore()
@@ -58,7 +60,9 @@ const deadlineText = computed(() => {
 // 出处/记录/工作链接携带规范化日程 return（定位本安排，保留来源日期视图），不再反复包 fullPath。
 const todayStr = computed(() => beijingDateStr(new Date(store.nowTick)))
 const scheduleReturn = computed(() => (plan.value ? planScheduleReturn(route.path, route.query, plan.value, todayStr.value) : '/today'))
-const taskLink = computed(() => (task.value ? taskPath(task.value.id, { return: scheduleReturn.value }) : null))
+const taskLink = computed(() => (task.value ? taskPath(task.value.id, {
+  return: route.path === '/tasks' ? taskListPath(route.query) : scheduleReturn.value,
+}) : null))
 const recordLink = (s) => recordPath(s.id, scheduleReturn.value)
 const workLink = (s) => workPath(s.id, scheduleReturn.value)
 const latestSession = computed(() =>
@@ -72,10 +76,11 @@ const hasEnded = computed(() => !!summary.value && summary.value.endedSessionCou
 const ops = computed(() => {
   const p = plan.value
   if (!p || !isLiveRef(p) || !task.value || task.value.status === 'done') return []
-  if (unfinishedSessions.value.length) return []
+  const edits = planEditBlock(store.docs, p) ? [] : ['edit']
+  if (unfinishedSessions.value.length) return edits
   if (summary.value && !summary.value.authoritative) return []
-  if (p.state === 'planned' && !hasEnded.value) return ['edit', 'move', 'confirm', 'cancel']
-  if (p.state === 'planned' || p.state === 'partial') return ['confirm', 'cancel', 'another']
+  if (p.state === 'planned' && !hasEnded.value) return [...edits, 'move', 'confirm', 'cancel']
+  if (p.state === 'planned' || p.state === 'partial') return [...edits, 'confirm', 'cancel', 'another']
   return ['another']
 })
 const OP_LABELS = { edit: '编辑', move: '改期', confirm: '确认进度', cancel: '取消安排', another: '另安排一天' }
@@ -111,9 +116,21 @@ const startCtrl = usePlanWorkStart({
   onReview: () => requestProgress(),
   workReturnFor: () => scheduleReturn.value,
 })
-function startThisPlan() {
-  if (!plan.value || !task.value) return
-  startCtrl.openFor({ taskId: task.value.id, planId: plan.value.id })
+const pickedActionId = ref('')
+const { action: scheduledAction, available: availableActions, binding, status: bindingStatus } = useScheduledAction(plan, task)
+const startAction = computed(() => pickedActionId.value
+  ? availableActions.value.find(action => action.id === pickedActionId.value)
+  : scheduledAction.value)
+watch([() => props.planId, () => store.workspaceId], () => { pickedActionId.value = '' })
+function pickAction(event) {
+  if (event.target instanceof HTMLSelectElement) pickedActionId.value = event.target.value
+}
+async function startThisPlan() {
+  if (!plan.value || !task.value || bindingStatus.value === 'loading' || startCtrl.state.value?.busy) return
+  const chosen = startAction.value
+  if (availableActions.value.length && !chosen) return
+  if (!startCtrl.openFor({ taskId: task.value.id, planId: plan.value.id, actionId: chosen?.id })) return
+  if (chosen && startCtrl.canConfirm.value) await startCtrl.submit()
 }
 async function gotoOtherWs() {
   const r = crossWsRunning.value
@@ -226,7 +243,7 @@ const historyView = computed(() => {
     <template #header>
       <div class="flex items-center gap-2">
         <div class="min-w-0 flex-1 text-base font-semibold">安排详情</div>
-        <Button size="sm" variant="ghost" aria-label="关闭安排详情" title="关闭" @click="emit('close')"><X /></Button>
+        <Button v-if="showClose" size="sm" variant="ghost" aria-label="关闭安排详情" title="关闭" @click="emit('close')"><X /></Button>
       </div>
     </template>
 
@@ -254,7 +271,7 @@ const historyView = computed(() => {
         </div>
         <div class="flex gap-2"><dt class="text-muted-foreground">实际</dt><dd class="font-medium">{{ planActualLabel(summary) }}</dd></div>
       </dl>
-      <p class="text-xs text-muted-foreground">安排只说明「这天准备做什么」；任务截止与行动不受安排操作影响。</p>
+      <p class="text-xs text-muted-foreground">安排不会改变任务截止或行动。</p>
 
       <!-- 异常历史：待核对块权威优先，不给可确认的数字 -->
       <div v-if="summary && !summary.authoritative" class="rounded-md border border-warning bg-warning/10 p-3 text-sm">
@@ -272,7 +289,6 @@ const historyView = computed(() => {
         <span class="text-muted-foreground"> · 累计 {{ formatDurationMs(summary.totalMs) }} · {{ summary.endedSessionCount }} 段已结束</span>
         <RouterLink v-if="latestSession" :to="recordLink(latestSession)" class="ml-2 text-xs underline">最近一段记录</RouterLink>
       </div>
-      <p v-else class="text-sm text-muted-foreground">实际用时未记录（没有已结束的工作记录）。</p>
 
       <!-- 缓存差异：只读提示，确认进度时按明细重算，不自动写库 -->
       <div v-if="summary && summary.cacheMismatch" class="rounded-md border border-dashed border-warning p-3 text-xs">
@@ -288,7 +304,7 @@ const historyView = computed(() => {
         <div class="font-medium">该安排有未结束的工作（{{ entry.session.running ? '正在计时' : '已暂停' }}）</div>
         <div class="mt-2 flex flex-wrap items-center gap-2">
           <Button size="sm" @click="router.push(workLink(entry.session))">回到工作</Button>
-          <span class="text-xs text-muted-foreground">进入工作页不会自动继续计时；变更本安排前请先处理它。</span>
+          <span v-if="entry.session.running" class="text-xs text-muted-foreground">暂停计时后可以编辑安排。</span>
         </div>
       </div>
       <div v-else-if="entry.kind === 'local-conflict'" class="rounded-md border border-warning bg-warning/10 p-3 text-sm">
@@ -313,8 +329,16 @@ const historyView = computed(() => {
         </div>
       </div>
       <div v-else-if="entry.kind === 'start'" class="flex flex-wrap items-center gap-2 rounded-md border border-primary/40 bg-primary/5 p-3">
-        <Button size="sm" @click="startThisPlan">开始这项安排</Button>
-        <span class="text-xs text-muted-foreground">打开确认面板核对行动与事实后开始；不按安排文字自动绑定行动。</span>
+        <p v-if="bindingStatus === 'loading'" role="status" class="text-sm text-muted-foreground">正在读取安排行动…</p>
+        <p v-else-if="scheduledAction" class="text-sm">执行行动 · {{ scheduledAction.text }}</p>
+        <label v-else-if="availableActions.length" class="flex min-w-0 flex-wrap items-center gap-2 text-sm">
+          {{ bindingStatus === 'error' ? '未能读取行动关联，请选择' : binding ? '原行动已失效，请选择替代行动' : '选择这次执行的行动' }}
+          <select class="min-w-0 max-w-full rounded border bg-card px-2 py-2" :value="startAction?.id || ''" @change="pickAction">
+            <option value="" disabled>选择行动</option>
+            <option v-for="action in availableActions" :key="action.id" :value="action.id">{{ action.text }}</option>
+          </select>
+        </label>
+        <Button size="sm" :disabled="bindingStatus === 'loading' || (availableActions.length > 0 && !startAction)" @click="startThisPlan">开始这项安排</Button>
       </div>
 
       <div v-if="endedSessions.length">
@@ -339,7 +363,6 @@ const historyView = computed(() => {
           :disabled="opBusy"
           @click="requestOp(op)"
         >{{ OP_LABELS[op] }}</Button>
-        <span class="text-xs text-muted-foreground">操作只作用于这项安排，不影响任务截止与行动。</span>
       </div>
     </div>
 

@@ -1,0 +1,43 @@
+[
+  {
+    "stage": "initial",
+    "resources": [
+      {
+        "url": "index-DE_BMvPB.js",
+        "bytes": 888639,
+        "start": 7.399999976158142
+      },
+      {
+        "url": "index-jobAVjQw.css",
+        "bytes": 38788,
+        "start": 7.599999964237213
+      }
+    ],
+    "domContentLoaded": 91.19999998807907
+  },
+  {
+    "stage": "settled",
+    "resources": [
+      {
+        "url": "index-DE_BMvPB.js",
+        "bytes": 888639,
+        "start": 7.399999976158142
+      },
+      {
+        "url": "index-jobAVjQw.css",
+        "bytes": 38788,
+        "start": 7.599999964237213
+      },
+      {
+        "url": "AssistantPage-Y-pKv22Q.js",
+        "bytes": 143130,
+        "start": 1857.3999999761581
+      },
+      {
+        "url": "DataPage-BkDUYiQO.js",
+        "bytes": 83554,
+        "start": 1857.5999999642372
+      }
+    ]
+  }
+]

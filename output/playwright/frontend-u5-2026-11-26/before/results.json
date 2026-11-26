@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "item": "layout",
+      "name": "today 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "today 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "tasks 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "tasks 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "collect 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "collect 390",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "assistant 1440",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "assistant 390",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "netHits": []
+}

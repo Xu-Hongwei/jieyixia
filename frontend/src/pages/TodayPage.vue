@@ -1,25 +1,23 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import { onBeforeRouteLeave, RouterLink, useRoute, useRouter } from 'vue-router'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { onBeforeRouteLeave, onBeforeRouteUpdate, RouterLink, useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronRight, ClipboardList, Inbox, LifeBuoy, Plus } from 'lucide-vue-next'
 import Alert from '@/components/ui/Alert.vue'
 import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
-import DateInput from '@/components/ui/DateInput.vue'
-import Input from '@/components/ui/Input.vue'
 import ContinueBar from '@/components/domain/ContinueBar.vue'
-import NodeSelect from '@/components/domain/NodeSelect.vue'
-import PlanDetail from '@/components/domain/PlanDetail.vue'
-import PlanEditor from '@/components/domain/PlanEditor.vue'
-import TaskListsPanel from '@/components/domain/TaskListsPanel.vue'
+import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
+import { usePlanStore } from '@/stores/plan'
+import { taskListPath } from '@/domains/taskList'
+import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
 import WeekView from '@/components/domain/WeekView.vue'
 import { useAppStore } from '@/stores/app'
 import { useFocusStore } from '@/stores/focus'
 import { isLiveRef } from '@/domains/plan'
 import { SESSION_OUTCOME_LABELS, label } from '@/domains/labels'
 import { recordPath, schedulePath } from '@/domains/workNavigation'
-import { beijingAddDays, beijingDateStr, interpretInstant, isValidDate } from '@/domains/time'
+import { beijingAddDays, beijingDateStr, isValidDate } from '@/domains/time'
 import { weekStartOf } from '@/domains/week'
 
 const store = useAppStore()
@@ -61,8 +59,7 @@ watch(() => route.query.date, (nv, ov) => {
   if (activePlan.value.date < currentStart.value || activePlan.value.date > end) closePlan()
 })
 
-// 工具栏只常驻日期、视图切换与一个新建入口；其余按需展开。
-const createOpen = ref(false)
+// 日程保留日期与视图；任务创建归任务页，安排内可就地补建。
 const recoverOpen = ref(false)
 
 // —— 共享安排编辑器宿主（5A-1 §5/§7）：主按钮/日列＋安排/详情操作共用一个实例与提交逻辑 ——
@@ -118,57 +115,27 @@ function onPlanSaved(payload) {
   editor.value = null
   locatePlan(payload)
 }
-function onGotoCreateTask() {
-  editor.value = null
-  createOpen.value = true
-  nextTick(() => {
-    const el = document.querySelector('[aria-label="新任务名称"]')
-    if (el instanceof HTMLElement) el.focus()
-  })
-}
-// 其它页（任务详情）编辑器里「先创建任务」跨页交接：create=1 打开新建面板并聚焦，参数随即移除。
-watch(() => route.query.create, (v) => {
-  if (v !== '1') return
-  const q = { ...route.query }
-  delete q.create
-  router.replace({ query: q })
-  onGotoCreateTask()
-}, { immediate: true })
-onBeforeRouteLeave(async () => (editorRef.value ? editorRef.value.guardLeave() : true))
-
-const taskTitle = ref('')
-const taskDeadline = ref('')
-const taskMatter = ref('')
-
-const matterItems = computed(() => [
-  { value: '', label: '未归组' },
-  ...store.matters.map((m) => ({ value: m.id, label: m.title })),
-])
+function closeWorkspace() { editor.value = null; closePlan() }
+async function guardLeave() { return editorRef.value ? editorRef.value.guardLeave() : true }
+const unregister = registerWorkLeave(guardLeave)
+onBeforeUnmount(unregister)
+onBeforeRouteLeave(requestWorkLeave)
+onBeforeRouteUpdate(async (to, from) => {
+  const allowed = await guardLeave()
+  if (allowed && to.fullPath !== from.fullPath) editor.value = null
+  return allowed
+})
+watch(() => store.workspaceId, () => { editor.value = null; resetWorkLeaveApproval() })
+// 保留旧入口，但任务创建与筛选统一归任务页。
+watch(() => route.query.create, (v) => { if (v === '1') router.replace('/tasks?create=1') }, { immediate: true })
+watch(() => route.query.undated, (v) => { if (v === '1' && !route.query.plan && !route.query.task) router.replace('/tasks?undated=1') }, { immediate: true })
+const plans = usePlanStore()
+const classification = computed(() => plans.classify(new Date(store.nowTick)))
 const pendingNoteCount = computed(() => store.noteBuckets.pending.length)
 const recoverCount = computed(() =>
   (store.lastDeleted ? 1 : 0) + (store.pendingSave ? 1 : 0) + store.failedNotes.length,
 )
 
-async function createTask() {
-  const r = await store.createStandaloneTask({ title: taskTitle.value, value: taskDeadline.value, matterId: taskMatter.value || null })
-  if (r && r.ok) {
-    taskTitle.value = ''
-    taskDeadline.value = ''
-    createOpen.value = false
-    locateTask(r.id)
-  }
-}
-// 新建成功后立即定位到结果：进入统一任务详情，返回上下文指向它所在的周/日期（无截止 → 无截止清单）。
-function locateTask(id) {
-  const t = store.tasks.find((x) => x.id === id)
-  if (!t) return
-  const q = { view: 'week' }
-  const ms = t.deadline && t.deadline.value ? interpretInstant(t.deadline.value) : null
-  if (ms != null) q.date = beijingDateStr(new Date(ms))
-  else q.undated = '1'
-  const returnPath = router.resolve({ path: '/today', query: q }).fullPath
-  router.push({ path: '/tasks/' + id, query: { return: returnPath } })
-}
 // 旧 /today?task= 深链接兼容：转入同一任务详情，原周/选日/视图/无截止上下文作为返回路径保留。
 watch(() => route.query.task, (id) => {
   if (typeof id !== 'string' || !id) return
@@ -180,46 +147,16 @@ watch(() => route.query.task, (id) => {
 async function retryFailed(note) {
   await store.runAnalysis(note.source_id, '')
 }
-function openRecover() {
+async function openRecover() {
   recoverOpen.value = true
+  await nextTick()
   const el = document.getElementById('recover')
   if (el) el.scrollIntoView({ block: 'nearest' })
 }
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- 工具栏：日期 + 视图切换 + 一个新建入口。窄屏控制组整组换行、组内再按控件换行；
-         每个控件不收缩、文字不断行，避免 360px 下被挤成单字竖排。 -->
-    <div class="flex flex-wrap items-center gap-2">
-      <div class="font-date whitespace-nowrap text-lg font-semibold">
-        {{ store.todayLabel }}<span class="ml-1.5 font-sans text-xs font-normal text-muted-foreground">北京时间</span>
-      </div>
-      <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
-        <RouterLink to="/work-records" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border bg-card px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent" title="回看已结束的工作记录">
-          <ClipboardList class="size-3.5" />工作记录
-        </RouterLink>
-        <div class="flex shrink-0 gap-0.5 rounded-md border bg-card p-0.5" role="group" aria-label="任务视图切换">
-          <button
-            type="button"
-            class="w-14 whitespace-nowrap rounded px-2 py-1 text-xs font-medium"
-            :class="view === 'week' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
-            :aria-pressed="view === 'week'"
-            @click="view = 'week'"
-          >周视图</button>
-          <button
-            type="button"
-            class="w-14 whitespace-nowrap rounded px-2 py-1 text-xs font-medium"
-            :class="view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
-            :aria-pressed="view === 'list'"
-            @click="view = 'list'"
-          >列表</button>
-        </div>
-        <Button variant="outline" class="shrink-0" @click="openEditor({ mode: 'create' })"><Plus />安排工作</Button>
-        <Button class="shrink-0" :aria-expanded="createOpen" @click="createOpen = !createOpen"><Plus />新建</Button>
-      </div>
-    </div>
-
+  <div class="mx-auto max-w-6xl space-y-5">
     <!-- 继续条：当前空间有未结束工作时出现，单一「回到工作」入口 -->
     <ContinueBar />
 
@@ -227,7 +164,7 @@ function openRecover() {
     <div v-if="pendingNoteCount || store.failedNotes.length || recoverCount" class="flex flex-wrap items-center gap-2 text-sm">
       <RouterLink
         v-if="pendingNoteCount"
-        to="/notes?bucket=pending"
+        to="/collect?status=pending"
         class="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 hover:bg-accent"
         :title="`${store.unconfirmedCount} 个字段待你核对确认`"
       >
@@ -236,7 +173,7 @@ function openRecover() {
       </RouterLink>
       <RouterLink
         v-if="store.failedNotes.length"
-        to="/notes?bucket=failed"
+        to="/collect?status=failed"
         class="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 hover:bg-accent"
       >
         <Inbox class="size-3.5" />分析失败
@@ -261,60 +198,49 @@ function openRecover() {
       <button type="button" class="ml-2 text-xs underline" @click="dismissRecorded">知道了</button>
     </Alert>
 
-    <!-- 新建任务面板：按需展开 -->
-    <Card v-if="createOpen">
-      <div class="flex flex-wrap items-center gap-2">
-        <Input v-model="taskTitle" placeholder="新任务名称…" class="min-w-40 flex-1" aria-label="新任务名称" />
-        <DateInput v-model="taskDeadline" allow-time placeholder="截止（可选）" class="max-w-48" />
-        <div class="w-28"><NodeSelect v-model="taskMatter" :items="matterItems" placeholder="未归组" /></div>
-        <Button @click="createTask"><Plus />新建任务</Button>
-      </div>
-      <p class="mt-2 text-xs text-muted-foreground">独立新建任务，可不填截止。事项在<RouterLink to="/collect" class="underline">资料库</RouterLink>管理；从便签带出处建任务请到待核对。</p>
-    </Card>
+    <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="planParam" @close="closeWorkspace" @saved="onPlanSaved"
+      @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
+      @another="id => openEditor({ mode: 'another', planId: id })" @op-done="locatePlan" />
 
-    <!-- 共享安排编辑器：四模式同一实例；key 保证每次打开重读初值（含北京今天） -->
-    <PlanEditor
-      v-if="editor"
-      :key="editor.key"
-      ref="editorRef"
-      :mode="editor.mode"
-      :plan-id="editor.planId || ''"
-      :task-id="editor.taskId || ''"
-      :date="editor.date || ''"
-      :lock-task="!!editor.locked"
-      @close="editor = null"
-      @saved="onPlanSaved"
-      @goto-create-task="onGotoCreateTask"
-    />
+    <WeekView :mode="view" @add-plan="(date) => openEditor({ mode: 'create', date })">
+      <template #tools>
+        <RouterLink to="/work-records" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent" title="回看已结束的工作记录">
+          <ClipboardList class="size-3.5" />工作记录
+        </RouterLink>
+        <div class="flex shrink-0 gap-0.5 rounded-md border bg-card p-0.5" role="group" aria-label="任务视图切换">
+          <button
+            type="button"
+            class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
+            :class="view === 'week' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
+            :aria-pressed="view === 'week'"
+            @click="view = 'week'"
+          >周视图</button>
+          <button
+            type="button"
+            class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
+            :class="view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
+            :aria-pressed="view === 'list'"
+            @click="view = 'list'"
+          >列表</button>
+        </div>
+        <Button v-if="view === 'list'" variant="outline" class="shrink-0" @click="openEditor({ mode: 'create' })"><Plus />安排工作</Button>
+      </template>
+    </WeekView>
 
-    <!-- 安排详情面板：URL plan 参数驱动；关闭回到同周同日的列表 -->
-    <PlanDetail
-      v-if="planParam"
-      :plan-id="planParam"
-      @close="closePlan"
-      @edit="(id) => openEditor({ mode: 'edit', planId: id })"
-      @move="(id) => openEditor({ mode: 'move', planId: id })"
-      @another="(id) => openEditor({ mode: 'another', planId: id })"
-      @op-done="locatePlan"
-    />
-
-    <WeekView :mode="view" @add-plan="(date) => openEditor({ mode: 'create', date })" />
-
-    <!-- 待安排/过去未完成/全部任务：三入口共享一个展开区（§9），安排入口复用同一编辑器 -->
-    <TaskListsPanel
-      @arrange="(cfg) => openEditor({ mode: 'create', taskId: cfg.taskId, date: cfg.date, locked: true })"
-      @open-plan="locatePlan"
-    />
+    <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 px-1 text-sm" aria-label="任务概览">
+      <RouterLink :to="taskListPath({ list: 'unscheduled' })" class="hover:underline">待安排 <span class="tabular-nums text-muted-foreground">{{ classification.unscheduled.length }}</span></RouterLink>
+      <RouterLink :to="taskListPath({ list: 'past' })" class="hover:underline">过去未完成 <span class="tabular-nums text-muted-foreground">{{ classification.pastUnfinished.length }}</span></RouterLink>
+      <RouterLink to="/tasks" class="ml-auto text-muted-foreground hover:underline">全部任务 →</RouterLink>
+    </nav>
 
     <!-- 恢复入口：默认折叠，异常提醒可直达；删除撤销/失败重试/暂存重落库的统一入口 -->
-    <Card id="recover">
+    <Card v-if="recoverCount || recoverOpen" id="recover">
       <template #header>
         <button class="flex w-full items-center justify-between text-base font-semibold" :aria-expanded="recoverOpen" @click="recoverOpen = !recoverOpen">
           <span>恢复入口<span v-if="recoverCount" class="ml-2 text-sm font-normal text-muted-foreground">{{ recoverCount }} 项可处理</span></span>
           <ChevronDown v-if="recoverOpen" class="size-4" />
           <ChevronRight v-else class="size-4" />
         </button>
-        <p v-if="recoverOpen" class="text-sm text-muted-foreground">失败重试、暂存重落库、撤销最近删除。原始资料始终保留在本地。</p>
       </template>
       <div v-if="recoverOpen" class="space-y-2">
         <div v-if="store.lastDeleted" class="flex flex-wrap items-center gap-2 rounded-md border p-3 text-sm">
@@ -331,11 +257,12 @@ function openRecover() {
         </div>
         <div v-for="n in store.failedNotes" :key="n.id" class="flex flex-wrap items-center gap-2 rounded-md border p-3 text-sm">
           <span class="min-w-0 flex-1 truncate">分析失败：{{ n.title }}</span>
-          <Button size="sm" variant="outline" :disabled="store.busy || store.aiDown" @click="retryFailed(n)">重试分析</Button>
+          <Button v-if="!store.isDemo" size="sm" variant="outline" :disabled="store.busy || store.aiDown" @click="retryFailed(n)">重试分析</Button>
           <RouterLink :to="`/notes/${n.id}?bucket=failed`" class="text-sm underline">查看</RouterLink>
         </div>
         <p v-if="!store.lastDeleted && !store.pendingSave && !store.failedNotes.length" class="text-sm text-muted-foreground">当前没有可恢复项。</p>
       </div>
     </Card>
+    <button v-if="!recoverCount && !recoverOpen" type="button" class="text-xs text-muted-foreground hover:underline" @click="openRecover">恢复与撤销</button>
   </div>
 </template>

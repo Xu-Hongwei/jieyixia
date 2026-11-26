@@ -1,5 +1,5 @@
 // M2 结果接收服务单测（fake-indexeddb）：版本/空间/线程约束、线程归档同事务、幂等、冲突不写。
-import { IDBFactory } from 'fake-indexeddb'
+import { IDBFactory, IDBObjectStore } from 'fake-indexeddb'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkProposal } from './planning.helpers.js'
 
@@ -35,6 +35,27 @@ async function generatingDraft(proposal = null) {
 }
 
 describe('proposal 接收', () => {
+  it('浏览器额度不足保留为 SAVE_FAILED，事务回滚且恢复后可保存同一结果', async () => {
+    const { frozen } = await generatingDraft()
+    const response = resp(frozen)
+    const original = IDBObjectStore.prototype.put
+    const spy = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (value, ...args) {
+      if (this.name === 'assistant_drafts') throw new DOMException('存储额度不足', 'QuotaExceededError')
+      return original.call(this, value, ...args)
+    })
+    try {
+      const failed = await svc.receiveResult(frozen.id, { expected: frozen, response })
+      expect(failed).toMatchObject({ ok: false, code: 'SAVE_FAILED' })
+      const current = await svc.get(frozen.id)
+      expect(current.draft).toEqual(frozen)
+      expect(current.thread.messages).toHaveLength(0)
+    } finally { spy.mockRestore() }
+    const saved = await svc.receiveResult(frozen.id, { expected: frozen, response })
+    expect(saved.ok).toBe(true)
+    const current = await svc.get(frozen.id)
+    expect(current.draft.status).toBe('needs_review')
+    expect(current.thread.messages).toHaveLength(1)
+  })
   it('generating → needs_review + revision+1；线程归档 proposal_card 同事务', async () => {
     const { frozen } = await generatingDraft()
     const r = await svc.receiveResult(frozen.id, { expected: frozen, response: resp(frozen) })

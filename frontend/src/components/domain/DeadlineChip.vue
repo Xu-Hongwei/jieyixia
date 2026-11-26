@@ -12,12 +12,12 @@ const emit = defineEmits(['open'])
 <template>
   <button
     type="button"
-    class="w-full rounded-md border px-2 py-1.5 text-left transition-colors"
+    class="w-full rounded-md border px-2.5 py-2.5 text-left transition-colors"
     :class="
       props.entry.done
         ? 'border-border/60 bg-muted/40 opacity-70'
         : props.entry.overdue
-          ? 'border-border/70 border-l-2 border-l-destructive bg-background hover:border-destructive/60'
+          ? 'border-destructive/25 border-l-2 border-l-destructive bg-red-50 hover:border-destructive/60'
           : 'border-border/70 bg-background hover:border-primary/50'
     "
     :aria-label="`任务详情：${props.entry.task.title}`"
@@ -27,8 +27,8 @@ const emit = defineEmits(['open'])
       <span class="font-date text-xs font-semibold" :class="props.entry.overdue && !props.entry.done ? 'text-destructive' : 'text-muted-foreground'">
         {{ slotClock(props.entry.minutes) || '当日截止' }}
       </span>
-      <span v-if="props.entry.done" class="text-[10px] font-medium text-success-foreground">已完成</span>
-      <span v-else-if="props.entry.overdue" class="text-[10px] font-medium text-destructive">已逾期</span>
+      <span v-if="props.entry.done" class="text-xs font-medium text-success-foreground">已完成</span>
+      <span v-else-if="props.entry.overdue" class="text-xs font-medium text-destructive">已逾期</span>
     </div>
     <div class="mt-0.5 line-clamp-2 break-words text-sm font-medium leading-snug" :class="props.entry.done && 'line-through'">
       {{ props.entry.task.title }}

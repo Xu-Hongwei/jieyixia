@@ -11,6 +11,8 @@ import { validatePlanningResult } from '../planning/validate.js'
 import { confirmTaskDeadline } from '../planning/normalize.js'
 import { checkReplacementBaseline } from './replan.js'
 import { resolveAssistantRefs } from './refs.js'
+import { scheduleWithManualSlots } from './manualSchedule.js'
+import { interpretEventInstant } from '../time.js'
 
 const L = limitsDoc.limits
 export const MAX_DRAFT_REVISIONS = L.max_draft_revisions.value
@@ -224,6 +226,18 @@ export function addConfirmation(draft, confirmation, now, ctx = {}) {
     return { ok: false, errors: [{ code: 'CONFIRMATION_DUP', message: 'confirmation_id 重复' }] }
   }
   const next = { ...draft, user_confirmations: [...(draft.user_confirmations ?? []), confirmation], updated_at: now }
+  if (confirmation.object_type === 'gap') {
+    try {
+      if (confirmation.field_path === 'manual_slot') {
+        const slot = confirmation.new_value
+        const start = interpretEventInstant(`${slot?.date}T${slot?.time}:00+08:00`)
+        if (start != null && start < Date.parse(now)) throw new Error('所选开始时间已过，请选择之后的时间。')
+      }
+      scheduleWithManualSlots(next)
+    } catch (error) {
+      return { ok: false, errors: [{ code: 'MANUAL_SLOT_INVALID', message: error.message }] }
+    }
+  }
   if ((next.user_confirmations ?? []).length > 200) {
     return { ok: false, errors: [{ code: 'CONFIRMATION_LIMIT', message: '确认最多 200 条' }] }
   }
@@ -473,6 +487,7 @@ export function deriveReadiness(draft, ctx = {}) {
   }
 
   const result = draft.planning_result
+  try { scheduleWithManualSlots(draft) } catch (error) { add('MANUAL_SLOT_INVALID', error.message) }
   const current = (draft.user_confirmations ?? []).filter((u) => u.draft_revision === draft.revision)
   const has = (type, key, fieldPath) => current.some((u) => u.object_type === type && u.object_id_or_key === key && (fieldPath === undefined || u.field_path === fieldPath))
 

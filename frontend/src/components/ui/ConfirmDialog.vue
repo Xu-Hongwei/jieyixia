@@ -21,16 +21,16 @@ const emit = defineEmits(['confirm'])
     <AlertDialogPortal>
       <AlertDialogOverlay class="fixed inset-0 z-50 bg-black/50" />
       <AlertDialogContent
-        class="fixed left-1/2 top-1/2 z-50 w-[min(92vw,26rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-card p-4 shadow-lg"
+        class="fixed left-1/2 top-1/2 z-50 max-h-[85dvh] w-[min(92vw,28rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-card p-5 shadow-lg"
       >
         <AlertDialogTitle class="text-base font-semibold">{{ props.title }}</AlertDialogTitle>
         <AlertDialogDescription class="mt-2 text-sm text-muted-foreground">
           <slot>此操作不可自动撤销，请确认。</slot>
         </AlertDialogDescription>
-        <div class="mt-4 flex justify-end gap-2">
-          <AlertDialogCancel class="rounded-md border px-3 py-1.5 text-sm hover:bg-accent">{{ props.cancelLabel }}</AlertDialogCancel>
+        <div class="mt-5 flex flex-wrap justify-end gap-2">
+          <AlertDialogCancel class="min-h-10 rounded-md border px-3 py-2 text-sm hover:bg-accent">{{ props.cancelLabel }}</AlertDialogCancel>
           <AlertDialogAction
-            class="rounded-md px-3 py-1.5 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
+            class="min-h-10 rounded-md px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:opacity-50"
             :class="props.tone === 'primary' ? 'bg-primary hover:bg-primary/90' : 'bg-red-600 hover:bg-red-700'"
             :disabled="props.confirmDisabled"
             @click="emit('confirm')"

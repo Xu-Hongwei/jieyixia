@@ -52,8 +52,8 @@ const sourceLabel = (s) => {
 
 <template>
   <div v-if="entries.length" class="rounded-lg border bg-card p-4">
-    <h3 class="flex items-center gap-2 text-sm font-semibold"><FileImage class="size-4" />资料核对（独立于采用）</h3>
-    <p class="mt-1 text-xs text-muted-foreground">模型识别可能出错：请对照原文核对字段。确认只把字段标记为事实，不改值；核对后请「重新排程」再确认任务截止。</p>
+    <h3 class="flex items-center gap-2 text-sm font-semibold"><FileImage class="size-4" />核对资料</h3>
+    <p class="mt-1 text-xs text-muted-foreground">对照原文确认事实，任务截止在下方单独核对。</p>
     <div v-for="e in entries" :key="e.id" class="mt-3 rounded-md border p-3">
       <div class="flex items-center gap-2 text-sm font-medium">
         <FileImage v-if="e.source?.kind === 'image'" class="size-4 text-muted-foreground" />

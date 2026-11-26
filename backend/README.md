@@ -160,6 +160,22 @@ tests/              354 条测试（含日历/偏移/图片完整解码/上限�
 
 ## 配置
 
+### 本机个人空间联调
+
+本机开发预览使用 `http://127.0.0.1:5174/#/assistant`。个人空间先将截图保存在浏览器，点击生成或提取时再调用模型。演示空间在同一地址播放内置课程案例。
+
+个人空间右上角的「连接千问」使用北京地域的阿里云百炼按量付费 API Key。验证仅查询模型目录。提取文字和生成计划使用 `qwen-plus`，提取截图使用 `qwen-vl-plus`。当前标签页只在内存里保留密钥，刷新、切换空间或断开连接后需重新输入。
+
+对外部署请使用 HTTPS，同源网关转发 `POST /api/qwen/verify`、`/api/qwen/analyze` 和 `/api/qwen/propose`，保留 `X-JXL-Qwen-Key` 请求头，并在网关端注入已有的服务访问令牌。日志应排除该密钥头。这三条路由仅使用当前请求提供的密钥。
+
+本机的 `backend/.env.development.local` 保存 `JXL_PROVIDER=model`、模型配置、`JXL_DEV_BACKEND=http://127.0.0.1:8016` 和本地代理令牌。模型密钥由运行后端的环境提供。重新开机后，在 `backend` 目录运行以下命令，然后在 `frontend` 目录运行 `npm run dev -- --host 127.0.0.1`。修改联调配置后重启两个服务。
+
+```powershell
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8016 --env-file .env.development.local
+```
+
+### 后端环境变量
+
 复制 `.env.example` 为 `.env`（**`.env` 已在根 `.gitignore`，绝不入库**）。
 
 | 变量 | 默认 | 说明 |

@@ -1,0 +1,32 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [scope] 日程移除普通新建和完整任务筛选
+PASS [panel] 日程安排打开侧边面板并保留周日期
+PASS [panel] Escape关闭详情并恢复原卡片焦点
+PASS [guard] 关闭编辑先确认未保存草稿
+PASS [guard] 取消关闭保留说明和时长
+PASS [edit] 修改真实落库且不改截止
+PASS [move] 面板日期选择可用，改期只改安排
+PASS [guard] 嵌套新建任务取消保护输入
+PASS [create] 新建任务返回安排保留日期时长说明
+PASS [create] 新任务和安排正确关联落库
+PASS [create] 放弃安排保留已创建任务且不新增安排
+PASS [guard] 浏览器返回取消后留在日程并保留输入 — {"beforeBack":"/today?view=list","after":"/today?view=list","draft":"虚构：返回保护"}
+PASS [guard] 点击遮罩确认后关闭
+PASS [guard] 同页返回确认放弃后关闭编辑器 — /today?date=2026-11-26&view=list
+PASS [detail] 说明和来源默认折叠
+PASS [detail] 近期安排仅默认展示三项
+PASS [detail] 全部安排仍可展开
+PASS [detail] 任务详情复用面板原地保存
+PASS [guard] 任务说明未保存时取消切空间
+PASS [layout] 安排面板 360 — {"page":360,"panel":360,"inner":359}
+PASS [layout] 安排面板 390 — {"page":390,"panel":390,"inner":389}
+PASS [layout] 安排面板 430 — {"page":430,"panel":430,"inner":429}
+PASS [layout] 安排面板 768 — {"page":768,"panel":576,"inner":575}
+PASS [layout] 安排面板 1440 — {"page":1440,"panel":576,"inner":575}
+PASS [mobile] 手机日期选择不关闭面板
+PASS [compat] 刷新深链接恢复安排详情
+PASS [compat] 旧新建链接转至任务创建 — /tasks
+PASS [compat] 旧无截止入口转至任务筛选 — /tasks?undated=1
+PASS [isolation] 无模型调用及用户服务访问 — {"analyze":0,"propose":0}
+TOTAL 29/29

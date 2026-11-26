@@ -3,7 +3,7 @@
 // 晚到的原空间结果不污染新空间。读取直接用 domains/plan.js + week.js 纯函数读 app.docs  live 事实。
 // 请求信封：UI 在用户意图产生时取一次（含预先固定的 PlanItem ID 与缺省北京今天），失败重试复用同一信封；
 // store 绝不给未知裸 requestId 补当前时间——刷新后旧 ID 首见不是新意图。
-import { defineStore } from 'pinia'
+import { acceptHMRUpdate, defineStore } from 'pinia'
 import { createPlanService } from '@/services/plan/service'
 import { beijingToday } from '@/domains/time'
 import { classifyUnscheduled, planRisk, summarizePlanTime, assertPlanExecutable, existingUnfinishedSessionForPlan } from '@/domains/plan'
@@ -81,3 +81,8 @@ export const usePlanStore = defineStore('plan', () => {
     unfinishedSessionFor: (planItemId) => existingUnfinishedSessionForPlan(docsOf(), planItemId),
   }
 })
+
+// 更新安排规则时，同步替换已打开页面的保存动作；编辑表单仍使用原快照与请求凭据。
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(usePlanStore, import.meta.hot))
+}

@@ -1,0 +1,23 @@
+{
+  "results": [
+    {
+      "item": "start",
+      "name": "无当前行动时确认开始禁用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "start",
+      "name": "取消开始不创建会话且回到详情",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "runner",
+      "name": "验收异常",
+      "pass": false,
+      "detail": "page.waitForFunction: Timeout 20000ms exceeded."
+    }
+  ],
+  "netHits": []
+}

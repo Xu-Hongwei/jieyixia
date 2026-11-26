@@ -11,7 +11,7 @@ import {
   refreshDraftStatus, checkDraftBounds, checkThreadBounds, appendThreadMessage, forkDraft,
   checkFactFreshness,
 } from '../../domains/assistant/draft'
-import { verifyReceiptForEnvelope, appliedSummaryFromReceipt } from '../../domains/assistant/application'
+import { deadlineSource, buildAdoptionPlan, verifyReceiptForEnvelope, appliedSummaryFromReceipt } from '../../domains/assistant/application'
 import { captureReplacementBaseline } from '../../domains/assistant/replan'
 import { resolveAssistantRefs } from '../../domains/assistant/refs'
 import { validateAgainstDef } from '../backup/contractSchema'
@@ -72,7 +72,10 @@ export function createAssistantDraftService(deps = {}) {
         const applied = await transformAssistantAtomic((latest, ctx) => assertPutsShape(job(latest, ctx)))
         return { ...(applied.info || {}), workspace_id: applied.workspace_id }
       } catch (err) {
-        const out = { ok: false, code: (err && err.code) || 'SAVE_FAILED', message: (err && err.message) || '保存失败', workspace_id: wsAtCall }
+        // DOMException.code 是浏览器数字编号（如额度不足为 22），不是领域错误码。
+        // 写入异常统一保留为可重试保存失败，避免生成结果被当作冲突而丢弃。
+        const code = typeof err?.code === 'string' && err.code ? err.code : 'SAVE_FAILED'
+        const out = { ok: false, code, message: (err && err.message) || '保存失败', workspace_id: wsAtCall }
         for (const k of ['current', 'blockers', 'errors', 'clarifications']) if (err && err[k] !== undefined) out[k] = err[k]
         return out
       }
@@ -160,6 +163,22 @@ export function createAssistantDraftService(deps = {}) {
     })
   }
 
+  // 同一草案及本地事实能否构造实际采用写集。预检不签发信封，也不持久化 ID。
+  function adoptionReadiness(draft, thread, base, docs) {
+    if (!base.ready) return base
+    try {
+      let serial = 0
+      const plan = buildAdoptionPlan(draft, {
+        workspaceId: draft.workspace_id, now: draft.updated_at, newId: () => 'preview-' + (++serial),
+        notes: docs.filter(item => item.kind === 'note'),
+        userMessages: (thread?.messages ?? []).filter(item => item.role === 'user'),
+      })
+      return { ...base, counts: plan.counts }
+    } catch (error) {
+      return { ready: false, blockers: [{ code: error.code || 'PREVIEW_INVALID', message: error.message }] }
+    }
+  }
+
   // ---- 读取：一致快照 + 引用解析状态 + 事实新鲜度 + ready 推导 + 完整读取基线。 ----
   async function get(draftId) {
     const snap = await readAssistantSnapshot()
@@ -172,10 +191,11 @@ export function createAssistantDraftService(deps = {}) {
     // 证据内容核对（R7）：重摘要在事务外完成，覆盖原文变化（不只 ID 存在）。
     const sourceDiffs = await checkSourceContentFreshness(draft.fact_baseline, snap.sources)
     const fullFreshness = { fresh: freshness.fresh && sourceDiffs.length === 0, diffs: [...freshness.diffs, ...sourceDiffs] }
+    const readiness = deriveReadiness(draft, { thread, live, freshness: fullFreshness })
     return {
       ok: true, workspace_id: snap.workspace_id, draft, thread,
       refs: resolveAssistantRefs({ draft, thread, live }),
-      readiness: deriveReadiness(draft, { thread, live, freshness: fullFreshness }),
+      readiness, adoptionReadiness: adoptionReadiness(draft, thread, readiness, snap.docs),
       factFreshness: fullFreshness,
       refresh: refreshDraftStatus(draft.status),
       baseline: { draft: snapshot(draft), thread: thread ? snapshot(thread) : null },
@@ -375,7 +395,35 @@ export function createAssistantDraftService(deps = {}) {
       planning_input: norm.input, planning_result: result, fact_baseline: baseline,
       ...(replanScope ? { replacement_baseline: replacementBaseline } : {}),
     }
-    const pre = applyContentEdit(expectedF, edits, now)
+    // 仅计算本身产生的新版本可继承本次 normalize 已核对的 create 截止。
+    // 草案内容与业务事实由下方事务再次比较；其它种类的确认继续按版本失效。
+    const previousFactsStillCurrent = !rec0.fact_baseline || (
+      checkFactFreshness(rec0, { docs: snap.docs, sources: snap.sources, today: contextF.today }).fresh &&
+      !(await checkSourceContentFreshness(rec0.fact_baseline, snap.sources)).length)
+    const inherited = currentConfs.filter(c => {
+      if (!previousFactsStillCurrent || c.object_type !== 'task' || c.field_path !== 'deadline' || c.id_scope !== 'draft') return false
+      const task = rec0.proposal.task_proposals.find(t => t.op === 'create' && t.key === c.object_id_or_key)
+      const fact = norm.input.task_facts.find(f => f.task_ref.kind === 'draft' && f.task_ref.key === c.object_id_or_key)
+      if (!task || !fact || (c.new_value?.value ?? null) !== (fact.deadline_value ?? null) ||
+          (c.new_value?.precision ?? 'none') !== (fact.deadline_precision ?? 'none')) return false
+      if (!fact.deadline_value) return true
+      try {
+        deadlineSource(task, fact.deadline_value, fact.deadline_precision, snap.docs.filter(d => d.kind === 'note'),
+          (thread0?.messages ?? []).filter(m => m.role === 'user'))
+        return true
+      } catch { return false }
+    })
+    const inheritedIds = new Map(inherited.map(c => [c.confirmation_id, newId()]))
+    function applySchedule(base) {
+      const change = applyContentEdit(base, edits, now)
+      if (!change.ok || !change.bumped || !inherited.length) return change
+      change.draft.user_confirmations = [...change.draft.user_confirmations, ...inherited.map(c => ({
+        ...c, confirmation_id: inheritedIds.get(c.confirmation_id), draft_revision: change.draft.revision,
+      }))]
+      const errors = checkDraftBounds(change.draft)
+      return errors.length ? { ok: false, errors } : change
+    }
+    const pre = applySchedule(expectedF)
     if (!pre.ok) return { ok: false, code: pre.errors[0].code, errors: pre.errors, workspace_id: wsAtCall }
     const targetDigest = pre.bumped ? canonicalJson(pre.draft) : expectedDigest
 
@@ -390,7 +438,7 @@ export function createAssistantDraftService(deps = {}) {
       })
       const latestFacts = canonicalJson({ planningSnapshot: latestSnapshot, requirements: thread ? thread.confirmed_requirements ?? [] : [] })
       if (latestFacts !== factsDigest) throw fail('CONFLICT_FACTS', '计算后空间事实或已确认要求已变化，旧结果不再适用；请重新排程')
-      const r = applyContentEdit(rec, edits, now)
+      const r = applySchedule(rec)
       if (!r.ok) throw fail(r.errors[0].code, r.errors[0].message, { errors: r.errors })
       if (!r.bumped) return { info: { ok: true, draft: rec, bumped: false } }
       return { draftPuts: [r.draft], info: { ok: true, draft: r.draft, bumped: true } }

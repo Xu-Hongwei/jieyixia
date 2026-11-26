@@ -1,0 +1,197 @@
+{
+  "results": [
+    {
+      "item": "library",
+      "name": "统一状态筛选和收起的添加区",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "panel",
+      "name": "资料打开关闭保持筛选滚动和焦点",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "panel",
+      "name": "资料库内打开核对不跳页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "evidence",
+      "name": "原文与核对字段可同时查看",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "关闭取消保留字段草稿",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "下一条取消不换对象",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "fields",
+      "name": "字段保存落库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "fields",
+      "name": "确认截止后原详情保留，待核对列表更新",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "task",
+      "name": "带出处创建任务",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "task",
+      "name": "从任务返回原资料和筛选",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "next",
+      "name": "核对完成后可前往当前筛选下一条",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "delete",
+      "name": "联删展示关联任务范围",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "delete",
+      "name": "取消联删保留对象",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "delete",
+      "name": "确认联删只删便签任务，保留原资料",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "undo",
+      "name": "资料页直接撤销恢复便签与任务",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "offline",
+      "name": "离线保存文字后原地查看",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "upload",
+      "name": "图片选择只保存本地未触发模型",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "retry",
+      "name": "失败资料重试后留在当前面板",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "item": "handoff",
+      "name": "交接仅列出选中资料且不自动调用模型",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "handoff",
+      "name": "取消替换仍保留交接选择",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "handoff",
+      "name": "助手只选定明确交接的两份资料",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "handoff",
+      "name": "跨空间交接拒绝",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "handoff",
+      "name": "已删除资料交接拒绝",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "compat",
+      "name": "旧核对深链接保持内容与返回",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "资料核对面板 360",
+      "pass": true,
+      "detail": "{\"page\":360,\"inner\":359,\"outer\":360}"
+    },
+    {
+      "item": "layout",
+      "name": "资料核对面板 390",
+      "pass": true,
+      "detail": "{\"page\":390,\"inner\":389,\"outer\":390}"
+    },
+    {
+      "item": "layout",
+      "name": "资料核对面板 430",
+      "pass": true,
+      "detail": "{\"page\":430,\"inner\":429,\"outer\":430}"
+    },
+    {
+      "item": "layout",
+      "name": "资料核对面板 768",
+      "pass": true,
+      "detail": "{\"page\":768,\"inner\":671,\"outer\":672}"
+    },
+    {
+      "item": "layout",
+      "name": "资料核对面板 1440",
+      "pass": true,
+      "detail": "{\"page\":1440,\"inner\":671,\"outer\":672}"
+    },
+    {
+      "item": "guard",
+      "name": "资料输入取消切空间保留内容",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "isolation",
+      "name": "切空间清空输入和选择",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "isolation",
+      "name": "无付费建议请求及用户服务访问",
+      "pass": true,
+      "detail": "{\"analyze\":1,\"propose\":0}"
+    }
+  ],
+  "netHits": []
+}

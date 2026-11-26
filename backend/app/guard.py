@@ -116,7 +116,7 @@ class GuardMiddleware:
       503 model_unavailable —— 并发满，走前端现有「仅保存」降级
     """
 
-    _GUARDED_PATHS = frozenset({"/api/analyze", "/api/assistant/propose"})
+    _GUARDED_PATHS = frozenset({"/api/analyze", "/api/assistant/propose", "/api/qwen/analyze", "/api/qwen/propose", "/api/qwen/verify"})
 
     def __init__(self, app: ASGIApp, *, token: str, rate_limiter: TokenBucket, gate: ConcurrencyGate) -> None:
         self.app = app

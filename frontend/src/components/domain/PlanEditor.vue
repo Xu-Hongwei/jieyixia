@@ -11,7 +11,7 @@ import Textarea from '@/components/ui/Textarea.vue'
 import { useAppStore } from '@/stores/app'
 import { usePlanStore } from '@/stores/plan'
 import { beijingAddDays, beijingToday, isValidDate } from '@/domains/time'
-import { planSnapshot } from '@/domains/plan'
+import { dayPlansForTask, planEditBlock, planSnapshot } from '@/domains/plan'
 import { PLAN_STATE_LABELS, STATUS_LABELS, label, planStaleRows } from '@/domains/labels'
 import { slotDeadlineLabel } from '@/domains/week'
 
@@ -24,8 +24,10 @@ const props = defineProps({
   taskId: { type: String, default: '' },
   date: { type: String, default: '' },
   lockTask: { type: Boolean, default: false },
+  showClose: { type: Boolean, default: true },
+  inlineCreate: { type: Boolean, default: false },
 })
-const emit = defineEmits(['close', 'saved', 'goto-create-task'])
+const emit = defineEmits(['close', 'saved', 'goto-create-task', 'edit'])
 const store = useAppStore()
 const planStore = usePlanStore()
 const wsAtOpen = store.workspaceId
@@ -56,12 +58,23 @@ const dDate = ref(
 const dText = ref(props.mode === 'create' ? '' : plan.value ? plan.value.action_text : '')
 const dMinutes = ref(props.mode === 'create' ? '30' : plan.value ? String(plan.value.planned_minutes) : '30')
 const initialSnapshot = JSON.stringify([dTask.value, dDate.value, dText.value, dMinutes.value])
-const dirty = computed(() => JSON.stringify([dTask.value, dDate.value, dText.value, dMinutes.value]) !== initialSnapshot)
+const dirty = computed(() => {
+  if (props.mode === 'create' && !dText.value.trim() && dMinutes.value === '30') return false
+  return JSON.stringify([dTask.value, dDate.value, dText.value, dMinutes.value]) !== initialSnapshot
+})
 
 const saving = ref(false)
 const saveState = ref('unsaved') // unsaved | saving | saved | error | verify
 const errorMsg = ref('')
 const intent = ref(null) // { op, sig, envelope:{requestId,issuedAtMs,planItemId}, input }
+const dayPlans = computed(() => props.mode === 'create' ? dayPlansForTask(store.docs, wsAtOpen, dTask.value, dDate.value) : [])
+const dayPlanIds = computed(() => dayPlans.value.map(p => p.id).sort())
+const dayPlanRows = computed(() => dayPlans.value.map(item => ({ item, block: planEditBlock(store.docs, item) })))
+const additionalConfirmed = ref(false)
+watch([dTask, dDate, () => JSON.stringify(dayPlanIds.value)], () => { additionalConfirmed.value = false }, { flush: 'sync' })
+const showFields = computed(() => props.mode !== 'create' || (!!fixedTask.value && (
+  !dayPlans.value.length || additionalConfirmed.value || saveState.value === 'verify'
+)))
 const confirmed = ref(/** @type {Record<string, any>} */ ({})) // 用户明确确认过的事实：deadlineConfirm / confirmedDuplicateIds
 // 编辑/改期基线在打开时冻结为用户所见的完整快照：草稿与该基线绑定，正常提交与原信封重试始终沿用；
 // store 刷新不得自动换 expected（否则旧草稿会无提示覆盖新事实）。仅 STALE 差异展示并明确确认后才换最新基线。
@@ -82,7 +95,7 @@ function localValidate() {
 }
 
 function baseInput() {
-  if (props.mode === 'create') return { taskId: taskLocked ? props.taskId : dTask.value, date: dDate.value, actionText: dText.value.trim(), plannedMinutes: minutesNum.value }
+  if (props.mode === 'create') return { taskId: taskLocked ? props.taskId : dTask.value, date: dDate.value, actionText: dText.value.trim(), plannedMinutes: minutesNum.value, expectedDayPlanIds: dayPlanIds.value }
   if (props.mode === 'another') return { taskId: plan.value.task_id, date: dDate.value, actionText: dText.value.trim(), plannedMinutes: minutesNum.value }
   if (props.mode === 'edit') return { planItemId: props.planId, expected: frozenExpected.value, actionText: dText.value.trim(), plannedMinutes: minutesNum.value }
   return { planItemId: props.planId, expected: frozenExpected.value, date: dDate.value }
@@ -132,7 +145,7 @@ onMounted(() => {
         // 基线随原输入恢复：重试沿用原 expected，不趁恢复换成实时值。
         if (props.mode !== 'create' && s.input.expected) frozenExpected.value = s.input.expected
         const baseKeys = props.mode === 'create' || props.mode === 'another'
-          ? ['taskId', 'date', 'actionText', 'plannedMinutes']
+          ? ['taskId', 'date', 'actionText', 'plannedMinutes', 'expectedDayPlanIds']
           : props.mode === 'edit' ? ['planItemId', 'expected', 'actionText', 'plannedMinutes'] : ['planItemId', 'expected', 'date']
         const conf = {}
         for (const k of Object.keys(s.input)) if (!baseKeys.includes(k)) conf[k] = s.input[k]
@@ -155,16 +168,18 @@ watch(() => store.workspaceId, (ws) => {
   if (ws !== wsAtOpen) emit('close')
 })
 
-async function submit() {
-  if (saving.value) return
-  const err = localValidate()
+async function submit(retryOriginal = false) {
+  if (saving.value || !showFields.value) return
+  const replay = retryOriginal === true && !!intent.value
+  if (saveState.value === 'verify' && !replay) return
+  const err = replay ? null : localValidate()
   if (err) {
     saveState.value = 'error'
     errorMsg.value = err
     return
   }
   const op = OP_OF[props.mode]
-  const input = { ...baseInput(), ...confirmed.value }
+  const input = replay ? intent.value.input : { ...baseInput(), ...confirmed.value }
   const sig = JSON.stringify(input)
   let envelope
   if (intent.value && intent.value.op === op && intent.value.sig === sig) {
@@ -216,6 +231,11 @@ function handleFailure(r) {
   }
   errorMsg.value = r.message || codeText[r.code] || r.code || '保存失败'
   switch (r.code) {
+    case 'DAY_PLANS_CHANGED':
+      additionalConfirmed.value = false
+      confirmed.value = {}
+      intent.value = null
+      break
     case 'DUPLICATE_PLAN':
     case 'DUPLICATE_SCOPE_CHANGED':
       dupPayload.value = { matchingIds: r.matchingIds || [], date: r.date || dDate.value, taskId: r.taskId || dTask.value }
@@ -335,6 +355,7 @@ function requestGotoCreate() {
     errorMsg.value = '正在保存：请等待本次结果后再切换表单。'
     return
   }
+  if (props.inlineCreate && saveState.value !== 'verify') { emit('goto-create-task'); return }
   if (dirty.value || saveState.value === 'verify') {
     discardAction.value = 'goto-create'
     dlgDiscard.value = true
@@ -371,7 +392,11 @@ function guardLeave() {
     dlgDiscard.value = true
   })
 }
-defineExpose({ guardLeave })
+function selectCreatedTask(id) {
+  if (props.mode !== 'create' || taskLocked || saving.value || saveState.value === 'verify') return
+  if (store.tasks.some((task) => task.id === id)) dTask.value = id
+}
+defineExpose({ guardLeave, selectCreatedTask })
 
 // —— 任务选择（仅 create）：搜索、未完成优先、受阻可选带标记、已完成不可新建 ——
 const taskQuery = ref('')
@@ -407,11 +432,11 @@ const taskTitleOf = (id) => {
         <Badge v-if="saveState === 'verify'" variant="warning">待核实</Badge>
         <Badge v-else-if="saveState === 'saving'" variant="secondary">保存中</Badge>
         <Badge v-else-if="dirty" variant="outline">未保存</Badge>
-        <Button size="sm" variant="ghost" aria-label="关闭安排编辑" title="关闭" @click="requestClose"><X /></Button>
+        <Button v-if="showClose" size="sm" variant="ghost" aria-label="关闭安排编辑" title="关闭" @click="requestClose"><X /></Button>
       </div>
     </template>
 
-    <form class="space-y-3" @submit.prevent="submit">
+    <form class="space-y-3" @submit.prevent="submit()">
       <!-- 任务：create 可选可搜；其余模式固定只读 -->
       <div v-if="props.mode === 'create'" class="space-y-2">
         <div v-if="fixedTask" class="flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm">
@@ -442,27 +467,11 @@ const taskTitleOf = (id) => {
           </div>
           <div v-else class="rounded-md border border-dashed p-3 text-sm">
             <p class="text-muted-foreground">还没有任务。安排必须挂在已有任务下，不会隐式创建任务。</p>
-            <Button size="sm" variant="outline" type="button" class="mt-2" @click="requestGotoCreate">先创建任务</Button>
+            <Button v-if="!inlineCreate" size="sm" variant="outline" type="button" class="mt-2" @click="requestGotoCreate">先创建任务</Button>
           </div>
+          <Button v-if="inlineCreate" size="sm" variant="outline" type="button" class="mt-2" :disabled="saving || saveState === 'verify'" @click="requestGotoCreate">新建任务并继续</Button>
         </template>
-        <!-- 从已有行动带入：只复制初值，不绑定行动 ID -->
-        <div v-if="dTask && taskActions.length" class="rounded-md border border-dashed p-2">
-          <div class="text-xs font-medium text-muted-foreground">从已有行动带入（仅初值，不绑定行动）</div>
-          <div class="mt-1 space-y-1">
-            <button
-              v-for="a in taskActions"
-              :key="a.id"
-              type="button"
-              class="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-accent"
-              @click="copyAction(a)"
-            >
-              <span class="min-w-0 flex-1 truncate">{{ a.text }}</span>
-              <span class="font-date text-muted-foreground">{{ a.minutes }} 分</span>
-              <span v-if="a.done" class="text-muted-foreground">已完成</span>
-              <span class="text-primary">带入</span>
-            </button>
-          </div>
-        </div>
+
       </div>
       <div v-else class="text-sm">
         <span class="text-muted-foreground">所属任务：</span>
@@ -470,12 +479,12 @@ const taskTitleOf = (id) => {
       </div>
 
       <div class="flex flex-wrap items-end gap-3">
-        <div class="w-44">
+        <div class="w-56 max-w-full">
           <div class="text-xs font-medium text-muted-foreground">安排日期</div>
           <DateInput v-if="props.mode !== 'edit'" v-model="dDate" aria-label="安排日期" />
           <div v-else class="font-date rounded-md border bg-muted/40 px-3 py-2 text-sm">{{ dDate }}</div>
         </div>
-        <div class="w-28">
+        <div v-if="showFields" class="w-28">
           <div class="text-xs font-medium text-muted-foreground">预计分钟</div>
           <Input v-if="props.mode !== 'move'" v-model="dMinutes" inputmode="numeric" aria-label="预计分钟" />
           <div v-else class="font-date rounded-md border bg-muted/40 px-3 py-2 text-sm">{{ dMinutes }}</div>
@@ -485,7 +494,38 @@ const taskTitleOf = (id) => {
         </p>
       </div>
 
-      <div>
+      <section v-if="dayPlans.length" aria-label="这项任务当天已有的安排" class="space-y-2 border-y py-3">
+        <h3 class="text-sm font-medium">这项任务当天已有 {{ dayPlans.length }} 项安排</h3>
+        <ul class="divide-y">
+          <li v-for="{ item, block } in dayPlanRows" :key="item.id" class="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm">
+            <span class="min-w-0 flex-1 break-words">{{ item.action_text }}</span>
+            <span class="shrink-0 text-muted-foreground">{{ item.planned_minutes }} 分钟</span>
+            <span v-if="item.state !== 'planned'" class="text-xs text-muted-foreground">{{ label(PLAN_STATE_LABELS, item.state) }}</span>
+            <Button v-if="!block" type="button" size="sm" variant="outline" :disabled="saving || saveState === 'verify'" @click="emit('edit', item.id)">修改安排</Button>
+            <span v-else-if="item.state === 'planned' || item.state === 'partial'" class="text-xs text-muted-foreground">{{ block.message }}</span>
+          </li>
+        </ul>
+        <Button v-if="!showFields" type="button" size="sm" variant="outline" @click="additionalConfirmed = true">另加一项工作</Button>
+      </section>
+
+      <div v-if="props.mode === 'create' && showFields && taskActions.length" class="rounded-md border border-dashed p-2">
+        <div class="text-xs font-medium text-muted-foreground">用已有行动填写新安排</div>
+        <div class="mt-1 space-y-1">
+          <button
+            v-for="a in taskActions"
+            :key="a.id"
+            type="button"
+            class="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-accent"
+            @click="copyAction(a)"
+          >
+            <span class="min-w-0 flex-1 truncate">{{ a.text }}</span>
+            <span class="font-date text-muted-foreground">{{ a.minutes }} 分</span>
+            <span v-if="a.done" class="text-muted-foreground">已完成</span>
+            <span class="text-primary">填入</span>
+          </button>
+        </div>
+      </div>
+      <div v-if="showFields">
         <div class="text-xs font-medium text-muted-foreground">工作说明（这天准备做什么）</div>
         <Textarea v-if="props.mode !== 'move'" v-model="dText" rows="2" aria-label="工作说明" placeholder="例如：梳理本周进展并列出周报提纲" />
         <div v-else class="break-words rounded-md border bg-muted/40 px-3 py-2 text-sm">{{ dText }}</div>
@@ -499,18 +539,17 @@ const taskTitleOf = (id) => {
         {{ errorMsg }}
         <div v-if="saveState === 'verify'" class="mt-2 flex flex-wrap gap-2">
           <Button size="sm" variant="outline" type="button" :disabled="saving" @click="verify">核实结果</Button>
-          <Button size="sm" variant="outline" type="button" :disabled="saving" @click="submit">原信封重试</Button>
+          <Button size="sm" variant="outline" type="button" :disabled="saving" @click="submit(true)">原信封重试</Button>
           <Button size="sm" variant="ghost" type="button" @click="dropStash">清除待核实记录</Button>
         </div>
         <div v-else-if="intent && saveState === 'error'" class="mt-2">
-          <Button size="sm" variant="outline" type="button" :disabled="saving" @click="submit">重试保存（同一请求）</Button>
+          <Button size="sm" variant="outline" type="button" :disabled="saving" @click="submit()">重试保存（同一请求）</Button>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <Button type="submit" :disabled="saving" :aria-busy="saving">{{ saving ? '保存中…' : SUBMIT_LABELS[props.mode] }}</Button>
+        <Button v-if="showFields && saveState !== 'verify'" type="submit" :disabled="saving" :aria-busy="saving">{{ saving ? '保存中…' : SUBMIT_LABELS[props.mode] }}</Button>
         <Button variant="outline" type="button" @click="requestClose">关闭</Button>
-        <span class="text-xs text-muted-foreground">回车等同点击保存；保存期间不可重复提交。</span>
       </div>
     </form>
 

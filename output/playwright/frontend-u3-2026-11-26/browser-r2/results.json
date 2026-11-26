@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "item": "library",
+      "name": "统一状态筛选和收起的添加区",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "panel",
+      "name": "资料打开关闭保持筛选滚动和焦点",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "panel",
+      "name": "资料库内打开核对不跳页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "runner",
+      "name": "验收异常",
+      "pass": false,
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: '展开原文', exact: true })\u001b[22m\n"
+    }
+  ],
+  "netHits": []
+}

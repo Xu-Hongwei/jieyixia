@@ -90,6 +90,6 @@ watch(locateKey, (key) => {
       class="mt-1 w-full rounded-md border border-dashed border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
       aria-label="在这一天安排工作"
       @click="emit('add')"
-    >＋安排</button>
+    >＋ 为这天安排工作</button>
   </div>
 </template>

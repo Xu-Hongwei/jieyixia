@@ -1,0 +1,15 @@
+
+> jiexialai-frontend@0.1.0 test
+> vitest run src/tests/workNavigation.test.js src/tests/taskList.test.js
+
+
+ RUN  v3.2.7 E:/qoder/frontend
+
+ ✓ src/tests/taskList.test.js (4 tests) 3ms
+ ✓ src/tests/workNavigation.test.js (33 tests) 6ms
+
+ Test Files  2 passed (2)
+      Tests  37 passed (37)
+   Start at  16:18:39
+   Duration  956ms (transform 60ms, setup 0ms, collect 165ms, tests 8ms, environment 0ms, prepare 182ms)
+

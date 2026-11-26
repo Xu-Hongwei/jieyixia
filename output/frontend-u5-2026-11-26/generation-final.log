@@ -1,0 +1,14 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [generate] 选定文字、要求和七天预算进入一次模拟请求
+PASS [generate] 生成后停在核对，未自动排程采用
+PASS [preview] 手动日期和预算保留，生成建议可预览
+PASS [adopt] 文字到正式任务和跨天安排闭环
+PASS [clarify] 澄清未回答不能继续，不能进入最终采用
+PASS [clarify] 取消离开保留未提交的澄清回答
+PASS [clarify] 只有明确回答并继续才发起续轮
+PASS [clarify] 已归档澄清允许离开，不锁死页面
+PASS [result] 生成结果保存失败保留重试入口，不能采用
+PASS [result] 重试保存使用保留结果，不再次请求模型
+PASS [isolation] 所有模型请求仅到自起模拟服务
+TOTAL 11/11

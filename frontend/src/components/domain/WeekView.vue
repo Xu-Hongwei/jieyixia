@@ -96,8 +96,11 @@ const headerClass = (d) =>
       <template #header>
         <div class="flex flex-wrap items-center gap-2">
           <div class="min-w-0 flex-1 basis-40">
-            <div class="font-date text-xl font-semibold">{{ weekRangeLabel(start) }}</div>
-            <p class="text-xs text-muted-foreground">{{ yearLabel }} · 上方每日工作 · 下方每日截止 · 北京时间</p>
+            <h1 class="font-date text-3xl font-semibold">{{ weekRangeLabel(start) }}</h1>
+            <p class="text-xs text-muted-foreground">{{ yearLabel }} · 北京时间</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <slot name="tools" />
           </div>
           <div class="flex items-center gap-1">
             <Button size="sm" variant="outline" aria-label="上一周" title="上一周" @click="goDate(beijingAddDays(start, -7))"><ChevronLeft /></Button>
@@ -146,6 +149,8 @@ const headerClass = (d) =>
           <div class="col-span-7 border-y border-border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
             每日截止 · 本周 {{ schedule.deadlineCount }} 项
           </div>
+          <p v-if="!schedule.deadlineCount" class="col-span-7 px-3 py-3 text-sm text-muted-foreground">本周无截止</p>
+          <template v-else>
           <div
             v-for="d in days"
             :key="'d-' + d.date"
@@ -155,6 +160,7 @@ const headerClass = (d) =>
           >
             <DayDeadlineZone :day="d" @open-task="openTask" />
           </div>
+          </template>
         </div>
       </div>
 
@@ -174,14 +180,11 @@ const headerClass = (d) =>
           >
             <div class="text-[10px] text-muted-foreground">{{ d.weekday }}</div>
             <div class="font-date text-lg font-semibold leading-tight" :class="d.isToday && 'text-primary'">{{ d.dayNum }}</div>
-            <div class="text-[10px] leading-tight" :class="d.isToday ? 'font-medium text-primary' : 'text-muted-foreground'">
-              {{ d.plans.length }}·{{ d.deadlines.length }}
-            </div>
           </button>
         </div>
         <div class="mt-3 overflow-hidden rounded-md border border-border" :data-date="selectedDay.date">
           <div class="flex flex-wrap items-baseline gap-2 border-b border-border bg-muted/30 px-3 py-2">
-            <span class="font-date text-sm font-semibold">{{ selectedDay.date }}</span>
+            <span class="text-sm font-semibold">{{ selectedDay.date.slice(5).replace('-', '/') }}</span>
             <span class="text-xs text-muted-foreground">{{ selectedDay.weekday }}</span>
             <span v-if="selectedDay.isToday" class="text-xs font-medium text-primary">今天</span>
           </div>
@@ -221,10 +224,8 @@ const headerClass = (d) =>
         <span>截止 {{ schedule.deadlineCount }} 项</span>
         <template v-if="schedule.outsideWeek.length">
           <span>·</span>
-          <span>周外另有 {{ schedule.outsideWeek.length }} 项安排（待安排/全部任务清单可见）</span>
+          <span>周外另有 {{ schedule.outsideWeek.length }} 项安排</span>
         </template>
-        <span>·</span>
-        <span>逾期红标 · 完成淡化 · 点击卡片看详情</span>
       </div>
     </Card>
   </div>

@@ -1,0 +1,67 @@
+[
+  {
+    "path": "src/App.vue",
+    "status": "modified",
+    "sha256": "8079ac77b7c03b9b67fd97c543fe18d6772ba7f09065408e3f44ac5cd9d26cc5"
+  },
+  {
+    "path": "src/app/router.js",
+    "status": "modified",
+    "sha256": "7482f58e8dad3a49b50275eca41ff31c8a4da0677bed274c089006de704f1747"
+  },
+  {
+    "path": "src/domains/workNavigation.js",
+    "status": "modified",
+    "sha256": "b62029620433d33e4a1e4134ed5de8df50b9081a4ea4f5540296e975efaa6cbe"
+  },
+  {
+    "path": "src/pages/AssistantPage.vue",
+    "status": "modified",
+    "sha256": "303e8e8aa824a2fc7d1a841d97c2c7b43a44d10b3f8eb1dee16193dec1853644"
+  },
+  {
+    "path": "src/pages/CollectPage.vue",
+    "status": "modified",
+    "sha256": "d044d9b7cfefbfbb438cdbf5997a301d72e0af0d0951e969d245adc8d236fa55"
+  },
+  {
+    "path": "src/pages/NotesPage.vue",
+    "status": "modified",
+    "sha256": "cdd7036d834b3d746e413a6dc84a0ce64c9d422a1d9527c06b8c5309f58c314d"
+  },
+  {
+    "path": "src/pages/TodayPage.vue",
+    "status": "modified",
+    "sha256": "80285f474a947b45c3f1870adc7f89f67e8067a573ec5f8a0dcdfa6735c9095c"
+  },
+  {
+    "path": "src/components/domain/FieldCard.vue",
+    "status": "modified",
+    "sha256": "61ed81b7bf5fb1903edec6100aa46630604fa15e4c95df40226f389291934ff5"
+  },
+  {
+    "path": "src/composables/useUnsavedGuard.js",
+    "status": "added",
+    "sha256": "4641ec531ffda27594e712c5b26f73f83227192d914e1b6c5c91b1ca45094475"
+  },
+  {
+    "path": "src/domains/materialHandoff.js",
+    "status": "added",
+    "sha256": "ab870cdf07a2ba1219bf0ec230b44b49fc7f933b9b4762ce2a035746a4c96bec"
+  },
+  {
+    "path": "src/tests/materialHandoff.test.js",
+    "status": "added",
+    "sha256": "8d1f09723c3d1c1da1a76c9248caad0dff8349827a6727017ecbf2adf4345fe3"
+  },
+  {
+    "path": "src/components/domain/MaterialPanel.vue",
+    "status": "added",
+    "sha256": "520393f5fb21150ab16717a43f2184e76551f0ff92c4f5204b96973bba787ef7"
+  },
+  {
+    "path": "src/components/domain/NoteReview.vue",
+    "status": "added",
+    "sha256": "6f1f31dd1bbd358ae0b45fc54dccef9230cb97a81b9e26355306df82d98b669e"
+  }
+]

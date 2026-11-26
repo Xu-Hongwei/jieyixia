@@ -1,0 +1,17 @@
+{
+  "results": [
+    {
+      "item": "offline",
+      "name": "未缓存助手断网有提示，原任务页面仍在",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "runner",
+      "name": "异常",
+      "pass": false,
+      "detail": "page.waitForFunction: Timeout 20000ms exceeded."
+    }
+  ],
+  "netHits": []
+}

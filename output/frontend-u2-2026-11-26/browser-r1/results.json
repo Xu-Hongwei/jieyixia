@@ -1,0 +1,173 @@
+{
+  "results": [
+    {
+      "item": "scope",
+      "name": "日程移除普通新建和完整任务筛选",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "panel",
+      "name": "日程安排打开侧边面板并保留周日期",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "panel",
+      "name": "Escape关闭详情并恢复原卡片焦点",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "关闭编辑先确认未保存草稿",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "取消关闭保留说明和时长",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "edit",
+      "name": "修改真实落库且不改截止",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "move",
+      "name": "面板日期选择可用，改期只改安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "嵌套新建任务取消保护输入",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "create",
+      "name": "新建任务返回安排保留日期时长说明",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "create",
+      "name": "新任务和安排正确关联落库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "create",
+      "name": "放弃安排保留已创建任务且不新增安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "浏览器返回取消后留在日程并保留输入",
+      "pass": false,
+      "detail": "/today?date=2026-11-28&view=list"
+    },
+    {
+      "item": "guard",
+      "name": "点击遮罩确认后关闭",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "detail",
+      "name": "说明和来源默认折叠",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "detail",
+      "name": "近期安排仅默认展示三项",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "detail",
+      "name": "全部安排仍可展开",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "detail",
+      "name": "任务详情复用面板原地保存",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "任务说明未保存时取消切空间",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "安排面板 360",
+      "pass": true,
+      "detail": "{\"page\":360,\"panel\":360,\"inner\":359}"
+    },
+    {
+      "item": "layout",
+      "name": "安排面板 390",
+      "pass": true,
+      "detail": "{\"page\":390,\"panel\":390,\"inner\":389}"
+    },
+    {
+      "item": "layout",
+      "name": "安排面板 430",
+      "pass": true,
+      "detail": "{\"page\":430,\"panel\":430,\"inner\":429}"
+    },
+    {
+      "item": "layout",
+      "name": "安排面板 768",
+      "pass": true,
+      "detail": "{\"page\":768,\"panel\":576,\"inner\":575}"
+    },
+    {
+      "item": "layout",
+      "name": "安排面板 1440",
+      "pass": true,
+      "detail": "{\"page\":1440,\"panel\":576,\"inner\":575}"
+    },
+    {
+      "item": "mobile",
+      "name": "手机日期选择不关闭面板",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "compat",
+      "name": "刷新深链接恢复安排详情",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "compat",
+      "name": "旧新建链接转至任务创建",
+      "pass": true,
+      "detail": "/tasks"
+    },
+    {
+      "item": "compat",
+      "name": "旧无截止入口转至任务筛选",
+      "pass": true,
+      "detail": "/tasks?undated=1"
+    },
+    {
+      "item": "isolation",
+      "name": "无模型调用及用户服务访问",
+      "pass": true,
+      "detail": "{\"analyze\":0,\"propose\":0}"
+    }
+  ],
+  "netHits": []
+}

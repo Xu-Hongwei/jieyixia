@@ -1,0 +1,128 @@
+[
+  {
+    "path": "frontend/src/app/router.js",
+    "status": "modified",
+    "sha256": "773b9690cc24047fba1144687ca79e647bf78509af570996bd3fbb753a679450",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/app/router.js"
+  },
+  {
+    "path": "frontend/src/App.vue",
+    "status": "modified",
+    "sha256": "90f351645cd2558fa6fbdef91fa2d90858092fe675dfa9ec6e3694072d15dd43",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/App.vue"
+  },
+  {
+    "path": "frontend/src/components/domain/DeadlineChip.vue",
+    "status": "modified",
+    "sha256": "11dd77e303da290eaa4d514cf3fbf5eebc8e54377684e8ad4681c949ce0afa20",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/domain/DeadlineChip.vue"
+  },
+  {
+    "path": "frontend/src/components/domain/MaterialPanel.vue",
+    "status": "modified",
+    "sha256": "bdb630529e89413d902d3598f5a0632b712f09914ca92fcee9d6828221debde5",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/domain/MaterialPanel.vue"
+  },
+  {
+    "path": "frontend/src/components/domain/PlanCard.vue",
+    "status": "modified",
+    "sha256": "87dbac970bc0a57d38f30ae8fe767f2f1c51b5394275dfc2da2a6021e360723c",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/domain/PlanCard.vue"
+  },
+  {
+    "path": "frontend/src/components/domain/PlanWorkspace.vue",
+    "status": "modified",
+    "sha256": "c93627fdcfacee39365688fb1bf92eb2db537ad083271e48656c31b8a233840f",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/domain/PlanWorkspace.vue"
+  },
+  {
+    "path": "frontend/src/components/domain/TaskListRows.vue",
+    "status": "modified",
+    "sha256": "0fa2cd8b4a2c1dc96cb86d6bb98da307a31270fa08085218c3572e3f676e33e4",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/domain/TaskListRows.vue"
+  },
+  {
+    "path": "frontend/src/components/domain/WeekView.vue",
+    "status": "modified",
+    "sha256": "b65d6bb74eb86c07da9bfcfec7f72a83af93abcb6685fc87d9b99e4d258a6e0b",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/domain/WeekView.vue"
+  },
+  {
+    "path": "frontend/src/components/ui/Alert.vue",
+    "status": "modified",
+    "sha256": "7126ae2cd0f457c227ce56eea6b17ec7dcd85034a189b57803723bfed4761a3a",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/ui/Alert.vue"
+  },
+  {
+    "path": "frontend/src/components/ui/Button.vue",
+    "status": "modified",
+    "sha256": "3a2ea83dc46f99faf7710899e2a740f95c8004f469bfa64b7fc961b3f9cc65dd",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/ui/Button.vue"
+  },
+  {
+    "path": "frontend/src/components/ui/Card.vue",
+    "status": "modified",
+    "sha256": "c49188b603e175b7dd423c2ddbf4b6bba202f161cb1a5bf78452f179e8f97606",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/ui/Card.vue"
+  },
+  {
+    "path": "frontend/src/components/ui/ConfirmDialog.vue",
+    "status": "modified",
+    "sha256": "5ae32f0d84ef97d9c95d87c54b79effb5a3f0b8eb832f1f910799b29f8837065",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/ui/ConfirmDialog.vue"
+  },
+  {
+    "path": "frontend/src/components/ui/Input.vue",
+    "status": "modified",
+    "sha256": "5b1a784034fd295398fb19a534a51749f5b20c70018776cd28d94d6bfb9be599",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/ui/Input.vue"
+  },
+  {
+    "path": "frontend/src/components/ui/Textarea.vue",
+    "status": "modified",
+    "sha256": "40c088968c6effecb10515c1a07057e783751bd2d4c310faaaaac0272fbce6ed",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/components/ui/Textarea.vue"
+  },
+  {
+    "path": "frontend/src/domains/assistant/limits.js",
+    "status": "new",
+    "sha256": "6533401524ab86d97ed35a2834358fa6112a4aac7aa13d159d963b3f89a38cbf",
+    "baseline": null
+  },
+  {
+    "path": "frontend/src/pages/AssistantPage.vue",
+    "status": "modified",
+    "sha256": "933c3558107c5b03726842b93db075470292171f72e129ed0128cda7034f3004",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/pages/AssistantPage.vue"
+  },
+  {
+    "path": "frontend/src/pages/CollectPage.vue",
+    "status": "modified",
+    "sha256": "8fc2ef08707710bea6e019f2acb7d200a0579088a1ba0de0284729caed3d2ecf",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/pages/CollectPage.vue"
+  },
+  {
+    "path": "frontend/src/pages/TasksPage.vue",
+    "status": "modified",
+    "sha256": "48ca75a320dcfcac0a219d7b82b44249ec2e851334b60e99f021588f43763693",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/pages/TasksPage.vue"
+  },
+  {
+    "path": "frontend/src/pages/TodayPage.vue",
+    "status": "modified",
+    "sha256": "6f81cd82fe7dbc79cb5715fbc9204c77b7602ae08a8d8c318ddf1ef539d240ad",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/pages/TodayPage.vue"
+  },
+  {
+    "path": "frontend/src/services/assistant/requests.js",
+    "status": "modified",
+    "sha256": "2e4d904410f92c1dc885583f23f0a634eec35851037a0f4593fd95b36a196828",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/services/assistant/requests.js"
+  },
+  {
+    "path": "frontend/src/styles/main.css",
+    "status": "modified",
+    "sha256": "28400bf069e201a965ac185e66c50eed28a52f678577b0b2fb3bb31009a4258f",
+    "baseline": "output/frontend-u5-2026-11-26/baseline/src/styles/main.css"
+  }
+]

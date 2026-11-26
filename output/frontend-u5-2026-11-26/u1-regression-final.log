@@ -1,0 +1,37 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [nav] 独立任务入口选中
+PASS [filters] 搜索状态事项无截止组合筛选 — /tasks?q=%E8%99%9A%E6%9E%84%E6%B5%8B%E8%AF%95%E4%BB%BB%E5%8A%A1+&status=open&undated=1&matter=group-u1
+PASS [nav] 任务详情仍高亮任务
+PASS [filters] 返回保留完整查询 — /tasks?q=%E8%99%9A%E6%9E%84%E6%B5%8B%E8%AF%95%E4%BB%BB%E5%8A%A1+&status=open&undated=1&matter=group-u1
+PASS [filters] 返回保留滚动位置 — before=792,after=792
+PASS [filters] 刷新恢复查询和结果
+PASS [filters] 待安排使用现有分类
+PASS [filters] 过去未完成可见对应安排
+PASS [create] 新建就地提交一次并落库
+PASS [create] 保存失败保留输入且未落库
+PASS [guard] 取消离开保留表单和任务页
+PASS [guard] 取消切空间仍在个人空间
+PASS [isolation] 切空间清除列表对象和新建表单
+PASS [guard] 切空间后没有残留免确认令牌
+PASS [arrange] 安排编辑留在任务列表 — /tasks?q=%E8%AF%BE%E7%A8%8B%E6%8A%A5%E5%91%8A
+PASS [arrange] 从任务列表创建安排实际落库
+PASS [arrange] 安排详情查看任务后返回原筛选 — /tasks?q=%E8%AF%BE%E7%A8%8B%E6%8A%A5%E5%91%8A
+PASS [nav] 任务列表改排往返保留筛选 — /tasks?q=%E8%AF%BE%E7%A8%8B%E6%8A%A5%E5%91%8A
+PASS [compat] 旧无截止链接仍显示任务清单
+PASS [compat] 旧新建链接仍可用
+PASS [nav] 核对页归资料分区
+PASS [nav] 工作记录归日程分区
+PASS [layout] 任务总览 360 — 360
+PASS [layout] 任务总览 390 — 390
+PASS [layout] 任务总览 430 — 430
+PASS [layout] 任务总览 768 — 768
+PASS [layout] 任务总览 1440 — 1440
+PASS [layout] 手机只有四个主入口
+PASS [layout] 最后一行可滚动到底栏上方 — {"last":747.328125,"nav":787}
+PASS [layout] 任务创建 360 — 360
+PASS [layout] 任务创建 390 — 390
+PASS [layout] 任务创建 430 — 430
+PASS [nav] 手机核对入口集中为资料状态筛选
+PASS [isolation] 无模型调用及用户服务访问 — {"analyze":0,"propose":0}
+TOTAL 34/34

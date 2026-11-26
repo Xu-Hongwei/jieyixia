@@ -1,0 +1,179 @@
+{
+  "results": [
+    {
+      "item": "nav",
+      "name": "独立任务入口选中",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "filters",
+      "name": "搜索状态事项无截止组合筛选",
+      "pass": true,
+      "detail": "/tasks?q=%E8%99%9A%E6%9E%84%E6%B5%8B%E8%AF%95%E4%BB%BB%E5%8A%A1+&status=open&undated=1&matter=group-u1"
+    },
+    {
+      "item": "nav",
+      "name": "任务详情仍高亮任务",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "filters",
+      "name": "返回保留完整查询",
+      "pass": true,
+      "detail": "/tasks?q=%E8%99%9A%E6%9E%84%E6%B5%8B%E8%AF%95%E4%BB%BB%E5%8A%A1+&status=open&undated=1&matter=group-u1"
+    },
+    {
+      "item": "filters",
+      "name": "返回保留滚动位置",
+      "pass": true,
+      "detail": "before=583,after=583"
+    },
+    {
+      "item": "filters",
+      "name": "刷新恢复查询和结果",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "filters",
+      "name": "待安排使用现有分类",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "filters",
+      "name": "过去未完成可见对应安排",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "create",
+      "name": "新建就地提交一次并落库",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "取消离开保留表单和任务页",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "取消切空间仍在个人空间",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "isolation",
+      "name": "切空间清除列表对象和新建表单",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "guard",
+      "name": "切空间后没有残留免确认令牌",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "arrange",
+      "name": "安排编辑留在任务列表",
+      "pass": false,
+      "detail": ""
+    },
+    {
+      "item": "compat",
+      "name": "旧无截止链接仍显示任务清单",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "compat",
+      "name": "旧新建链接仍可用",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "nav",
+      "name": "核对页归资料分区",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "nav",
+      "name": "工作记录归日程分区",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "任务总览 360",
+      "pass": true,
+      "detail": "360"
+    },
+    {
+      "item": "layout",
+      "name": "任务总览 390",
+      "pass": true,
+      "detail": "390"
+    },
+    {
+      "item": "layout",
+      "name": "任务总览 430",
+      "pass": true,
+      "detail": "430"
+    },
+    {
+      "item": "layout",
+      "name": "任务总览 768",
+      "pass": true,
+      "detail": "768"
+    },
+    {
+      "item": "layout",
+      "name": "任务总览 1440",
+      "pass": true,
+      "detail": "1440"
+    },
+    {
+      "item": "layout",
+      "name": "手机只有四个主入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "layout",
+      "name": "任务创建 360",
+      "pass": true,
+      "detail": "360"
+    },
+    {
+      "item": "layout",
+      "name": "任务创建 390",
+      "pass": true,
+      "detail": "390"
+    },
+    {
+      "item": "layout",
+      "name": "任务创建 430",
+      "pass": true,
+      "detail": "430"
+    },
+    {
+      "item": "nav",
+      "name": "手机资料有核对二级入口",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "item": "isolation",
+      "name": "无模型调用及用户服务访问",
+      "pass": true,
+      "detail": "{\"analyze\":0,\"propose\":0}"
+    }
+  ],
+  "netHits": []
+}

@@ -1,0 +1,64 @@
+{
+  "hash": "8f2fcbc0",
+  "configHash": "3e599b13",
+  "lockfileHash": "a1bc03ed",
+  "browserHash": "ca8475e4",
+  "optimized": {
+    "clsx": {
+      "src": "../../../../frontend/node_modules/clsx/dist/clsx.mjs",
+      "file": "clsx.js",
+      "fileHash": "4ae994d1",
+      "needsInterop": false
+    },
+    "fflate": {
+      "src": "../../../../frontend/node_modules/fflate/esm/browser.js",
+      "file": "fflate.js",
+      "fileHash": "9479b087",
+      "needsInterop": false
+    },
+    "lucide-vue-next": {
+      "src": "../../../../frontend/node_modules/lucide-vue-next/dist/esm/lucide-vue-next.js",
+      "file": "lucide-vue-next.js",
+      "fileHash": "66bcce86",
+      "needsInterop": false
+    },
+    "pinia": {
+      "src": "../../../../frontend/node_modules/pinia/dist/pinia.mjs",
+      "file": "pinia.js",
+      "fileHash": "8ada98eb",
+      "needsInterop": false
+    },
+    "reka-ui": {
+      "src": "../../../../frontend/node_modules/reka-ui/dist/index.js",
+      "file": "reka-ui.js",
+      "fileHash": "ce266ed5",
+      "needsInterop": false
+    },
+    "tailwind-merge": {
+      "src": "../../../../frontend/node_modules/tailwind-merge/dist/bundle-mjs.mjs",
+      "file": "tailwind-merge.js",
+      "fileHash": "8c529b3c",
+      "needsInterop": false
+    },
+    "vue": {
+      "src": "../../../../frontend/node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "d78ac9ef",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../../../frontend/node_modules/vue-router/dist/vue-router.mjs",
+      "file": "vue-router.js",
+      "fileHash": "394b363c",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-MLBYSQTJ": {
+      "file": "chunk-MLBYSQTJ.js"
+    },
+    "chunk-PZ5AY32C": {
+      "file": "chunk-PZ5AY32C.js"
+    }
+  }
+}

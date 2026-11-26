@@ -3,7 +3,7 @@
 // setup（taskId：任务详情/助手入口）与 edit（draft：改排草案编辑区）两用。
 // 资格与准备/提交同一 replacementEligibility；受保护条目只读并展示原因，绝不静默纳入替换集。
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { CalendarClock, ListChecks, Plus, Trash2 } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
 import Input from '@/components/ui/Input.vue'
@@ -12,10 +12,12 @@ import Badge from '@/components/ui/Badge.vue'
 import DateInput from '@/components/ui/DateInput.vue'
 import { useAppStore } from '@/stores/app'
 import { useAssistantStore } from '@/stores/assistant'
+import { requireQwen } from '@/services/api/qwenConnection'
 import { replacementEligibility, PROTECTION_LABELS, REPLAN_PRIORITIES, replanRowsSignature } from '@/domains/assistant/replan'
 import { windowDates } from '@/domains/planning/protocol'
 import { beijingToday, formatWhen, isValidDate } from '@/domains/time'
-import { taskPath } from '@/domains/workNavigation'
+import { resolveReplanReturn } from '@/domains/workNavigation'
+import { adoptedActionEstimates, adoptedPlanActions, unallocatedActions } from '@/domains/assistant/scheduledActions'
 
 const props = defineProps({
   taskId: { type: String, default: null },
@@ -25,11 +27,15 @@ const emit = defineEmits(['started'])
 const app = useAppStore()
 const store = useAssistantStore()
 const router = useRouter()
+const route = useRoute()
 
 const EDITABLE = ['editing', 'needs_clarification', 'needs_review', 'ready']
 const editable = computed(() => !props.draft || EDITABLE.includes(props.draft.status))
 const taskId = computed(() => props.draft?.replan_scope?.task_id ?? props.taskId)
 const task = computed(() => app.docs.find((d) => d.kind === 'task' && d.id === taskId.value) ?? null)
+const taskReturn = computed(() => resolveReplanReturn(route.query.return, taskId.value, {
+  docs: app.docs, ws: app.workspaceId, todayStr: beijingToday(),
+}))
 const scopeStart = computed(() => props.draft?.replan_scope?.start_date ?? beijingToday())
 const ctx = computed(() => ({
   workspaceId: app.workspaceId,
@@ -48,7 +54,18 @@ const futureOutside = computed(() => {
   return app.docs.filter((d) => d.kind === 'plan_item' && d.task_id === taskId.value && d.date > last && d.state === 'planned')
 })
 const taskActions = computed(() => app.docs.filter((d) => d.kind === 'action' && d.task_id === taskId.value))
-const reuseOptions = computed(() => taskActions.value.filter((a) => !a.done))
+const planBindings = computed(() => adoptedPlanActions(store.drafts))
+const actionEstimates = computed(() => adoptedActionEstimates(store.drafts))
+const reuseOptions = computed(() => unallocatedActions(taskActions.value,
+  app.docs.filter(d => d.kind === 'plan_item' && d.task_id === taskId.value),
+  planBindings.value, new Set(selected.value), actionEstimates.value))
+function chooseAction(row, event) {
+  const id = event.target.value
+  const action = reuseOptions.value.find(a => a.id === id)
+  row.reuse = id
+  row.text = action?.text ?? ''
+  row.minutes = action ? String(action.remaining) : ''
+}
 
 const PRIORITY_LABELS = { low: '低', normal: '普通', high: '高' }
 const emptyRow = () => ({
@@ -114,6 +131,7 @@ function parseDeps(text, rowNo, total) {
 function buildForm() {
   const items = []
   const constraints = []
+  const allocated = new Map()
   for (let i = 0; i < rows.length; i += 1) {
     const r = rows[i]
     const text = r.text.trim()
@@ -130,7 +148,13 @@ function buildForm() {
       if (!Number.isInteger(n) || n < 1 || n > 240) throw new Error(`第 ${i + 1} 行最小段长必须是 1–240 的整数或留空（默认 25）`)
       minSeg = n
     }
-    if (r.reuse && !reuseOptions.value.some((a) => a.id === r.reuse)) throw new Error(`第 ${i + 1} 行复用的行动不是本任务未完成行动，请重新选择`)
+    if (r.reuse) {
+      const available = reuseOptions.value.find(a => a.id === r.reuse)
+      if (!available) throw new Error(`第 ${i + 1} 行的行动已排满或已完成，请重新选择。`)
+      const total = (allocated.get(r.reuse) ?? 0) + (minutes ?? 0)
+      if (total > available.remaining) throw new Error(`「${available.text}」总共还有 ${available.remaining} 分钟待安排。`)
+      allocated.set(r.reuse, total)
+    }
     const earliest = String(r.earliest ?? '').trim()
     if (earliest && !isValidDate(earliest)) throw new Error(`第 ${i + 1} 行最早日期「${earliest}」不是合法日期（YYYY-MM-DD）`)
     if (!REPLAN_PRIORITIES.includes(r.priority ?? 'normal')) throw new Error(`第 ${i + 1} 行优先级不合法`)
@@ -152,6 +176,9 @@ const liveSignature = computed(() => replanRowsSignature({
   statement: statement.value,
   rows: rows.map((r) => ({ ...r })),
 }))
+const initialSignature = liveSignature.value
+const hasUnsaved = computed(() => props.draft ? store.replanPanelDirty : liveSignature.value !== initialSignature)
+function discard() { initFromDraft() }
 watch([() => props.draft?.id ?? null, liveSignature, editable], () => {
   if (!props.draft || !editable.value) { store.setReplanForm(null); return }
   store.setReplanForm({ draftId: props.draft.id, signature: liveSignature.value })
@@ -180,6 +207,7 @@ function removeRow(i) {
 }
 
 const busy = ref(false)
+defineExpose({ hasUnsaved, discard, busy })
 // 助手建议清单（M3）：模型接收后 estimate_origin=model 的工作项只是建议；
 // 用户核对并「保存改排内容」后才重建为 estimate_origin=user 的本次清单，方可采用。
 const modelSuggestion = computed(() => {
@@ -256,7 +284,7 @@ async function submit() {
   try {
     if (props.draft) {
       const r = await store.saveReplanContent({ replacementIds: selected.value, progress: form.progress, constraints: form.constraints })
-      if (r.ok) store.say('info', '改排内容已保存；请再次「重新排程」更新预览。')
+      if (r.ok) store.say('info', '改排内容已保存；请再次「保存并预览」更新预览。')
     } else {
       const r = await store.startReplan({ taskId: taskId.value, replacementIds: selected.value, progress: form.progress, constraints: form.constraints })
       if (r.ok) emit('started')
@@ -279,12 +307,12 @@ const deadlineLabel = computed(() => {
         <span class="font-medium">{{ task.title }}</span>
         <Badge variant="secondary">总截止：{{ deadlineLabel }}</Badge>
         <Badge variant="outline">本轮不修改截止</Badge>
-        <Button variant="ghost" size="sm" @click="router.push(taskPath(task.id))">原任务页</Button>
+        <Button variant="ghost" size="sm" @click="router.push(taskReturn)">原任务页</Button>
       </div>
       <p v-if="task.status === 'done'" class="mt-2 text-sm text-destructive">任务已完成，不能改排。</p>
       <template v-else>
         <div class="mt-3 rounded-md border p-2">
-          <div class="text-xs font-medium text-muted-foreground">行动完成情况（只读参考；完成状态请到原任务页操作）</div>
+          <div class="text-xs font-medium text-muted-foreground">行动进展</div>
           <ul class="mt-1 space-y-0.5 text-xs">
             <li v-for="a in taskActions" :key="a.id" class="flex items-center gap-2">
               <Badge :variant="a.done ? 'success' : 'secondary'">{{ a.done ? '已完成' : '未完成' }}</Badge>
@@ -314,16 +342,17 @@ const deadlineLabel = computed(() => {
         <div class="mt-3 space-y-2">
           <label class="block text-xs font-medium text-muted-foreground">进展说明（一句话）</label>
           <Textarea v-model="statement" :disabled="!editable" placeholder="例如：资料读完了，报告还需安排 90 分钟，周四没空" />
-          <div class="text-xs font-medium text-muted-foreground">本次待安排清单（已含所选旧安排对应的未完工作；不含保留安排继续覆盖的工作）</div>
+          <div class="text-xs font-medium text-muted-foreground">本次待安排工作（包含所选旧安排的剩余工作）</div>
           <div v-for="(r, i) in rows" :key="i" class="space-y-1 rounded-md border p-2">
             <div class="flex items-center gap-2">
               <Input v-model="r.text" :disabled="!editable" class="flex-1" :aria-label="`第 ${i + 1} 行工作内容`" placeholder="工作内容" />
               <Button variant="ghost" size="sm" :disabled="!editable || rows.length <= 1" :aria-label="`删除第 ${i + 1} 行`" @click="removeRow(i)"><Trash2 /></Button>
             </div>
             <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <select v-model="r.reuse" :disabled="!editable" class="h-8 rounded-md border bg-background px-2 text-xs" :aria-label="`第 ${i + 1} 行复用行动`">
-                <option value="">新增行动（将新增）</option>
-                <option v-for="a in reuseOptions" :key="a.id" :value="a.id">复用：{{ a.text }}</option>
+              <select :value="r.reuse" :disabled="!editable || store.busy.loading" class="h-8 max-w-full rounded-md border bg-background px-2 text-xs" :aria-label="`第 ${i + 1} 行复用行动`" @change="chooseAction(r, $event)">
+                <option value="">新建行动</option>
+                <option v-if="r.reuse && !reuseOptions.some(a => a.id === r.reuse)" :value="r.reuse" disabled>原行动已排满或已完成</option>
+                <option v-for="a in reuseOptions" :key="a.id" :value="a.id">待安排：{{ a.text }} · {{ a.remaining }} 分钟</option>
               </select>
               <label class="flex items-center gap-1">分钟<Input v-model="r.minutes" :disabled="!editable" class="h-8 w-20" inputmode="numeric" :aria-label="`第 ${i + 1} 行分钟数`" /></label>
               <label class="flex items-center gap-1"><input v-model="r.splittable" type="checkbox" :disabled="!editable" />可拆分</label>
@@ -366,10 +395,10 @@ const deadlineLabel = computed(() => {
           <Button :disabled="!editable || busy || store.busy.saving" @click="submit">
             <ListChecks class="size-4" />{{ draft ? '保存改排内容' : '创建改排草案' }}
           </Button>
-          <Button v-if="draft" variant="secondary" :disabled="!editable || busy || store.generating || store.replanPanelDirty" @click="store.generateReplan()">请助手整理剩余工作</Button>
-          <span v-if="draft" class="text-xs text-muted-foreground">保存后请再次「重新排程」；旧预览与采用确认随之失效。</span>
+          <Button v-if="draft" variant="secondary" :disabled="!editable || busy || store.generating || store.replanPanelDirty" @click="requireQwen() && store.generateReplan()">请助手整理剩余工作</Button>
+          <span v-if="draft" class="text-xs text-muted-foreground">保存后请再次「保存并预览」；旧预览与采用确认随之失效。</span>
         </div>
-        <p v-if="draft && store.replanPanelDirty" class="mt-2 text-xs text-amber-700">改排面板有未保存修改：旧方案不能采用，请先「保存改排内容」并重新排程。</p>
+        <p v-if="draft && store.replanPanelDirty" class="mt-2 text-xs text-amber-700">改排面板有未保存修改：旧方案不能采用，请先「保存改排内容」，再保存并预览。</p>
       </template>
     </template>
   </div>

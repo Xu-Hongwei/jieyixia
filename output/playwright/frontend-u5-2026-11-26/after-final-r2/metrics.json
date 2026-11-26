@@ -1,0 +1,48 @@
+[
+  {
+    "stage": "initial",
+    "resources": [
+      {
+        "url": "index-D0Uohas_.js",
+        "bytes": 663601,
+        "start": 8.100000023841858
+      },
+      {
+        "url": "index-jobAVjQw.css",
+        "bytes": 38788,
+        "start": 8.199999988079071
+      }
+    ],
+    "domContentLoaded": 91.30000001192093
+  },
+  {
+    "stage": "settled",
+    "resources": [
+      {
+        "url": "index-D0Uohas_.js",
+        "bytes": 663601,
+        "start": 8.100000023841858
+      },
+      {
+        "url": "index-jobAVjQw.css",
+        "bytes": 38788,
+        "start": 8.199999988079071
+      },
+      {
+        "url": "AssistantPage-eMSxMqQ-.js",
+        "bytes": 166592,
+        "start": 1858.300000011921
+      },
+      {
+        "url": "contractSchema-DKwulQjd.js",
+        "bytes": 201269,
+        "start": 1858.4000000357628
+      },
+      {
+        "url": "DataPage-BddtaBRK.js",
+        "bytes": 83569,
+        "start": 1858.5
+      }
+    ]
+  }
+]

@@ -25,22 +25,23 @@ const lateRisk = computed(() => !!risk.value && (risk.value.kind === 'after_dead
 <template>
   <button
     type="button"
-    class="w-full rounded-md border border-border/70 bg-background px-2 py-1.5 text-left transition-colors hover:border-primary/50"
+    class="w-full rounded-sm border-l-2 border-primary/40 bg-background px-2.5 py-2.5 text-left transition-colors hover:border-primary/50"
     :aria-label="`安排详情：${props.plan.action_text}`"
     @click="emit('open', props.plan.id)"
   >
     <div class="line-clamp-2 break-words text-sm font-medium leading-snug">{{ props.plan.action_text }}</div>
-    <div class="mt-0.5 truncate text-xs text-muted-foreground">{{ props.task ? props.task.title : '原任务已删除' }}</div>
-    <div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] text-muted-foreground">
-      <span class="font-date">预计 {{ props.plan.planned_minutes }} 分</span>
-      <span>· 实际 {{ planActualLabel(summary) }}</span>
-      <Badge v-if="props.plan.state === 'partial'" variant="secondary" class="px-1 py-0 text-[10px]">部分完成</Badge>
-      <Badge v-if="summary && !summary.authoritative" variant="warning" class="px-1 py-0 text-[10px]">待核对</Badge>
-      <Badge v-if="summary && summary.cacheMismatch" variant="warning" class="px-1 py-0 text-[10px]" title="缓存与明细不一致：仅提示，不自动改写">缓存差异</Badge>
+
+    <div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
+      <span class="min-w-0 truncate">{{ props.task ? props.task.title : '原任务已删除' }}</span>
+      <span class="whitespace-nowrap">预计 {{ props.plan.planned_minutes }} 分</span>
+      <span v-if="!summary || (summary.authoritative && summary.actualMinutes != null)">实际 {{ planActualLabel(summary) }}</span>
+      <Badge v-if="props.plan.state === 'partial'" variant="secondary" class="px-1 py-0 text-xs">部分完成</Badge>
+      <Badge v-if="summary && !summary.authoritative" variant="warning" class="px-1 py-0 text-xs">待核对</Badge>
+      <Badge v-if="summary && summary.cacheMismatch" variant="warning" class="px-1 py-0 text-xs" title="缓存与明细不一致：仅提示，不自动改写">缓存差异</Badge>
     </div>
     <div
       v-if="deadlineLabel || (risk && risk.kind !== 'no_deadline')"
-      class="mt-0.5 break-words text-[11px] leading-snug"
+      class="mt-0.5 break-words text-xs leading-snug"
       :class="lateRisk ? 'text-destructive' : 'text-muted-foreground'"
     >
       {{ deadlineLabel }}<template v-if="risk && risk.kind === 'after_deadline'"> · 晚于截止</template><template v-else-if="risk && risk.overdue"> · 已逾期</template><template v-else-if="risk && (risk.kind === 'due_same_day' || risk.kind === 'due_same_day_timed')"> · 当日截止</template>

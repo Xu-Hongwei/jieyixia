@@ -1,0 +1,17 @@
+INFO:     Started server process [27188]
+INFO:     Waiting for application startup.
+{"event": "startup", "provider": "fixture", "source_ids": ["src-01", "src-02", "src-03", "src-04"], "max_body_bytes": 8388608, "cors_origins": ["http://127.0.0.1:5177", "http://localhost:5177"], "auth_enabled": true, "rate_limit_per_min": 60, "max_concurrent_analyze": 4, "max_model_calls_per_day": 1000, "propose_budget_s": 120.0, "propose_max_attempts": 2, "propose_max_body_bytes": 524288}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)
+INFO:     127.0.0.1:65376 - "GET /api/healthz HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65389 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "ab5489d8-c071-45a8-bfb1-ed40bbe77e2c", "thread_id": "5d8cf371-f0c3-4343-8858-9fe2fa2dba55", "turn_id": "9a325b6b-31b9-4436-aa8e-382fa8188fd2", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 0.43}
+INFO:     127.0.0.1:65397 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56708 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "d95abd7f-9428-48b2-85ef-99ccbec116fd", "thread_id": "5a59f767-9073-41c9-937d-57638e2344c5", "turn_id": "b1707899-02ad-4eea-b3a0-6a72df6cee87", "provider": "fixture", "payload_kind": "clarification", "duration_ms": 0.2}
+INFO:     127.0.0.1:56713 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "e5a834b0-905f-42d7-818a-d1485d7120b2", "thread_id": "5a59f767-9073-41c9-937d-57638e2344c5", "turn_id": "780136f6-1100-4afd-8fd5-8c287abe3fa4", "provider": "fixture", "payload_kind": "clarification", "duration_ms": 0.2}
+INFO:     127.0.0.1:56714 - "POST /api/assistant/propose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56722 - "GET /api/healthz HTTP/1.1" 200 OK
+{"event": "propose", "request_id": "b135a437-e305-4b95-b974-77c8d1e27bc0", "thread_id": "9ffd1929-337d-4a04-9cec-dd009583255d", "turn_id": "a7b601c1-889f-4075-a1ae-8a6adf413e42", "provider": "fixture", "payload_kind": "proposal", "duration_ms": 0.23}
+INFO:     127.0.0.1:56726 - "POST /api/assistant/propose HTTP/1.1" 200 OK

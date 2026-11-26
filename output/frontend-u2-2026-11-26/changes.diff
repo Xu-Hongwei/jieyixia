@@ -1,0 +1,633 @@
+--- before/src/components/domain/PlanDetail.vue
++++ after/src/components/domain/PlanDetail.vue
+@@ -26,6 +26,7 @@
+ // 终态→只读历史+可另建；未结束会话/异常摘要→禁所有变更，先处理。
+ const props = defineProps({
+   planId: { type: String, required: true },
++  showClose: { type: Boolean, default: true },
+ })
+ const emit = defineEmits(['close', 'edit', 'move', 'another', 'op-done'])
+ const store = useAppStore()
+@@ -229,7 +230,7 @@
+     <template #header>
+       <div class="flex items-center gap-2">
+         <div class="min-w-0 flex-1 text-base font-semibold">安排详情</div>
+-        <Button size="sm" variant="ghost" aria-label="关闭安排详情" title="关闭" @click="emit('close')"><X /></Button>
++        <Button v-if="showClose" size="sm" variant="ghost" aria-label="关闭安排详情" title="关闭" @click="emit('close')"><X /></Button>
+       </div>
+     </template>
+ 
+@@ -257,7 +258,7 @@
+         </div>
+         <div class="flex gap-2"><dt class="text-muted-foreground">实际</dt><dd class="font-medium">{{ planActualLabel(summary) }}</dd></div>
+       </dl>
+-      <p class="text-xs text-muted-foreground">安排只说明「这天准备做什么」；任务截止与行动不受安排操作影响。</p>
++      <p class="text-xs text-muted-foreground">安排不会改变任务截止或行动。</p>
+ 
+       <!-- 异常历史：待核对块权威优先，不给可确认的数字 -->
+       <div v-if="summary && !summary.authoritative" class="rounded-md border border-warning bg-warning/10 p-3 text-sm">
+@@ -275,7 +276,6 @@
+         <span class="text-muted-foreground"> · 累计 {{ formatDurationMs(summary.totalMs) }} · {{ summary.endedSessionCount }} 段已结束</span>
+         <RouterLink v-if="latestSession" :to="recordLink(latestSession)" class="ml-2 text-xs underline">最近一段记录</RouterLink>
+       </div>
+-      <p v-else class="text-sm text-muted-foreground">实际用时未记录（没有已结束的工作记录）。</p>
+ 
+       <!-- 缓存差异：只读提示，确认进度时按明细重算，不自动写库 -->
+       <div v-if="summary && summary.cacheMismatch" class="rounded-md border border-dashed border-warning p-3 text-xs">
+@@ -317,7 +317,6 @@
+       </div>
+       <div v-else-if="entry.kind === 'start'" class="flex flex-wrap items-center gap-2 rounded-md border border-primary/40 bg-primary/5 p-3">
+         <Button size="sm" @click="startThisPlan">开始这项安排</Button>
+-        <span class="text-xs text-muted-foreground">打开确认面板核对行动与事实后开始；不按安排文字自动绑定行动。</span>
+       </div>
+ 
+       <div v-if="endedSessions.length">
+@@ -342,7 +341,6 @@
+           :disabled="opBusy"
+           @click="requestOp(op)"
+         >{{ OP_LABELS[op] }}</Button>
+-        <span class="text-xs text-muted-foreground">操作只作用于这项安排，不影响任务截止与行动。</span>
+       </div>
+     </div>
+ 
+--- before/src/components/domain/PlanEditor.vue
++++ after/src/components/domain/PlanEditor.vue
+@@ -24,6 +24,8 @@
+   taskId: { type: String, default: '' },
+   date: { type: String, default: '' },
+   lockTask: { type: Boolean, default: false },
++  showClose: { type: Boolean, default: true },
++  inlineCreate: { type: Boolean, default: false },
+ })
+ const emit = defineEmits(['close', 'saved', 'goto-create-task'])
+ const store = useAppStore()
+@@ -335,6 +337,7 @@
+     errorMsg.value = '正在保存：请等待本次结果后再切换表单。'
+     return
+   }
++  if (props.inlineCreate && saveState.value !== 'verify') { emit('goto-create-task'); return }
+   if (dirty.value || saveState.value === 'verify') {
+     discardAction.value = 'goto-create'
+     dlgDiscard.value = true
+@@ -371,7 +374,11 @@
+     dlgDiscard.value = true
+   })
+ }
+-defineExpose({ guardLeave })
++function selectCreatedTask(id) {
++  if (props.mode !== 'create' || taskLocked || saving.value || saveState.value === 'verify') return
++  if (store.tasks.some((task) => task.id === id)) dTask.value = id
++}
++defineExpose({ guardLeave, selectCreatedTask })
+ 
+ // —— 任务选择（仅 create）：搜索、未完成优先、受阻可选带标记、已完成不可新建 ——
+ const taskQuery = ref('')
+@@ -407,7 +414,7 @@
+         <Badge v-if="saveState === 'verify'" variant="warning">待核实</Badge>
+         <Badge v-else-if="saveState === 'saving'" variant="secondary">保存中</Badge>
+         <Badge v-else-if="dirty" variant="outline">未保存</Badge>
+-        <Button size="sm" variant="ghost" aria-label="关闭安排编辑" title="关闭" @click="requestClose"><X /></Button>
++        <Button v-if="showClose" size="sm" variant="ghost" aria-label="关闭安排编辑" title="关闭" @click="requestClose"><X /></Button>
+       </div>
+     </template>
+ 
+@@ -442,8 +449,9 @@
+           </div>
+           <div v-else class="rounded-md border border-dashed p-3 text-sm">
+             <p class="text-muted-foreground">还没有任务。安排必须挂在已有任务下，不会隐式创建任务。</p>
+-            <Button size="sm" variant="outline" type="button" class="mt-2" @click="requestGotoCreate">先创建任务</Button>
++            <Button v-if="!inlineCreate" size="sm" variant="outline" type="button" class="mt-2" @click="requestGotoCreate">先创建任务</Button>
+           </div>
++          <Button v-if="inlineCreate" size="sm" variant="outline" type="button" class="mt-2" :disabled="saving || saveState === 'verify'" @click="requestGotoCreate">新建任务并继续</Button>
+         </template>
+         <!-- 从已有行动带入：只复制初值，不绑定行动 ID -->
+         <div v-if="dTask && taskActions.length" class="rounded-md border border-dashed p-2">
+@@ -470,7 +478,7 @@
+       </div>
+ 
+       <div class="flex flex-wrap items-end gap-3">
+-        <div class="w-44">
++        <div class="w-56 max-w-full">
+           <div class="text-xs font-medium text-muted-foreground">安排日期</div>
+           <DateInput v-if="props.mode !== 'edit'" v-model="dDate" aria-label="安排日期" />
+           <div v-else class="font-date rounded-md border bg-muted/40 px-3 py-2 text-sm">{{ dDate }}</div>
+@@ -510,7 +518,6 @@
+       <div class="flex flex-wrap items-center gap-2">
+         <Button type="submit" :disabled="saving" :aria-busy="saving">{{ saving ? '保存中…' : SUBMIT_LABELS[props.mode] }}</Button>
+         <Button variant="outline" type="button" @click="requestClose">关闭</Button>
+-        <span class="text-xs text-muted-foreground">回车等同点击保存；保存期间不可重复提交。</span>
+       </div>
+     </form>
+ 
+@@ -547,4 +554,4 @@
+       <p>{{ saveState === 'verify' ? '保存结果仍待核实；离开后凭据保留在本空间，重新打开同一安排可继续核实或原信封重试。' : '当前草稿尚未保存，放弃后不可恢复。' }}</p>
+     </ConfirmDialog>
+   </Card>
+-</template>+</template>
+--- before/src/components/domain/WeekView.vue
++++ after/src/components/domain/WeekView.vue
+@@ -221,10 +221,8 @@
+         <span>截止 {{ schedule.deadlineCount }} 项</span>
+         <template v-if="schedule.outsideWeek.length">
+           <span>·</span>
+-          <span>周外另有 {{ schedule.outsideWeek.length }} 项安排（待安排/全部任务清单可见）</span>
++          <span>周外另有 {{ schedule.outsideWeek.length }} 项安排</span>
+         </template>
+-        <span>·</span>
+-        <span>逾期红标 · 完成淡化 · 点击卡片看详情</span>
+       </div>
+     </Card>
+   </div>
+--- before/src/pages/TaskDetailPage.vue
++++ after/src/pages/TaskDetailPage.vue
+@@ -1,5 +1,5 @@
+ <script setup>
+-import { computed, nextTick, ref, watch } from 'vue'
++import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+ import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
+ import { ArrowLeft, CalendarClock, Check, Pencil, Play, Plus, Trash2, X } from 'lucide-vue-next'
+ import {
+@@ -16,8 +16,8 @@
+ import ContinueBar from '@/components/domain/ContinueBar.vue'
+ import DeleteImpact from '@/components/domain/DeleteImpact.vue'
+ import PlanCard from '@/components/domain/PlanCard.vue'
+-import PlanDetail from '@/components/domain/PlanDetail.vue'
+-import PlanEditor from '@/components/domain/PlanEditor.vue'
++import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
++import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
+ import StartPlanWorkDialog from '@/components/domain/StartPlanWorkDialog.vue'
+ import Textarea from '@/components/ui/Textarea.vue'
+ import { useAppStore } from '@/stores/app'
+@@ -467,6 +467,8 @@
+   store.docs
+     .filter((d) => d.kind === 'plan_item' && d.task_id === taskId.value)
+     .sort((a, b) => (a.date === b.date ? (a.order ?? 0) - (b.order ?? 0) : a.date < b.date ? -1 : 1)))
++const showAllPlans = ref(false)
++const visibleTaskPlans = computed(() => showAllPlans.value ? taskPlans.value : taskPlans.value.filter(p => p.date >= todayStr.value && ['planned', 'partial'].includes(p.state)).slice(0, 3))
+ const detailPlanId = ref('')
+ const detailPlan = computed(() =>
+   (detailPlanId.value ? store.docs.find((d) => d.kind === 'plan_item' && d.id === detailPlanId.value) || null : null))
+@@ -488,20 +490,27 @@
+   editor.value = null
+   detailPlanId.value = payload.planId
+ }
+-function onGotoCreateTask() {
++async function openDetail(id) {
++  if (editorRef.value && !(await editorRef.value.guardLeave())) return
+   editor.value = null
+-  router.push({ path: '/today', query: { create: '1' } })
++  detailPlanId.value = id
+ }
+ // 草稿不串任务/工作区：切换即关闭编辑器与详情（离开守卫已先结算草稿）。
+-watch(taskId, () => { editor.value = null; detailPlanId.value = '' })
+-watch(() => store.workspaceId, () => { editor.value = null; detailPlanId.value = '' })
++watch(taskId, () => { editor.value = null; detailPlanId.value = ''; showAllPlans.value = false })
++watch(() => store.workspaceId, () => { editor.value = null; detailPlanId.value = ''; showAllPlans.value = false; resetWorkLeaveApproval() })
+ // 离开保护叠加：先结算编辑器草稿（放弃/继续），再任务脏输入；两者都放行才离开。
+ async function guardLeave() {
+   if (editorRef.value && !(await editorRef.value.guardLeave())) return false
+   return confirmLeaveIfDirty()
+ }
+-onBeforeRouteLeave(guardLeave)
+-onBeforeRouteUpdate(guardLeave)
++const unregister = registerWorkLeave(guardLeave)
++onBeforeUnmount(unregister)
++onBeforeRouteLeave(requestWorkLeave)
++onBeforeRouteUpdate(async (to, from) => {
++  const allowed = await guardLeave()
++  if (allowed && to.fullPath !== from.fullPath) { editor.value = null; detailPlanId.value = '' }
++  return allowed
++})
+ 
+ const deleteActionTarget = ref(null)
+ const deleteActionOpen = ref(false)
+@@ -615,7 +624,7 @@
+             <Button size="sm" variant="ghost" aria-label="重命名任务" title="重命名" @click="startRename"><Pencil /></Button>
+           </template>
+           <Badge :variant="task.status === 'done' ? 'success' : 'secondary'" :title="task.status">{{ label(STATUS_LABELS, task.status) }}</Badge>
+-          <Button v-if="task.status !== 'done'" size="sm" @click="requestFinish"><Check />完成任务</Button>
++          <Button v-if="task.status !== 'done'" size="sm" variant="outline" @click="requestFinish"><Check />完成任务</Button>
+           <Button v-else size="sm" variant="outline" @click="reopen">重新打开</Button>
+           <Button size="sm" variant="destructive" aria-label="删除任务" title="删除任务" @click="openDeleteTask"><Trash2 /></Button>
+         </div>
+@@ -653,13 +662,13 @@
+               <div v-if="currentAction" class="flex flex-wrap items-center gap-2">
+                 <div class="min-w-0 flex-1 basis-40">
+                   <div class="break-words text-sm font-medium">{{ currentAction.text }}</div>
+-                  <div class="mt-0.5 text-xs text-muted-foreground">预计 {{ currentAction.minutes }} 分钟 · 用户手动填写</div>
++                  <div class="mt-0.5 text-xs text-muted-foreground">预计 {{ currentAction.minutes }} 分钟</div>
+                 </div>
+                 <Button size="sm" variant="outline" @click="toggleDone(currentAction)"><Check />完成行动</Button>
+                 <Button size="sm" variant="outline" @click="clearCurrent">取消当前</Button>
+               </div>
+               <div v-else-if="taskActions.length" class="text-sm text-muted-foreground">
+-                尚未选择当前行动。请在下方行动列表中显式选择下一步，不会自动替你指定。
++                从下方行动列表选择下一步。
+               </div>
+               <div v-else class="space-y-2">
+                 <p class="text-sm text-muted-foreground">还没有行动。添加下一步，把任务拆成可以开始的小步骤。</p>
+@@ -772,34 +781,29 @@
+           <Card>
+             <template #header>
+               <div class="flex flex-wrap items-center gap-2">
+-                <span class="text-base font-semibold">跨日安排 · {{ taskPlans.length }}</span>
++                <span class="text-base font-semibold">近期安排</span>
+                 <Button v-if="task.status !== 'done'" size="sm" variant="outline" class="ml-auto" @click="router.push(replanLink)"><CalendarClock />调整后续安排</Button>
+                 <Button v-if="task.status !== 'done'" size="sm" variant="outline" @click="openEditor({ mode: 'create', taskId: task.id, locked: true })"><Plus />安排工作</Button>
+               </div>
+-              <p class="text-xs text-muted-foreground">安排只说明「这天准备做什么」，不改任务截止与行动。已完成任务的安排为只读历史。</p>
+             </template>
+             <div class="space-y-2">
+-              <div v-for="p in taskPlans" :key="p.id" class="space-y-1">
++              <div v-for="p in visibleTaskPlans" :key="p.id" class="space-y-1">
+                 <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                   <span class="font-date font-medium">{{ p.date }}</span>
+                   <Badge :variant="p.state === 'done' ? 'success' : p.state === 'partial' ? 'warning' : 'secondary'">{{ label(PLAN_STATE_LABELS, p.state) }}</Badge>
+                   <span v-if="p.task_ref_state === 'deleted'">原任务已删除</span>
+                 </div>
+-                <PlanCard :plan="p" :task="task" @open="detailPlanId = $event" />
+-              </div>
+-              <p v-if="!taskPlans.length" class="text-sm text-muted-foreground">还没有安排。「安排工作」固定本任务、默认北京今天。</p>
++                <PlanCard :plan="p" :task="task" @open="openDetail" />
++              </div>
++              <p v-if="!visibleTaskPlans.length" class="text-sm text-muted-foreground">暂无{{ showAllPlans ? '' : '后续' }}安排。</p>
++              <button v-if="showAllPlans || taskPlans.length > visibleTaskPlans.length" type="button" class="text-sm text-muted-foreground underline" :aria-expanded="showAllPlans" @click="showAllPlans = !showAllPlans">{{ showAllPlans ? '收起历史安排' : `查看全部 ${taskPlans.length} 项安排` }}</button>
+             </div>
+           </Card>
+ 
+           <!-- 本任务已结束工作：快照标题/行动、北京起止、实际用时、结果；删除任务后仍可在独立记录页回看 -->
+-          <Card v-if="taskSessions.length">
+-            <template #header>
+-              <div class="flex flex-wrap items-center gap-2">
+-                <span class="text-base font-semibold">工作记录 · {{ taskSessions.length }} 段</span>
+-                <span class="text-xs text-muted-foreground">合计 <span class="font-date tabular-nums">{{ formatDurationMs(taskTotalMs) }}</span></span>
+-                <RouterLink to="/work-records" class="ml-auto text-xs underline">全部工作记录</RouterLink>
+-              </div>
+-            </template>
++          <details v-if="taskSessions.length" class="rounded-lg border bg-card p-4">
++            <summary class="mb-3 cursor-pointer text-base font-semibold">工作记录 · {{ taskSessions.length }} 段</summary>
++            <div class="mb-3 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground"><span>合计 {{ formatDurationMs(taskTotalMs) }}</span><RouterLink to="/work-records" class="underline">全部工作记录</RouterLink></div>
+             <ul class="space-y-2">
+               <li v-for="s in taskSessions" :key="s.id" class="rounded-md border p-2.5 text-sm">
+                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+@@ -817,15 +821,13 @@
+                 <p v-if="s.outcome === 'blocked' && s.blocker" class="mt-1 break-words text-xs text-warning-foreground">卡点：{{ s.blocker }}</p>
+               </li>
+             </ul>
+-          </Card>
++          </details>
+         </div>
+ 
+         <div class="space-y-4">
+           <!-- 说明与完成标准 -->
+-          <Card>
+-            <template #header>
+-              <div class="text-base font-semibold">说明与完成标准</div>
+-            </template>
++          <details class="rounded-lg border bg-card p-4">
++            <summary class="mb-3 cursor-pointer text-base font-semibold">说明与完成标准</summary>
+             <div class="space-y-3">
+               <div>
+                 <Textarea v-model="draftDescription" class="min-h-20" placeholder="任务说明（交付什么、交给谁…）" aria-label="任务说明" />
+@@ -836,53 +838,26 @@
+                 <Button size="sm" variant="outline" class="mt-1.5" @click="saveCriteria">保存完成标准</Button>
+               </div>
+             </div>
+-          </Card>
++          </details>
+ 
+           <!-- 关联资料：只读出处，不改便签事实 -->
+-          <Card>
+-            <template #header>
+-              <div class="text-base font-semibold">关联资料</div>
+-            </template>
++          <details class="rounded-lg border bg-card p-4">
++            <summary class="mb-3 cursor-pointer text-base font-semibold">关联资料</summary>
+             <div class="space-y-1.5">
+               <div v-for="n in relatedNotes" :key="n.id">
+                 <RouterLink :to="noteLink(n)" class="text-sm underline">便签「{{ n.title }}」</RouterLink>
+               </div>
+-              <p v-if="!relatedNotes.length" class="text-sm text-muted-foreground">没有关联便签；截止为用户手动输入或独立创建。</p>
++              <p v-if="!relatedNotes.length" class="text-sm text-muted-foreground">暂无关联资料。</p>
+             </div>
+-          </Card>
++          </details>
+         </div>
+       </div>
+     </template>
+ 
+     <!-- 共享安排编辑器/详情：与日程页同一组件；保存后定位本任务清单内的目标卡片 -->
+-    <PlanEditor
+-      v-if="editor"
+-      :key="editor.key"
+-      ref="editorRef"
+-      :mode="editor.mode"
+-      :plan-id="editor.planId || ''"
+-      :task-id="editor.taskId || ''"
+-      :date="editor.date || ''"
+-      :lock-task="!!editor.locked"
+-      @close="editor = null"
+-      @saved="onPlanSaved"
+-      @goto-create-task="onGotoCreateTask"
+-    />
+-    <div v-if="detailPlanId" class="space-y-1">
+-      <RouterLink
+-        v-if="detailPlan"
+-        :to="schedulePath({ date: detailPlan.date, plan: detailPlanId }, todayStr)"
+-        class="text-xs underline"
+-      >在日程表中查看该安排</RouterLink>
+-      <PlanDetail
+-        :plan-id="detailPlanId"
+-        @close="detailPlanId = ''"
+-        @edit="(id) => openEditor({ mode: 'edit', planId: id })"
+-        @move="(id) => openEditor({ mode: 'move', planId: id })"
+-        @another="(id) => openEditor({ mode: 'another', planId: id })"
+-        @op-done="(p) => { detailPlanId = p.planId }"
+-      />
+-    </div>
++    <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="detailPlanId" @close="editor = null; detailPlanId = ''" @saved="onPlanSaved"
++      @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
++      @another="id => openEditor({ mode: 'another', planId: id })" @op-done="onPlanSaved" />
+ 
+     <ConfirmDialog v-model="finishConfirmOpen" title="完成任务" confirm-label="确认整体完成" @confirm="confirmFinish">
+       还有 {{ unfinishedCount }} 个行动未完成。完成任务不会自动把它们标为完成；之后仍可重新打开任务。
+--- before/src/pages/TasksPage.vue
++++ after/src/pages/TasksPage.vue
+@@ -1,13 +1,12 @@
+ <script setup>
+ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+-import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
++import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
+ import { Plus } from 'lucide-vue-next'
+ import Button from '@/components/ui/Button.vue'
+ import Input from '@/components/ui/Input.vue'
+ import TaskListRows from '@/components/domain/TaskListRows.vue'
+ import TaskCreateForm from '@/components/domain/TaskCreateForm.vue'
+-import PlanEditor from '@/components/domain/PlanEditor.vue'
+-import PlanDetail from '@/components/domain/PlanDetail.vue'
++import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
+ import { useAppStore } from '@/stores/app'
+ import { usePlanStore } from '@/stores/plan'
+ import { TASK_LIST_LABELS, cleanTaskListQuery, filterTaskList, taskListPath } from '@/domains/taskList'
+@@ -47,6 +46,11 @@
+ const unregister = registerWorkLeave(guardLeave)
+ onBeforeUnmount(unregister)
+ onBeforeRouteLeave(requestWorkLeave)
++onBeforeRouteUpdate(async (to, from) => {
++  const allowed = await guardLeave()
++  if (allowed && to.fullPath !== from.fullPath) { editor.value = null; detailId.value = '' }
++  return allowed
++})
+ watch(() => app.workspaceId, () => { createOpen.value = false; editor.value = null; detailId.value = ''; resetWorkLeaveApproval() })
+ async function openCreate() {
+   if (!(await guardLeave())) return
+@@ -69,14 +73,21 @@
+   router.push(taskPath(id, { return: returnTo.value }))
+ }
+ function onPlanSaved({ planId }) { editor.value = null; detailId.value = planId }
++watch(() => route.query.create, async (value) => {
++  if (value !== '1') return
++  await openCreate()
++  const query = { ...route.query }; delete query.create
++  await router.replace({ query })
++}, { immediate: true })
+ </script>
+ 
+ <template>
+   <div class="mx-auto max-w-6xl space-y-5">
+     <header class="flex items-center justify-between gap-3"><h1 class="text-xl font-semibold">任务</h1><Button :aria-expanded="createOpen" @click="openCreate"><Plus />新建任务</Button></header>
+     <TaskCreateForm v-if="createOpen" :key="app.workspaceId" ref="createRef" @saved="onCreated" @close="createOpen = false" />
+-    <PlanEditor v-if="editor" :key="editor.key" ref="editorRef" :mode="editor.mode" :task-id="editor.taskId || ''" :plan-id="editor.planId || ''" :date="editor.date || ''" :lock-task="!!editor.taskId" @close="editor = null" @saved="onPlanSaved" @goto-create-task="openCreate" />
+-    <PlanDetail v-if="detailId" :plan-id="detailId" @close="detailId = ''" @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })" @another="id => openEditor({ mode: 'another', planId: id })" @op-done="onPlanSaved" />
++    <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="detailId" @close="editor = null; detailId = ''" @saved="onPlanSaved"
++      @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
++      @another="id => openEditor({ mode: 'another', planId: id })" @op-done="onPlanSaved" />
+     <section class="rounded-lg border bg-card p-4 sm:p-5" aria-label="任务列表">
+       <div class="flex flex-wrap gap-1 border-b pb-3" aria-label="任务清单分类">
+         <button v-for="(label, key) in TASK_LIST_LABELS" :key="key" type="button" class="rounded-md px-3 py-2 text-sm" :class="(filters.list || 'all') === key ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-muted'" :aria-pressed="(filters.list || 'all') === key" @click="setFilter('list', key)">{{ label }} <span class="ml-1 tabular-nums">{{ counts[key] }}</span></button>
+--- before/src/pages/TodayPage.vue
++++ after/src/pages/TodayPage.vue
+@@ -1,25 +1,23 @@
+ <script setup>
+-import { computed, nextTick, ref, watch } from 'vue'
+-import { onBeforeRouteLeave, RouterLink, useRoute, useRouter } from 'vue-router'
++import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
++import { onBeforeRouteLeave, onBeforeRouteUpdate, RouterLink, useRoute, useRouter } from 'vue-router'
+ import { ChevronDown, ChevronRight, ClipboardList, Inbox, LifeBuoy, Plus } from 'lucide-vue-next'
+ import Alert from '@/components/ui/Alert.vue'
+ import Badge from '@/components/ui/Badge.vue'
+ import Button from '@/components/ui/Button.vue'
+ import Card from '@/components/ui/Card.vue'
+-import DateInput from '@/components/ui/DateInput.vue'
+-import Input from '@/components/ui/Input.vue'
+ import ContinueBar from '@/components/domain/ContinueBar.vue'
+-import NodeSelect from '@/components/domain/NodeSelect.vue'
+-import PlanDetail from '@/components/domain/PlanDetail.vue'
+-import PlanEditor from '@/components/domain/PlanEditor.vue'
+-import TaskListsPanel from '@/components/domain/TaskListsPanel.vue'
++import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
++import { usePlanStore } from '@/stores/plan'
++import { taskListPath } from '@/domains/taskList'
++import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
+ import WeekView from '@/components/domain/WeekView.vue'
+ import { useAppStore } from '@/stores/app'
+ import { useFocusStore } from '@/stores/focus'
+ import { isLiveRef } from '@/domains/plan'
+ import { SESSION_OUTCOME_LABELS, label } from '@/domains/labels'
+ import { recordPath, schedulePath } from '@/domains/workNavigation'
+-import { beijingAddDays, beijingDateStr, interpretInstant, isValidDate } from '@/domains/time'
++import { beijingAddDays, beijingDateStr, isValidDate } from '@/domains/time'
+ import { weekStartOf } from '@/domains/week'
+ 
+ const store = useAppStore()
+@@ -61,8 +59,7 @@
+   if (activePlan.value.date < currentStart.value || activePlan.value.date > end) closePlan()
+ })
+ 
+-// 工具栏只常驻日期、视图切换与一个新建入口；其余按需展开。
+-const createOpen = ref(false)
++// 日程保留日期与视图；任务创建归任务页，安排内可就地补建。
+ const recoverOpen = ref(false)
+ 
+ // —— 共享安排编辑器宿主（5A-1 §5/§7）：主按钮/日列＋安排/详情操作共用一个实例与提交逻辑 ——
+@@ -118,57 +115,27 @@
+   editor.value = null
+   locatePlan(payload)
+ }
+-function onGotoCreateTask() {
+-  editor.value = null
+-  createOpen.value = true
+-  nextTick(() => {
+-    const el = document.querySelector('[aria-label="新任务名称"]')
+-    if (el instanceof HTMLElement) el.focus()
+-  })
+-}
+-// 其它页（任务详情）编辑器里「先创建任务」跨页交接：create=1 打开新建面板并聚焦，参数随即移除。
+-watch(() => route.query.create, (v) => {
+-  if (v !== '1') return
+-  const q = { ...route.query }
+-  delete q.create
+-  router.replace({ query: q })
+-  onGotoCreateTask()
+-}, { immediate: true })
+-onBeforeRouteLeave(async () => (editorRef.value ? editorRef.value.guardLeave() : true))
+-
+-const taskTitle = ref('')
+-const taskDeadline = ref('')
+-const taskMatter = ref('')
+-
+-const matterItems = computed(() => [
+-  { value: '', label: '未归组' },
+-  ...store.matters.map((m) => ({ value: m.id, label: m.title })),
+-])
++function closeWorkspace() { editor.value = null; closePlan() }
++async function guardLeave() { return editorRef.value ? editorRef.value.guardLeave() : true }
++const unregister = registerWorkLeave(guardLeave)
++onBeforeUnmount(unregister)
++onBeforeRouteLeave(requestWorkLeave)
++onBeforeRouteUpdate(async (to, from) => {
++  const allowed = await guardLeave()
++  if (allowed && to.fullPath !== from.fullPath) editor.value = null
++  return allowed
++})
++watch(() => store.workspaceId, () => { editor.value = null; resetWorkLeaveApproval() })
++// 保留旧入口，但任务创建与筛选统一归任务页。
++watch(() => route.query.create, (v) => { if (v === '1') router.replace('/tasks?create=1') }, { immediate: true })
++watch(() => route.query.undated, (v) => { if (v === '1' && !route.query.plan && !route.query.task) router.replace('/tasks?undated=1') }, { immediate: true })
++const plans = usePlanStore()
++const classification = computed(() => plans.classify(new Date(store.nowTick)))
+ const pendingNoteCount = computed(() => store.noteBuckets.pending.length)
+ const recoverCount = computed(() =>
+   (store.lastDeleted ? 1 : 0) + (store.pendingSave ? 1 : 0) + store.failedNotes.length,
+ )
+ 
+-async function createTask() {
+-  const r = await store.createStandaloneTask({ title: taskTitle.value, value: taskDeadline.value, matterId: taskMatter.value || null })
+-  if (r && r.ok) {
+-    taskTitle.value = ''
+-    taskDeadline.value = ''
+-    createOpen.value = false
+-    locateTask(r.id)
+-  }
+-}
+-// 新建成功后立即定位到结果：进入统一任务详情，返回上下文指向它所在的周/日期（无截止 → 无截止清单）。
+-function locateTask(id) {
+-  const t = store.tasks.find((x) => x.id === id)
+-  if (!t) return
+-  const q = { view: 'week' }
+-  const ms = t.deadline && t.deadline.value ? interpretInstant(t.deadline.value) : null
+-  if (ms != null) q.date = beijingDateStr(new Date(ms))
+-  else q.undated = '1'
+-  const returnPath = router.resolve({ path: '/today', query: q }).fullPath
+-  router.push({ path: '/tasks/' + id, query: { return: returnPath } })
+-}
+ // 旧 /today?task= 深链接兼容：转入同一任务详情，原周/选日/视图/无截止上下文作为返回路径保留。
+ watch(() => route.query.task, (id) => {
+   if (typeof id !== 'string' || !id) return
+@@ -180,8 +147,9 @@
+ async function retryFailed(note) {
+   await store.runAnalysis(note.source_id, '')
+ }
+-function openRecover() {
++async function openRecover() {
+   recoverOpen.value = true
++  await nextTick()
+   const el = document.getElementById('recover')
+   if (el) el.scrollIntoView({ block: 'nearest' })
+ }
+@@ -189,7 +157,7 @@
+ 
+ <template>
+   <div class="space-y-4">
+-    <!-- 工具栏：日期 + 视图切换 + 一个新建入口。窄屏控制组整组换行、组内再按控件换行；
++    <!-- 工具栏：日期、视图与记录入口；列表视图补充安排入口。窄屏控制组整组换行；
+          每个控件不收缩、文字不断行，避免 360px 下被挤成单字竖排。 -->
+     <div class="flex flex-wrap items-center gap-2">
+       <div class="font-date whitespace-nowrap text-lg font-semibold">
+@@ -215,8 +183,7 @@
+             @click="view = 'list'"
+           >列表</button>
+         </div>
+-        <Button variant="outline" class="shrink-0" @click="openEditor({ mode: 'create' })"><Plus />安排工作</Button>
+-        <Button class="shrink-0" :aria-expanded="createOpen" @click="createOpen = !createOpen"><Plus />新建</Button>
++        <Button v-if="view === 'list'" variant="outline" class="shrink-0" @click="openEditor({ mode: 'create' })"><Plus />安排工作</Button>
+       </div>
+     </div>
+ 
+@@ -261,60 +228,26 @@
+       <button type="button" class="ml-2 text-xs underline" @click="dismissRecorded">知道了</button>
+     </Alert>
+ 
+-    <!-- 新建任务面板：按需展开 -->
+-    <Card v-if="createOpen">
+-      <div class="flex flex-wrap items-center gap-2">
+-        <Input v-model="taskTitle" placeholder="新任务名称…" class="min-w-40 flex-1" aria-label="新任务名称" />
+-        <DateInput v-model="taskDeadline" allow-time placeholder="截止（可选）" class="max-w-48" />
+-        <div class="w-28"><NodeSelect v-model="taskMatter" :items="matterItems" placeholder="未归组" /></div>
+-        <Button @click="createTask"><Plus />新建任务</Button>
+-      </div>
+-      <p class="mt-2 text-xs text-muted-foreground">独立新建任务，可不填截止。事项在<RouterLink to="/collect" class="underline">资料库</RouterLink>管理；从便签带出处建任务请到待核对。</p>
+-    </Card>
+-
+-    <!-- 共享安排编辑器：四模式同一实例；key 保证每次打开重读初值（含北京今天） -->
+-    <PlanEditor
+-      v-if="editor"
+-      :key="editor.key"
+-      ref="editorRef"
+-      :mode="editor.mode"
+-      :plan-id="editor.planId || ''"
+-      :task-id="editor.taskId || ''"
+-      :date="editor.date || ''"
+-      :lock-task="!!editor.locked"
+-      @close="editor = null"
+-      @saved="onPlanSaved"
+-      @goto-create-task="onGotoCreateTask"
+-    />
+-
+-    <!-- 安排详情面板：URL plan 参数驱动；关闭回到同周同日的列表 -->
+-    <PlanDetail
+-      v-if="planParam"
+-      :plan-id="planParam"
+-      @close="closePlan"
+-      @edit="(id) => openEditor({ mode: 'edit', planId: id })"
+-      @move="(id) => openEditor({ mode: 'move', planId: id })"
+-      @another="(id) => openEditor({ mode: 'another', planId: id })"
+-      @op-done="locatePlan"
+-    />
++    <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="planParam" @close="closeWorkspace" @saved="onPlanSaved"
++      @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
++      @another="id => openEditor({ mode: 'another', planId: id })" @op-done="locatePlan" />
+ 
+     <WeekView :mode="view" @add-plan="(date) => openEditor({ mode: 'create', date })" />
+ 
+-    <!-- 待安排/过去未完成/全部任务：三入口共享一个展开区（§9），安排入口复用同一编辑器 -->
+-    <TaskListsPanel
+-      @arrange="(cfg) => openEditor({ mode: 'create', taskId: cfg.taskId, date: cfg.date, locked: true })"
+-      @open-plan="locatePlan"
+-    />
++    <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 px-1 text-sm" aria-label="任务概览">
++      <RouterLink :to="taskListPath({ list: 'unscheduled' })" class="hover:underline">待安排 <span class="tabular-nums text-muted-foreground">{{ classification.unscheduled.length }}</span></RouterLink>
++      <RouterLink :to="taskListPath({ list: 'past' })" class="hover:underline">过去未完成 <span class="tabular-nums text-muted-foreground">{{ classification.pastUnfinished.length }}</span></RouterLink>
++      <RouterLink to="/tasks" class="ml-auto text-muted-foreground hover:underline">全部任务 →</RouterLink>
++    </nav>
+ 
+     <!-- 恢复入口：默认折叠，异常提醒可直达；删除撤销/失败重试/暂存重落库的统一入口 -->
+-    <Card id="recover">
++    <Card v-if="recoverCount || recoverOpen" id="recover">
+       <template #header>
+         <button class="flex w-full items-center justify-between text-base font-semibold" :aria-expanded="recoverOpen" @click="recoverOpen = !recoverOpen">
+           <span>恢复入口<span v-if="recoverCount" class="ml-2 text-sm font-normal text-muted-foreground">{{ recoverCount }} 项可处理</span></span>
+           <ChevronDown v-if="recoverOpen" class="size-4" />
+           <ChevronRight v-else class="size-4" />
+         </button>
+-        <p v-if="recoverOpen" class="text-sm text-muted-foreground">失败重试、暂存重落库、撤销最近删除。原始资料始终保留在本地。</p>
+       </template>
+       <div v-if="recoverOpen" class="space-y-2">
+         <div v-if="store.lastDeleted" class="flex flex-wrap items-center gap-2 rounded-md border p-3 text-sm">
+@@ -337,5 +270,6 @@
+         <p v-if="!store.lastDeleted && !store.pendingSave && !store.failedNotes.length" class="text-sm text-muted-foreground">当前没有可恢复项。</p>
+       </div>
+     </Card>
++    <button v-if="!recoverCount && !recoverOpen" type="button" class="text-xs text-muted-foreground hover:underline" @click="openRecover">恢复与撤销</button>
+   </div>
+ </template>

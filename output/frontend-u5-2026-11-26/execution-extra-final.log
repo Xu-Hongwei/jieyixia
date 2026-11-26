@@ -1,0 +1,16 @@
+fixture 后端就绪：http://127.0.0.1:8010
+Vite 就绪：http://127.0.0.1:5177/（北京今天 2026-11-26）
+PASS [start] 无当前行动时确认开始禁用
+PASS [start] 取消开始不创建会话且回到详情
+PASS [save] 安排保存失败保留输入和重试入口
+PASS [save] 离线原请求重试正确保存一次
+PASS [cancel] 取消确认框不改变安排
+PASS [cancel] 确认取消保留任务和安排历史
+PASS [history] 已取消安排无编辑与改期入口
+PASS [progress] 部分完成后保留另安排一天入口
+PASS [nav] 同一任务更新返回来源后关闭旧面板 — #/tasks/t-smoke?return=%2Ftoday%3Fplan%3Dp-1
+PASS [guard] 任务同页返回放弃后关闭草稿
+PASS [start] 选择行动后开始确认可用
+PASS [start] 确认开始进入工作并绑定原安排
+PASS [isolation] 无模型请求与用户服务访问
+TOTAL 13/13
