@@ -1,5 +1,6 @@
 import { readonly, ref } from 'vue'
 import { request } from './http'
+import { apiUrl } from './base'
 
 let key = ''
 let connection = new AbortController()
@@ -24,7 +25,7 @@ export function disconnectQwen() {
 }
 
 function post(operation, secret, body, signal) {
-  return request('/api/qwen/' + operation, {
+  return request(apiUrl('/api/qwen/' + operation), {
     method: 'POST', redirect: 'error', mode: 'same-origin', cache: 'no-store',
     headers: { 'X-JXL-Qwen-Key': secret, 'Content-Type': 'application/json' }, body, signal,
   })

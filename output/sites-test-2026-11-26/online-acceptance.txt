@@ -1,0 +1,32 @@
+线上无付费验收 · 私有站点正式版
+时间：2026-11-27（北京时间）
+站点：https://jiexialai-test-6vz53of4csq.qoder.zone  access_mode=private
+actionId：0f4c4f5c-2f5a-4b7f-9d0a-7a3a9c1e5b21
+publishOperationId：01a21af5-58c3-7c08-af7b-5b6e6c37c980（state=succeeded, committed=true）
+get_publish_status：published=true, readiness=publication_completed, blockers=[]
+
+一、正式页面读取后端健康状态（已登录浏览器，页面上下文）
+  fetch('/functions/v1/app/api/healthz') → 200
+  body: {"model_ready":true,"api_version":"v1","schema_version":"0.6.0"}（原样透传，未包 body）
+  页面自身启动时发出的健康请求（performance resource）：
+    https://jiexialai-test-6vz53of4csq.qoder.zone/functions/v1/app/api/healthz（2 次）
+  页头文案：日程 / 个人空间 / 演示空间 / 数据 / 连接千问
+  "后端不可达" 徽标：不存在（offlineBadge=false）
+  截图：online-today.png
+
+二、通过 Sites Function 验证千问，未填个人 Key
+  POST /functions/v1/app/api/qwen/verify（无 X-JXL-Qwen-Key）→ 401
+  body: {"code":"qwen_key_invalid","message":"请输入北京地域的百炼 API Key。","retryable":false,"detail":null}
+  （后端状态码与错误码原样透传；未触发模型调用，无费用）
+
+三、公网直连业务接口无服务凭证（Ubuntu 上执行 curl，未携带任何密钥）
+  POST https://123.56.205.140/api/qwen/verify → 403
+  GET  https://123.56.205.140/api/healthz → 200
+
+四、安全复核
+  本轮所有命令/输出/截图均不含 JXL_SITE_SERVICE_TOKEN 值、个人千问 Key 或请求体。
+  旧服务令牌已在网关轮换（旧值 403，新值仅在服务器 .env 与 Sites Secrets）。
+  Function / 公网网关 / 18080 网关 / api 四层日志均不记录请求头与本轮密钥。
+
+结论：两项无付费验收均通过。等待用户使用新个人 Key 在私有站点完成
+「截图 → 生成方案 → 采用 → 日程可见」，再在同一线上版本完成无 Key 演示四步。

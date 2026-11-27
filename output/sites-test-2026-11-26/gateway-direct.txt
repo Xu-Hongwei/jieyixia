@@ -1,0 +1,37 @@
+== 1 healthz GET ==
+HTTP/1.1 200 Connection Established
+
+HTTP/1.1 200 OK
+Content-Length: 64
+Content-Type: application/json
+Date: Thu, 26 Nov 2026 14:49:23 GMT
+Server: uvicorn
+Via: 1.1 Caddy
+{"model_ready":true,"api_version":"v1","schema_version":"0.6.0"}
+== 2 verify no token ==
+status=403
+
+== 3 verify wrong token ==
+status=403
+
+== 4 verify right token, no key ==
+status=401
+{"code":"qwen_key_invalid","message":"请输入北京地域的百炼 API Key。","retryable":false,"detail":null}
+== 5 verify right token + canary key ==
+status=403
+{"code":"qwen_key_denied","message":"千问拒绝了这次访问，请检查 Key 的地域和模型权限。","retryable":false,"detail":null}
+== 6 analyze right token, no key, body canary ==
+status=422
+{"code":"invalid_request","message":"请求不符合契约","retryable":false,"detail":[{"loc":["body","source_id"],"msg":"Field required","type":"missing"},{"loc":["body","kind"],"msg":"Field required","type":"missing"},{"loc":["body","captured_at"],"msg":"Field required","type":"missing"},{"loc":["body","canary"],"msg":"Extra inputs are not permitted","type":"extra_forbidden"}]}
+== 7 unknown path ==
+status=404
+
+== empty service header ==
+status=403
+
+== GET on qwen path ==
+status=403
+== POST healthz ==
+status=404
+== POST other api ==
+status=404

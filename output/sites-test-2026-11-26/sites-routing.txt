@@ -1,0 +1,8 @@
+2026-11-26 站点 Function 逻辑子路径路由核查（旧已发布版做对照）
+页面: https://jiexialai-test-6vz53of4csq.qoder.zone/
+在已登录浏览器上下文 fetch：
+  /functions/v1/app?action=ping            -> 200 {"ok":true,"test":"sites-function","runtime":"edge",...}
+  /functions/v1/app/api/routing-check      -> 200 {"ok":true,"test":"sites-function","runtime":"edge",...}
+结论：/functions/v1/app/<子路径> 能到达同一个 Function（旧 handler 不看路径，均回 ping）。
+     因此新 handler 按路径后缀 /api/healthz 与 /api/qwen/<op> 路由可用。
+注：旧版 handler 未实现这些路由，本项只证明子路径可达；功能验收在发布新版后做。

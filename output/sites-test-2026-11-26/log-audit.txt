@@ -1,0 +1,10 @@
+log audit 2026-11-26T14:51:09Z
+gateway_canary_key_hits=0
+gateway_canary_body_hits=0
+gateway_token_hits=0
+gateway_header_fields=0
+web18080_canary_hits=0
+api_canary_hits=0
+gateway_new_token_hits=0
+gateway_canary2_hits=0
+gateway_header_fields=0

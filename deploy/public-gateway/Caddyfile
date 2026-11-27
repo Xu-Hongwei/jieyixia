@@ -1,0 +1,62 @@
+{
+	admin off
+	persist_config off
+	default_sni 123.56.205.140
+	servers {
+		protocols h1 h2
+	}
+}
+
+https://123.56.205.140 {
+	tls {
+		issuer acme {
+			profile shortlived
+		}
+	}
+
+	encode zstd gzip
+
+	@health {
+		method GET HEAD
+		path /api/healthz
+	}
+	handle @health {
+		reverse_proxy 127.0.0.1:18080
+	}
+
+	# 千问业务接口：只接受携带站点专用服务凭证的 POST（由私有站 Function 注入）；
+	# 凭证不匹配一律 403，不进入现有网关。
+	@qwen {
+		method POST
+		path /api/qwen/verify /api/qwen/analyze /api/qwen/propose
+		header X-JXL-Site-Service {$JXL_SITE_SERVICE_TOKEN}
+	}
+	handle @qwen {
+		reverse_proxy 127.0.0.1:18080 {
+			header_up -X-JXL-Site-Service
+		}
+	}
+
+	@qwen_blocked {
+		path /api/qwen/*
+	}
+	handle @qwen_blocked {
+		respond 403
+	}
+
+	handle {
+		respond 404
+	}
+
+	# 控制台日志：保留路径/状态/耗时，整段删除请求头，避免记录
+	# 千问 Key、服务凭证或任何头字段；正文从不记录。
+	log {
+		output stdout
+		format filter {
+			wrap console
+			fields {
+				request>headers delete
+			}
+		}
+	}
+}

@@ -1,0 +1,69 @@
+Ubuntu 公网 IP 证书 + Function 健康检查验收（2026-11-26）
+站点：https://jiexialai-test-6vz53of4csq.qoder.zone （access_mode=private，仍私有）
+服务器：admin@123.56.205.140（iZ2zefqwct71mzxzfke6w0Z，Ubuntu 24.04.2 LTS）
+
+== 0) 变更前状态（只读核查）==
+- 公网 22 OPEN；80/443 ECONNREFUSED（安全组已放通，仅无监听），无需控制台改规则。
+- 监听：127.0.0.1:18080（docker-proxy）→ jiexialai-web-1 (caddy:2-alpine, 版本 v2.11.9)
+  容器端口 80/443 仅绑定 127.0.0.1:18080/18443；api 容器 healthy。
+- ufw inactive；无 certbot/nginx；部署目录 /home/admin/jiexialai（compose 项目 jiexialai）。
+- 本机基线：curl http://127.0.0.1:18080/api/healthz
+  {"model_ready":true,"api_version":"v1","schema_version":"0.6.0"}
+
+== 1) 新增公网网关（独立 compose，不动原项目）==
+目录：/home/admin/jiexialai-public（仓库副本 E:\qoder\deploy\public-gateway）
+compose：caddy:2-alpine，network_mode: host，数据卷 ./data ./config
+Caddyfile 要点：
+  default_sni 123.56.205.140     # 无 SNI 客户端（Node/Deno/Windows）也能取到 IP 证书
+  servers { protocols h1 h2 }    # 关闭 HTTP/3，仅 TCP 443
+  https://123.56.205.140
+    tls { issuer acme { profile shortlived } }
+    GET/HEAD /api/healthz -> reverse_proxy 127.0.0.1:18080
+    其余一律 404
+首次以内部 CA 签发（issuer=local）——已改用显式 ACME shortlived。
+证书签发日志：
+  ACME account registered status=valid
+  challenge_type=http-01，Let's Encrypt 验证 IP 200
+  certificate obtained successfully identifier=123.56.205.140 issuer=acme-v02.api.letsencrypt.org-directory
+
+== 2) 证书事实（openssl 实测）==
+subject=（空，IP 证书）
+issuer=C=US, O=Let's Encrypt, CN=YE2
+notBefore=Nov 26 13:42:40 2026 GMT
+notAfter=Dec  3 05:42:39 2026 GMT   （160 小时）
+SAN: critical, IP Address:123.56.205.140
+链：YE2 -> Root YE -> ISRG Root X2 -> ISRG Root X1，Verify return code 0 (ok)
+续期：Caddy ARI 已获取 renewal info（window 约 2026-11-30 前后），到期前自动续签并热加载，无需重启。
+
+== 3) 公网边界（Windows 直连 123.56.205.140）==
+GET  https://123.56.205.140/api/healthz -> 200
+  {"model_ready":true,"api_version":"v1","schema_version":"0.6.0"}
+  Server: uvicorn，Via: 1.1 Caddy（双层 Caddy）
+GET  /                    -> 404
+GET  /api/qwen/verify     -> 404
+GET  /api/anything        -> 404
+POST /api/healthz         -> 404（仅 GET/HEAD）
+http://123.56.205.140/    -> 308 https://123.56.205.140/
+TLS：无 SNI 与带 SNI 均握手成功；Node/OpenSSL fetch 200，证书校验开启。
+
+== 4) Function 固定健康检查 ==
+新增 action=backend-health，目标常量 https://123.56.205.140/api/healthz，
+redirect=error，15s 超时，默认证书校验（无任何跳过）。
+发布：prepare/write descriptor + publish committed=true（publishOperationId 01a2184e-ab30-7003-9c4a-e9544a7034a4）。
+实测（私有站点已登录浏览器同源 fetch）：
+{"ok":true,"target":"https://123.56.205.140/api/healthz","upstreamStatus":200,
+ "upstreamServer":"uvicorn","elapsedMs":27,
+ "body":{"model_ready":true,"api_version":"v1","schema_version":"0.6.0"}}
+网关收紧后复测：elapsedMs=25，同值。
+匿名请求 /functions/v1/app?action=backend-health -> 401（站点仍私有）。
+
+== 5) 与本机对照 ==
+2026-11-26T14:42:47Z 本机 curl http://127.0.0.1:18080/api/healthz
+{"model_ready":true,"api_version":"v1","schema_version":"0.6.0"} HTTP 200
+与 Function 返回值完全一致（model_ready=true，schema_version=0.6.0，api_version=v1）。
+
+== 6) 保留与回退 ==
+- SSH 22、本机 18080/18443、原 compose 均未改动；公网网关是独立 compose 项目。
+- 回退：ssh admin@123.56.205.140 'cd /home/admin/jiexialai-public && sudo docker compose down'
+  公网 80/443 随即关闭，原有本机入口不受影响。
+- 仅新增公网 80/443 监听；80 只做 ACME 验证与 308 跳转；443 只暴露 GET/HEAD /api/healthz。

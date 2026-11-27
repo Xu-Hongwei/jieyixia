@@ -1,0 +1,48 @@
+Qoder Sites Function 能力验证（2026-11-26）
+站点：https://jiexialai-test-6vz53of4csq.qoder.zone （access_mode=private）
+函数入口：/functions/v1/app （runtime=edge，Deno SupabaseEdgeRuntime）
+部署记录：
+  backendOperationId 01a21847-4c46-772a-bb2b-09bc7ea4f84d（capabilities: functions, storage）
+  publishOperationId 01a21848-a5d5-70cb-a74e-12654d432935（首次含函数发布）
+  publishOperationId 01a21849-2198-7d9f-b77e-5c53f7ad0bc1（多目标探测版）
+请求方式：已登录的内嵌浏览器同源 fetch（页面即函数 JSON 响应）
+
+== 1) GET /functions/v1/app?action=ping ==
+HTTP 200，content-type: application/json
+{"ok":true,"test":"sites-function","runtime":"edge","now":"2026-11-26T14:35:19.636Z"}
+（复测：now 2026-11-26T14:36:30.124Z，同一响应形状）
+
+== 2) GET /functions/v1/app?action=egress-probe （域名目标）==
+HTTP 200
+{"ok":true,"elapsedMs":6002,"results":[
+ {"target":"https://1.1.1.1/cdn-cgi/trace","ok":false,"error":"TimeoutError","elapsedMs":6002},
+ {"target":"https://www.cloudflare.com/cdn-cgi/trace","ok":true,"status":200,"elapsedMs":1036,
+  "sample":"fl=618f214\nh=www.cloudflare.com\nip=39.107.45.188\nts=1795703750.000\nvisit_scheme=https\nuag=Deno/1.45.2 (variant; SupabaseEdgeRuntime/)\ncolo=LAX\nsliver=none\nhttp="},
+ {"target":"https://checkip.amazonaws.com","ok":true,"status":200,"elapsedMs":1234,"sample":"39.107.45.188"},
+ {"target":"https://example.com","ok":true,"status":200,"elapsedMs":965,"sample":"<!doctype html>..."}
+]}
+要点：函数出网正常，出口 IP 39.107.45.188（阿里云），Cloudflare 侧 colo=LAX；
+      ip 字面量 https://1.1.1.1:443 超时。
+
+== 3) GET /functions/v1/app?action=egress-ip-literals （IP 字面量对照）==
+HTTP 200
+{"ok":true,"elapsedMs":6003,"results":[
+ {"target":"http://1.1.1.1/cdn-cgi/trace","ok":true,"status":301,"elapsedMs":1647,"sample":"<html>...301 Moved Permanently...cloudflare..."},
+ {"target":"https://1.0.0.1/cdn-cgi/trace","ok":false,"error":"TimeoutError","elapsedMs":6002},
+ {"target":"https://8.8.8.8/","ok":false,"error":"TimeoutError","elapsedMs":6002},
+ {"target":"https://223.5.5.5/","ok":true,"status":404,"elapsedMs":17,"sample":""},
+ {"target":"https://dns.alidns.com/resolve?name=example.com&type=A","ok":true,"status":200,"elapsedMs":17,"sample":"{\"Status\":0,...}"}
+]}
+要点：
+- IP 字面量本身未被平台拦截：http://1.1.1.1:80 返回 Cloudflare 301；https://223.5.5.5 完成 TLS 握手并返回 404。
+- https://223.5.5.5 能成功说明 Deno 的证书校验通过（该 IP 有 IP SAN 可信证书）→
+  「固定公网 IP + 可信 IP 证书」这条路径在能力上成立。
+- 1.1.1.1:443 / 1.0.0.1:443 / 8.8.8.8:443 超时是网络路径（中国大陆方向）问题，不是平台策略。
+
+== 结论 ==
+1. 当前账号/套餐可以运行 Function（capabilities 含 functions，发布成功，线上返回 JSON）。
+2. Function 可访问外网 HTTPS（域名与 IP 字面量均可），证书由运行时校验；
+   固定公网 IP + Let's Encrypt IP 证书（IP SAN）在能力上可行。
+3. 待实际验证项：Ubuntu 服务器必须对 39.107.45.188 可达（443），
+   且证书必须覆盖该 IP；部署脚本需适配 160 小时证书自动续期。
+4. 站点仍为 private，未公开，未购买域名。

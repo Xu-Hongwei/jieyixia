@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "vue-tsc --noEmit -p jsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:sites": "vite build --mode sites"
   },
   "dependencies": {
     "clsx": "^2.1.1",

@@ -1,0 +1,47 @@
+{
+  "problems": [],
+  "rows": [
+    {
+      "name": "GET /api/healthz",
+      "status": 200,
+      "type": "application/json",
+      "body": "{\"model_ready\":true,\"api_version\":\"v1\",\"schema_version\":\"0.6.0\"}"
+    },
+    {
+      "name": "POST /api/healthz",
+      "status": 405,
+      "type": "application/json",
+      "body": "{\"ok\":false,\"code\":\"method_not_allowed\",\"message\":\"方法不允许\"}"
+    },
+    {
+      "name": "POST /api/qwen/verify 无 Key",
+      "status": 401,
+      "type": "application/json",
+      "body": "{\"code\":\"qwen_key_invalid\",\"message\":\"请输入北京地域的百炼 API Key。\",\"retryable\":false,\"detail\":null}"
+    },
+    {
+      "name": "POST /api/qwen/verify 金丝雀 Key",
+      "status": 403,
+      "type": "application/json",
+      "body": "{\"code\":\"qwen_key_denied\",\"message\":\"千问拒绝了这次访问，请检查 Key 的地域和模型权限。\",\"retryable\":false,\"detail\":null}"
+    },
+    {
+      "name": "POST /api/qwen/analyze 金丝雀正文",
+      "status": 422,
+      "type": "application/json",
+      "body": "{\"code\":\"invalid_request\",\"message\":\"请求不符合契约\",\"retryable\":false,\"detail\":[{\"loc\":[\"body\",\"source_id\"],\"msg\":\"Field required\",\"type\":\"missing\"},{\"loc\":[\"body\",\"kind\"],\"msg\":\"Field required\",\"type\":\"missing\"},{\"loc\":[\"body\",\"captured_at\"],\"msg\":\"Field required\",\"type\":\"missing\"},{\"loc\":[\"body\",\"canary\"],\"msg\":\"Extra inputs are not permitted\",\"type\":\"extra_forbidden\"}]}"
+    },
+    {
+      "name": "GET /api/unknown",
+      "status": 404,
+      "type": "application/json",
+      "body": "{\"ok\":false,\"code\":\"not_found\",\"message\":\"接口不存在\"}"
+    },
+    {
+      "name": "GET 诊断 ping",
+      "status": 200,
+      "type": "application/json",
+      "body": "{\"ok\":true,\"test\":\"sites-function\",\"runtime\":\"edge\",\"now\":\"2026-11-26T14:49:39.248Z\"}"
+    }
+  ]
+}

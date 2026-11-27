@@ -1,0 +1,8 @@
+== rotation 2026-11-27T02:53:50Z ==
+healthz: 200
+{"model_ready":true,"api_version":"v1","schema_version":"0.6.0"}
+old token qwen/verify: 403
+new token, no qwen key: 401
+{"code":"qwen_key_invalid","message":"请输入北京地域的百炼 API Key。","retryable":false,"detail":null}
+new token, canary key: 403
+{"code":"qwen_key_denied","message":"千问拒绝了这次访问，请检查 Key 的地域和模型权限。","retryable":false,"detail":null}

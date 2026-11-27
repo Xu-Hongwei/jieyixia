@@ -1,7 +1,8 @@
 import { request } from './http'
+import { apiUrl } from './base'
 import { requestQwen } from './qwenConnection'
 
-export const healthz = () => request('/api/healthz')
+export const healthz = () => request(apiUrl('/api/healthz'))
 export const analyze = (payload, { signal = undefined } = {}) => requestQwen('analyze', payload, signal)
 export const propose = (payload, { signal = undefined } = {}) => requestQwen('propose', payload, signal)
 
