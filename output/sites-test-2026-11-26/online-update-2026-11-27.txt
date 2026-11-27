@@ -1,0 +1,33 @@
+线上更新发布 · 既有「截下来测试站」
+时间：2026-11-27（北京时间）
+站点：https://jiexialai-test-6vz53of4csq.qoder.zone
+项目：01a2183a-2b35-795f-9cdf-60ec09ed79e5；站点：01a2183a-2b39-7393-a21f-492f1560eea7
+actionId：c2d37998-d5ff-451d-a70b-88897cfa63d1
+publishOperationId：01a21c9b-d5c8-75b4-816b-930df886261b（state=succeeded, committed=true）
+get_publish_status：published=true, readiness=publication_completed, blockers=[]
+
+构建产物（未重新构建、未改源码）
+  E:\qoder\frontend\dist
+  index.html SHA256 = 285a76c852f2459a9cad3e91c7edfd25a37ebb6e4a55bf63de6605cfc9558162（与本机 sha256sum 一致）
+  入口：/assets/index-DC5rXpen.js，样式：/assets/index-Cm1oIbqm.css
+  index-DC5rXpen.js 内含 API 基址 "/functions/v1/app"
+  Function 目录：frontend/functions（handler.ts + index.ts，未改动）
+  Secrets：JXL_SITE_SERVICE_TOKEN（仅按名称声明，值未触碰）
+  databaseAccess：none；spa：true
+
+访问范围（发布前后一致，未修改策略）
+  mode=selected，include_project_members=false，rule_count=1，受邀访问者 1 人；
+  available_modes 中 private/selected/public 均可，本轮未调用任何访问策略写入。
+
+线上实测（已登录浏览器，页面上下文，未输入 Key、未调用模型）
+  GET / → 200，标题「截下来 · 把通知变成行动」，路由 #/today
+  HTML 含 index-DC5rXpen.js：true；含旧入口：false
+  实际加载资源：
+    /assets/index-DC5rXpen.js
+    /assets/index-Cm1oIbqm.css
+  GET /functions/v1/app/api/healthz → 200
+    {"model_ready":true,"api_version":"v1","schema_version":"0.6.0"}
+  「后端不可达」徽标：无
+  截图：online-update-2026-11-27.png
+
+未执行：服务器改动、网关/凭证变更、产品源码修改、模型调用。
