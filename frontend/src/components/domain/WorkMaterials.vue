@@ -8,7 +8,7 @@ import { taskMaterials } from '@/domains/work'
 import { FIELD_LABELS, STATUS_LABELS, label } from '@/domains/labels'
 import { formatWhen } from '@/domains/time'
 
-// 执行页只读资料：Task.note_ids → 便签 → 原始 Source；同事项补充默认折叠。
+// 执行页只读资料：Task.note_ids → 便签 → 原始 Source；同项目补充默认折叠。
 // 全部只读：无字段确认/AI 重跑/编辑原文入口。异步加载捕获 ws/session/task 身份，
 // 迟到的旧资料不进新会话；Blob URL 在身份变化与卸载时回收。
 const props = defineProps({
@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
 
       <div v-if="extra.length" class="border-t border-dashed pt-2">
         <button type="button" class="text-sm font-medium underline" :aria-expanded="extraOpen" @click="extraOpen = !extraOpen">
-          同事项补充资料 · {{ extra.length }}（{{ extraOpen ? '收起' : '展开' }}）
+          同项目补充资料 · {{ extra.length }}（{{ extraOpen ? '收起' : '展开' }}）
         </button>
         <div v-if="extraOpen" class="mt-2 space-y-3">
           <div v-for="item in extra" :key="item.id" class="rounded-md border p-2.5">

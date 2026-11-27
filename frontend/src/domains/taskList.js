@@ -28,3 +28,22 @@ export function filterTaskList(tasks, classification, query = {}) {
     && (!q.undated || !task.deadline?.value)
     && (!q.matter || (q.matter === 'ungrouped' ? !task.matter_id : task.matter_id === q.matter)))
 }
+
+// 筛选仅影响展开的清单，项目进度始终以全部成员为分母。
+export function projectTaskGroups(projects, tasks, visibleTasks, notes, filters = {}) {
+  const section = project => ({ project, id: project?.id ?? 'ungrouped', total: 0, done: 0, tasks: [], notes: [] })
+  const groups = projects.map(section)
+  const standalone = section(null)
+  const byId = new Map(groups.map(group => [group.id, group]))
+  const groupOf = task => byId.get(task.matter_id) ?? standalone
+  for (const task of tasks) {
+    const group = groupOf(task)
+    group.total++
+    if (task.status === 'done') group.done++
+  }
+  for (const task of visibleTasks) groupOf(task).tasks.push(task)
+  for (const note of notes) byId.get(note.matter_id)?.notes.push(note)
+  const filteringTasks = filters.q || filters.status || filters.undated || filters.list
+  return [...groups, standalone].filter(group => (!filters.matter || filters.matter === group.id)
+    && (group.tasks.length || (group.project && !filteringTasks)))
+}

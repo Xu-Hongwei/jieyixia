@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import PlanCard from '@/components/domain/PlanCard.vue'
 import { PLAN_STATE_LABELS, label, planHistoryReasonLabel } from '@/domains/labels'
 
@@ -14,6 +15,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['open-plan', 'add'])
 
+const route = useRoute()
 const root = ref(null)
 const expanded = ref(false)
 const historyOpen = ref(false)
@@ -28,8 +30,21 @@ const locateKey = computed(() => {
 })
 function reveal() {
   nextTick(() => {
-    if (!root.value) return
-    const el = props.locatePlanId ? root.value.querySelector(`[data-plan-id="${CSS.escape(props.locatePlanId)}"]`) : null
+    if (!root.value || !props.locatePlanId) return
+    const el = root.value.querySelector(`[data-plan-id="${CSS.escape(props.locatePlanId)}"]`)
+    if (route.query.plan) {
+      // The open inspector owns the viewport. A deep link can still reveal a
+      // card inside its day's expanded list without moving the calendar.
+      const list = el?.parentElement
+      if (list && list.scrollHeight > list.clientHeight) {
+        const cardBounds = el.getBoundingClientRect()
+        const listBounds = list.getBoundingClientRect()
+        if (cardBounds.top < listBounds.top) list.scrollTop += cardBounds.top - listBounds.top
+        else if (cardBounds.bottom > listBounds.bottom) list.scrollTop += cardBounds.bottom - listBounds.bottom
+      }
+      return
+    }
+    if (el instanceof HTMLElement && route.query.recorded && !document.querySelector('[role="dialog"]')) el.focus({ preventScroll: true })
     ;(el || root.value).scrollIntoView({ block: 'nearest' })
   })
 }
@@ -49,7 +64,7 @@ watch(locateKey, (key) => {
   <div ref="root">
     <div class="space-y-1.5" :class="expanded && 'max-h-[22rem] overflow-y-auto scroll-slim'">
       <PlanCard v-for="e in visible" :key="e.plan.id" :plan="e.plan" :task="e.task" :data-plan-id="e.plan.id" @open="emit('open-plan', $event)" />
-      <p v-if="!day.plans.length" class="px-1 pt-2 text-center text-xs text-muted-foreground">未安排工作</p>
+      <p v-if="!day.plans.length" class="work-empty px-1 pt-2 text-center text-xs text-muted-foreground">未安排工作</p>
     </div>
     <button
       v-if="day.plans.length > 3"
@@ -87,9 +102,9 @@ watch(locateKey, (key) => {
     </div>
     <button
       type="button"
-      class="mt-1 w-full rounded-md border border-dashed border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
+      class="add-day-work mt-1 w-full rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
       aria-label="在这一天安排工作"
       @click="emit('add')"
-    >＋ 为这天安排工作</button>
+    >＋ 安排</button>
   </div>
 </template>

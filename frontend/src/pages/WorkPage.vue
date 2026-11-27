@@ -126,8 +126,13 @@ watch([ready, sessionId, () => focus.sessions], () => {
 const todayStr = computed(() => beijingDateStr(new Date(app.nowTick)))
 const navCtx = computed(() => ({ docs: app.docs, ws: app.workspaceId, todayStr: todayStr.value }))
 const workReturn = computed(() => resolveWorkReturn(route.query.return, session.value, navCtx.value))
+const returnOpensPlan = computed(() => {
+  const target = router.resolve(workReturn.value)
+  return target.path === '/today' && target.query.plan === session.value?.plan_item_id
+})
 const returnLabel = computed(() => {
   const r = workReturn.value
+  if (returnOpensPlan.value) return '返回安排'
   if (r.startsWith('/today')) return '返回日程'
   if (r.startsWith('/tasks/')) return '返回任务'
   return '返回'
@@ -403,9 +408,19 @@ function finishEndSuccess(r, a) {
   const parts = ['本次工作已保存']
   if (a.outcome) parts.push(`行动${label(SESSION_OUTCOME_LABELS, a.outcome)}`)
   if (r.planItem) parts.push(`安排${r.planItem.state === 'done' ? '已完成' : '还需要继续'}`)
-  app.say('success', parts.join(' · '))
   const target = router.resolve(retTarget)
-  router.replace({ path: target.path, query: { ...target.query, recorded: sid } })
+  if (target.name === 'schedule' || target.name === 'task-detail') {
+    if (app.banner?.tone === 'success') app.banner = null
+  } else {
+    app.say('success', parts.join(' · '))
+  }
+  /** @type {import('vue-router').LocationQueryRaw} */
+  const query = { ...target.query, recorded: sid }
+  if (target.path === '/today' && r.planItem) {
+    delete query.plan
+    query.date = r.planItem.date
+  }
+  router.replace({ path: target.path, query })
 }
 
 async function handleEndFailure(r, a) {
@@ -805,14 +820,17 @@ const leaseCountdown = computed(() => {
       </div>
       <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
         <div class="min-w-0 flex-1 basis-52">
-          <h1 class="break-words text-lg font-semibold leading-snug">{{ title }}</h1>
+          <h1 class="break-words text-2xl font-semibold leading-snug">{{ actionText || title }}</h1>
           <div class="mt-0.5 break-words text-sm text-muted-foreground">
-            {{ actionText || '（行动已删除）' }}
+            {{ title }}
             <template v-if="minutes"> · 预计 {{ minutes }} 分钟</template>
-            · 已投入 <span class="font-date tabular-nums">{{ formatDurationMs(displayMs) }}</span>
           </div>
         </div>
-        <div v-if="editable" class="flex shrink-0 gap-2">
+        <div class="flex flex-col text-primary">
+          <span class="text-xs text-muted-foreground">已投入</span>
+          <span class="text-3xl font-semibold leading-tight tabular-nums">{{ formatDurationMs(displayMs) }}</span>
+        </div>
+        <div v-if="editable" class="flex flex-wrap gap-2">
           <Button v-if="session.running" size="sm" variant="outline" :disabled="opBusy" @click="runStateOp('pause')"><Pause />暂停</Button>
           <Button v-else size="sm" variant="outline" :disabled="opBusy" @click="runStateOp('resume')"><Play />继续计时</Button>
           <Button size="sm" :disabled="opBusy" @click="endOpen = true"><Square />结束本次</Button>
@@ -832,26 +850,25 @@ const leaseCountdown = computed(() => {
       <p v-if="rollbackHint" class="text-xs text-warning-foreground"><CircleAlert class="mr-1 inline size-3.5" />检测到墙钟回拨：显示已保存累计，下次操作需核对时段。</p>
 
       <!-- 所属安排（5A-2B §5）：紧凑事实块；本段计时单独显示，不混入已结束累计 -->
-      <Card v-if="planLinked && isV1 && plan">
+      <section v-if="planLinked && isV1 && plan" class="border-y py-3">
         <div class="flex flex-wrap items-center gap-2 text-sm">
           <span class="text-xs text-muted-foreground">所属安排</span>
           <span class="font-date font-medium">{{ plan.date }}</span>
           <Badge v-if="plan.date === todayStr" variant="secondary">今天</Badge>
           <Badge variant="secondary">{{ label(PLAN_STATE_LABELS, plan.state) }}</Badge>
-          <Button size="sm" variant="outline" class="ml-auto" @click="gotoPlan"><ArrowLeft />返回安排</Button>
+          <Button v-if="!returnOpensPlan" size="sm" variant="outline" class="ml-auto" @click="gotoPlan"><ArrowLeft />返回安排</Button>
         </div>
-        <p class="mt-1 break-words text-sm">当前安排说明：{{ plan.action_text }}</p>
+        <p v-if="plan.action_text !== actionText" class="mt-1 break-words text-sm">{{ plan.action_text }}</p>
         <p class="mt-1 text-xs text-muted-foreground">
-          安排预计 {{ plan.planned_minutes }} 分钟 ·
-          <template v-if="planSummary.authoritative">已结束 {{ planSummary.endedSessionCount }} 段 · 累计 {{ formatDurationMs(planSummary.totalMs) }} · 实际 {{ planActualLabel(planSummary) }}</template>
-          <template v-else>历史用时异常待核对（不显示为 0）</template>
+          安排预计 {{ plan.planned_minutes }} 分钟
+          <template v-if="planSummary.authoritative && planSummary.endedSessionCount"> · 已结束 {{ planSummary.endedSessionCount }} 段 · 累计 {{ formatDurationMs(planSummary.totalMs) }} · 实际 {{ planActualLabel(planSummary) }}</template>
+          <template v-else-if="!planSummary.authoritative">历史用时异常待核对</template>
         </p>
-        <p class="mt-1 text-xs text-muted-foreground">
+        <p v-if="deadlineText" class="mt-1 text-xs text-muted-foreground">
           任务总截止：{{ deadlineText || '未设置' }}
           <span v-if="planDeadlineRisk && (planDeadlineRisk.kind === 'after_deadline' || planDeadlineRisk.overdue)" class="text-warning-foreground">（{{ planDeadlineRisk.overdue ? '任务已逾期' : '安排日晚于截止' }}，仅提示，不阻止工作）</span>
         </p>
-        <p class="mt-1 text-xs text-muted-foreground">本段计时单独显示（顶部「已投入」），不混入已结束累计。</p>
-      </Card>
+      </section>
       <Alert v-else-if="planLinked && isV1" variant="warning">
         会话关联的安排已不存在（关联损坏）：正文与累计保留，编辑/暂停/保存仍可用；本次无法联动安排进度，不会自动解绑或降级为遗留结束。
       </Alert>
@@ -958,11 +975,11 @@ const leaseCountdown = computed(() => {
         <button type="button" role="tab" :aria-selected="mobileTab === 'materials'" class="rounded-md px-3 py-1.5 text-sm" :class="mobileTab === 'materials' ? 'bg-primary text-primary-foreground' : 'border bg-card'" @click="mobileTab = 'materials'">关联资料</button>
       </div>
 
-      <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <Card :class="mobileTab !== 'write' && 'max-lg:hidden'">
           <template #header>
             <div class="text-base font-semibold">本次成果</div>
-            <p class="text-xs text-muted-foreground">纯文本 / Markdown 源码；停止输入约 1 秒自动保存。</p>
+            <p class="text-xs text-muted-foreground">自动保存到本机</p>
           </template>
           <Textarea
             :model-value="draft.text.value"

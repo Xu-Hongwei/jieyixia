@@ -119,6 +119,20 @@ describe('B1-04 依赖：跨天前置/同日顺序/部分缺口/无关工作', (
     expect(r.complete).toBe(true)
   })
 
+  it.each([
+    ['overdue_requires_consent', { deadline_precision: 'date', deadline_value: D(-1) }, {}],
+    ['outside_horizon', {}, { earliest_date: D(7) }],
+  ])('前置未排完时保留后继自身的日期限制 %s', (reason, fact, work) => {
+    const input = mkInput({
+      budgets: Array(7).fill(0),
+      facts: [mkFact('t-1'), mkFact('t-2', fact)],
+      works: [mkWork('w1'), mkWork('w4', { task_ref: { kind: 'existing', id: 't-2' }, depends_on: ['w1'], ...work })],
+    })
+    const result = run(input)
+    expect(result.segments).toHaveLength(0)
+    expect(result.unscheduled).toContainEqual({ work_item_key: 'w4', remaining_minutes: 60, reason })
+  })
+
   it('前置部分缺口：后继 dependency_blocked，不当作已完成', () => {
     const input = mkInput({
       buffer: 0, budgets: [30, 0, 0, 0, 0, 0, 0],

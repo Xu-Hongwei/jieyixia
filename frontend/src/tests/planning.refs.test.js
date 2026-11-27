@@ -17,6 +17,33 @@ const mkReq = (type, value, over = {}) => ({
 const norm = (proposal, over = {}, requirements = [], options = {}) =>
   normalizePlanningContext(mkSnapshot(over), proposal, requirements, mkContext(), options)
 
+describe('任务清单的截止与跨天安排', () => {
+  function singleTask(title, minutes, candidate) {
+    const task = { kind: 'draft', key: 't1' }
+    return mkProposal({
+      task_proposals: [{ key: 't1', op: 'create', title, deadline_candidates: [candidate], evidence_refs: [EV_USER] }],
+      action_proposals: [{ key: 'a1', op: 'create', task_ref: task, text: title, minutes, basis: 'suggestion', evidence_refs: [] }],
+      work_items: [mkWork('w1', { task_ref: task, action_ref: { kind: 'draft', key: 'a1' }, deliverable: title, remaining_minutes: minutes })],
+    })
+  }
+  const undated = { precision: 'none', value: null, basis: 'inferred', derived: false }
+  it('报名截止未知也能预览，不生成正式截止', () => {
+    const { input } = norm(singleTask('完成报名', 15, undated))
+    expect(input.task_facts.find(f => f.task_ref.key === 't1').deadline_value).toBeNull()
+    expect(scheduleDaily(input).segments).toHaveLength(1)
+  })
+  it('跨日写同一份报告只使用一个任务引用', () => {
+    const { input } = norm(singleTask('撰写课程报告', 90, undated))
+    const { segments } = scheduleDaily(input)
+    expect(new Set(segments.map(s => s.date)).size).toBeGreaterThan(1)
+    expect(segments.every(s => s.task_ref.key === 't1')).toBe(true)
+    expect(segments.reduce((sum, s) => sum + s.minutes, 0)).toBe(90)
+  })
+  it('有具体日期仍校验推算来源', () => {
+    expect(() => norm(singleTask('完成报名', 15, { ...undated, precision: 'date', value: START, evidence_refs: [EV_USER] }))).toThrow('推算标记')
+  })
+})
+
 describe('B1-09 冻结 model_semantics fixture × normalize（R3/R4 跨入 JS）', () => {
   const index = load('index')
   const semCases = index.cases.filter((c) => c.file.startsWith('f-sem-'))

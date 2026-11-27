@@ -7,7 +7,6 @@ JXL_PROVIDER=model    → ModelProvider（多厂家 profile + 失败降级）
 from __future__ import annotations
 
 import json
-from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Protocol
@@ -20,7 +19,6 @@ from contract.models import (
     AssistantModelProposal,
     ClarificationPayload,
     ClarificationQuestion,
-    DeadlineCandidate,
     DraftRef,
     ExistingFactEvidence,
     ExistingRef,
@@ -236,21 +234,18 @@ class FixtureProposeProvider:
                 ev = SourceExcerptEvidence(source_id=s.source_id, excerpt=(s.excerpt or "（桩）选定资料原文")[:2000])
             else:
                 ev = UserMessageEvidence(turn_id=request.turn_id, excerpt=request.user_message[:2000])
-            deadline_date = (date.fromisoformat(request.planning_context.start_date) + timedelta(days=2)).isoformat()
+            title = "完成资料要求（桩建议）"
             tasks = [
                 TaskProposalCreate(
-                    key="t1", title="完成资料要求（桩建议）",
-                    deadline_candidates=[DeadlineCandidate(value=deadline_date, precision="date", basis="explicit", evidence_refs=[ev])],
+                    key="t1", title=title,
                     evidence_refs=[ev],
                 ),
             ]
             actions = [
-                ActionProposalCreate(key="a1", task_ref=DraftRef(key="t1"), text="整理资料", minutes=45, basis="requirement", evidence_refs=[ev]),
-                ActionProposalCreate(key="a2", task_ref=DraftRef(key="t1"), text="撰写结论", minutes=60, basis="suggestion"),
+                ActionProposalCreate(key="a1", task_ref=DraftRef(key="t1"), text=title, minutes=105, basis="suggestion"),
             ]
             work = [
-                WorkItemProposal(key="w1", task_ref=DraftRef(key="t1"), action_ref=DraftRef(key="a1"), deliverable="资料清单", remaining_minutes=45),
-                WorkItemProposal(key="w2", task_ref=DraftRef(key="t1"), action_ref=DraftRef(key="a2"), deliverable="结论段落", remaining_minutes=60, depends_on=["w1"]),
+                WorkItemProposal(key="w1", task_ref=DraftRef(key="t1"), action_ref=DraftRef(key="a1"), deliverable=title, remaining_minutes=105),
             ]
             if request.selected_tasks:
                 t = request.selected_tasks[0]

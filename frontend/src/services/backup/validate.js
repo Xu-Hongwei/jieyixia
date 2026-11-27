@@ -148,6 +148,10 @@ function semByDef(defName, core, objectId, errors) {
       if (Array.isArray(core.fields)) core.fields.forEach((f, i) => { if (f && typeof f === 'object') semField(f, `Note.fields[${i}]`, objectId, errors) })
       break
     case 'Matter':
+      if (core.deadline && typeof core.deadline === 'object') {
+        semDeadline(core.deadline, 'Matter.deadline', objectId, errors)
+        if (core.deadline.value && core.deadline.source !== 'manual') err(errors, 'B', '项目总截止须由用户设置', { objectId, path: 'Matter.deadline.source' })
+      }
       if (Array.isArray(core.note_ids) && new Set(core.note_ids).size !== core.note_ids.length) err(errors, 'B', 'note_ids 不得重复', { objectId, path: 'Matter.note_ids' })
       break
     case 'Task':

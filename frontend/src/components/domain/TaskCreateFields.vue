@@ -42,6 +42,6 @@ function setDate(value) {
         </select>
       </div>
     </fieldset>
-    <label class="min-w-0 space-y-1 text-sm"><span class="block">事项</span><select v-model="matter" aria-label="新任务事项" :disabled="disabled" class="h-9 max-w-full rounded-md border bg-transparent px-2"><option value="">未归组</option><option v-for="item in app.matters" :key="item.id" :value="item.id">{{ item.title }}</option></select></label>
+    <label class="min-w-0 space-y-1 text-sm"><span class="block">项目</span><select v-model="matter" aria-label="新任务项目" :disabled="disabled" class="h-9 max-w-full rounded-md border bg-transparent px-2"><option value="">独立任务</option><option v-for="item in app.matters" :key="item.id" :value="item.id">{{ item.title }}</option></select></label>
   </div>
 </template>

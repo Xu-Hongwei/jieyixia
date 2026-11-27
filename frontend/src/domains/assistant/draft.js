@@ -12,7 +12,7 @@ import { confirmTaskDeadline } from '../planning/normalize.js'
 import { checkReplacementBaseline } from './replan.js'
 import { resolveAssistantRefs } from './refs.js'
 import { scheduleWithManualSlots } from './manualSchedule.js'
-import { interpretEventInstant } from '../time.js'
+import { beijingDateStr, interpretEventInstant } from '../time.js'
 
 const L = limitsDoc.limits
 export const MAX_DRAFT_REVISIONS = L.max_draft_revisions.value
@@ -230,6 +230,7 @@ export function addConfirmation(draft, confirmation, now, ctx = {}) {
     try {
       if (confirmation.field_path === 'manual_slot') {
         const slot = confirmation.new_value
+        if (slot?.date < beijingDateStr(Date.parse(now))) throw new Error('请选择今天或以后的日期。')
         const start = interpretEventInstant(`${slot?.date}T${slot?.time}:00+08:00`)
         if (start != null && start < Date.parse(now)) throw new Error('所选开始时间已过，请选择之后的时间。')
       }

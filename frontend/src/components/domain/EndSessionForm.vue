@@ -82,7 +82,7 @@ const minutesText = (m) => (m == null ? '未记录' : m === 0 ? '<1分钟' : `${
       >
         <DialogTitle class="text-base font-semibold">结束本次工作</DialogTitle>
         <DialogDescription class="mt-1 text-sm text-muted-foreground">
-          编辑区当前正文将作为本次成果一并保存。选择「行动完成」只完成该行动，不会自动完成任务。
+          本次成果和用时将一起保存，任务状态由你单独更新。
         </DialogDescription>
 
         <!-- 所属安排事实（冻结快照，与提交同版）；独立会话不显示 -->
@@ -100,7 +100,6 @@ const minutesText = (m) => (m == null ? '未记录' : m === 0 ? '<1分钟' : `${
             </template>
             <template v-else>暂无已结束历史</template>
           </p>
-          <p class="mt-1 text-muted-foreground">本段有效用时将在保存时结算，不混入上方已结束累计。</p>
         </div>
         <Alert v-else-if="planCtx && planCtx.missing" variant="warning" class="mt-2">
           会话关联的安排已不存在（关联损坏）：正文仍可保存，但本次无法联动安排进度，不能结束。请先核对数据；不会自动解绑或降级为遗留结束。
@@ -114,19 +113,19 @@ const minutesText = (m) => (m == null ? '未记录' : m === 0 ? '<1分钟' : `${
           </ul>
         </div>
 
-        <fieldset class="mt-3 space-y-2" :disabled="disabled()">
-          <legend class="text-sm font-medium">这次行动的结果</legend>
+        <fieldset class="mt-4 flex flex-wrap gap-2" :disabled="disabled()">
+          <legend class="mb-2 text-sm font-medium">这次行动的结果</legend>
           <label class="flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm" :class="outcome === 'done' && 'border-primary bg-primary/5'">
             <input v-model="outcome" type="radio" name="work-outcome" value="done" class="mt-0.5" />
-            <span><strong>行动完成</strong><span class="block text-xs text-muted-foreground">确认完成当前行动；任务不自动完成，也不自动选下一条。</span></span>
+            <span>行动完成</span>
           </label>
           <label class="flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm" :class="outcome === 'partial' && 'border-primary bg-primary/5'">
             <input v-model="outcome" type="radio" name="work-outcome" value="partial" class="mt-0.5" />
-            <span><strong>部分完成</strong><span class="block text-xs text-muted-foreground">记录进展，行动保持原状态，之后可再开始新一段。</span></span>
+            <span>部分完成</span>
           </label>
           <label class="flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm" :class="outcome === 'blocked' && 'border-primary bg-primary/5'">
             <input v-model="outcome" type="radio" name="work-outcome" value="blocked" class="mt-0.5" />
-            <span><strong>被阻塞</strong><span class="block text-xs text-muted-foreground">写明具体卡点；行动/任务状态不会自动改为受阻。</span></span>
+            <span>被阻塞</span>
           </label>
         </fieldset>
         <div v-if="outcome === 'blocked'" class="mt-2">
@@ -135,15 +134,15 @@ const minutesText = (m) => (m == null ? '未记录' : m === 0 ? '<1分钟' : `${
         </div>
 
         <!-- 第二组：这项安排的进度（仅关联会话；与行动结果独立，六组合全允许） -->
-        <fieldset v-if="planCtx && !planCtx.missing" class="mt-3 space-y-2" :disabled="disabled()">
-          <legend class="text-sm font-medium">这项安排的进度</legend>
+        <fieldset v-if="planCtx && !planCtx.missing" class="mt-4 flex flex-wrap gap-2" :disabled="disabled()">
+          <legend class="mb-2 text-sm font-medium">当天这项安排还要继续吗？</legend>
           <label class="flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm" :class="planProgress === 'partial' && 'border-primary bg-primary/5'">
             <input v-model="planProgress" type="radio" name="plan-progress" value="partial" class="mt-0.5" />
-            <span><strong>还需要继续</strong><span class="block text-xs text-muted-foreground">保留这项安排，之后可以修改或继续工作。</span></span>
+            <span>还需要继续</span>
           </label>
           <label class="flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm" :class="planProgress === 'done' && 'border-primary bg-primary/5'">
             <input v-model="planProgress" type="radio" name="plan-progress" value="done" class="mt-0.5" />
-            <span><strong>这项安排已完成</strong><span class="block text-xs text-muted-foreground">只完成这项安排，不代表完成任务；行动结果按上方选择单独记录。</span></span>
+            <span>这项安排已完成</span>
           </label>
         </fieldset>
 
@@ -183,7 +182,6 @@ const minutesText = (m) => (m == null ? '未记录' : m === 0 ? '<1分钟' : `${
           <Button variant="outline" :disabled="busy" @click="open = false">取消</Button>
           <Button :disabled="disabled() || (planCtx && planCtx.missing)" @click="submit">{{ busy ? '正在结束…' : '结束并保存' }}</Button>
         </div>
-        <p class="mt-2 text-[11px] text-muted-foreground">取消只关闭表单，不结束、不暂停、不写进度；同会话重开保留已选结果与卡点。</p>
       </DialogContent>
     </DialogPortal>
   </DialogRoot>

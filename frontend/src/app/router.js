@@ -1,6 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { ref } from 'vue'
 import { resetWorkLeaveApproval } from '@/composables/workLeave'
+import { schedulePath } from '@/domains/workNavigation'
+import { beijingToday } from '@/domains/time'
 import TodayPage from '@/pages/TodayPage.vue'
 import CollectPage from '@/pages/CollectPage.vue'
 import NotesPage from '@/pages/NotesPage.vue'
@@ -34,7 +36,12 @@ export function warmOptionalPages() {
 const scrollKey = (route) => {
   let ws = 'personal'
   try { ws = localStorage.getItem('jxl-workspace') || 'personal' } catch { /* 隐私模式退化为会话内 */ }
-  return `jxl-scroll:${ws}:${route.fullPath}`
+  // The drawer and transient parameters sit over the same calendar. Use the
+  // calendar's date/view in a stable order for links back from task details.
+  const path = route.name === 'schedule'
+    ? schedulePath({ date: route.query.date, view: route.query.view }, beijingToday())
+    : route.fullPath
+  return `jxl-scroll:${ws}:${path}`
 }
 
 // 托管未验证 history 回退前用 hash 模式，保证深链接刷新可恢复。
@@ -55,6 +62,7 @@ export const router = createRouter({
     { path: '/data', name: 'data', component: () => loadPage('数据管理', loadData), meta: { title: '数据管理', section: 'data' } },
   ],
   scrollBehavior(to, from, savedPosition) {
+    if (to.name === 'schedule' && from.name === 'schedule' && !savedPosition) return false
     if (to.path === '/collect' && from.path === '/collect') {
       const withoutPanel = q => Object.entries(q).filter(([key]) => key !== 'source').sort(([a], [b]) => a.localeCompare(b))
       if (JSON.stringify(withoutPanel(to.query)) === JSON.stringify(withoutPanel(from.query))) return false

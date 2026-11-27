@@ -33,6 +33,26 @@ describe('手动补排', () => {
     draft.user_confirmations.push({ ...choice('prepare', ''), field_path: '', new_value: true })
     expect(scheduleWithManualSlots(draft)).toBe(draft.planning_result)
   })
+  it('仅指定日期不能绕过当天精确截止', () => {
+    const draft = makeDraft()
+    draft.user_confirmations.push(choice('prepare', ''))
+    expect(() => scheduleWithManualSlots(draft)).toThrow(/具体截止时刻/)
+  })
+  it('窗口外按日确认保留前置顺序，不虚构工时预算或开始时刻', () => {
+    const date = '2026-12-13'
+    const works = [mkWork('arrival', { earliest_date: date }), mkWork('award', { earliest_date: date, depends_on: ['arrival'] })]
+    const input = mkInput({ works })
+    const draft = { revision: 1, planning_input: input, planning_result: scheduleDaily(input), user_confirmations: [] }
+    const project = (...choices) => scheduleWithManualSlots({ ...draft, user_confirmations: choices })
+    expect(() => project(choice('arrival', '', '2026-12-12'))).toThrow(/最早可安排/)
+    expect(() => project(choice('award', '', date))).toThrow(/前置/)
+    const r = project(choice('arrival', '', date), choice('award', '', date))
+    expect(r.complete).toBe(true)
+    expect(r.segments.map(s => [s.date, s.order, s.action_text])).toEqual([
+      [date, 1, works[0].deliverable], [date, 2, works[1].deliverable],
+    ])
+    expect(r.days).toEqual(draft.planning_result.days)
+  })
   it('已采用行动按实际拆解工作量筛选，同名行动独立', () => {
     const work = mkWork('step', { remaining_minutes: 40 })
     const draft = { status: 'applied', proposal: { action_proposals: [{ op: 'create', key: 'a-step' }] },

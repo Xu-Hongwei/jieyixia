@@ -1,8 +1,8 @@
 <script setup>
 import { requireQwen } from '@/services/api/qwenConnection'
-import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onUnmounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
-import { ChevronDown, ChevronRight, FolderPlus, Pencil, RefreshCw, Search, SlidersHorizontal, Sparkles, Trash2, Upload, X } from 'lucide-vue-next'
+import { RefreshCw, Search, SlidersHorizontal, Sparkles, Upload, X } from 'lucide-vue-next'
 import Alert from '@/components/ui/Alert.vue'
 import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
@@ -11,7 +11,6 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import DateInput from '@/components/ui/DateInput.vue'
 import Input from '@/components/ui/Input.vue'
 import NodeSelect from '@/components/domain/NodeSelect.vue'
-import TaskRow from '@/components/domain/TaskRow.vue'
 import Textarea from '@/components/ui/Textarea.vue'
 import MaterialPanel from '@/components/domain/MaterialPanel.vue'
 import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
@@ -19,8 +18,8 @@ import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/c
 import { MAX_SELECTED_SOURCES } from '@/domains/assistant/limits'
 import { useAppStore } from '@/stores/app'
 import { beijingInstantLabel, isValidDate } from '@/domains/time'
-import { BUCKET_LABELS, byCaptured, matterNotesOf, matterTasksOf, matterTitleOf, rowMatches, sourceRow } from '@/domains/organize'
-import { MATTER_ROLE_LABELS, STATUS_LABELS, label } from '@/domains/labels'
+import { BUCKET_LABELS, byCaptured, matterTitleOf, rowMatches, sourceRow } from '@/domains/organize'
+import { STATUS_LABELS, label } from '@/domains/labels'
 
 const store = useAppStore()
 const route = useRoute()
@@ -30,8 +29,17 @@ const referenceAt = ref('')
 const fileInput = ref(null)
 const pendingUrl = ref(null)
 
-// 添加入口常驻一行；输入 / 粘贴 / 选图后才展开完整输入区。
+// 空资料库直接展示首次录入，收起后可从页首重新打开。
 const addOpen = ref(false)
+const emptyComposerClosed = ref(false)
+const showComposer = computed(() => !store.isDemo && (
+  addOpen.value || (store.ready && !store.sources.length && !emptyComposerClosed.value)
+))
+async function closeComposer() {
+  if (!(await guardDraft())) return
+  emptyComposerClosed.value = true
+  addOpen.value = false
+}
 function openAdd() {
   addOpen.value = true
   nextTick(() => {
@@ -207,9 +215,9 @@ function planSelected() {
 }
 const statusCounts = computed(() => Object.fromEntries(STATUS_ITEMS.map(item => [item.value, item.value === 'all' ? store.sources.length : store.sources.filter(s => sourceRow(s, store.notes.find(n => n.source_id === s.id) || null, '').bucket === item.value).length])))
 const { discardOpen, guardLeave: guardDraft, settle } = useUnsavedGuard(
-  () => !!textDraft.value.trim() || !!referenceAt.value || !!matterName.value.trim() || !!renamingMatter.value,
+  () => !!textDraft.value.trim() || !!referenceAt.value,
   () => store.busy || localBusy.value,
-  () => { textDraft.value = ''; referenceAt.value = ''; matterName.value = ''; renamingMatter.value = null },
+  () => { textDraft.value = ''; referenceAt.value = '' },
 )
 async function guardLeave() {
   if (panelRef.value && !(await panelRef.value.guardLeave())) return false
@@ -230,8 +238,9 @@ watch(() => store.workspaceId, () => {
   textDraft.value = ''
   referenceAt.value = ''
   addOpen.value = false
+  emptyComposerClosed.value = false
   filtersOpen.value = false
-  selectedIds.value = []; queueIds.value = []; renamingMatter.value = null; matterName.value = ''
+  selectedIds.value = []; queueIds.value = []
   resetWorkLeaveApproval()
   clearFilters()
   if (panelId.value) closePanel()
@@ -272,20 +281,6 @@ async function saveImages(files) {
   try { await store.collectFiles(files) } finally { localBusy.value = false }
 }
 
-function onPaste(e) {
-  if (store.isDemo || panelId.value || e.target.closest?.('textarea, input')) return
-  const files = e.clipboardData && e.clipboardData.files
-  if (files && files.length) {
-    e.preventDefault()
-    saveImages(files)
-  } else {
-    const text = e.clipboardData && e.clipboardData.getData('text')
-    if (text) {
-      textDraft.value = text
-      store.say('info', '剪贴板文字已填入输入框')
-    }
-  }
-}
 const onDrop = (e) => {
   e.preventDefault()
   if (store.isDemo || panelId.value) return
@@ -296,51 +291,19 @@ function onFileChange(e) {
   saveImages(input.files)
   input.value = ''
 }
-onMounted(() => window.addEventListener('paste', onPaste))
 onUnmounted(() => {
-  window.removeEventListener('paste', onPaste)
   if (pendingUrl.value) URL.revokeObjectURL(pendingUrl.value)
 })
 
-// 事项管理（从日程页移入资料库）：手动归组，非 AI；删除只解除归组。
-const mattersOpen = ref(false)
-const matterName = ref('')
-const renamingMatter = ref(null)
-const matterDraft = ref('')
-const expandedMatter = ref(null)
-const deleteMatterTarget = ref(null)
-const deleteMatterOpen = ref(false)
-const deleteMatterNotes = computed(() => (deleteMatterTarget.value ? matterNotesOf(store.docs, deleteMatterTarget.value.id) : []))
-const deleteMatterTasks = computed(() => (deleteMatterTarget.value ? matterTasksOf(store.docs, deleteMatterTarget.value.id) : []))
-async function createMatter() {
-  const r = await store.createMatter(matterName.value)
-  if (r && r.ok) matterName.value = ''
-}
-function startRenameMatter(m) {
-  renamingMatter.value = m.id
-  matterDraft.value = m.title
-}
-async function saveRenameMatter(m) {
-  const r = await store.renameMatter(m, matterDraft.value)
-  if (r && r.ok) renamingMatter.value = null
-}
-function toggleMatter(id) {
-  expandedMatter.value = expandedMatter.value === id ? null : id
-}
-async function confirmDeleteMatter() {
-  const m = deleteMatterTarget.value
-  deleteMatterOpen.value = false
-  deleteMatterTarget.value = null
-  if (m) await store.deleteMatter(m)
-}
 </script>
 
 <template>
   <div class="mx-auto max-w-6xl" @drop="onDrop" @dragover.prevent>
-  <header class="mb-4 flex items-center justify-between gap-3"><h1 class="text-2xl font-semibold">资料</h1><RouterLink v-if="store.isDemo" to="/assistant" class="text-sm text-primary underline">查看操作演示</RouterLink><Button v-else :aria-expanded="addOpen" @click="openAdd"><Upload />添加资料</Button></header>
-  <Card v-if="!store.isDemo && addOpen" class="mb-4">
+  <header class="mb-4 flex items-center justify-between gap-3"><h1 class="workspace-title">资料</h1><RouterLink v-if="store.isDemo" to="/assistant" class="text-sm text-primary underline">查看操作演示</RouterLink><Button v-else-if="!showComposer" @click="openAdd"><Upload />添加资料</Button></header>
+  <div class="min-w-0 space-y-5">
+  <Card v-if="showComposer" class="library-index">
     <template #header>
-      <div class="flex items-center justify-between"><span class="text-base font-semibold">添加资料</span><Button size="sm" variant="ghost" aria-label="收起添加资料" @click="async () => { if (await guardDraft()) addOpen = false }"><X /></Button></div>
+      <div class="flex items-center justify-between"><span class="text-base font-semibold">添加资料</span><Button size="sm" variant="ghost" aria-label="收起添加资料" @click="closeComposer"><X /></Button></div>
     </template>
     <div class="space-y-3">
       <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/webp" multiple class="hidden" @change="onFileChange" />
@@ -370,12 +333,12 @@ async function confirmDeleteMatter() {
     </div>
   </Card>
 
-  <Card>
+  <Card v-if="store.sources.length || !showComposer" class="library-index">
     <template #header>
       <div class="text-base font-semibold">资料库 · {{ inboxRows.length }} 份</div>
     </template>
     <div class="space-y-3">
-      <div class="flex flex-wrap gap-1 border-b pb-3" aria-label="资料状态筛选"><button v-for="item in STATUS_ITEMS" :key="item.value" type="button" class="rounded-md px-3 py-2 text-sm" :class="statusFilter === item.value ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-muted'" :aria-pressed="statusFilter === item.value" @click="statusFilter = item.value">{{ item.label }} <span class="ml-1 tabular-nums">{{ statusCounts[item.value] }}</span></button></div>
+      <div class="index-tabs flex flex-wrap" aria-label="资料状态筛选"><button v-for="item in STATUS_ITEMS" :key="item.value" type="button" class="rounded-md px-3 py-2 text-sm" :class="statusFilter === item.value ? 'bg-accent font-medium' : 'text-muted-foreground hover:bg-muted'" :aria-pressed="statusFilter === item.value" @click="statusFilter = item.value">{{ item.label }} <span class="ml-1 tabular-nums">{{ statusCounts[item.value] }}</span></button></div>
       <div v-if="selectedIds.length" class="space-y-2 rounded-md bg-accent/50 p-3" aria-label="已选资料">
         <div class="flex flex-wrap items-center gap-2"><span class="flex-1 text-sm">已选 {{ selectedIds.length }} 份</span><Button size="sm" @click="planSelected">用所选资料制定计划</Button><Button size="sm" variant="ghost" @click="selectedIds = []">清空选择</Button></div>
         <div class="flex flex-wrap gap-2"><button v-for="source in selectedSources" :key="source.id" type="button" class="max-w-full truncate text-xs underline" :aria-label="`取消选择：${sourceTitle(source)}`" @click="toggleSelected(source.id)">{{ sourceTitle(source) }} ×</button></div>
@@ -388,7 +351,7 @@ async function confirmDeleteMatter() {
             placeholder="搜索资料名称或内容"
             class="pl-8"
             aria-label="搜索资料库"
-            title="命中文件名 / 正文 / 便签标题 / 摘要 / 字段原文与引用 / 关键词 / 事项名称"
+            title="命中文件名 / 正文 / 便签标题 / 摘要 / 字段原文与引用 / 关键词 / 项目名称"
           />
         </div>
         <div class="w-28"><NodeSelect v-model="sortDir" :items="SORT_ITEMS" placeholder="最新优先" /></div>
@@ -438,76 +401,10 @@ async function confirmDeleteMatter() {
     </div>
   </Card>
 
-  <!-- 事项管理：资料库的二级工作面，默认折叠 -->
-  <Card class="mt-4">
-    <template #header>
-      <button class="flex w-full items-center justify-between text-base font-semibold" :aria-expanded="mattersOpen" @click="mattersOpen = !mattersOpen">
-        <span>事项管理 · {{ store.matters.length }}</span>
-        <ChevronDown v-if="mattersOpen" class="size-4" />
-        <ChevronRight v-else class="size-4" />
-      </button>
-      <p v-if="mattersOpen" class="text-sm text-muted-foreground">删除事项只解除归组，保留资料与任务。</p>
-    </template>
-    <div v-if="mattersOpen" class="space-y-3">
-      <div class="flex flex-wrap items-center gap-2">
-        <Input v-model="matterName" placeholder="新事项名…" class="max-w-40" aria-label="新事项名" />
-        <Button variant="outline" @click="createMatter"><FolderPlus />建事项</Button>
-      </div>
-      <div class="space-y-2">
-        <div v-for="m in store.matters" :key="m.id" class="rounded-md border p-2 text-sm">
-          <div class="flex flex-wrap items-center gap-2">
-            <template v-if="renamingMatter === m.id">
-              <Input v-model="matterDraft" class="h-8 max-w-40" aria-label="重命名事项" @keyup.enter="saveRenameMatter(m)" />
-              <Button size="sm" @click="saveRenameMatter(m)">保存</Button>
-              <Button size="sm" variant="outline" @click="renamingMatter = null">取消</Button>
-            </template>
-            <template v-else>
-              <button class="flex min-w-0 flex-1 basis-40 items-center gap-1 text-left font-medium" :aria-expanded="expandedMatter === m.id" @click="toggleMatter(m.id)">
-                <ChevronDown v-if="expandedMatter === m.id" class="size-3.5 shrink-0" />
-                <ChevronRight v-else class="size-3.5 shrink-0" />
-                <span class="truncate">{{ m.title }}</span>
-              </button>
-              <Badge variant="secondary">{{ matterNotesOf(store.docs, m.id).length }} 便签 · {{ matterTasksOf(store.docs, m.id).length }} 任务</Badge>
-              <Button size="sm" variant="outline" aria-label="重命名事项" title="重命名" @click="startRenameMatter(m)"><Pencil /></Button>
-              <Button size="sm" variant="destructive" aria-label="删除事项" title="删除" @click="deleteMatterTarget = m; deleteMatterOpen = true"><Trash2 /></Button>
-            </template>
-          </div>
-          <div v-if="expandedMatter === m.id" class="mt-2 space-y-3 border-t pt-2">
-            <div class="space-y-1">
-              <div class="text-xs font-medium text-muted-foreground">资料与角色</div>
-              <div v-for="n in matterNotesOf(store.docs, m.id)" :key="n.id" class="flex flex-wrap items-center gap-2">
-                <button type="button" class="min-w-0 flex-1 basis-40 truncate text-left underline" @click="openNote(n.id)">{{ n.title }}</button>
-                <Badge variant="secondary">{{ n.matter_role ? label(MATTER_ROLE_LABELS, n.matter_role) : '未指定角色' }}</Badge>
-              </div>
-              <p v-if="!matterNotesOf(store.docs, m.id).length" class="text-xs text-muted-foreground">暂无关联资料。</p>
-            </div>
-            <div class="space-y-1">
-              <div class="text-xs font-medium text-muted-foreground">相关任务</div>
-              <TaskRow v-for="t in matterTasksOf(store.docs, m.id)" :key="t.id" :task="t" />
-              <p v-if="!matterTasksOf(store.docs, m.id).length" class="text-xs text-muted-foreground">还没有任务归入此事项。</p>
-            </div>
-          </div>
-        </div>
-        <p v-if="!store.matters.length" class="text-sm text-muted-foreground">还没有事项；建一个即可把便签与任务手动归进去。</p>
-      </div>
-    </div>
-  </Card>
-
+  </div>
   <div v-if="store.lastDeleted" class="mt-4 flex flex-wrap items-center gap-2 rounded-md border p-3 text-sm"><span class="flex-1">{{ store.lastDeleted.kind === 'note' ? '便签已删除，原始资料保留' : '最近删除可恢复' }}</span><Button size="sm" variant="outline" @click="store.undoDelete()">撤销删除</Button></div>
   <MaterialPanel ref="panelRef" :source-id="panelId" :next-id="nextNoteId" :return-to="route.fullPath" @close="closePanel" @open-note="openNote" />
   <ConfirmDialog v-model="discardOpen" title="放弃未保存的资料输入？" confirm-label="放弃修改" cancel-label="继续编辑" @confirm="settle(true)">输入尚未保存，离开后将清空。</ConfirmDialog>
-  <ConfirmDialog
-    v-model="deleteMatterOpen"
-    title="删除事项"
-    confirm-label="删除事项（保留成员）"
-    @confirm="confirmDeleteMatter"
-  >
-    <p>将删除事项「{{ deleteMatterTarget ? deleteMatterTarget.title : '' }}」，只解除归组关系：</p>
-    <ul class="mt-1 list-disc space-y-0.5 pl-5">
-      <li>{{ deleteMatterNotes.length }} 张便签回到未归组，资料角色清除；便签与原始截图/文字保留。</li>
-      <li>{{ deleteMatterTasks.length }} 个任务解除事项关联，任务本体与截止保留。</li>
-      <li>专注与计划记录保留。取消则不做任何修改。</li>
-    </ul>
-  </ConfirmDialog>
+
   </div>
 </template>

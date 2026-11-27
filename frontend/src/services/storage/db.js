@@ -563,21 +563,27 @@ export const allWorkspaces = () => tx('workspaces', 'readonly', (s) => s.getAll(
 // 仅清空指定工作区的 sources/docs/focus_runtime 与三个助手 store（demo 重置用），同一事务，
 // 绝不触碰其它空间。runtime 一并清：重置不留运行锁/租约/台账。
 // assistant_ops 主键是 application_id（无 id 字段），删除键不能用 rec.id。
-export const clearWorkspace = (id) =>
+export const clearWorkspace = (id, expected = null) =>
   open().then(
     (db) =>
       new Promise((resolve, reject) => {
         const stores = ['sources', 'docs', 'focus_runtime', 'assistant_threads', 'assistant_drafts', 'assistant_ops']
         const t = db.transaction(stores, 'readwrite')
+        let scopeChanged = false
         try {
           for (const name of stores) {
             const store = t.objectStore(name)
             const keyPath = name === 'assistant_ops' ? 'application_id' : 'id'
             const req = store.getAll()
             req.onsuccess = () => {
-              for (const rec of req.result) {
-                if (rec && rec.workspace_id === id) store.delete(rec[keyPath])
+              const members = req.result.filter(rec => inWorkspace(rec, id))
+              const ids = expected?.[name]
+              if (ids && (members.length !== ids.size || members.some(rec => !ids.has(rec[keyPath])))) {
+                scopeChanged = true
+                t.abort()
+                return
               }
+              for (const rec of members) store.delete(rec[keyPath])
             }
           }
         } catch (err) {
@@ -586,8 +592,7 @@ export const clearWorkspace = (id) =>
           return
         }
         t.oncomplete = () => resolve()
-        t.onerror = () => reject(t.error)
-        t.onabort = () => reject(t.error)
+        t.onabort = () => reject(scopeChanged ? new Error('空间内容已变化，请重新查看后确认清空。') : t.error)
       }),
   )
 

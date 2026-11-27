@@ -16,8 +16,9 @@ import { useAppStore } from '@/stores/app'
 import { useFocusStore } from '@/stores/focus'
 import { isLiveRef } from '@/domains/plan'
 import { SESSION_OUTCOME_LABELS, label } from '@/domains/labels'
-import { recordPath, schedulePath } from '@/domains/workNavigation'
+import { recordPath, schedulePath, taskPath } from '@/domains/workNavigation'
 import { beijingAddDays, beijingDateStr, isValidDate } from '@/domains/time'
+import { endedSessionsSorted, formatDurationMs, sessionActionText, sessionTitle } from '@/domains/work'
 import { weekStartOf } from '@/domains/week'
 
 const store = useAppStore()
@@ -131,6 +132,17 @@ watch(() => route.query.create, (v) => { if (v === '1') router.replace('/tasks?c
 watch(() => route.query.undated, (v) => { if (v === '1' && !route.query.plan && !route.query.task) router.replace('/tasks?undated=1') }, { immediate: true })
 const plans = usePlanStore()
 const classification = computed(() => plans.classify(new Date(store.nowTick)))
+const followupQueues = computed(() => {
+  const tasks = new Map(store.tasks.map(task => [task.id, task]))
+  return [
+    { list: 'unscheduled', label: '待安排', ids: classification.value.unscheduled },
+    { list: 'past', label: '过去未完成', ids: classification.value.pastUnfinished.map(entry => entry.taskId) },
+  ].map(queue => ({
+    ...queue, count: queue.ids.length, tasks: queue.ids.slice(0, 3).map(id => tasks.get(id)).filter(Boolean),
+  }))
+})
+const recentWork = computed(() => focus.ready ? endedSessionsSorted(focus.sessions).slice(0, 3) : [])
+const hasQueue = computed(() => followupQueues.value.some(queue => queue.count > 0))
 const pendingNoteCount = computed(() => store.noteBuckets.pending.length)
 const recoverCount = computed(() =>
   (store.lastDeleted ? 1 : 0) + (store.pendingSave ? 1 : 0) + store.failedNotes.length,
@@ -159,6 +171,80 @@ async function openRecover() {
   <div class="mx-auto max-w-6xl space-y-5">
     <!-- 继续条：当前空间有未结束工作时出现，单一「回到工作」入口 -->
     <ContinueBar />
+
+    <!-- 结束回跳横幅：真实已结束记录才展示；partial 安排提供「另安排一天」（复用共享编辑器） -->
+    <Alert v-if="recordedSession" variant="success" dismiss-label="关闭工作保存提示" @dismiss="dismissRecorded">
+      这次记录已保存<template v-if="recordedSession.outcome"> · 行动{{ label(SESSION_OUTCOME_LABELS, recordedSession.outcome) }}</template>。
+      <RouterLink :to="recordedRecordLink" class="ml-1 underline">查看工作记录</RouterLink>
+      <Button v-if="canArrangeAnother" size="sm" variant="outline" class="ml-2" @click="arrangeAnotherFromRecorded">另安排一天</Button>
+    </Alert>
+
+    <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="planParam" @close="closeWorkspace" @saved="onPlanSaved"
+      @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
+      @another="id => openEditor({ mode: 'another', planId: id })" @op-done="locatePlan" />
+
+    <div class="min-w-0">
+      <WeekView :mode="view" :recorded-plan-id="recordedPlan?.id || ''" @add-plan="(date) => openEditor({ mode: 'create', date })">
+        <template #tools>
+          <RouterLink to="/work-records" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent" title="回看已结束的工作记录">
+            <ClipboardList class="size-3.5" />工作记录
+          </RouterLink>
+          <div class="flex shrink-0 gap-0.5 rounded-md border bg-card p-0.5" role="group" aria-label="任务视图切换">
+            <button
+              type="button"
+              class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
+              :class="view === 'week' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
+              :aria-pressed="view === 'week'"
+              @click="view = 'week'"
+            >周视图</button>
+            <button
+              type="button"
+              class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
+              :class="view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
+              :aria-pressed="view === 'list'"
+              @click="view = 'list'"
+            >列表</button>
+          </div>
+          <Button v-if="view === 'list'" variant="outline" class="shrink-0" @click="openEditor({ mode: 'create' })"><Plus />安排工作</Button>
+        </template>
+      </WeekView>
+
+      <section v-if="store.ready && (hasQueue || recentWork.length || !store.tasks.length)" class="schedule-followup" aria-label="任务概览">
+        <header v-if="hasQueue || !store.tasks.length" class="flex items-baseline justify-between gap-3">
+          <h2 class="section-heading">待跟进</h2>
+          <RouterLink to="/tasks" class="quiet-link">全部任务 →</RouterLink>
+        </header>
+        <div v-if="hasQueue" class="followup-columns">
+          <section v-for="queue in followupQueues" :key="queue.list" class="followup-queue">
+            <RouterLink :to="taskListPath({ list: queue.list })" class="queue-label">{{ queue.label }} <span>{{ queue.count }}</span></RouterLink>
+            <ul v-if="queue.tasks.length" class="divide-y">
+              <li v-for="task in queue.tasks" :key="task.id" class="flex items-center gap-1">
+                <RouterLink class="queue-row min-w-0 flex-1" :to="taskPath(task.id, { return: schedulePath(route.query, todayStr) })">{{ task.title }} <ChevronRight v-if="queue.list !== 'unscheduled'" class="size-4 shrink-0" /></RouterLink>
+                <Button v-if="queue.list === 'unscheduled'" size="sm" variant="ghost" :aria-label="'安排' + task.title" @click="openEditor({ mode: 'create', taskId: task.id, date: typeof route.query.date === 'string' && isValidDate(route.query.date) ? route.query.date : todayStr })"><Plus />安排</Button>
+              </li>
+            </ul>
+          </section>
+        </div>
+        <div v-else-if="!store.tasks.length" class="schedule-start">
+          <div><h3 class="font-medium">还没有任务</h3><p class="mt-1 text-sm text-muted-foreground">选一天手动安排，或用通知和截图生成计划。</p></div>
+          <RouterLink to="/assistant" class="quiet-link">用资料制定计划 →</RouterLink>
+        </div>
+        <section v-if="recentWork.length" :class="hasQueue && 'mt-6'" aria-label="最近工作">
+          <header class="flex items-baseline justify-between gap-3">
+            <h2 class="section-heading">最近工作</h2>
+          </header>
+          <ul class="divide-y">
+            <li v-for="record in recentWork" :key="record.id">
+              <RouterLink class="block py-2.5 hover:text-primary" :to="recordPath(record.id, schedulePath(route.query, todayStr))">
+                <span class="block break-words text-sm font-medium">{{ sessionActionText(record) || sessionTitle(record) || '工作记录' }}</span>
+                <span class="text-xs text-muted-foreground">{{ beijingDateStr(new Date(record.ended_at)) }} · {{ formatDurationMs(record.accumulated_ms) }}</span>
+              </RouterLink>
+            </li>
+          </ul>
+        </section>
+      </section>
+
+    </div>
 
     <!-- 异常短提醒：只在有内容时出现，点击直达对应队列（携带 bucket，不被上次选中项覆盖） -->
     <div v-if="pendingNoteCount || store.failedNotes.length || recoverCount" class="flex flex-wrap items-center gap-2 text-sm">
@@ -189,49 +275,6 @@ async function openRecover() {
         <Badge variant="secondary">{{ recoverCount }}</Badge>
       </button>
     </div>
-
-    <!-- 结束回跳横幅：真实已结束记录才展示；partial 安排提供「另安排一天」（复用共享编辑器） -->
-    <Alert v-if="recordedSession" variant="success">
-      这次记录已保存<template v-if="recordedSession.outcome"> · 行动{{ label(SESSION_OUTCOME_LABELS, recordedSession.outcome) }}</template>。
-      <RouterLink :to="recordedRecordLink" class="ml-1 underline">查看工作记录</RouterLink>
-      <Button v-if="canArrangeAnother" size="sm" variant="outline" class="ml-2" @click="arrangeAnotherFromRecorded">另安排一天</Button>
-      <button type="button" class="ml-2 text-xs underline" @click="dismissRecorded">知道了</button>
-    </Alert>
-
-    <PlanWorkspace ref="editorRef" :editor="editor" :plan-id="planParam" @close="closeWorkspace" @saved="onPlanSaved"
-      @edit="id => openEditor({ mode: 'edit', planId: id })" @move="id => openEditor({ mode: 'move', planId: id })"
-      @another="id => openEditor({ mode: 'another', planId: id })" @op-done="locatePlan" />
-
-    <WeekView :mode="view" @add-plan="(date) => openEditor({ mode: 'create', date })">
-      <template #tools>
-        <RouterLink to="/work-records" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent" title="回看已结束的工作记录">
-          <ClipboardList class="size-3.5" />工作记录
-        </RouterLink>
-        <div class="flex shrink-0 gap-0.5 rounded-md border bg-card p-0.5" role="group" aria-label="任务视图切换">
-          <button
-            type="button"
-            class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
-            :class="view === 'week' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
-            :aria-pressed="view === 'week'"
-            @click="view = 'week'"
-          >周视图</button>
-          <button
-            type="button"
-            class="min-h-9 w-16 whitespace-nowrap rounded px-2 py-1 text-sm font-medium"
-            :class="view === 'list' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'"
-            :aria-pressed="view === 'list'"
-            @click="view = 'list'"
-          >列表</button>
-        </div>
-        <Button v-if="view === 'list'" variant="outline" class="shrink-0" @click="openEditor({ mode: 'create' })"><Plus />安排工作</Button>
-      </template>
-    </WeekView>
-
-    <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 px-1 text-sm" aria-label="任务概览">
-      <RouterLink :to="taskListPath({ list: 'unscheduled' })" class="hover:underline">待安排 <span class="tabular-nums text-muted-foreground">{{ classification.unscheduled.length }}</span></RouterLink>
-      <RouterLink :to="taskListPath({ list: 'past' })" class="hover:underline">过去未完成 <span class="tabular-nums text-muted-foreground">{{ classification.pastUnfinished.length }}</span></RouterLink>
-      <RouterLink to="/tasks" class="ml-auto text-muted-foreground hover:underline">全部任务 →</RouterLink>
-    </nav>
 
     <!-- 恢复入口：默认折叠，异常提醒可直达；删除撤销/失败重试/暂存重落库的统一入口 -->
     <Card v-if="recoverCount || recoverOpen" id="recover">

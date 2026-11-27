@@ -21,7 +21,7 @@ const days = [
 
 <template>
   <section aria-label="规划助手操作演示" class="mx-auto max-w-3xl">
-    <header class="mb-5"><h1 class="text-2xl font-semibold">规划助手</h1></header>
+    <header class="mb-5"><h1 class="workspace-title">规划助手</h1></header>
     <div class="overflow-hidden rounded-xl border bg-card">
       <div class="px-5 pt-5 sm:px-8 sm:pt-7" aria-live="polite" aria-atomic="true">
         <p class="text-sm text-muted-foreground">课程报告 · 操作演示 <span class="ml-2 tabular-nums">{{ step + 1 }} / {{ titles.length }}</span></p>

@@ -9,11 +9,13 @@ import { addActionPlan, deleteActionPlan, editActionPlan, makeAction, reopenTask
 import { cascadeDeleteNotePlan, deleteMatterPlan, deleteTaskPlan, finishTaskPlan, migratePlan, normalizeDeadline, planDeleteScope, setMatterPlan, undoDeletePlan } from '@/domains/matter'
 import { sessionsOf } from '@/domains/focus'
 import { useFocusStore } from './focus'
+import { forgetWorkspaceDrafts } from '@/composables/useWorkDraft'
 
 const WORKSPACE_KEY = 'jxl-workspace'
 const UI_NOTE_KEY = 'jxl-ui-note'
 const UI_EVIDENCE_KEY = 'jxl-ui-evidence'
 const PENDING_SAVE_KEY = 'jxl-pending-save'
+const CLEAR_KEY = 'jxl-cleared:'
 
 const readLocal = (key) => {
   try {
@@ -45,6 +47,7 @@ export const useAppStore = defineStore('app', () => {
   const workBlock = ref(null)
   // 数据就绪标记：深链接对象校验须等加载完成，避免把合法 ID 误判为不存在。
   const ready = ref(false)
+  const clearRevision = ref(0)
 
   // 当前工作区（personal/demo）。UI 持久化键按空间隔离，切换不残留上一空间状态。
   const workspaceId = ref(readLocal(WORKSPACE_KEY) || 'personal')
@@ -97,12 +100,16 @@ export const useAppStore = defineStore('app', () => {
       void refreshWorkspaces()
     }
   }
+  const onSpaceCleared = event => {
+    if (event.key?.startsWith(CLEAR_KEY) && event.newValue) void refreshClearedSpace(event.key.slice(CLEAR_KEY.length))
+  }
   function startClock() {
     // 测试/SSR 等无 DOM 环境不启动时钟（避免悬挂定时器与监听）。
     if (typeof document === 'undefined' || typeof window === 'undefined') return
     armClock()
     document.addEventListener('visibilitychange', onVisible)
     window.addEventListener('focus', onVisible)
+    window.addEventListener('storage', onSpaceCleared)
   }
   function stopClock() {
     if (clockTimer) clearTimeout(clockTimer)
@@ -110,6 +117,7 @@ export const useAppStore = defineStore('app', () => {
     if (typeof document === 'undefined' || typeof window === 'undefined') return
     document.removeEventListener('visibilitychange', onVisible)
     window.removeEventListener('focus', onVisible)
+    window.removeEventListener('storage', onSpaceCleared)
   }
   const todayLabel = computed(() => beijingTodayLabel(new Date(nowTick.value)))
   const tasks = computed(() =>
@@ -153,6 +161,36 @@ export const useAppStore = defineStore('app', () => {
   watch(selectedNoteId, (v) => writeLocal(wsKey(UI_NOTE_KEY), v))
   watch(evidenceOpen, (v) => writeLocal(wsKey(UI_EVIDENCE_KEY), v ? '1' : '0'))
   watch(pendingSave, (v) => writeLocal(wsKey(PENDING_SAVE_KEY), v ? JSON.stringify(v) : null), { deep: true })
+
+  async function refreshClearedSpace(ws) {
+    forgetWorkspaceDrafts(ws)
+    try {
+      sessionStorage.removeItem('jieplan.pending.' + ws)
+      for (const key of Object.keys(sessionStorage)) if (key.startsWith('jxl-scroll:' + ws + ':')) sessionStorage.removeItem(key)
+    } catch { /* 会话存储不可用时没有可恢复的页面暂存。 */ }
+    if (workspaceId.value !== ws) return
+    configureWorkspace(ws)
+    clearRevision.value++
+    sources.value = []; docs.value = []
+    pendingId.value = null; selectedNoteId.value = null; pendingSave.value = null
+    lastDeleted.value = null; workBlock.value = null
+    await loadEvidence(null)
+    const focus = useFocusStore()
+    focus.stop()
+    await Promise.all([reload(), focus.loadWorkspace()])
+  }
+
+  async function finishWorkspaceClear(ws) {
+    for (const key of [UI_NOTE_KEY, UI_EVIDENCE_KEY, PENDING_SAVE_KEY]) writeLocal(key + ':' + ws, null)
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('jxl.assistant.analysis-binding:' + ws + ':') ||
+            key.startsWith('jxl.assistant.analysis-binding.input-form:' + ws + ':')) localStorage.removeItem(key)
+      }
+    } catch { /* 隐私模式下这些缓存可能不可用。 */ }
+    writeLocal(CLEAR_KEY + ws, crypto.randomUUID())
+    await refreshClearedSpace(ws)
+  }
 
   async function reload() {
     const srcRes = await allSources()
@@ -389,6 +427,7 @@ export const useAppStore = defineStore('app', () => {
   async function runAnalysis(sourceId, referenceAt) {
     if (isDemo.value) return fail()
     const ws = workspaceId.value
+    const startedBeforeClear = readLocal(CLEAR_KEY + ws)
     const source = sources.value.find((s) => s.id === sourceId)
     if (!source) {
       say('warning', '先收集一份截图或文字')
@@ -406,6 +445,7 @@ export const useAppStore = defineStore('app', () => {
       if (source.kind === 'image') payload.image_base64 = await blobToBase64(source.blob)
       else payload.text = source.text
       const result = await analyze(payload)
+      if (startedBeforeClear !== readLocal(CLEAR_KEY + ws)) return fail()
       if (result.ok) {
         const existing = notes.value.find((n) => n.source_id === source.id) || null
         const note = mergeReanalysis(existing, result.body, now())
@@ -1028,76 +1068,52 @@ export const useAppStore = defineStore('app', () => {
       say('warning', '截止须为合法的 YYYY-MM-DD 或 ISO datetime')
       return { ok: false }
     }
-    if (matterId && !matters.value.some((m) => m.id === matterId)) {
-      say('warning', '所选事项不存在')
-      return { ok: false }
-    }
     const task = standaloneTask(crypto.randomUUID(), trimmed, v, matterId, now())
-    let saved
     try {
-      saved = await putDoc(task)
+      const result = await transformDocsAtomic(latest => {
+        if (matterId && !latest.some(d => d.kind === 'matter' && d.id === matterId)) throw new Error('所选项目已不存在')
+        return { puts: [task] }
+      })
+      if (!applyChanges(result)) return { ok: false, workspaceChanged: true }
     } catch (err) {
       say('destructive', `保存失败（${err.message}）：任务未持久化`)
       return { ok: false }
     }
-    if (!belongsHere(saved)) {
-      say('warning', '工作区已切换：任务已保存在原空间')
-      return { ok: false, workspaceChanged: true }
-    }
-    upsertDoc(saved.record)
     say('success', '任务已创建')
     return { ok: true, id: task.id }
   }
 
-  // 事项（契约 Matter）：title + note_ids，便签/任务按 matter_id 关联。
-  async function createMatter(title) {
-    const trimmed = (title || '').trim()
-    if (!trimmed) {
-      say('warning', '事项名不能为空')
+  // 项目沿用原事项的身份；更新时读取事务内最新的成员，不覆盖并发归组。
+  async function saveProject(project, title, value = '') {
+    const name = (title || '').trim()
+    const id = project?.id ?? crypto.randomUUID()
+    if (!name || (value && !isValidTimeValue(value))) {
+      say('warning', name ? '请选择有效的项目总截止' : '请输入项目名称')
       return { ok: false }
     }
-    if (matters.value.some((m) => m.title === trimmed)) {
-      say('warning', '已有同名事项')
-      return { ok: false }
-    }
-    const matter = { id: crypto.randomUUID(), kind: 'matter', title: trimmed, note_ids: [], created_at: now(), is_demo: isDemo.value }
-    let saved
     try {
-      saved = await putDoc(matter)
-    } catch (err) {
-      say('destructive', `保存失败（${err.message}）：事项未持久化`)
+      const result = await transformDocsAtomic(latest => {
+        const current = latest.find(doc => doc.kind === 'matter' && doc.id === id)
+        if (project && (!current || current.title !== project.title || current.deadline?.value !== project.deadline?.value)) {
+          throw new Error('项目已变更，请重新打开后编辑')
+        }
+        if (latest.some(doc => doc.kind === 'matter' && doc.id !== id && doc.title === name)) throw new Error('已有同名项目')
+        const stamp = now()
+        const record = { ...(current ?? { id, kind: 'matter', note_ids: [], created_at: stamp, is_demo: isDemo.value }), title: name, updated_at: stamp }
+        if (value !== (current?.deadline?.value || '')) {
+          record.deadline = value ? { value, precision: value.includes('T') ? 'datetime' : 'date', source: 'manual', confirmed_at: stamp } : null
+        }
+        return { puts: [record] }
+      })
+      if (!applyChanges(result)) return { ok: false, workspaceChanged: true }
+      return { ok: true, id }
+    } catch (error) {
+      say('warning', error.message || '项目保存失败')
       return { ok: false }
     }
-    if (!belongsHere(saved)) {
-      say('warning', '工作区已切换：事项已保存在原空间')
-      return { ok: false, workspaceChanged: true }
-    }
-    upsertDoc(saved.record)
-    return { ok: true, id: matter.id }
   }
-
-  async function renameMatter(matter, title) {
-    const trimmed = (title || '').trim()
-    if (!trimmed) {
-      say('warning', '事项名不能为空')
-      return { ok: false }
-    }
-    const draft = snapshot(matter)
-    draft.title = trimmed
-    let saved
-    try {
-      saved = await putDoc(draft)
-    } catch (err) {
-      say('destructive', `保存失败（${err.message}）：重命名未持久化`)
-      return { ok: false }
-    }
-    if (!belongsHere(saved)) {
-      say('warning', '工作区已切换：重命名已保存在原空间')
-      return { ok: false, workspaceChanged: true }
-    }
-    upsertDoc(saved.record)
-    return { ok: true }
-  }
+  const createMatter = title => saveProject(null, title)
+  const renameMatter = (matter, title) => saveProject(matter, title, matter.deadline?.value || '')
 
   // 删事项（P04）：单事务解除成员归组 + 删事项记录；便签/原图/任务/专注记录保留，便签资料角色清除。
   async function deleteMatter(matter) {
@@ -1105,15 +1121,15 @@ export const useAppStore = defineStore('app', () => {
     try {
       result = await transformDocsAtomic((latest) => deleteMatterPlan(latest, matter.id, now()))
     } catch (err) {
-      say('destructive', `删除失败（${err.message}）：事项与成员归属均未改动`)
+      say('destructive', `项目删除失败（${err.message}）`)
       return { ok: false }
     }
     if (!result.info || !result.info.matter) {
-      say('warning', '事项已不存在，无需删除')
+      say('warning', '项目已不存在')
       return { ok: false }
     }
     if (!applyChanges(result)) return { ok: false, workspaceChanged: true }
-    say('success', `事项已删除；${result.info.members.length} 个成员回到未归组（便签、原图与任务保留）`)
+    say('success', `项目已删除；${result.info.members.length} 个成员回到未归组（便签、原图与任务保留）`)
     return { ok: true }
   }
 
@@ -1136,7 +1152,7 @@ export const useAppStore = defineStore('app', () => {
   // 资料角色只在已归组便签上有效（契约：未归组便签不得有资料角色）。
   const setNoteRole = (note, role) => {
     if (!note.matter_id) {
-      say('warning', '先把便签归入事项，再选择资料角色')
+      say('warning', '先把便签归入项目，再选择资料角色')
       return Promise.resolve({ ok: false })
     }
     return setMatter(note, note.matter_id, role)
@@ -1144,13 +1160,13 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     sources, docs, health, aiDown, busy, banner, pendingId, selectedNoteId, evidenceOpen, imageUrl, pendingSave, lastDeleted, workBlock, ready,
-    workspaceId, workspaces, currentWorkspace, isDemo, isRestore, workspaceKind,
+    workspaceId, workspaces, currentWorkspace, isDemo, isRestore, workspaceKind, clearRevision, finishWorkspaceClear,
     notes, tasks, matters, actions, selectedNote, pendingSource, unconfirmedCount,
     nowTick, todayLabel, taskBuckets, noteBuckets, failedNotes,
     say, clearWorkBlock, init, refreshHealth, reload, reloadDocs, selectNote, switchWorkspace, refreshWorkspaces, collectFiles, collectText, runAnalysis, retrySave,
     saveImageFiles, saveText, analyzeForAssistant, saveAnalysisNote,
     confirmField, saveEdit, saveNodeEdit, reviewNote, createTask, createTaskManual, finishTask, deleteNote,
-    undoDelete, deleteTask, renameTask, createStandaloneTask, createMatter, renameMatter, deleteMatter, setMatter, setNoteRole,
+    undoDelete, deleteTask, renameTask, createStandaloneTask, saveProject, createMatter, renameMatter, deleteMatter, setMatter, setNoteRole,
     actionsOf, currentActionOf, unfinishedCountOf, addAction, editAction, setActionDone, deleteAction, setCurrentAction,
     reopenTask, editTask, setTaskDeadline,
     startClock, stopClock,

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>项目示例 · 校园马拉松</title>
+<p role="status">正在打开示例项目…</p>
+<script type="module">
+  import { configureWorkspace, getWorkspace, putWorkspace, transformDocsAtomic } from '/src/services/storage/db.js'
+  import { standaloneTask } from '/src/domains/note.js'
+
+  const workspace = 'example-campus-marathon'
+  const projectId = 'example-campus-marathon-project'
+  const stamp = '2026-11-27T09:00:00+08:00'
+  async function openExample() {
+    configureWorkspace(workspace)
+    if (!(await getWorkspace(workspace))) {
+      await putWorkspace({ id: workspace, name: '示例 · 校园马拉松', created_at: stamp, is_demo: false })
+    }
+    await transformDocsAtomic(docs => {
+      if (docs.length) return {}
+      const project = {
+        kind: 'matter', id: projectId, title: '校园马拉松报名', created_at: stamp, note_ids: [],
+        deadline: { value: '2026-11-29T18:00:00+08:00', precision: 'datetime', source: 'manual', confirmed_at: stamp },
+      }
+      const check = standaloneTask('example-marathon-check', '核对报名资格', '', projectId, stamp)
+      check.status = 'done'
+      const roster = standaloneTask('example-marathon-roster', '整理参赛名单', '2026-11-28', projectId, stamp)
+      const submit = standaloneTask('example-marathon-submit', '提交报名表', '', projectId, stamp)
+      const plan = {
+        id: 'example-marathon-plan', kind: 'plan_item', task_id: roster.id, date: '2026-11-27',
+        planned_minutes: 30, action_text: '整理参赛名单', state: 'planned', order: 0, task_ref_state: 'active',
+      }
+      return { puts: [project, check, roster, submit, plan] }
+    })
+    localStorage.setItem('jxl-workspace', workspace)
+    location.replace('/#/tasks')
+  }
+  openExample().catch(() => { document.querySelector('[role=status]').textContent = '示例空间未能打开，请刷新重试。' })
+</script>
+</html>

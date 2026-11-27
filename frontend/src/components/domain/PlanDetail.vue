@@ -106,8 +106,8 @@ const crossWsName = computed(() => {
 const opsDisplay = computed(() => (entry.value.kind === 'review' ? ops.value.filter((o) => o !== 'confirm') : ops.value))
 
 const startCtrl = usePlanWorkStart({
-  onStarted: (sid, meta) => {
-    store.say('success', meta.existing ? '该安排已有未结束工作，已回到该会话（不会自动继续计时）' : '工作会话已创建，进入工作页开始计时')
+  onStarted: (sid) => {
+    if (store.banner?.tone === 'success') store.banner = null
     router.push(workPath(sid, scheduleReturn.value))
   },
   onGotoTask: (planId) => {
@@ -122,6 +122,25 @@ const startAction = computed(() => pickedActionId.value
   ? availableActions.value.find(action => action.id === pickedActionId.value)
   : scheduledAction.value)
 watch([() => props.planId, () => store.workspaceId], () => { pickedActionId.value = '' })
+const actionText = ref('')
+const addingAction = ref(false)
+watch([() => plan.value?.id, () => store.workspaceId], () => {
+  actionText.value = plan.value?.action_text || ''
+}, { immediate: true })
+
+async function addPlanAction() {
+  const owner = task.value
+  const item = plan.value
+  if (addingAction.value || !owner || !item || !actionText.value.trim() || availableActions.value.length) return
+  const ws = store.workspaceId
+  addingAction.value = true
+  try {
+    const result = await store.addAction(owner, actionText.value.trim(), item.planned_minutes)
+    if (result.ok && plan.value?.id === item.id && ws === store.workspaceId) pickedActionId.value = result.id
+  } finally {
+    addingAction.value = false
+  }
+}
 function pickAction(event) {
   if (event.target instanceof HTMLSelectElement) pickedActionId.value = event.target.value
 }
@@ -239,8 +258,8 @@ const historyView = computed(() => {
 </script>
 
 <template>
-  <Card>
-    <template #header>
+  <Card flush class="rounded-none border-0">
+    <template v-if="showClose" #header>
       <div class="flex items-center gap-2">
         <div class="min-w-0 flex-1 text-base font-semibold">安排详情</div>
         <Button v-if="showClose" size="sm" variant="ghost" aria-label="关闭安排详情" title="关闭" @click="emit('close')"><X /></Button>
@@ -253,7 +272,7 @@ const historyView = computed(() => {
         <Badge :variant="stateVariant[plan.state] || 'secondary'" :title="plan.state">{{ label(PLAN_STATE_LABELS, plan.state) }}</Badge>
         <span v-if="readonlyReason" class="text-xs text-muted-foreground">{{ readonlyReason }}</span>
       </div>
-      <h2 class="break-words text-base font-semibold leading-snug">{{ plan.action_text }}</h2>
+      <h2 class="break-words text-xl font-semibold leading-snug">{{ plan.action_text }}</h2>
       <div class="text-sm">
         <span class="text-muted-foreground">所属任务：</span>
         <RouterLink v-if="taskLink" :to="taskLink" class="underline underline-offset-2">{{ task.title }}</RouterLink>
@@ -263,15 +282,13 @@ const historyView = computed(() => {
       <dl class="grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
         <div class="flex gap-2"><dt class="text-muted-foreground">安排日期</dt><dd class="font-date font-medium">{{ plan.date }}</dd></div>
         <div class="flex gap-2"><dt class="text-muted-foreground">预计</dt><dd class="font-date font-medium">{{ plan.planned_minutes }} 分钟</dd></div>
-        <div class="flex gap-2">
+        <div v-if="task && slotDeadlineLabel(task.deadline)" class="flex gap-2">
           <dt class="text-muted-foreground">总截止</dt>
           <dd class="font-medium" :class="risk && (risk.kind === 'after_deadline' || risk.overdue) ? 'text-destructive' : ''">
             {{ deadlineText }}<template v-if="risk && risk.kind === 'after_deadline'"> · 安排晚于截止</template><template v-else-if="risk && risk.overdue"> · 已逾期</template>
           </dd>
         </div>
-        <div class="flex gap-2"><dt class="text-muted-foreground">实际</dt><dd class="font-medium">{{ planActualLabel(summary) }}</dd></div>
       </dl>
-      <p class="text-xs text-muted-foreground">安排不会改变任务截止或行动。</p>
 
       <!-- 异常历史：待核对块权威优先，不给可确认的数字 -->
       <div v-if="summary && !summary.authoritative" class="rounded-md border border-warning bg-warning/10 p-3 text-sm">
@@ -338,7 +355,13 @@ const historyView = computed(() => {
             <option v-for="action in availableActions" :key="action.id" :value="action.id">{{ action.text }}</option>
           </select>
         </label>
-        <Button size="sm" :disabled="bindingStatus === 'loading' || (availableActions.length > 0 && !startAction)" @click="startThisPlan">开始这项安排</Button>
+        <form v-else class="w-full space-y-2" @submit.prevent="addPlanAction">
+          <label class="block text-sm">这次要做的行动
+            <input v-model="actionText" class="mt-1 w-full rounded-md border bg-card px-3 py-2" required />
+          </label>
+          <Button type="submit" size="sm" :disabled="addingAction || !actionText.trim()">添加行动</Button>
+        </form>
+        <Button v-if="availableActions.length" size="sm" :disabled="!startAction || bindingStatus === 'loading' || startCtrl.state.value?.busy" @click="startThisPlan">开始工作</Button>
       </div>
 
       <div v-if="endedSessions.length">
@@ -354,16 +377,19 @@ const historyView = computed(() => {
       </div>
 
       <!-- 操作区：资格由 live 事实派生；无资格时不渲染按钮，只读原因/引导块在上方解释 -->
-      <div v-if="opsDisplay.length" class="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+      <details v-if="opsDisplay.length" class="border-t pt-3">
+        <summary class="cursor-pointer text-sm text-muted-foreground">更多操作</summary>
+        <div class="mt-2 flex flex-wrap items-center gap-2">
         <Button
           v-for="op in opsDisplay"
           :key="op"
           size="sm"
-          :variant="op === 'cancel' ? 'outline' : op === 'confirm' ? 'default' : 'outline'"
+          variant="outline"
           :disabled="opBusy"
           @click="requestOp(op)"
         >{{ OP_LABELS[op] }}</Button>
-      </div>
+        </div>
+      </details>
     </div>
 
     <ConfirmDialog v-model="dlgCancel" title="取消这项安排" confirm-label="取消安排" @confirm="runFrozen">

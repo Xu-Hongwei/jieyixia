@@ -144,7 +144,7 @@ const planScheduleLink = computed(() =>
             <dd>{{ formatWhen(session.task_snapshot.deadline_value, session.task_snapshot.deadline_precision) }}</dd>
           </div>
           <div v-if="hasSnapshot && session.task_snapshot.matter_name" class="sm:col-span-2">
-            <dt class="text-xs text-muted-foreground">开始时所属事项</dt>
+            <dt class="text-xs text-muted-foreground">开始时所属项目</dt>
             <dd class="break-words">{{ session.task_snapshot.matter_name }}</dd>
           </div>
         </dl>

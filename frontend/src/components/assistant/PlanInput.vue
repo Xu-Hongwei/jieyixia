@@ -4,14 +4,13 @@
 import { computed, ref } from 'vue'
 import { ChevronDown, ChevronRight, FileImage, FileText, Sparkles, Upload } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
-import Input from '@/components/ui/Input.vue'
 import Textarea from '@/components/ui/Textarea.vue'
-import DateInput from '@/components/ui/DateInput.vue'
+import PlanningAvailability from './PlanningAvailability.vue'
 import Badge from '@/components/ui/Badge.vue'
 import GenerationPanel from '@/components/assistant/GenerationPanel.vue'
 import { useAssistantStore, DEFAULT_USER_MESSAGE } from '@/stores/assistant'
 import { useAppStore } from '@/stores/app'
-import { beijingToday, beijingAddDays, formatWhen } from '@/domains/time'
+import { formatWhen } from '@/domains/time'
 import { MAX_SELECTED_SOURCES } from '@/services/assistant/requests'
 import { requireQwen } from '@/services/api/qwenConnection'
 
@@ -22,15 +21,9 @@ const pasteText = ref('')
 const showRelated = ref(false)
 const fileInput = ref(null)
 const savingSource = ref(false)
-const today = computed(() => beijingToday())
 const input = store.input
-const dates = computed(() => Array.from({ length: 7 }, (_, i) => beijingAddDays(input.startDate || today.value, i)))
 const selectedCount = computed(() => input.sourceIds.length)
 const canGenerate = computed(() => !store.generating && !savingSource.value && (pasteText.value.trim() ? input.sourceIds.length < MAX_SELECTED_SOURCES : (input.sourceIds.length > 0 || input.userText.trim().length > 0)))
-const timeSummary = computed(() => {
-  const budgets = dates.value.map(date => input.unavailable.includes(date) ? 0 : Number(input.budgets[date] == null || input.budgets[date] === '' ? store.formDefaults.budget : input.budgets[date]))
-  return budgets.every(n => Number.isInteger(n) && n >= 0 && n <= 1440) ? `${budgets.reduce((sum, n) => sum + n, 0)} 分钟` : '请检查时间输入'
-})
 const hasUnsaved = computed(() => !!pasteText.value.trim() || !!input.userText.trim() || input.sourceIds.length > 0 || input.taskIds.length > 0 || !!input.startDate || Object.keys(input.budgets).length > 0 || input.unavailable.length > 0)
 function discard() {
   pasteText.value = ''
@@ -102,19 +95,14 @@ function toggleAction(id) {
   if (i >= 0) input.actionIds.splice(i, 1)
   else input.actionIds.push(id)
 }
-function toggleUnavailable(date) {
-  const i = input.unavailable.indexOf(date)
-  if (i >= 0) input.unavailable.splice(i, 1)
-  else input.unavailable.push(date)
-}
 </script>
 
 <template>
-  <div class="py-2">
-    <h2 class="text-base font-semibold">提供资料与需求</h2>
+  <div class="assistant-input">
+    <section class="input-material min-w-0 space-y-3"><h2 class="input-heading">计划资料</h2>
     <p class="mt-1 text-sm text-muted-foreground">只发送你选定的内容，生成后可修改。</p>
 
-    <div class="mt-3 space-y-3">
+
       <div>
         <div class="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="outline" :disabled="store.generating || savingSource" @click="fileInput?.click()"><Upload class="size-4" />上传截图</Button>
@@ -142,8 +130,10 @@ function toggleUnavailable(date) {
         </ul>
       </div>
 
+    </section>
+    <section class="input-request min-w-0 space-y-4">
       <div>
-        <label class="text-xs font-medium text-muted-foreground" for="assistant-requirement">你想完成什么？有什么要求？</label>
+        <h2 class="input-heading"><label for="assistant-requirement">安排要求</label></h2>
         <Textarea id="assistant-requirement" v-model="input.userText" :disabled="store.generating" :placeholder="DEFAULT_USER_MESSAGE" class="mt-1 min-h-16" />
       </div>
 
@@ -172,24 +162,7 @@ function toggleUnavailable(date) {
         </div>
       </div>
 
-      <details class="border-y py-3">
-        <summary class="cursor-pointer text-sm font-medium">可用时间 · {{ input.startDate || today }} 起七天 · 共 {{ timeSummary }} <span class="font-normal text-muted-foreground">编辑</span></summary>
-        <div class="mt-1 flex items-center gap-2">
-          <DateInput v-model="input.startDate" :disabled="store.generating" aria-label="生成排程起始日期" class="w-44" />
-          <span class="text-xs text-muted-foreground">留空 = 今天（{{ today }}）</span>
-        </div>
-        <div class="mt-2 space-y-1">
-          <div v-for="date in dates" :key="date" class="flex flex-wrap items-center gap-2 text-sm">
-            <span class="w-28 shrink-0 text-xs text-muted-foreground">{{ date }}</span>
-            <Input v-model="input.budgets[date]" :disabled="store.generating || input.unavailable.includes(date)" class="h-8 w-24" inputmode="numeric" :placeholder="String(store.formDefaults.budget)" :aria-label="`${date} 预算分钟`" />
-            <span class="text-xs text-muted-foreground">分钟</span>
-            <label class="ml-auto flex items-center gap-1 text-xs">
-              <input type="checkbox" :checked="input.unavailable.includes(date)" :disabled="store.generating" @change="toggleUnavailable(date)" />不可用
-            </label>
-          </div>
-        </div>
-        <p class="mt-2 text-xs text-muted-foreground">北京时间；留空默认每天 {{ store.formDefaults.budget }} 分钟。</p>
-      </details>
+      <PlanningAvailability :input="input" :default-budget="store.formDefaults.budget" :disabled="store.generating" />
 
       <div class="flex items-center gap-2">
         <Button :disabled="!canGenerate" @click="generateWithText"><Sparkles class="size-4" />生成方案</Button>
@@ -198,6 +171,6 @@ function toggleUnavailable(date) {
       <p v-if="pasteText.trim()" class="text-xs text-muted-foreground">{{ selectedCount >= MAX_SELECTED_SOURCES ? "资料数量已满，请先取消选择一份。" : "生成时会一并保存这段文字。" }}</p>
 
       <GenerationPanel />
-    </div>
+    </section>
   </div>
 </template>

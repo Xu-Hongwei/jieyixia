@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildRemap } from '@/services/backup/remap'
-import { validateRecords } from '@/services/backup/validate'
+import { validateBackup, validateRecords } from '@/services/backup/validate'
 import { buildCompleteBackup, rebuild, findDoc } from './backupFixtures'
 
 const counter = () => { let n = 0; return () => `new-${++n}` }
@@ -18,6 +18,19 @@ async function remapComplete(extraMutate) {
 const byId = (docs, id) => docs.find((d) => d.id === id)
 
 describe('ID 重建与引用重写', () => {
+  it('项目总截止随备份恢复，任务、不同旧行动及工作快照保留', async () => {
+    const deadline = { value: '2026-11-30', precision: 'date', source: 'manual', confirmed_at: '2026-11-22T10:00:00+08:00' }
+    const { archive, r } = await remapComplete(({ docs }) => {
+      findDoc(docs, 'matter-1').deadline = deadline
+      return { formatVersion: 2 }
+    })
+    expect((await validateBackup(archive)).errors).toEqual([])
+    const project = byId(r.docs, r.liveMap.get('matter-1'))
+    expect(project.deadline).toEqual(deadline)
+    expect(byId(r.docs, r.liveMap.get('task-1')).matter_id).toBe(project.id)
+    expect(r.docs.filter(d => d.kind === 'action').map(a => a.text)).toEqual(['撰写报告正文', '检查字数与格式'])
+    expect(byId(r.docs, r.liveMap.get('focus-ended')).task_snapshot.matter_name).toBe('实验报告')
+  })
   it('活对象全部换新 ID、workspace_id→目标、is_demo=false', async () => {
     const { archive, r } = await remapComplete()
     for (const s of r.sources) { expect(s.id).not.toBe(archive.sources.find((x) => x.asset_path === s.asset_path)?.id); expect(s.workspace_id).toBe(TARGET); expect(s.is_demo).toBe(false) }

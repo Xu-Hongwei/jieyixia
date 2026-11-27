@@ -34,25 +34,24 @@
 
 :root {
   --radius: 0.625rem;
-  /* 三层：暖白背景 → 纸白工作面(card) → 内容(background 色纸片)。单一赭红强调色只给今天与主操作。 */
-  --background: oklch(0.968 0.013 85);
-  --foreground: oklch(0.27 0.022 55);
-  --card: oklch(0.995 0.004 85);
-  --card-foreground: oklch(0.27 0.022 55);
-  --popover: oklch(0.995 0.004 85);
-  --popover-foreground: oklch(0.27 0.022 55);
-  --primary: oklch(0.5 0.135 40);
-  --primary-foreground: oklch(0.985 0.005 85);
-  --secondary: oklch(0.952 0.015 80);
-  --secondary-foreground: oklch(0.3 0.025 55);
-  --muted: oklch(0.952 0.013 82);
-  --muted-foreground: oklch(0.49 0.028 60);
-  --accent: oklch(0.938 0.038 66);
-  --accent-foreground: oklch(0.3 0.03 55);
-  --destructive: oklch(0.55 0.21 27);
-  --border: oklch(0.895 0.016 80);
-  --input: oklch(0.88 0.018 80);
-  --ring: oklch(0.6 0.12 45);
+  --background: #f8f8f3;
+  --foreground: #25332e;
+  --card: #fffefa;
+  --card-foreground: var(--foreground);
+  --popover: #fffefa;
+  --popover-foreground: var(--foreground);
+  --primary: #27634f;
+  --primary-foreground: #fffefa;
+  --secondary: #eaf0e8;
+  --secondary-foreground: #304e3f;
+  --muted: #efefe8;
+  --muted-foreground: #59665d;
+  --accent: #dfebde;
+  --accent-foreground: #204b39;
+  --destructive: #a03e32;
+  --border: #d9dfd5;
+  --input: #c4cfc3;
+  --ring: #468368;
   --success: oklch(0.94 0.055 160);
   --success-foreground: oklch(0.42 0.1 160);
   --warning: oklch(0.94 0.07 85);
@@ -90,8 +89,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans text-sm leading-relaxed antialiased;
-    /* 极淡纸纹：静态、低透明度，不参与文字对比 */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.28 0 0 0 0 0.2 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+
   }
   :where(button, a, summary, select):focus-visible {
     outline: 2px solid var(--ring);
@@ -123,6 +121,101 @@
     background: transparent;
   }
   .panel-scroll { scroll-padding-block: 1.5rem; }
+}
+
+.app-rail {
+  width: clamp(11rem, 16vw, 14rem);
+  background: #213e35;
+  color: #f3f5eb;
+  border: 0;
+}
+.rail-brand { padding: 1.75rem 1.25rem 1.5rem; }
+.brand-mark {
+  display: grid; place-items: center; width: 2.15rem; aspect-ratio: 1;
+  border: 1px solid #b7c6a7; border-radius: .62rem .62rem .62rem .15rem;
+  color: #e5ebc6; transform: rotate(-4deg);
+}
+.brand-mark svg { width: 1.3rem; stroke-width: 1.6; }
+.brand-name, .workspace-title, .section-heading, .input-heading {
+  font-family: Georgia, "Songti SC", "Noto Serif CJK SC", SimSun, serif;
+}
+.brand-name { font-size: 1.35rem; letter-spacing: .06em; }
+.rail-switcher { padding: 0 1rem 1.25rem; }
+.rail-switcher select { background: #304d42; border-color: #51685a; color: #fffef6; }
+.rail-switcher svg, .rail-note { color: #c3d0c3; }
+.rail-links a { gap: .8rem; color: #dce6d9; transition: background-color .16s, color .16s; }
+.rail-links a:hover, .rail-foot a:hover { background: #355346; color: white; }
+.rail-links a[aria-current="page"], .rail-foot a.router-link-active { background: #dce7ce; color: #203d32; }
+.rail-links a span { color: #584516; }
+.rail-foot { border-color: #54675a; }
+.rail-foot a { color: #dce6d9; }
+.rail-foot a[aria-current="page"] { color: #203d32; }
+.app-topbar { background: var(--background); }
+.app-main { padding-top: clamp(1.2rem, 2.6vw, 2.6rem); }
+.workspace-title { font-size: clamp(1.85rem, 3vw, 2.75rem); font-weight: 600; line-height: 1.24; }
+.section-heading, .input-heading { font-size: 1.22rem; font-weight: 600; }
+.week-sheet { background: transparent; border: 0; border-radius: 0; }
+.week-sheet > :first-child { padding: 0 0 1.3rem; }
+.week-heading { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem 1rem; }
+.week-caption { flex: 1 1 16rem; }
+.week-year { color: var(--muted-foreground); font-size: .79rem; letter-spacing: .06em; }
+.week-range { margin-top: .3rem; font-size: clamp(2.15rem, 3.7vw, 3.55rem); font-weight: 500; line-height: 1.1; letter-spacing: -.045em; }
+.week-sheet > :nth-child(2) { border-block: 1px solid var(--border); background: var(--card); }
+.week-grid { border-top: 0; }
+.week-grid > button { display: flex; flex-direction: column; align-items: center; justify-content: start; gap: .2rem; padding-block: .9rem .65rem; }
+.week-grid > button[aria-pressed="true"] { box-shadow: inset 0 3px var(--primary); }
+.week-grid > button .font-date { font-size: 1.8rem; font-weight: 500; }
+.week-grid > button[data-today] .font-date { color: var(--primary-foreground); background: var(--primary); border-radius: 50%; min-width: 2.2rem; line-height: 2.2rem; }
+.week-band { display: flex; gap: .6rem; align-items: baseline; padding: .5rem .85rem; background: var(--secondary); color: var(--secondary-foreground); font-weight: 600; }
+.week-band span { font-weight: 400; font-size: .75rem; }
+.deadline-band { background: #f4eadf; color: #794a2a; }
+.dark .deadline-band { background: #403429; color: #efcbab; }
+.week-work-cell { min-height: 7.6rem; }
+.week-work-cell .work-empty { display: none; }
+.week-work-cell .add-day-work { text-align: start; }
+.add-day-work { color: var(--muted-foreground); }
+.schedule-followup { margin-top: clamp(1.35rem, 2.4vw, 2.2rem); }
+.schedule-followup header { border-bottom: 1px solid var(--border); padding-bottom: .65rem; }
+.quiet-link { color: var(--primary); font-size: .85rem; font-weight: 500; }
+.quiet-link:hover, .queue-label:hover { text-decoration: underline; }
+.followup-columns, .assistant-input { display: grid; gap: 1.25rem; }
+.followup-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.followup-queue { padding-top: .85rem; }
+.queue-label { font-weight: 600; }
+.queue-label span { padding-inline-start: .25rem; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.queue-row, .schedule-start { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-block: .75rem; }
+.queue-row { overflow-wrap: anywhere; }
+.queue-row:hover { color: var(--primary); }
+.schedule-start { flex-wrap: wrap; }
+.index-tabs { gap: .15rem .5rem; border-bottom: 1px solid var(--border); }
+.index-tabs button { border-radius: 0; border-bottom: 2px solid transparent; }
+.index-tabs button[aria-pressed="true"] { background: transparent; color: var(--primary); border-color: currentColor; }
+.task-index-body { display: grid; gap: 1.25rem; padding-top: 1.1rem; }
+.task-filters { display: flex; flex-wrap: wrap; align-content: start; align-items: end; gap: .75rem; }
+.task-results { min-width: 0; border-top: 1px solid var(--border); padding-top: .85rem; }
+.library-index { border-radius: 0; background: transparent; border-width: 1px 0 0; }
+.library-index > div { padding-inline: 0; }
+.library-index [aria-label="资料列表"] > p { padding: 1.5rem 0; }
+.assistant-input { gap: 1.4rem; padding: 1.25rem 0; border-block: 1px solid var(--border); }
+.assistant-input textarea { background: var(--card); }
+.assistant-input .input-request textarea { min-height: 6rem; }
+.assistant-steps { max-width: 46rem; }
+@media (min-width: 1050px) {
+  .task-index-body { grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr); gap: 2rem; }
+  .task-filters { display: grid; border-right: 1px solid var(--border); padding-right: 1.5rem; }
+  .task-filters select { width: 100%; }
+  .task-results { border-top: 0; padding-top: 0; }
+  .assistant-input { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 2rem; }
+  .input-request { padding-left: 1.75rem; border-left: 1px solid var(--border); }
+}
+@media (max-width: 767px) {
+  .week-caption { flex: 1 1 10rem; }
+  .week-heading { gap: .65rem .5rem; }
+  .week-heading > :nth-child(2) { order: 1; flex-basis: 100%; }
+  .week-heading > :last-child { margin-left: auto; align-self: end; }
+  .week-heading > :last-child .ui-button { padding-inline: .55rem; }
+  .week-sheet > :first-child { padding-bottom: .85rem; }
+  .task-filters label:first-child { flex-basis: 100%; }
 }
 
 /* 小屏输入保持 16px，避免输入时浏览器放大；触摸按钮留出独立点击高度。 */

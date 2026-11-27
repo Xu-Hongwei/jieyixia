@@ -157,6 +157,8 @@ export const useAssistantStore = defineStore('assistant', () => {
     stale.value = false
   }
 
+  watch(() => app.clearRevision, () => { reset(); scheduleClarifications.value = [] }, { flush: 'sync' })
+
   // F4：显式切换草案/线程或离开生成上下文 → 作废在途会话并取消等待，迟到结果不再抢页面。
   function invalidateGen() {
     if (gen.value) {

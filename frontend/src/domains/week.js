@@ -121,7 +121,7 @@ export function weekSchedule({ docs, startStr, nowD = new Date() }) {
     d.planHistory.sort(byPlanOrder)
   }
 
-  // 截止只从 Task.deadline 计算，每 Task 最多一次；已完成 Task 保留标识（淡化由 UI 处理）。
+  // 项目总截止独立显示一次，各任务自己的截止仍按原日期投影。
   const undatedTasks = []
   for (const t of tasks) {
     const slot = deadlineSlot(t.deadline)
@@ -130,12 +130,17 @@ export function weekSchedule({ docs, startStr, nowD = new Date() }) {
     if (!day) continue
     day.deadlines.push({ task: t, minutes: slot.minutes, precision: t.deadline.precision, done: t.status === 'done', overdue: isOverdue(t, nowD) })
   }
+  for (const project of docs.filter(doc => doc.kind === 'matter' && doc.deadline?.value)) {
+    const slot = deadlineSlot(project.deadline)
+    const day = slot && byDate.get(slot.day)
+    if (day) day.deadlines.push({ project, minutes: slot.minutes })
+  }
   for (const d of days) {
     d.deadlines.sort((a, b) => {
       const am = a.minutes == null ? 1440 : a.minutes
       const bm = b.minutes == null ? 1440 : b.minutes
       if (am !== bm) return am - bm
-      return (a.task.title || '').localeCompare(b.task.title || '', 'zh')
+      return ((a.task || a.project).title || '').localeCompare((b.task || b.project).title || '', 'zh')
     })
   }
   return {

@@ -194,6 +194,7 @@ export interface Matter {
   workspace_id: string;
   title: string;
   note_ids?: Array<string>;
+  deadline?: Deadline | null;
   created_at: string;
   is_demo?: boolean;
 }

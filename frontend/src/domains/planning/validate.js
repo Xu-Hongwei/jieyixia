@@ -246,7 +246,11 @@ export function validatePlanningResult(input, result) {
       }
       if (depSum < dw.remaining_minutes) {
         if (segs.length) fail(`前置 ${dep} 仍有未排量，后继 ${k} 不得排段`)
-        if (unsched.has(k) && unsched.get(k).reason !== 'dependency_blocked') fail(`${k} 应标 dependency_blocked`)
+        // 日期限制已在上面按事实校验，排程器优先报告这两类原因。
+        const reason = unsched.get(k)?.reason
+        if (reason && !['overdue_requires_consent', 'outside_horizon', 'dependency_blocked'].includes(reason)) {
+          fail(`${k} 应标 dependency_blocked`)
+        }
       } else if (segs.length && depSegs.length) {
         const depLast = depSegs.reduce((a, s) => (s.date > a.date || (s.date === a.date && s.order > a.order) ? s : a))
         const ownFirst = segs.reduce((a, s) => (s.date < a.date || (s.date === a.date && s.order < a.order) ? s : a))

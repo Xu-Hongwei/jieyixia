@@ -397,7 +397,9 @@ def check_planning_pair(inp: M.PlanningInput, res: M.PlanningResult) -> dict[str
             if dep_sum < dw.remaining_minutes:
                 if segs:
                     raise ValueError(f"前置 {dep} 仍有未排量，后继 {k} 不得排段")
-                if k in unsched and unsched[k].reason.value != "dependency_blocked":
+                if k in unsched and unsched[k].reason.value not in (
+                    "overdue_requires_consent", "outside_horizon", "dependency_blocked"
+                ):
                     raise ValueError(f"{k} 应标 dependency_blocked")
             elif segs and dep_segs:
                 dep_last = max((_date.fromisoformat(s.date), s.order) for s in dep_segs)

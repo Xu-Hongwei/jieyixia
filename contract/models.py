@@ -587,11 +587,14 @@ class Matter(ContractModel):
     workspace_id: str
     title: str
     note_ids: list[str] = []
+    deadline: Deadline | None = None
     created_at: str
     is_demo: bool = False
 
     @model_validator(mode="after")
     def _check(self) -> Matter:
+        if self.deadline and self.deadline.value and self.deadline.source != "manual":
+            raise ValueError("项目总截止须由用户设置")
         if len(set(self.note_ids)) != len(self.note_ids):
             raise ValueError("note_ids 不得重复")
         return self

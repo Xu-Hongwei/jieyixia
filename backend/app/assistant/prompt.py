@@ -40,11 +40,12 @@ _PROMPT_LIMIT_KEYS = (
 
 
 def _example_proposal_payload() -> dict:
-    ev = SourceExcerptEvidence(source_id="src-示例", excerpt="11月27日18:00前提交课程报告")
+    ev = SourceExcerptEvidence(source_id="src-示例", excerpt="2026年11月27日18:00前提交课程报告")
+    title = "撰写并提交课程报告"
     proposal = AssistantModelProposal(
         task_proposals=[
             TaskProposalCreate(
-                key="t1", title="完成课程报告",
+                key="t1", title=title,
                 deadline_candidates=[
                     DeadlineCandidate(value="2026-11-27T18:00:00", precision="datetime", basis="explicit", evidence_refs=[ev]),
                 ],
@@ -52,12 +53,10 @@ def _example_proposal_payload() -> dict:
             ),
         ],
         action_proposals=[
-            ActionProposalCreate(key="a1", task_ref=DraftRef(key="t1"), text="整理资料", minutes=45, basis="requirement", evidence_refs=[ev]),
-            ActionProposalCreate(key="a2", task_ref=DraftRef(key="t1"), text="撰写结论", minutes=60, basis="suggestion"),
+            ActionProposalCreate(key="a1", task_ref=DraftRef(key="t1"), text=title, minutes=105, basis="requirement", evidence_refs=[ev]),
         ],
         work_items=[
-            WorkItemProposal(key="w1", task_ref=DraftRef(key="t1"), action_ref=DraftRef(key="a1"), deliverable="资料清单", remaining_minutes=45),
-            WorkItemProposal(key="w2", task_ref=DraftRef(key="t1"), action_ref=DraftRef(key="a2"), deliverable="结论段落", remaining_minutes=60, depends_on=["w1"]),
+            WorkItemProposal(key="w1", task_ref=DraftRef(key="t1"), action_ref=DraftRef(key="a1"), deliverable=title, remaining_minutes=105, splittable=True),
         ],
     )
     return ProposalPayload(proposal=proposal).model_dump(mode="json")

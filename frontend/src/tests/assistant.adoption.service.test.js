@@ -389,6 +389,26 @@ describe('刷新结算与结果核实（回执是权威）', () => {
 })
 
 describe('缺口/过载独立确认后才可采用', () => {
+  it('七天后的活动确认日期后可重新打开并采用到实际日程', async () => {
+    await seedBusiness()
+    const date = '2026-12-13'
+    const proposal = mkProposal({ evidence_refs: [EV_SRC] })
+    proposal.work_items[0].earliest_date = date
+    const c = await dsvc.create({ proposal })
+    const r = await dsvc.reschedule(c.draft.id, { expected: c.draft, context: mkContext(FULL) })
+    expect(r.draft.planning_result.unscheduled[0].reason).toBe('outside_horizon')
+    const confirmed = await dsvc.confirm(c.draft.id, { expected: r.draft, confirmation: {
+      ...conf('gap', 'w1', r.draft.revision, 'future'), field_path: 'manual_slot', new_value: { date, time: '', allowExtra: false },
+    } })
+    expect(confirmed.ok).toBe(true)
+    const reloaded = await dsvc.get(c.draft.id)
+    const gen = await dsvc.setStatus(c.draft.id, { expected: reloaded.baseline.draft, status: 'generating' })
+    const ready = await dsvc.setStatus(c.draft.id, { expected: gen.draft, status: 'ready' })
+    const prepared = await asvc.prepare(c.draft.id, { expected: ready.draft })
+    expect(prepared.envelope.planned_gaps).toEqual([])
+    expect((await asvc.apply(c.draft.id, { expected: ready.draft, envelope: prepared.envelope })).ok).toBe(true)
+    expect(await newDocs()).toEqual([expect.objectContaining({ kind: 'plan_item', date, action_text: proposal.work_items[0].deliverable })])
+  })
   it('手选缺口时间后只补剩余量，刷新、采用、查回行动和改排选项一致', async () => {
     await seedBusiness()
     const c = await dsvc.create({ proposal: mkProposal({ evidence_refs: [EV_SRC] }) })

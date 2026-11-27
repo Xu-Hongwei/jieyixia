@@ -6,19 +6,20 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import { useAppStore } from '@/stores/app'
 
 const emit = defineEmits(['saved', 'close'])
+const props = defineProps({ initialMatter: { type: String, default: '' } })
 const app = useAppStore()
 const workspace = app.workspaceId
 const title = ref('')
 const deadline = ref('')
-const matter = ref('')
+const matter = ref(props.initialMatter)
 const saving = ref(false)
 const discardOpen = ref(false)
-const dirty = computed(() => !!(title.value || deadline.value || matter.value))
+const dirty = computed(() => !!(title.value || deadline.value || matter.value !== props.initialMatter))
 let leaveResolve = null
 function settleLeave(allow) {
   const resolve = leaveResolve
   leaveResolve = null
-  if (allow) { title.value = ''; deadline.value = ''; matter.value = '' }
+  if (allow) { title.value = ''; deadline.value = ''; matter.value = props.initialMatter }
   resolve?.(allow)
 }
 watch(discardOpen, (open) => { if (!open) settleLeave(false) })
@@ -36,7 +37,7 @@ async function save() {
   try {
     const result = await app.createStandaloneTask({ title: title.value, value: deadline.value, matterId: matter.value || null })
     if (result.ok && app.workspaceId === workspace) {
-      title.value = ''; deadline.value = ''; matter.value = ''
+      title.value = ''; deadline.value = ''; matter.value = props.initialMatter
       emit('saved', result.id)
     }
   } finally { saving.value = false }

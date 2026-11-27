@@ -1419,6 +1419,17 @@
           "title": "Note Ids",
           "type": "array"
         },
+        "deadline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Deadline"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "created_at": {
           "title": "Created At",
           "type": "string"

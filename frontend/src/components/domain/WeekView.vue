@@ -16,6 +16,7 @@ import { weekRangeLabel, weekStartOf } from '@/domains/week'
 // 桌面周表用同一个 CSS grid 的三行带（表头/工作/截止），行边界跨列统一，截止带不随任务数漂移。
 // 容器（而非屏幕）过窄时切换为「七日日期条 → 选中日两区顺序展示」；列表视图按天呈现同一两区内容。
 const props = defineProps({
+  recordedPlanId: { type: String, default: '' },
   mode: { type: String, default: 'week' }, // week | list
 })
 const emit = defineEmits(['add-plan'])
@@ -33,12 +34,16 @@ function goDate(date) {
   if (date === todayStr.value) delete q.date
   router.replace({ query: q })
 }
+function jumpToDate(event) {
+  const date = event.currentTarget.value
+  if (isValidDate(date)) goDate(date)
+}
 
 const schedule = computed(() => planStore.schedule(start.value, new Date(store.nowTick)))
 const days = computed(() => schedule.value.days)
 const selectedDay = computed(() => days.value.find((d) => d.date === targetDate.value) || days.value[0])
 // 待定位安排（URL plan 参数）：传给各日区，命中日自动展开历史/折叠清单（R4）。
-const locatePlanId = computed(() => (typeof route.query.plan === 'string' ? route.query.plan : ''))
+const locatePlanId = computed(() => (typeof route.query.plan === 'string' ? route.query.plan : props.recordedPlanId))
 const yearLabel = computed(() => {
   const endYear = beijingAddDays(start.value, 6).slice(0, 4)
   const startYear = start.value.slice(0, 4)
@@ -76,13 +81,16 @@ function openTask(id) {
 const scroller = ref(null)
 function centerTarget() {
   const el = scroller.value
-  const col = el && (el.querySelector(`[data-date="${targetDate.value}"]`) || el.querySelector('[data-today="true"]'))
-  if (col) el.scrollLeft = Math.max(0, col.offsetLeft - 12)
+  if (!el || el.scrollWidth <= el.clientWidth) return
+  const col = el.querySelector(`button[data-date="${targetDate.value}"]`)
+  if (!col) return
+  const bounds = el.getBoundingClientRect()
+  const target = col.getBoundingClientRect()
+  if (target.left < bounds.left) el.scrollLeft += target.left - bounds.left
+  else if (target.right > bounds.right) el.scrollLeft += target.right - bounds.right
 }
 onMounted(centerTarget)
-watch(start, () => centerTarget())
-// 同周换日（含返回定位）也要把目标日滚进首屏，不只跨周才滚动。
-watch(targetDate, () => centerTarget())
+watch(targetDate, centerTarget, { flush: 'post' })
 
 // 今天=品牌色标记；选中=底色+描边。两者可同时命中但视觉可区分。
 const colBg = (d) => (d.date === targetDate.value ? 'bg-accent/50' : d.isToday ? 'bg-primary/5' : '')
@@ -92,17 +100,20 @@ const headerClass = (d) =>
 
 <template>
   <div ref="root">
-    <Card flush>
+    <Card flush class="week-sheet">
       <template #header>
-        <div class="flex flex-wrap items-center gap-2">
-          <div class="min-w-0 flex-1 basis-40">
-            <h1 class="font-date text-3xl font-semibold">{{ weekRangeLabel(start) }}</h1>
-            <p class="text-xs text-muted-foreground">{{ yearLabel }} · 北京时间</p>
+        <div class="week-heading">
+          <div class="week-caption">
+            <p class="week-year">{{ yearLabel }} 年 · 北京时间</p>
+            <h1 class="week-range font-date">{{ weekRangeLabel(start) }}</h1>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <slot name="tools" />
           </div>
-          <div class="flex items-center gap-1">
+          <div class="flex flex-wrap items-center gap-1">
+            <label class="inline-flex items-center gap-1 text-xs text-muted-foreground">跳至日期
+              <input type="date" aria-label="跳至日期" :value="targetDate" class="rounded-md border bg-background px-2 py-1.5" @change="jumpToDate" />
+            </label>
             <Button size="sm" variant="outline" aria-label="上一周" title="上一周" @click="goDate(beijingAddDays(start, -7))"><ChevronLeft /></Button>
             <Button size="sm" variant="outline" @click="goDate(todayStr)">本周</Button>
             <Button size="sm" variant="outline" aria-label="下一周" title="下一周" @click="goDate(beijingAddDays(start, 7))"><ChevronRight /></Button>
@@ -112,7 +123,7 @@ const headerClass = (d) =>
 
       <!-- 宽容器周表：一条日期轴 + 统一行边界的工作带/截止带 -->
       <div v-if="props.mode === 'week' && !narrow" ref="scroller" class="overflow-x-auto scroll-slim">
-        <div class="grid min-w-[700px] grid-cols-7 border-t border-border">
+        <div class="week-grid grid min-w-[700px] grid-cols-7 border-t border-border">
           <button
             v-for="d in days"
             :key="'h-' + d.date"
@@ -129,25 +140,25 @@ const headerClass = (d) =>
             <div class="font-date text-2xl font-semibold leading-tight" :class="d.isToday && 'text-primary'">{{ d.dayNum }}</div>
             <div class="text-[11px] leading-tight">
               <span v-if="d.isToday" class="font-medium text-primary">今天</span>
-              <span class="text-muted-foreground"> 工作 {{ d.plans.length }} · 截止 {{ d.deadlines.length }}</span>
+              <span v-if="d.plans.length || d.deadlines.length" class="text-muted-foreground"> 工作 {{ d.plans.length }} · 截止 {{ d.deadlines.length }}</span>
             </div>
           </button>
 
-          <div class="col-span-7 border-y border-border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
-            每日工作 · 本周 {{ schedule.planCount }} 项
+          <div class="week-band col-span-7">
+            每日工作 <span>{{ schedule.planCount }} 项</span>
           </div>
           <div
             v-for="d in days"
             :key="'w-' + d.date"
-            class="border-l border-border p-1.5 first:border-l-0"
+            class="week-work-cell border-l border-border p-1.5"
             :class="colBg(d)"
             :data-date="d.date"
           >
             <DayWorkZone :day="d" :locate-plan-id="locatePlanId" @open-plan="openPlan" @add="emit('add-plan', d.date)" />
           </div>
 
-          <div class="col-span-7 border-y border-border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground">
-            每日截止 · 本周 {{ schedule.deadlineCount }} 项
+          <div class="week-band deadline-band col-span-7">
+            每日截止 <span>{{ schedule.deadlineCount }} 项</span>
           </div>
           <p v-if="!schedule.deadlineCount" class="col-span-7 px-3 py-3 text-sm text-muted-foreground">本周无截止</p>
           <template v-else>
@@ -218,7 +229,7 @@ const headerClass = (d) =>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 px-5 py-2.5 text-xs text-muted-foreground">
+      <div v-if="narrow || props.mode === 'list' || schedule.outsideWeek.length" class="flex flex-wrap items-center gap-x-2 gap-y-1 px-5 py-2.5 text-xs text-muted-foreground">
         <span>本周工作 {{ schedule.planCount }} 项</span>
         <span>·</span>
         <span>截止 {{ schedule.deadlineCount }} 项</span>

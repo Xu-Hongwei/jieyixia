@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { RouterLink, onBeforeRouteLeave, useRouter } from 'vue-router'
 import { ArrowLeft, ArrowRight, Database, Download, FileArchive, Loader2, RotateCcw, Upload, X } from 'lucide-vue-next'
 import Alert from '@/components/ui/Alert.vue'
@@ -7,8 +7,10 @@ import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
 import Input from '@/components/ui/Input.vue'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import { useAppStore } from '@/stores/app'
-import { readWorkspaceSnapshot } from '@/services/storage/db'
+import { useAssistantStore } from '@/stores/assistant'
+import { clearWorkspace, readWorkspaceSnapshot } from '@/services/storage/db'
 import { buildBackup } from '@/services/backup/export'
 import { DOC_KINDS } from '@/services/backup/adapt'
 import { requestWorkLeave } from '@/composables/workLeave'
@@ -18,10 +20,11 @@ import {
 } from '@/services/backup/restore'
 
 const store = useAppStore()
+const assistant = useAssistantStore()
 const router = useRouter()
 
 const KIND_LABELS = {
-  note: '便签', matter: '事项', task: '任务', action: '行动',
+  note: '便签', matter: '项目', task: '任务', action: '行动',
   focus_session: '专注会话', plan_item: '计划条目',
 }
 
@@ -44,6 +47,46 @@ function formatBytes(n) {
 }
 
 const exporting = ref(false)
+const preparingClear = ref(false)
+const clearing = ref(false)
+const clearOpen = ref(false)
+const clearTarget = shallowRef(null)
+const clearBusy = computed(() => preparingClear.value || clearing.value)
+const clearUnavailable = computed(() => !store.ready || exporting.value || importActive.value || store.busy ||
+  assistant.generating || Object.values(assistant.busy).some(Boolean))
+
+async function openClear() {
+  if (clearBusy.value || clearUnavailable.value) return
+  const ws = store.workspaceId
+  preparingClear.value = true
+  try {
+    const data = await readWorkspaceSnapshot(ws)
+    if (store.workspaceId !== ws || clearUnavailable.value) return
+    const ids = records => new Set(records.map(record => record.id))
+    clearTarget.value = {
+      ws, name: store.currentWorkspace.name,
+      records: { sources: ids(data.sources), docs: ids(data.docs), assistant_threads: ids(data.assistantThreads), assistant_drafts: ids(data.assistantDrafts) },
+      unfinished: data.docs.filter(d => d.kind === 'focus_session' && !d.ended_at).length,
+    }
+    clearOpen.value = true
+  } catch { store.say('destructive', '读取待清空的数据失败，请重试。') }
+  finally { preparingClear.value = false }
+}
+async function confirmClear() {
+  const target = clearTarget.value
+  if (!target || clearBusy.value || clearUnavailable.value || target.ws !== store.workspaceId) return
+  clearing.value = true
+  let committed = false
+  try {
+    await clearWorkspace(target.ws, target.records)
+    committed = true
+    await store.finishWorkspaceClear(target.ws)
+    store.say('success', '已清空「' + target.name + '」')
+  } catch (err) {
+    store.say('destructive', committed ? '数据已清空，请刷新以更新页面。' : (err.message || '清空失败，请重试。'))
+  } finally { clearing.value = false; clearTarget.value = null }
+}
+watch(() => store.workspaceId, () => { clearOpen.value = false; clearTarget.value = null })
 const exportError = ref(null)
 // 最近一次成功导出：固定记录原空间归属。导出期间切换空间时，成功态仍标原空间，不更新到新空间。
 const lastExport = ref(null)
@@ -64,7 +107,7 @@ function triggerDownload(bytes, filename) {
 }
 
 async function doExport() {
-  if (exporting.value) return
+  if (exporting.value || clearBusy.value) return
   // 点击瞬间捕获空间归属：此后即使切换空间，快照与结果仍属原空间。
   const wsId = store.workspaceId
   const wsName = store.currentWorkspace.name
@@ -91,7 +134,7 @@ async function doExport() {
 const fileInput = ref(null)
 // 一页同时只允许一个导出/导入作业：导入非 idle 时禁导出；导出中或写入中禁选文件。
 const importActive = computed(() => restoreJob.phase !== 'idle')
-const fileSelectDisabled = computed(() => exporting.value || restoreJob.phase === 'committing')
+const fileSelectDisabled = computed(() => clearBusy.value || exporting.value || restoreJob.phase === 'committing')
 const nameValid = computed(() => {
   const n = String(restoreJob.targetName || '').trim()
   return n.length >= 1 && n.length <= 80
@@ -170,7 +213,7 @@ onBeforeRouteLeave(() => {
 
     <Card>
       <div class="flex flex-wrap items-center gap-3">
-        <Button :disabled="exporting || !store.ready || importActive" @click="doExport">
+        <Button :disabled="exporting || clearBusy || !store.ready || importActive" @click="doExport">
           <Loader2 v-if="exporting" class="animate-spin" />
           <Download v-else />
           {{ exporting ? '正在打包…' : '导出当前空间备份' }}
@@ -221,7 +264,7 @@ onBeforeRouteLeave(() => {
 
       <!-- idle：选择备份 -->
       <div v-if="restoreJob.phase === 'idle'" class="mt-3 space-y-2">
-        <Button variant="outline" :disabled="exporting" @click="pickFile"><Upload />选择备份 ZIP</Button>
+        <Button variant="outline" :disabled="fileSelectDisabled" @click="pickFile"><Upload />选择备份 ZIP</Button>
         <p class="text-xs leading-relaxed text-muted-foreground">
           仅支持本应用导出的备份；按实际字节校验，不只看扩展名或 MIME。选择、检查与预览不会写入任何数据、不创建空空间、不切换当前空间。
         </p>
@@ -383,5 +426,16 @@ onBeforeRouteLeave(() => {
         </div>
       </div>
     </Card>
+    <section class="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4" aria-label="清空空间数据">
+      <div><h2 class="font-medium">清空空间数据</h2><p class="mt-1 text-sm text-muted-foreground">仅影响本浏览器中的「{{ store.currentWorkspace.name }}」。需要保留副本时，请先导出备份。</p></div>
+      <Button variant="destructive" :disabled="clearBusy || clearUnavailable" @click="openClear">{{ clearing ? '正在清空…' : preparingClear ? '正在统计…' : '清空当前空间' }}</Button>
+    </section>
+    <ConfirmDialog v-model="clearOpen" :title="'清空「' + (clearTarget?.name || '') + '」？'" confirm-label="确认清空" :confirm-disabled="clearBusy || clearUnavailable" @confirm="confirmClear">
+      <template v-if="clearTarget">
+        将删除 {{ clearTarget.records.sources.size }} 份资料、{{ clearTarget.records.docs.size }} 条项目与工作记录（含任务、便签和日程）、{{ clearTarget.records.assistant_threads.size }} 个助手对话和 {{ clearTarget.records.assistant_drafts.size }} 份草案。
+        <span v-if="clearTarget.unfinished">其中有 {{ clearTarget.unfinished }} 项未结束的工作。</span>
+        此操作无法撤销。其他空间和已下载的备份会保留。
+      </template>
+    </ConfirmDialog>
   </div>
 </template>

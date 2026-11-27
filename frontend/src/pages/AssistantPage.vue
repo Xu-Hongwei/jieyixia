@@ -2,7 +2,7 @@
 import { deadlineSource } from '@/domains/assistant/application'
 import PlanAgenda from '@/components/assistant/PlanAgenda.vue'
 import ManualGapRow from '@/components/assistant/ManualGapRow.vue'
-import { manualSlots, scheduleWithManualSlots } from '@/domains/assistant/manualSchedule'
+import { manualSegmentKey, manualSlots, scheduleWithManualSlots } from '@/domains/assistant/manualSchedule'
 import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router'
 import { ChevronDown, ChevronRight, ListChecks } from 'lucide-vue-next'
@@ -39,7 +39,7 @@ const workflowHeader = ref(null)
 watch(tab, async () => {
   await nextTick()
   if (!draft.value) return
-  workflowHeader.value?.querySelector('[aria-current="step"]')?.focus({ preventScroll: true })
+  workflowHeader.value?.querySelector('[data-preview-heading], [aria-current="step"]')?.focus({ preventScroll: true })
   workflowHeader.value?.scrollIntoView({ block: 'start' })
 })
 const entryMode = ref('create')
@@ -101,17 +101,37 @@ function cancelReplanEntry() {
   if (route.query.replanTask) router.replace({ path: '/assistant' })
 }
 
-const today = computed(() => beijingToday())
+const today = computed(() => beijingToday(new Date(app.nowTick)))
 const draft = computed(() => store.activeDraft)
 const proposal = computed(() => draft.value?.proposal ?? null)
 const gapRows = computed(() => draft.value?.planning_result?.unscheduled ?? [])
 const slots = computed(() => manualSlots(draft.value))
 const editingGap = ref(null)
+async function saveGapChoice(key, slot) {
+  const id = draft.value?.id
+  const response = slot ? await store.scheduleGap(key, slot) : await store.confirmGap(key)
+  // 保存后行会移入另一个分组，由持续挂载的页面结束编辑。
+  if (response.ok && draft.value?.id === id && editingGap.value === key) editingGap.value = null
+  return response
+}
 watch([() => draft.value?.id, () => draft.value?.revision, tab], () => { editingGap.value = null })
 const result = computed(() => {
   try { return scheduleWithManualSlots(draft.value) } catch { return draft.value?.planning_result }
 })
 const planningInput = computed(() => draft.value?.planning_input ?? null)
+const workByKey = computed(() => new Map((planningInput.value?.work_items ?? []).map(w => [w.key, w])))
+const gapBySegment = computed(() => new Map(gapRows.value.map((gap, index) => [manualSegmentKey(index), gap])))
+const windowEnd = computed(() => result.value?.days.at(-1)?.date)
+const recentSegments = computed(() => (result.value?.segments ?? []).filter(s => result.value.days.some(day => day.date === s.date)))
+const gapGroups = computed(() => {
+  const future = [], pending = []
+  for (const gap of result.value?.unscheduled ?? []) {
+    if (workByKey.value.get(gap.work_item_key)?.earliest_date > windowEnd.value) future.push(gap)
+    else pending.push(gap)
+  }
+  future.sort((a, b) => workByKey.value.get(a.work_item_key).earliest_date.localeCompare(workByKey.value.get(b.work_item_key).earliest_date))
+  return [{ label: '后续日期待确认', rows: future, future: true }, { label: '待安排', rows: pending, future: false }].filter(g => g.rows.length)
+})
 const isReplan = computed(() => draft.value?.mode === 'replan')
 const readiness = computed(() => store.readiness)
 const EDITABLE = ['editing', 'needs_clarification', 'needs_review', 'ready']
@@ -150,6 +170,39 @@ const deadlineDecision = (key) => {
 }
 const createTasks = computed(() => (proposal.value?.task_proposals ?? []).filter((t) => t.op === 'create'))
 const linkTasks = computed(() => (proposal.value?.task_proposals ?? []).filter((t) => t.op === 'link'))
+// A simple task has one execution record and one schedulable item. Older drafts can
+// contain genuinely distinct work, so fold only losslessly equivalent records.
+const taskRows = computed(() => {
+  const actions = proposal.value?.action_proposals ?? []
+  const work = proposal.value?.work_items ?? []
+  const pairs = new Map()
+  const actionKeys = new Set()
+  const workKeys = new Set()
+  for (const task of createTasks.value) {
+    const belongs = item => item.task_ref.kind === 'draft' && item.task_ref.key === task.key
+    const taskActions = actions.filter(belongs)
+    const taskWork = work.filter(belongs)
+    if (taskActions.length !== 1 || taskWork.length !== 1) continue
+    const [action] = taskActions
+    const [item] = taskWork
+    if (action.op !== 'create' || item.action_ref.kind !== 'draft' || item.action_ref.key !== action.key ||
+        action.text !== task.title || item.deliverable !== task.title || action.minutes !== item.remaining_minutes) continue
+    pairs.set(task.key, { action, item })
+    actionKeys.add(action.key)
+    workKeys.add(item.key)
+  }
+  return { pairs, otherActions: actions.filter(a => !actionKeys.has(a.key)), otherWork: work.filter(w => !workKeys.has(w.key)) }
+})
+function updateTaskTitle(key, value) {
+  edit.tasks[key].title = value
+  const pair = taskRows.value.pairs.get(key)
+  if (pair) edit.actions[pair.action.key].text = value
+}
+function updateTaskMinutes(key, value) {
+  const { action, item } = taskRows.value.pairs.get(key)
+  edit.work[item.key].remaining = value
+  if (value !== '') edit.actions[action.key].minutes = value
+}
 const taskTitle = (ref) => {
   if (!ref) return ''
   if (ref.kind === 'existing') return app.docs.find((d) => d.id === ref.id && d.kind === 'task')?.title ?? ref.id
@@ -184,7 +237,16 @@ const confirmedDeadlines = computed(() => createTasks.value.flatMap(task => {
   if (decision.state !== 'confirmed' || !decision.value) return []
   return [{ key: task.key, title: task.title, label: formatWhen(decision.value, decision.precision) }]
 }))
-const overbookConfirms = computed(() => (result.value?.days ?? []).filter((d) => d.overbooked_minutes > 0 && !hasConf('overbook', d.date)))
+const previewDeadlines = computed(() => [
+  ...confirmedDeadlines.value,
+  ...(planningInput.value?.task_facts ?? [])
+    .filter(fact => fact.task_ref.kind === 'existing' && fact.deadline_value && (
+      fact.task_ref.id === draft.value?.replan_scope?.task_id ||
+      linkTasks.value.some(task => task.target_id === fact.task_ref.id) ||
+      proposal.value?.work_items?.some(work => work.task_ref.kind === 'existing' && work.task_ref.id === fact.task_ref.id)
+    ))
+    .map(fact => ({ key: 'existing:' + fact.task_ref.id, title: fact.title, label: formatWhen(fact.deadline_value, fact.deadline_precision) })),
+])
 const extraWorkConfirms = computed(() => (planningInput.value?.extra_work_acknowledged ?? []).filter((k) => !hasConf('extra_work', k)))
 // D12 额外工作阻断排程：确认面板不能依赖排程结果，故从排程澄清的结构化键在排程前逐项确认。
 const extraWorkPreConfirms = computed(() => [...new Set(
@@ -203,7 +265,7 @@ const HANDLED_CODES = ['DEADLINE_UNCONFIRMED', 'GAP_UNCONFIRMED', 'OVERBOOK_UNCO
 const otherBlockers = computed(() => (readiness.value?.blockers ?? []).filter((b) => !HANDLED_CODES.includes(b.code) && (result.value || !['NO_COMPUTATION', 'FACT_BASELINE_MISSING'].includes(b.code))))
 // 新建任务的截止问题在上方已有具名确认按钮，预览只补充仍需解释的原因。
 const previewBlockers = computed(() => (readiness.value?.blockers ?? []).filter(blocker =>
-  blocker.code !== 'GAP_UNCONFIRMED' && (blocker.code !== 'DEADLINE_UNCONFIRMED' || !deadlineConfirms.value.length)))
+  !['GAP_UNCONFIRMED', 'OVERBOOK_UNCONFIRMED'].includes(blocker.code) && (blocker.code !== 'DEADLINE_UNCONFIRMED' || !deadlineConfirms.value.length)))
 const estimateUnknown = computed(() => result.value?.unknown_items ?? [])
 
 const segmentsByDate = computed(() => {
@@ -245,17 +307,18 @@ const replanTaskTitle = computed(() => {
 // 采用后导航：优先冻结写集，其次 applied_summary + 当前空间 docs（刷新后重开）。
 const adoptedLinks = computed(() => {
   const env = store.prepared?.envelope
-  const firstPlan = env?.write_set?.plan_items_create?.[0]
+  const earliest = plans => plans.slice().sort((a, b) => a.date.localeCompare(b.date))[0]
+  const firstPlan = earliest(env?.write_set?.plan_items_create ?? [])
   let planId = firstPlan?.formal_id
   let planDate = firstPlan?.date
   let taskId = env?.write_set?.tasks_create?.[0]?.formal_id ?? firstPlan?.task_id
   if (!planId) {
-    const entry = (draft.value?.applied_summary?.id_map ?? []).find((e) => e.object_type === 'plan_item')
-    if (entry) {
-      const doc = app.docs.find((d) => d.id === entry.formal_id && d.kind === 'plan_item')
-      planId = entry.formal_id
-      planDate = doc?.date
-      taskId = doc?.task_id
+    const ids = new Set((draft.value?.applied_summary?.id_map ?? []).filter(e => e.object_type === 'plan_item').map(e => e.formal_id))
+    const doc = earliest(app.docs.filter(d => d.kind === 'plan_item' && ids.has(d.id)))
+    if (doc) {
+      planId = doc.id
+      planDate = doc.date
+      taskId = doc.task_id
     }
   }
   if (!taskId) taskId = (draft.value?.applied_summary?.id_map ?? []).find((e) => e.object_type === 'task')?.formal_id
@@ -297,6 +360,7 @@ const contentDirty = computed(() => {
     if (!e) continue
     const cur = w.remaining_minutes == null ? '' : String(w.remaining_minutes)
     if ((e.remaining ?? '') !== cur) return true
+    if ((e.earliest || '') !== (w.earliest_date || '')) return true
   }
   return false
 })
@@ -389,7 +453,7 @@ function initContent(reset = true) {
   for (const w of d.proposal?.work_items ?? []) {
     const prev = edit.work[w.key]
     if (!reset && prev) continue
-    edit.work[w.key] = { remaining: w.remaining_minutes == null ? '' : String(w.remaining_minutes) }
+    edit.work[w.key] = { remaining: w.remaining_minutes == null ? '' : String(w.remaining_minutes), earliest: w.earliest_date || '' }
   }
 }
 // 排程窗口表单只在「打开另一草案」或「planning_input 实际变化（重排）」时重置；
@@ -464,7 +528,11 @@ async function saveChanges() {
     ...p,
     task_proposals: (p.task_proposals ?? []).map((t) => (t.op === 'create' ? { ...t, title: frozen.tasks[t.key].title.trim() } : t)),
     action_proposals: (p.action_proposals ?? []).map((a) => (a.op === 'create' ? { ...a, text: frozen.actions[a.key].text.trim(), minutes: Number(frozen.actions[a.key].minutes) } : a)),
-    work_items: (p.work_items ?? []).map((w) => ({ ...w, remaining_minutes: frozen.work[w.key].remaining === '' ? null : Number(frozen.work[w.key].remaining) })),
+    work_items: (p.work_items ?? []).map((w) => {
+      const pair = taskRows.value.pairs.get(w.task_ref.key)
+      const deliverable = pair?.item.key === w.key ? frozen.tasks[w.task_ref.key].title.trim() : w.deliverable
+      return { ...w, deliverable, earliest_date: frozen.work[w.key].earliest || null, remaining_minutes: frozen.work[w.key].remaining === '' ? null : Number(frozen.work[w.key].remaining) }
+    }),
   }
   saving = true
   try {
@@ -586,6 +654,12 @@ async function saveAndPreview() {
     store.say('warning', `未能完成预览：${err.message || '请稍后重试'}。输入已保留。`)
   } finally { advancing.value = false }
 }
+async function replanFromToday() {
+  form.startDate = today.value
+  tab.value = 'edit'
+  await nextTick()
+  await saveAndPreview()
+}
 const { discardOpen: leaveOpen, guardLeave, settle: settleLeave } = useUnsavedGuard(
   () => !!editingGap.value || contentDirty.value || windowDirty.value || (!!draft.value && !planningInput.value && JSON.stringify(form) !== windowBaseline.value) || !!extraText.value.trim() || !!inputRef.value?.hasUnsaved || !!replanRef.value?.hasUnsaved || !!generationRef.value?.hasUnsaved,
   () => workflowBusy.value || store.gen?.phase === 'save_failed' || draft.value?.status === 'applying',
@@ -615,6 +689,38 @@ watch(() => [store.gen?.phase, draft.value?.id, draft.value?.status, workflowBus
   if (!deadlineConfirms.value.length && !requiredMissing.value.length && !contentDirty.value) await saveAndPreview()
 }, { flush: 'post' })
 
+const previewRoot = ref(null)
+const sourceOpen = ref(false)
+watch([() => draft.value?.id, tab], () => { sourceOpen.value = false })
+const sourceCount = computed(() => draft.value?.source_refs?.filter(r => r.object_type === 'source').length || 0)
+const originalRequest = computed(() => {
+  const m = store.active?.thread?.messages?.find(m => m.role === 'user' && m.type === 'text')
+  return m?.user_input?.original_user_request ?? m?.content ?? ''
+})
+const previewTitle = computed(() => {
+  if (isReplan.value) return replanTaskTitle.value || '调整后续安排'
+  const tasks = proposal.value?.task_proposals ?? []
+  if (tasks.length === 1) {
+    const task = tasks[0]
+    return task.title || app.tasks.find(t => t.id === task.target_id)?.title || '任务计划'
+  }
+  return tasks.length ? `本次计划 · ${tasks.length} 个任务` : '本次计划'
+})
+function goToDecision() {
+  const root = previewRoot.value
+  if (!root) return
+  const gap = root.querySelector('[data-pending-gap="true"]')
+  const budget = root.querySelector('[data-pending-budget]:not(:disabled)')
+  const target = gap?.querySelector('button:not(:disabled)') || budget || root.querySelector('[data-review] button:not(:disabled)')
+  if (target) {
+    const details = target.closest('details')
+    if (details) details.open = true
+    target.focus()
+    target.scrollIntoView({ block: 'center' })
+  } else {
+    tab.value = 'edit'
+  }
+}
 const threadTitle = (d) => store.threads.find((t) => t.id === d.thread_id)?.title || '未命名线程'
 const outcome = computed(() => store.adoptResult?.outcome ?? null)
 </script>
@@ -633,19 +739,21 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
     <template v-else><p role="alert" class="text-sm">{{ materialHandoff.message }}</p><Button size="sm" variant="outline" @click="dismissMaterials">关闭提示</Button></template>
   </section>
   <ConfirmDialog v-model="materialConfirm" title="用所选资料开始新计划？" confirm-label="替换输入并继续" cancel-label="保留当前输入" :confirm-disabled="handoffBusy || !materialHandoff?.ok" @confirm="acceptMaterials">当前未提交的输入将被替换；已保存草案保留。所选资料尚不会发送给模型。</ConfirmDialog>
-  <div class="mx-auto space-y-4" :class="draft && tab === 'preview' ? 'max-w-4xl' : 'max-w-3xl'">
+  <div class="mx-auto space-y-4" :class="((!draft && !replanEntry && entryMode === 'create') || tab === 'preview') ? 'max-w-6xl' : 'max-w-4xl'">
     <header ref="workflowHeader" class="scroll-mt-20 space-y-4">
-      <h1 class="text-2xl font-semibold">规划助手</h1>
-      <nav aria-label="规划步骤" class="grid grid-cols-4 border-b">
+      <p v-if="draft && tab === 'preview' && !isReplan" class="flex items-center gap-2 text-sm font-medium text-primary"><span aria-hidden="true" class="w-7 border-t-2"></span>安排预览</p>
+      <h1 class="workspace-title" :data-preview-heading="draft && tab === 'preview' && !isReplan ? '' : undefined" tabindex="-1">{{ draft && tab === 'preview' ? previewTitle : '规划助手' }}</h1>
+      <nav v-if="!draft || tab !== 'preview' || isReplan" aria-label="规划步骤" class="assistant-steps grid auto-cols-fr grid-flow-col border-b">
         <button v-for="(step, i) in steps" :key="step.key" type="button" :disabled="!stepEnabled(step.key) || workflowBusy" :aria-current="(!draft ? step.key === 'input' : tab === step.key) ? 'step' : undefined" class="min-w-0 border-b-2 px-1 py-3 text-sm transition-colors disabled:cursor-default" :class="(!draft ? step.key === 'input' : tab === step.key) ? 'border-primary font-semibold text-primary' : 'border-transparent text-muted-foreground enabled:hover:text-foreground disabled:opacity-45'" @click="tab = step.key"><span class="block text-xs sm:inline">{{ i + 1 }}</span> {{ step.label }}</button>
       </nav>
     </header>
     <Alert v-if="app.aiDown" variant="warning">模型服务当前不可用：生成会失败并保留输入；本地手动编辑与排程照常。</Alert>
-    <Alert v-if="store.notice" :variant="store.notice.tone === 'info' ? 'info' : 'warning'">{{ store.notice.text.replaceAll('「重新排程」', '「保存并预览」') }}</Alert>
+    <Alert v-if="store.notice" :variant="store.notice.tone" dismiss-label="关闭助手通知" @dismiss="store.notice = null">{{ store.notice.text.replaceAll('「重新排程」', '「保存并预览」') }}</Alert>
 
     <!-- 入口：真实输入（当前空间）/ 显式载入演示 / 继续已有草案；绝不自动播种 -->
     <section v-if="!draft" class="space-y-4">
-      <template v-if="replanEntry">
+      <GenerationPanel v-if="store.generating && !replanEntry" />
+      <template v-else-if="replanEntry">
         <ReplanPanel ref="replanRef" :task-id="replanEntry" @started="onReplanStarted" />
         <Button variant="ghost" size="sm" @click="async () => { if (await guardLeave()) cancelReplanEntry() }">← 返回新建计划</Button>
       </template>
@@ -688,7 +796,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
     <template v-else>
       <div class="flex flex-wrap items-center gap-2">
         <Button variant="ghost" size="sm" @click="closeDraft">← 返回列表</Button>
-        <h2 class="text-base font-semibold">{{ threadTitle(draft) }} · 第 {{ draft.revision }} 版</h2>
+        <h2 class="text-sm font-medium"><template v-if="tab !== 'preview'">{{ threadTitle(draft) }} · </template>第 {{ draft.revision }} 版</h2>
         <Badge v-if="isReplan" variant="outline">改排</Badge>
         <Badge :variant="statusVariant(draft.status)">{{ draft.status === 'ready' && !canAdopt ? '待核对' : STATUS_LABELS[draft.status] ?? draft.status }}</Badge>
         <span class="flex-1" />
@@ -701,7 +809,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           已采用：取消 {{ draft.applied_summary?.counts?.plan_items_cancelled ?? 0 }} 条旧安排，新增 {{ draft.applied_summary?.counts?.actions_created ?? 0 }} 个行动、{{ draft.applied_summary?.counts?.plan_items_created ?? 0 }} 条安排。草案只读；再调整请「新建草案」。
         </template>
         <template v-else>
-          已采用：新增 {{ draft.applied_summary?.counts?.tasks_created ?? 0 }} 个任务、{{ draft.applied_summary?.counts?.actions_created ?? 0 }} 个行动、{{ draft.applied_summary?.counts?.plan_items_created ?? 0 }} 条安排。草案只读；新意图请「新建草案」。
+          已加入日程。新增 {{ draft.applied_summary?.counts?.tasks_created ?? 0 }} 个任务、{{ draft.applied_summary?.counts?.plan_items_created ?? 0 }} 条安排。
         </template>
         <div class="mt-2 flex gap-2">
           <Button size="sm" @click="router.push(adoptedLinks.schedule)">查看日程</Button>
@@ -717,6 +825,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
         含初版不支持的操作：{{ unsupported.join('、') }}。采用已阻断；请改为新建任务/行动，或放弃该修改。
       </Alert>
       <Alert v-if="store.stale" variant="warning">更改尚未重新排程：预览仍是旧计算，采用已禁用。请返回核对建议，保存并预览。</Alert>
+      <Button v-if="editable && planningInput?.start_date < today" size="sm" variant="outline" :disabled="workflowBusy || !!editingGap || store.replanPanelDirty" @click="replanFromToday">从今天重新排</Button>
       <Alert v-if="store.replanPanelDirty" variant="warning">改排面板有未保存修改：旧方案不能采用。请先「保存改排内容」，再保存并预览。</Alert>
       <Alert v-else-if="!store.stale && (contentDirty || windowDirty)" variant="warning">有未保存修改或预算窗口未重排，采用已禁用。请返回核对建议，保存并预览。</Alert>
       <Alert v-if="editable && requiredMissing.length" variant="destructive">必填项为空：{{ requiredMissing.join('、') }}。标题/行动正文不能为空，保存与采用已禁用；请填写或改回原值。</Alert>
@@ -740,17 +849,24 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           <!-- 改排草案：范围/清单由改排面板编辑（建议随清单重建），不走通用任务/行动编辑。 -->
           <ReplanPanel v-if="isReplan" ref="replanRef" :draft="draft" />
           <div v-if="!isReplan" class="rounded-lg border bg-card p-4">
-            <h3 class="flex items-center gap-2 text-sm font-semibold"><ListChecks class="size-4" />任务与行动</h3>
+            <h3 class="flex items-center gap-2 text-sm font-semibold"><ListChecks class="size-4" />任务清单</h3>
             <p v-if="!proposal" class="mt-2 text-sm text-muted-foreground">无建议内容。</p>
             <div v-for="t in createTasks" :key="t.key" class="mt-3 space-y-2 rounded-md border p-3">
               <div class="text-xs text-muted-foreground">任务</div>
-              <Input v-model="edit.tasks[t.key].title" :disabled="!editable" aria-label="任务标题" />
+              <Input :model-value="edit.tasks[t.key].title" :disabled="!editable" aria-label="任务标题" @update:model-value="updateTaskTitle(t.key, $event)" />
+              <p v-if="t.description" class="whitespace-pre-wrap text-xs text-muted-foreground">{{ t.description }}</p>
+              <label v-if="taskRows.pairs.has(t.key)" class="flex items-center gap-2 text-xs text-muted-foreground">最早安排日（可选）
+                <input v-model="edit.work[taskRows.pairs.get(t.key).item.key].earliest" type="date" :disabled="!editable" class="rounded-md border bg-background px-2 py-1" />
+              </label>
+              <label v-if="taskRows.pairs.has(t.key)" class="flex items-center gap-2 text-xs text-muted-foreground">预计分钟
+                <Input :model-value="edit.work[taskRows.pairs.get(t.key).item.key].remaining" :disabled="!editable" class="h-8 w-24" inputmode="numeric" @update:model-value="updateTaskMinutes(t.key, $event)" />
+              </label>
               <div class="flex items-center gap-2">
                 <DateInput v-model="edit.tasks[t.key].deadline" :disabled="!editable" placeholder="无截止" class="flex-1" :aria-label="`任务 ${t.title} 截止`" />
                 <Button variant="ghost" size="sm" :disabled="!editable" @click="edit.tasks[t.key].deadline = ''">无截止</Button>
               </div>
-              <div v-if="(t.deadline_candidates ?? []).length" class="text-xs text-muted-foreground">
-                模型候选：{{ t.deadline_candidates.map((c) => c.value ?? '无').join('、') }}（可修改）
+              <div v-if="t.deadline_candidates?.some(c => c.value)" class="text-xs text-muted-foreground">
+                建议截止：{{ t.deadline_candidates.filter(c => c.value).map(c => c.value).join('、') }}
               </div>
             </div>
             <div v-for="t in linkTasks" :key="t.key" class="mt-3 rounded-md border p-3 text-sm">
@@ -758,7 +874,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
               <div>{{ taskTitle({ kind: 'existing', id: t.target_id }) }}</div>
               <div class="text-xs text-muted-foreground">沿用原任务截止。</div>
             </div>
-            <div v-for="a in proposal?.action_proposals ?? []" :key="a.key" class="mt-3 space-y-1 rounded-md border p-3">
+            <div v-for="a in taskRows.otherActions" :key="a.key" class="mt-3 space-y-1 rounded-md border p-3">
               <template v-if="a.op === 'create'">
                 <div class="text-xs text-muted-foreground">行动 · {{ taskTitle(a.task_ref) }}</div>
                 <Input v-model="edit.actions[a.key].text" :disabled="!editable" aria-label="行动内容" />
@@ -771,8 +887,11 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
                 <div class="text-sm">{{ a.target_id }}</div>
               </template>
             </div>
-            <div v-for="w in proposal?.work_items ?? []" :key="w.key" class="mt-3 space-y-1 rounded-md border p-3">
+            <div v-for="w in taskRows.otherWork" :key="w.key" class="mt-3 space-y-1 rounded-md border p-3">
               <div class="text-xs text-muted-foreground">待安排工作 · {{ w.deliverable }}</div>
+              <label class="flex items-center gap-2 text-xs text-muted-foreground">最早安排日（可选）
+                <input v-model="edit.work[w.key].earliest" type="date" :disabled="!editable" class="rounded-md border bg-background px-2 py-1" />
+              </label>
               <label class="flex items-center gap-2 text-xs text-muted-foreground">剩余分钟（留空=未知）
                 <Input v-model="edit.work[w.key].remaining" :disabled="!editable" class="h-8 w-24" inputmode="numeric" />
               </label>
@@ -838,7 +957,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           <div v-show="tab === 'edit'" class="flex justify-end border-t pt-4"><Button :disabled="!editable || workflowBusy || requiredMissing.length > 0 || store.replanPanelDirty" @click="saveAndPreview">{{ advancing ? '正在准备预览…' : '保存并预览' }}</Button></div>
 
         <!-- 预览区 -->
-        <section v-show="tab === 'preview'" class="space-y-4" aria-label="预览安排">
+        <section v-show="tab === 'preview'" ref="previewRoot" class="space-y-4" aria-label="预览安排">
           <div v-if="emptyPlan" class="space-y-3 border-y py-5">
             <h3 class="text-xl font-semibold">本次没有新增安排</h3>
             <p class="text-sm text-muted-foreground">草案已保留。可以补充要做的事和期望日期，再生成方案。</p>
@@ -853,16 +972,48 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           <template v-else>
           <Alert v-if="replanZeroNew" variant="warning">本次还没有新安排。可以为下方未排工作选择时间，也可以返回调整工作量。</Alert>
           <Alert v-if="!previewCurrent" variant="warning">这是上一次预览，请返回核对建议更新后再采用。</Alert>
-          <div v-if="estimateUnknown.length || overbookConfirms.length || extraWorkConfirms.length || previewBlockers.length || !result" class="space-y-2 border-b pb-4">
+          <div v-if="previewDeadlines.length" class="space-y-1 text-sm text-warning-foreground">
+            <p v-for="entry in previewDeadlines" :key="entry.key"><template v-if="entry.title !== previewTitle">{{ entry.title }} · </template>总截止 {{ entry.label }}</p>
+          </div>
+          <div class="preview-layout">
+          <div class="min-w-0 space-y-4">
+          <div class="py-2">
+            <h3 class="text-xl font-semibold">近期安排 <span v-if="result" class="text-sm font-normal tabular-nums text-muted-foreground">{{ result.days[0].date.slice(5).replace('-', '/') }}–{{ windowEnd.slice(5).replace('-', '/') }}</span></h3>
+            <p v-if="result" class="mt-1 text-sm text-muted-foreground">{{ recentSegments.length }} 项工作 · 预计 {{ recentSegments.reduce((sum, segment) => sum + segment.minutes, 0) }} 分钟</p>
+            <p v-if="!result" class="mt-2 text-sm text-muted-foreground">排程后这里显示每日安排与容量。</p>
+            <div v-else class="mt-2 space-y-3">
+              <PlanAgenda :result="result" :segments-by-date="segmentsByDate" :task-title="taskTitle" :heading-title="previewTitle" preview>
+                <template #segment-controls="{ segment }">
+                  <ManualGapRow v-if="editable && gapBySegment.has(segment.segment_key)" :save-choice="saveGapChoice" :gap="gapBySegment.get(segment.segment_key)"
+                    :days="result.days" :slot="slots.get(segment.work_item_key)" :today="today" :earliest="workByKey.get(segment.work_item_key)?.earliest_date"
+                    :disabled="workflowBusy || !previewCurrent || (!!editingGap && editingGap !== segment.work_item_key)" :editing="editingGap === segment.work_item_key"
+                    @edit="editingGap = segment.work_item_key" @close="editingGap = null" />
+                </template>
+                <template #overbook="{ day }">
+                  <Button v-if="editable && !hasConf('overbook', day.date)" data-pending-budget size="sm" variant="outline" :disabled="workflowBusy || !previewCurrent" @click="store.confirmOverbook(day.date)">保留当天已有安排</Button>
+                  <span v-else-if="hasConf('overbook', day.date)" class="text-xs text-muted-foreground">已核对</span>
+                </template>
+              </PlanAgenda>
+              <div v-for="group in gapGroups" :key="group.label" class="border-t py-3">
+                <h4 class="text-base font-semibold">{{ group.label }} <span class="text-sm text-muted-foreground">{{ group.rows.length }} 项</span></h4>
+                <ManualGapRow v-for="u in group.rows" :key="u.work_item_key" :save-choice="saveGapChoice" :gap="u" :data-pending-gap="!hasConf('gap', u.work_item_key)" :title="workTitle(u.work_item_key)"
+                  :earliest="workByKey.get(u.work_item_key)?.earliest_date" :today="today" :suggested-date="group.future ? workByKey.get(u.work_item_key).earliest_date : null"
+                  :reason="REASON_LABELS[u.reason] ?? u.reason" :days="result.days"
+                  :acknowledged="hasConf('gap', u.work_item_key)" :disabled="!editable || workflowBusy || !previewCurrent || (!!editingGap && editingGap !== u.work_item_key)"
+                  :editing="editingGap === u.work_item_key" @edit="editingGap = u.work_item_key" @close="editingGap = null" />
+              </div>
+              <details v-if="result.warnings?.length" class="text-xs text-muted-foreground"><summary class="cursor-pointer">排程说明</summary><ul class="mt-2 list-disc pl-5">
+                <li v-for="(w, i) in result.warnings" :key="i">{{ w.message }}</li>
+              </ul></details>
+            </div>
+          </div>
+
+          <div v-if="estimateUnknown.length || extraWorkConfirms.length || previewBlockers.length || !result" data-review class="space-y-2 border-t py-3">
             <h3 class="text-sm font-semibold">安排核对</h3>
             <p v-if="!result" class="mt-2 text-sm text-muted-foreground">尚未排程：返回核对建议，点击「保存并预览」。</p>
             <template v-else>
               <div v-if="estimateUnknown.length" class="mt-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900">
                 估时未知（请在编辑区填写剩余分钟）：{{ estimateUnknown.map((u) => workTitle(u.work_item_key)).join('、') }}
-              </div>
-              <div v-for="d in overbookConfirms" :key="d.date" class="mt-2 flex items-center gap-2 rounded-md border p-2 text-sm">
-                <span class="flex-1">{{ d.date }} 既有安排已超预算 {{ d.overbooked_minutes }} 分钟（不新增安排）</span>
-                <Button size="sm" variant="secondary" :disabled="!editable" @click="store.confirmOverbook(d.date)">确认过载</Button>
               </div>
               <div v-for="k in extraWorkConfirms" :key="k" class="mt-2 flex items-center gap-2 rounded-md border p-2 text-sm">
                 <span class="flex-1">{{ workTitle(k) }}：既有任务在窗口已有安排，须确认本次为额外尚未安排工作</span>
@@ -872,26 +1023,6 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
                 <li v-for="(b, i) in previewBlockers" :key="i">{{ b.message }}</li>
               </ul>
             </template>
-          </div>
-
-          <div class="py-2">
-            <h3 class="text-xl font-semibold">每日安排</h3>
-            <p v-if="result" class="mt-1 text-sm text-muted-foreground">{{ Object.keys(segmentsByDate).length }} 天 · {{ result.segments.length }} 项工作 · 预计 {{ result.segments.reduce((sum, segment) => sum + segment.minutes, 0) }} 分钟</p>
-            <p v-if="!result" class="mt-2 text-sm text-muted-foreground">排程后这里显示每日安排与容量。</p>
-            <div v-else class="mt-2 space-y-3">
-              <p v-for="entry in confirmedDeadlines" :key="entry.key" class="break-words text-sm text-primary">{{ entry.title }} · 截止 {{ entry.label }}</p>
-              <PlanAgenda :result="result" :segments-by-date="segmentsByDate" :task-title="taskTitle" preview />
-              <div v-if="gapRows.length && editable" class="rounded-md border p-3">
-                <h4 class="text-sm font-semibold">自行安排 <span class="text-muted-foreground">· {{ result.unscheduled.length }} 项未排</span></h4>
-                <ManualGapRow v-for="u in gapRows" :key="u.work_item_key" :gap="u" :title="workTitle(u.work_item_key)"
-                  :reason="REASON_LABELS[u.reason] ?? u.reason" :days="result.days" :slot="slots.get(u.work_item_key)"
-                  :acknowledged="hasConf('gap', u.work_item_key)" :disabled="workflowBusy || !previewCurrent || (!!editingGap && editingGap !== u.work_item_key)"
-                  :editing="editingGap === u.work_item_key" @edit="editingGap = u.work_item_key" @close="editingGap = null" />
-              </div>
-              <ul v-if="result.warnings?.length" class="list-disc pl-5 text-xs text-muted-foreground">
-                <li v-for="(w, i) in result.warnings" :key="i">{{ w.message }}</li>
-              </ul>
-            </div>
           </div>
 
           <!-- M3 改排三块预览：保留 / 将取消 / 将新增；打开与关闭预览都不修改正式日程 -->
@@ -925,15 +1056,30 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
             </div>
           </div>
 
-          <p v-if="!isReplan && canAdopt && adoptionCounts" class="text-sm text-muted-foreground">将新增 {{ adoptionCounts.tasks_created }} 个任务、{{ adoptionCounts.actions_created }} 个行动。</p>
-          <div class="flex flex-wrap justify-between gap-2 border-t pt-4"><Button variant="outline" @click="tab = 'edit'">修改任务与时间</Button><Button v-if="isReplan" :disabled="!canAdopt" @click="tab = 'adopt'">下一步：确认加入</Button><Button v-else-if="!applied" :disabled="!canAdopt || workflowBusy" @click="openAdopt">将计划加入日程（{{ adoptionCounts?.plan_items_created ?? result?.segments?.length ?? 0 }} 项安排）</Button></div>
-          <p v-if="!canAdopt" class="text-sm text-muted-foreground">请处理上方待确认项；修改任务或时间请返回核对建议。</p>
+          </div>
+          <aside v-if="sourceCount || originalRequest" class="preview-context">
+            <h3 class="text-lg font-semibold">计划依据</h3>
+            <div v-if="sourceCount">
+              <button type="button" class="flex items-center gap-2 py-2 text-sm" :aria-expanded="sourceOpen" @click="sourceOpen = !sourceOpen">
+                查看资料原文 · {{ sourceCount }} 份 <ChevronDown class="size-4" :class="sourceOpen && 'rotate-180'" />
+              </button>
+              <SourceReview v-if="sourceOpen && tab === 'preview'" :draft="draft" />
+            </div>
+            <div v-if="originalRequest" class="mt-2 border-t pt-3">
+              <h4 class="text-sm font-medium">我的要求</h4>
+              <p class="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words text-sm text-muted-foreground">{{ originalRequest }}</p>
+            </div>
+          </aside>
+          </div>
+          <p v-if="!isReplan && canAdopt && adoptionCounts" class="text-sm text-muted-foreground">将新增 {{ adoptionCounts.tasks_created }} 个任务、{{ adoptionCounts.plan_items_created }} 条日程安排。</p>
+          <div class="preview-actions flex flex-wrap justify-between gap-2 border-t py-3"><Button variant="ghost" @click="tab = 'edit'">修改任务与时间</Button><Button v-if="editable && !canAdopt" :disabled="workflowBusy" @click="goToDecision">处理待核对项</Button><Button v-else-if="isReplan" :disabled="!canAdopt" @click="tab = 'adopt'">下一步：确认加入</Button><Button v-else-if="!applied" :disabled="!canAdopt || workflowBusy" @click="openAdopt">将计划加入日程（{{ adoptionCounts?.plan_items_created ?? result?.segments?.length ?? 0 }} 项安排）</Button></div>
+
           </template>
         </section>
         <section v-show="tab === 'adopt' && !applied" class="space-y-4" aria-label="确认加入">
           <div class="rounded-lg border bg-card p-4">
             <h3 class="text-base font-semibold">将建议加入日程</h3>
-            <p class="mt-1 text-xs text-muted-foreground">确认后保存任务、行动和每日安排。</p>
+            <p class="mt-1 text-xs text-muted-foreground">确认后保存任务和每日安排。</p>
             <p class="mt-3 text-sm">{{ result?.segments?.length ?? 0 }} 条新安排<span v-if="isReplan">，替换 {{ replanView?.replacedCount ?? 0 }} 条旧安排</span><span v-if="result?.unscheduled?.length">，{{ result.unscheduled.length }} 项工作仍未排入</span>。</p>
             <PlanAgenda v-if="result" class="mt-3" :result="result" :segments-by-date="segmentsByDate" :task-title="taskTitle" />
             <div v-if="confirmedDeadlines.length" class="border-b py-3">
@@ -979,3 +1125,15 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
   </div>
   </template>
 </template>
+
+<style scoped>
+.preview-context { align-self: start; padding-block: .8rem; border-top: 1px solid var(--border); }
+.preview-actions { background: var(--background); }
+@media (min-width: 1100px) {
+  .preview-layout:has(> aside) { display: grid; grid-template-columns: minmax(0, 2.45fr) minmax(14rem, 1fr); gap: clamp(2rem, 4vw, 5rem); }
+  .preview-context { border: 0; border-left: 1px solid var(--border); padding: .5rem 0 .5rem 1.35rem; }
+}
+@media (max-width: 767px) {
+  .preview-actions { position: sticky; z-index: 10; bottom: calc(4rem + env(safe-area-inset-bottom)); }
+}
+</style>

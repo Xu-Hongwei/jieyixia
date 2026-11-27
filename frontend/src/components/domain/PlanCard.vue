@@ -25,14 +25,14 @@ const lateRisk = computed(() => !!risk.value && (risk.value.kind === 'after_dead
 <template>
   <button
     type="button"
-    class="w-full rounded-sm border-l-2 border-primary/40 bg-background px-2.5 py-2.5 text-left transition-colors hover:border-primary/50"
+    class="w-full rounded-md border-l-2 border-primary/55 bg-secondary px-2.5 py-2.5 text-left transition-colors hover:border-primary/50"
     :aria-label="`安排详情：${props.plan.action_text}`"
     @click="emit('open', props.plan.id)"
   >
     <div class="line-clamp-2 break-words text-sm font-medium leading-snug">{{ props.plan.action_text }}</div>
 
     <div class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
-      <span class="min-w-0 truncate">{{ props.task ? props.task.title : '原任务已删除' }}</span>
+      <span v-if="!props.task || props.task.title !== props.plan.action_text" class="min-w-0 truncate">{{ props.task ? props.task.title : '原任务已删除' }}</span>
       <span class="whitespace-nowrap">预计 {{ props.plan.planned_minutes }} 分</span>
       <span v-if="!summary || (summary.authoritative && summary.actualMinutes != null)">实际 {{ planActualLabel(summary) }}</span>
       <Badge v-if="props.plan.state === 'partial'" variant="secondary" class="px-1 py-0 text-xs">部分完成</Badge>

@@ -168,9 +168,10 @@ async function runSave(fn) {
   return r
 }
 
+const project = computed(() => store.matters.find(m => m.id === task.value?.matter_id))
 const deadlineText = computed(() => {
   const t = task.value
-  return t && t.deadline && t.deadline.value ? formatWhen(t.deadline.value, t.deadline.precision) : '无截止'
+  return t?.deadline?.value ? formatWhen(t.deadline.value, t.deadline.precision) : project.value ? '任务未设单独截止' : '无截止'
 })
 const deadlineSource = computed(() => {
   const t = task.value
@@ -180,7 +181,7 @@ const deadlineSource = computed(() => {
   return n ? `来自便签「${n.title}」` : '来自便签'
 })
 const matterItems = computed(() => [
-  { value: '', label: '未归组' },
+  { value: '', label: '独立任务' },
   ...store.matters.map((m) => ({ value: m.id, label: m.title })),
 ])
 const matterModel = computed({
@@ -613,10 +614,9 @@ function deleteGotoWork(r) {
       {{ planCtxInvalidText }}
     </Alert>
 
-    <Alert v-if="recordedSession" variant="success">
+    <Alert v-if="recordedSession" variant="success" dismiss-label="关闭工作保存提示" @dismiss="dismissRecorded">
       这次记录已保存<template v-if="recordedSession.outcome"> · 行动{{ label(SESSION_OUTCOME_LABELS, recordedSession.outcome) }}</template>。
       <RouterLink :to="recordLink(recordedSession)" class="ml-1 underline">查看该记录</RouterLink>
-      <button type="button" class="ml-2 text-xs underline" @click="dismissRecorded">知道了</button>
     </Alert>
 
     <template v-if="task">
@@ -649,8 +649,9 @@ function deleteGotoWork(r) {
             <span v-if="deadlineSource" class="text-xs text-muted-foreground">{{ deadlineSource }}</span>
             <Button size="sm" variant="ghost" aria-label="编辑截止" title="编辑截止" @click="startDeadlineEdit"><Pencil /></Button>
           </template>
-          <span class="text-xs text-muted-foreground">所属事项</span>
-          <div class="w-32"><NodeSelect v-model="matterModel" :items="matterItems" placeholder="未归组" /></div>
+          <span class="text-xs text-muted-foreground">所属项目</span>
+          <div class="w-32"><NodeSelect v-model="matterModel" :items="matterItems" placeholder="独立任务" /></div>
+          <RouterLink v-if="project?.deadline?.value" :to="{ path: '/tasks', query: { matter: project.id } }" class="rounded bg-accent px-2 py-1 text-xs font-semibold">项目总截止 · {{ formatWhen(project.deadline.value, project.deadline.precision) }}</RouterLink>
         </div>
         <p v-if="task.status !== 'done' && unfinishedCount > 0" class="mt-2 text-xs text-muted-foreground">
           完成任务是独立操作：不会自动把 {{ unfinishedCount }} 个未完成行动标为完成。

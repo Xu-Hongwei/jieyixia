@@ -6,6 +6,18 @@ import { allDocs, allSources, clearWorkspace, configureWorkspace, deepRaw, putDo
 beforeEach(() => configureWorkspace('w1'))
 
 describe('workspace 限定', () => {
+  it('清空确认之后新增的任务触发整批回滚，重新确认只清目标空间', async () => {
+    configureWorkspace('clear-example')
+    await putSource({ id: 'clear-material', kind: 'text', text: '虚构资料' })
+    const original = { docs: new Set(), sources: new Set(['clear-material']) }
+    await putDoc({ id: 'new-after-preview', kind: 'task' })
+    await expect(clearWorkspace('clear-example', original)).rejects.toThrow('空间内容已变化')
+    expect((await allSources()).records).toHaveLength(1)
+    expect((await allDocs()).records).toHaveLength(1)
+    await clearWorkspace('clear-example', { ...original, docs: new Set(['new-after-preview']) })
+    expect((await allSources()).records).toEqual([])
+    expect((await allDocs()).records).toEqual([])
+  })
   it('读写都按当前空间过滤，跨空间写入拒绝', async () => {
     await putDoc({ id: 'a', kind: 'note', title: 'w1 便签' })
     configureWorkspace('w2')

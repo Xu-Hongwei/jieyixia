@@ -10,11 +10,15 @@ const memKey = (ws, sid) => `${ws}:${sid}`
 export function forgetWorkDraft(ws, sid) {
   memory.delete(memKey(ws, sid))
 }
+export function forgetWorkspaceDrafts(ws) {
+  for (const key of memory.keys()) if (key.startsWith(ws + ':')) memory.delete(key)
+}
 
 const EXPIRED_CODES = ['STALE_REQUEST', 'REQUEST_ENVELOPE_REQUIRED']
 const BLOCKED_CODES = ['OWNER_CONFLICT', 'RECOVERY_REQUIRED', 'LEGACY_RECOVERY_REQUIRED', 'ALREADY_ENDED', 'WORKSPACE_CHANGED']
 
 export function useWorkDraft({ app, focus, sessionId, session, rt, editable }) {
+  const initialClearRevision = app.clearRevision
   const text = ref('')
   const inputVersion = ref(0)
   const savedVersion = ref(0)
@@ -287,7 +291,7 @@ export function useWorkDraft({ app, focus, sessionId, session, rt, editable }) {
 
   onScopeDispose(() => {
     if (debounce) clearTimeout(debounce)
-    if (loadedKey === key()) persistMemory()
+    if (loadedKey === key() && initialClearRevision === app.clearRevision) persistMemory()
   })
 
   return {

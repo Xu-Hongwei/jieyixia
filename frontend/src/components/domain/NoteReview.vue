@@ -496,7 +496,7 @@ defineExpose({ guardLeave })
             </li>
           </ul>
           <p v-if="affectedActions.length" class="mt-1 text-xs text-muted-foreground">这些任务的 {{ affectedActions.length }} 个行动一并删除。</p>
-          <p class="mt-1 text-xs text-muted-foreground">不会沿任务引用继续删除其他便签或事项。取消则不做任何修改。</p>
+          <p class="mt-1 text-xs text-muted-foreground">不会沿任务引用继续删除其他便签或项目。取消则不做任何修改。</p>
         </template>
         <p v-else class="mt-1 text-xs text-muted-foreground">当前没有关联任务。取消则不做任何修改。</p>
         <DeleteImpact

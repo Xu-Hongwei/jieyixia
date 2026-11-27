@@ -58,8 +58,8 @@ function checkDeadlineCandidates(dls, ctx, label) {
     }
     checkEnum(dl.origin ?? 'model', ['model', 'user'], `${label} 截止候选 origin`)
     checkEnum(dl.basis ?? 'explicit', ['explicit', 'relative', 'inferred'], `${label} 截止候选 basis`)
-    if ((dl.basis === 'relative' || dl.basis === 'inferred') && !dl.derived) {
-      fail('relative/inferred 候选必须标 derived')
+    if (precision !== 'none' && (dl.basis === 'relative' || dl.basis === 'inferred') && !dl.derived) {
+      fail(`${label} 的建议截止日期缺少推算标记，请核对日期来源`)
     }
     const evs = dl.evidence_refs ?? []
     if (precision !== 'none' && evs.length === 0) fail('有值的截止候选必须给证据出处；无来源估计不能成为正式截止')

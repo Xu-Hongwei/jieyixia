@@ -101,12 +101,12 @@ def vendor(payload: dict) -> httpx.Response:
 
 
 def test_personal_qwen_propose_uses_own_key_and_contract(client, monkeypatch):
-    from app.qwen import HOST, KEY_HEADER, PersonalQwenAdapter
+    from app.qwen import HOST, KEY_HEADER, MODEL, PersonalQwenAdapter
 
     def respond(self, url, headers, payload, deadline=None):
         assert url == HOST + "/compatible-mode/v1/chat/completions"
         assert headers["Authorization"] == "Bearer sk-personal-unit-test"
-        assert payload["model"] == "qwen-plus"
+        assert payload["model"] == MODEL
         return vendor(proposal_payload()).json()
 
     monkeypatch.setattr(PersonalQwenAdapter, "_post", respond)
@@ -190,6 +190,14 @@ def test_fixture_proposal_happy_path_and_correlation(monkeypatch):
     assert parsed.client_seq == 1
     assert parsed.workspace_id == "ws-test"
     assert parsed.payload.kind == "proposal"
+    task, = parsed.payload.proposal.task_proposals
+    action, = parsed.payload.proposal.action_proposals
+    work, = parsed.payload.proposal.work_items
+    assert task.title == action.text == work.deliverable
+    assert action.task_ref.key == work.task_ref.key == task.key
+    assert work.action_ref.key == action.key
+    assert action.minutes == work.remaining_minutes
+    assert task.deadline_candidates == []
     request = AssistantProposeRequest.model_validate(mk_request(selected_sources=[mk_source()]))
     check_proposal_semantics(parsed.payload.proposal, build_request_context(request))
 
