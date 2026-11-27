@@ -5,7 +5,9 @@
 // 三个对象分清：Task=最终完成什么/何时交；PlanItem=哪天准备做什么/预计多久；
 // FocusSession=实际执行了什么/成果/用时。安排保存绝不回写 Task.current_action_id/status/deadline/便签。
 // PlanItem 无 action_id：action_text 是工作说明，不是行动身份，绝不按文字绑定 Action。
-import { beijingDateStr, beijingParts, interpretEventInstant, interpretInstant, isOverdue, isValidDate } from './time'
+import { beijingDateStr, beijingParts, interpretEventInstant, interpretInstant, isOverdue, isValidDate, isValidTimeValue } from './time'
+
+import { standaloneTask } from './note'
 
 export const PLAN_STATES = ['planned', 'done', 'partial', 'moved', 'cancelled']
 // 活安排：仍可执行/可确认进度的状态。done/cancelled/moved 是终态历史，不重开、不覆盖编辑。
@@ -308,6 +310,20 @@ export function dayPlansForTask(docs, ws, taskId, date) {
     && isLiveRef(p) && !['cancelled', 'moved'].includes(p.state)).sort((a, b) => a.order - b.order)
 }
 
+function createTaskAndPlan(latest, env, input) {
+  const { title, deadline, matterId } = input.newTask
+  if (!input.taskId || input.taskId === input.planItemId || latest.some(d => d.id === input.taskId || d.id === input.planItemId)) {
+    fail('RELATION_INVALID', '任务或安排编号已被使用')
+  }
+  if (typeof title !== 'string' || !title.trim()) fail('INVALID_FIELD', '请填写任务名称')
+  if (deadline && !isValidTimeValue(deadline)) fail('INVALID_FIELD', '截止日期无效')
+  if (matterId && !findDoc(latest, matterId, 'matter')) fail('RELATION_INVALID', '所选事项不存在')
+  const task = { ...standaloneTask(input.taskId, title.trim(), deadline, matterId, env.wallNow), workspace_id: env.ws }
+  const plan = createPlan([...latest, task], env, input)
+  if (plan.info.code) return plan
+  return { ...plan, puts: [task, ...plan.puts] }
+}
+
 export function createPlan(latest, env, input) {
   const task = findDoc(latest, input.taskId, 'task')
   if (!task || task.workspace_id !== env.ws) fail('RELATION_INVALID', '任务不存在或不属于当前空间')
@@ -448,7 +464,7 @@ export function arrangeAnotherDayPlan(latest, env, input) {
 }
 
 export const PLAN_COMMANDS = {
-  create: createPlan,
+  create: (latest, env, input) => input.newTask ? createTaskAndPlan(latest, env, input) : createPlan(latest, env, input),
   edit: editPlan,
   move: movePlan,
   cancel: cancelPlan,

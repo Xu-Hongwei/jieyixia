@@ -118,3 +118,22 @@ export function manualTask(note, value, now) {
     updated_at: now,
   }
 }
+
+export function standaloneTask(id, title, value, matterId, timestamp) {
+  return {
+    id,
+    kind: 'task',
+    title,
+    description: '',
+    matter_id: matterId || null,
+    note_ids: [],
+    deadline: value
+      ? { value, precision: value.includes('T') ? 'datetime' : 'date', source: 'manual', from_note_id: null, confirmed_at: timestamp }
+      : { value: null, precision: 'none' },
+    status: 'todo',
+    completion_criteria: null,
+    current_action_id: null,
+    created_at: timestamp,
+    updated_at: timestamp,
+  }
+}

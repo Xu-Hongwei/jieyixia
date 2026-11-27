@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { allDocs, allSources, allWorkspaces, configureWorkspace, getSource, getWorkspace, putDoc, putSource, putWorkspace, snapshot, transformDocsAtomic, transformFocusAtomic } from '@/services/storage/db'
 import { analyze, blobToBase64, healthz } from '@/services/api/client'
-import { canConfirm, failedNote, manualTask, mergeReanalysis, taskFromNote } from '@/domains/note'
+import { canConfirm, failedNote, manualTask, standaloneTask, mergeReanalysis, taskFromNote } from '@/domains/note'
 import { beijingTodayLabel, interpretInstant, isOverdue, isValidDate, isValidTimeValue, nextBeijingMidnightMs } from '@/domains/time'
 import { mattersOf, noteBucket, partitionTasks } from '@/domains/organize'
 import { addActionPlan, deleteActionPlan, editActionPlan, makeAction, reopenTaskPlan, setActionDonePlan, setCurrentActionPlan } from '@/domains/action'
@@ -1032,22 +1032,7 @@ export const useAppStore = defineStore('app', () => {
       say('warning', '所选事项不存在')
       return { ok: false }
     }
-    const task = {
-      id: crypto.randomUUID(),
-      kind: 'task',
-      title: trimmed,
-      description: '',
-      matter_id: matterId || null,
-      note_ids: [],
-      deadline: v
-        ? { value: v, precision: v.includes('T') ? 'datetime' : 'date', source: 'manual', from_note_id: null, confirmed_at: now() }
-        : normalizeDeadline(null),
-      status: 'todo',
-      completion_criteria: null,
-      current_action_id: null,
-      created_at: now(),
-      updated_at: now(),
-    }
+    const task = standaloneTask(crypto.randomUUID(), trimmed, v, matterId, now())
     let saved
     try {
       saved = await putDoc(task)

@@ -39,6 +39,21 @@ const baseInput = (over = {}) => ({ taskId: 't1', planItemId: 'p1', date: '2026-
 const envelope = (input, rid = 'req-1', issued = T0MS) => ({ ...input, requestId: rid, issuedAtMs: issued })
 
 describe('A05 同次保存只一条 + 信封幂等/拒绝', () => {
+  it('新任务和首条安排一起保存：截止风险确认前无残留，重复提交只创建一对', async () => {
+    const deadline = '2026-11-24T15:35+08:00'
+    const input = baseInput({ taskId: 't2', date: '2026-11-25', newTask: { title: '提交报告', deadline, matterId: null } })
+    const rejected = await svc.create(envelope(input))
+    expect(rejected.code).toBe('AFTER_DEADLINE_UNCONFIRMED')
+    expect((await docs()).filter(d => d.id === 't2' || d.id === 'p1')).toHaveLength(0)
+
+    const confirmed = envelope({ ...input, deadlineConfirm: { value: deadline, precision: 'datetime', planDate: input.date } }, 'confirmed')
+    const [first, retry] = await Promise.all([svc.create(confirmed), svc.create(confirmed)])
+    expect(first.ok && retry.ok).toBe(true)
+    expect([first, retry].filter(r => r.replayed)).toHaveLength(1)
+    const saved = await docs()
+    expect(saved.find(d => d.id === 't2')).toMatchObject({ kind: 'task', title: '提交报告', deadline: { value: deadline } })
+    expect(await planDocs()).toMatchObject([{ id: 'p1', task_id: 't2', date: input.date, action_text: input.actionText }])
+  })
   it('双击并发同信封 → 恰好一条计划，第二次 replay', async () => {
     const input = envelope(baseInput())
     const [a, b] = await Promise.all([svc.create(input), svc.create(input)])

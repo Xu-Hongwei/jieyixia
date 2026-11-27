@@ -4,6 +4,7 @@ import { X } from 'lucide-vue-next'
 import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
+import TaskCreateFields from './TaskCreateFields.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import DateInput from '@/components/ui/DateInput.vue'
 import Input from '@/components/ui/Input.vue'
@@ -25,9 +26,8 @@ const props = defineProps({
   date: { type: String, default: '' },
   lockTask: { type: Boolean, default: false },
   showClose: { type: Boolean, default: true },
-  inlineCreate: { type: Boolean, default: false },
 })
-const emit = defineEmits(['close', 'saved', 'goto-create-task', 'edit'])
+const emit = defineEmits(['close', 'saved', 'edit'])
 const store = useAppStore()
 const planStore = usePlanStore()
 const wsAtOpen = store.workspaceId
@@ -39,7 +39,14 @@ const SUBMIT_LABELS = { create: '创建安排', edit: '保存修改', move: '确
 const plan = computed(() => (props.planId ? store.docs.find((d) => d.kind === 'plan_item' && d.id === props.planId) || null : null))
 // 锁定任务（任务详情/清单固定入口）：构造命令只用锁定 ID，不依赖可变草稿；全局入口仍可搜索选择。
 const taskLocked = props.mode === 'create' && props.lockTask && !!props.taskId
+const canChooseTask = props.mode === 'create' && !taskLocked
+const creatingTask = ref(canChooseTask && !props.taskId && !store.tasks.some(t => t.status !== 'done'))
+const newTaskId = ref('')
+const newTitle = ref('')
+const newDeadline = ref('')
+const newMatter = ref('')
 const fixedTask = computed(() => {
+  if (creatingTask.value) return null
   const id = props.mode === 'create' ? (taskLocked ? props.taskId : dTask.value) : plan.value && plan.value.task_id
   return id ? store.tasks.find((t) => t.id === id) || null : null
 })
@@ -57,8 +64,12 @@ const dDate = ref(
 )
 const dText = ref(props.mode === 'create' ? '' : plan.value ? plan.value.action_text : '')
 const dMinutes = ref(props.mode === 'create' ? '30' : plan.value ? String(plan.value.planned_minutes) : '30')
+const initialDate = dDate.value
 const initialSnapshot = JSON.stringify([dTask.value, dDate.value, dText.value, dMinutes.value])
 const dirty = computed(() => {
+  if (newTitle.value || newDeadline.value || newMatter.value) return true
+  if (creatingTask.value) return !!(dText.value
+    || dDate.value !== initialDate || dMinutes.value !== '30')
   if (props.mode === 'create' && !dText.value.trim() && dMinutes.value === '30') return false
   return JSON.stringify([dTask.value, dDate.value, dText.value, dMinutes.value]) !== initialSnapshot
 })
@@ -67,12 +78,12 @@ const saving = ref(false)
 const saveState = ref('unsaved') // unsaved | saving | saved | error | verify
 const errorMsg = ref('')
 const intent = ref(null) // { op, sig, envelope:{requestId,issuedAtMs,planItemId}, input }
-const dayPlans = computed(() => props.mode === 'create' ? dayPlansForTask(store.docs, wsAtOpen, dTask.value, dDate.value) : [])
+const dayPlans = computed(() => props.mode === 'create' && !creatingTask.value ? dayPlansForTask(store.docs, wsAtOpen, dTask.value, dDate.value) : [])
 const dayPlanIds = computed(() => dayPlans.value.map(p => p.id).sort())
 const dayPlanRows = computed(() => dayPlans.value.map(item => ({ item, block: planEditBlock(store.docs, item) })))
 const additionalConfirmed = ref(false)
 watch([dTask, dDate, () => JSON.stringify(dayPlanIds.value)], () => { additionalConfirmed.value = false }, { flush: 'sync' })
-const showFields = computed(() => props.mode !== 'create' || (!!fixedTask.value && (
+const showFields = computed(() => props.mode !== 'create' || creatingTask.value || (!!fixedTask.value && (
   !dayPlans.value.length || additionalConfirmed.value || saveState.value === 'verify'
 )))
 const confirmed = ref(/** @type {Record<string, any>} */ ({})) // 用户明确确认过的事实：deadlineConfirm / confirmedDuplicateIds
@@ -83,10 +94,11 @@ const frozenExpected = ref(props.mode !== 'create' && plan.value ? planSnapshot(
 const minutesNum = computed(() => (/^\d+$/.test(dMinutes.value.trim()) ? Number(dMinutes.value.trim()) : NaN))
 
 function localValidate() {
-  if (props.mode === 'create' && !dTask.value) return '先选择要安排的任务'
+  if (creatingTask.value && !newTitle.value.trim()) return '请填写任务名称'
+  if (props.mode === 'create' && !creatingTask.value && !dTask.value) return '先选择要安排的任务'
   if (props.mode !== 'create' && !plan.value) return '安排已不存在或不属于当前空间，无法提交'
   if (!isValidDate(dDate.value)) return '安排日期必须是真实日期（清空不等于今天）'
-  if (!dText.value.trim()) return '工作说明不能为空'
+  if (!creatingTask.value && !dText.value.trim()) return '工作说明不能为空'
   if (!Number.isSafeInteger(minutesNum.value) || minutesNum.value <= 0) return '预计分钟必须是正整数，不能为 0、小数或负数'
   if (props.mode === 'edit' && frozenExpected.value && dText.value.trim() === frozenExpected.value.action_text && minutesNum.value === frozenExpected.value.planned_minutes) {
     return '编辑需要修改工作说明或预计分钟'
@@ -95,6 +107,11 @@ function localValidate() {
 }
 
 function baseInput() {
+  if (creatingTask.value) {
+    if (!newTaskId.value) newTaskId.value = crypto.randomUUID()
+    return { taskId: newTaskId.value, newTask: { title: newTitle.value.trim(), deadline: newDeadline.value, matterId: newMatter.value || null },
+      date: dDate.value, actionText: dText.value.trim() || newTitle.value.trim(), plannedMinutes: minutesNum.value }
+  }
   if (props.mode === 'create') return { taskId: taskLocked ? props.taskId : dTask.value, date: dDate.value, actionText: dText.value.trim(), plannedMinutes: minutesNum.value, expectedDayPlanIds: dayPlanIds.value }
   if (props.mode === 'another') return { taskId: plan.value.task_id, date: dDate.value, actionText: dText.value.trim(), plannedMinutes: minutesNum.value }
   if (props.mode === 'edit') return { planItemId: props.planId, expected: frozenExpected.value, actionText: dText.value.trim(), plannedMinutes: minutesNum.value }
@@ -132,7 +149,13 @@ onMounted(() => {
         intent.value = { op: s.op, sig: s.sig, envelope: s.envelope, input: s.input }
         // 恢复草稿与已确认事实：重试必须重建出与原输入完全一致的 sig，才能复用原信封不重新生成 ID。
         if (props.mode === 'create' || props.mode === 'another') {
-          if (s.input.taskId) dTask.value = s.input.taskId
+          creatingTask.value = canChooseTask && !!s.input.newTask
+          if (creatingTask.value) {
+            newTaskId.value = s.input.taskId
+            newTitle.value = s.input.newTask.title
+            newDeadline.value = s.input.newTask.deadline
+            newMatter.value = s.input.newTask.matterId || ''
+          } else if (s.input.taskId) dTask.value = s.input.taskId
           if (s.input.date) dDate.value = s.input.date
           if (s.input.actionText != null) dText.value = s.input.actionText
           if (s.input.plannedMinutes != null) dMinutes.value = String(s.input.plannedMinutes)
@@ -145,7 +168,7 @@ onMounted(() => {
         // 基线随原输入恢复：重试沿用原 expected，不趁恢复换成实时值。
         if (props.mode !== 'create' && s.input.expected) frozenExpected.value = s.input.expected
         const baseKeys = props.mode === 'create' || props.mode === 'another'
-          ? ['taskId', 'date', 'actionText', 'plannedMinutes', 'expectedDayPlanIds']
+          ? ['taskId', 'newTask', 'date', 'actionText', 'plannedMinutes', 'expectedDayPlanIds']
           : props.mode === 'edit' ? ['planItemId', 'expected', 'actionText', 'plannedMinutes'] : ['planItemId', 'expected', 'date']
         const conf = {}
         for (const k of Object.keys(s.input)) if (!baseKeys.includes(k)) conf[k] = s.input[k]
@@ -169,7 +192,7 @@ watch(() => store.workspaceId, (ws) => {
 })
 
 async function submit(retryOriginal = false) {
-  if (saving.value || !showFields.value) return
+  if (saving.value || store.workspaceId !== wsAtOpen || !showFields.value) return
   const replay = retryOriginal === true && !!intent.value
   if (saveState.value === 'verify' && !replay) return
   const err = replay ? null : localValidate()
@@ -199,7 +222,7 @@ async function submit(retryOriginal = false) {
     result = { ok: false, code: 'SAVE_FAILED', message: (e && e.message) || '保存失败', workspace_id: wsAtOpen }
   }
   saving.value = false
-  if (result.workspace_id && result.workspace_id !== wsAtOpen) {
+  if (result.workspace_id && (result.workspace_id !== wsAtOpen || store.workspaceId !== wsAtOpen)) {
     saveState.value = 'error'
     errorMsg.value = '保存结果属于其它空间，已忽略；草稿保留，未写入当前空间。'
     return
@@ -318,7 +341,7 @@ async function verify() {
   const p = store.docs.find((d) => d.kind === 'plan_item' && d.id === id)
   const inp = intent.value.input
   let committed = false
-  if (props.mode === 'create' || props.mode === 'another') committed = !!p && (!taskLocked || p.task_id === props.taskId)
+  if (props.mode === 'create' || props.mode === 'another') committed = !!p && p.task_id === inp.taskId
   else if (p) committed = props.mode === 'edit' ? p.action_text === inp.actionText && p.planned_minutes === inp.plannedMinutes : p.date === inp.date
   if (committed) {
     clearStash()
@@ -338,7 +361,6 @@ function dropStash() {
 
 // —— 关闭/离开保护：未保存草稿、保存中、待核实都必须显式选择 ——
 const dlgDiscard = ref(false)
-const discardAction = ref('close')
 let leaveResolver = null
 function requestClose() {
   if (saving.value) {
@@ -346,31 +368,17 @@ function requestClose() {
     return
   }
   if (dirty.value || saveState.value === 'verify') {
-    discardAction.value = 'close'
     dlgDiscard.value = true
   } else emit('close')
 }
-function requestGotoCreate() {
-  if (saving.value) {
-    errorMsg.value = '正在保存：请等待本次结果后再切换表单。'
-    return
-  }
-  if (props.inlineCreate && saveState.value !== 'verify') { emit('goto-create-task'); return }
-  if (dirty.value || saveState.value === 'verify') {
-    discardAction.value = 'goto-create'
-    dlgDiscard.value = true
-  } else emit('goto-create-task')
-}
 function onDiscardConfirm() {
   dlgDiscard.value = false
-  const action = discardAction.value
   if (leaveResolver) {
     leaveResolver(true)
     leaveResolver = null
     return
   }
-  if (action === 'goto-create') emit('goto-create-task')
-  else emit('close')
+  emit('close')
 }
 // 取消/Esc/遮罩关闭只改 open：统一在这里结算离开守卫，避免 Promise 悬置卡住导航。
 watch(dlgDiscard, (open) => {
@@ -388,15 +396,18 @@ function guardLeave() {
   if (!dirty.value && saveState.value !== 'verify') return Promise.resolve(true)
   return new Promise((resolve) => {
     leaveResolver = resolve
-    discardAction.value = 'leave'
     dlgDiscard.value = true
   })
 }
-function selectCreatedTask(id) {
-  if (props.mode !== 'create' || taskLocked || saving.value || saveState.value === 'verify') return
-  if (store.tasks.some((task) => task.id === id)) dTask.value = id
+function chooseNewTask(value) {
+  if (value === creatingTask.value || saving.value || saveState.value === 'verify') return
+  creatingTask.value = value
+  confirmed.value = {}
+  intent.value = null
+  errorMsg.value = ''
+  saveState.value = 'unsaved'
 }
-defineExpose({ guardLeave, selectCreatedTask })
+defineExpose({ guardLeave })
 
 // —— 任务选择（仅 create）：搜索、未完成优先、受阻可选带标记、已完成不可新建 ——
 const taskQuery = ref('')
@@ -408,7 +419,7 @@ const pickerTasks = computed(() => {
     .sort((a, b) => Number(a.status === 'done') - Number(b.status === 'done') || a.title.localeCompare(b.title, 'zh'))
     .slice(0, 8)
 })
-const taskActions = computed(() => (dTask.value ? store.actions.filter((a) => a.task_id === dTask.value) : []))
+const taskActions = computed(() => (!creatingTask.value && dTask.value ? store.actions.filter((a) => a.task_id === dTask.value) : []))
 function copyAction(a) {
   dText.value = a.text
   dMinutes.value = String(a.minutes == null ? 30 : a.minutes)
@@ -439,7 +450,12 @@ const taskTitleOf = (id) => {
     <form class="space-y-3" @submit.prevent="submit()">
       <!-- 任务：create 可选可搜；其余模式固定只读 -->
       <div v-if="props.mode === 'create'" class="space-y-2">
-        <div v-if="fixedTask" class="flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm">
+        <div v-if="canChooseTask" class="flex gap-2">
+          <Button type="button" size="sm" :variant="creatingTask ? 'secondary' : 'outline'" :aria-pressed="creatingTask" :disabled="saving || saveState === 'verify'" @click="chooseNewTask(true)">新建任务</Button>
+          <Button type="button" size="sm" :variant="creatingTask ? 'outline' : 'secondary'" :aria-pressed="!creatingTask" :disabled="saving || saveState === 'verify'" @click="chooseNewTask(false)">已有任务</Button>
+        </div>
+        <TaskCreateFields v-if="creatingTask" v-model:title="newTitle" v-model:deadline="newDeadline" v-model:matter="newMatter" :disabled="saving || saveState === 'verify'" />
+        <div v-else-if="fixedTask" class="flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm">
           <span class="min-w-0 flex-1 break-words font-medium">{{ fixedTask.title }}</span>
           <Badge v-if="fixedTask.status === 'blocked'" variant="warning">受阻</Badge>
           <Badge v-else variant="secondary">{{ label(STATUS_LABELS, fixedTask.status) }}</Badge>
@@ -466,10 +482,8 @@ const taskTitleOf = (id) => {
             <p v-if="!pickerTasks.length" class="px-2 py-1 text-xs text-muted-foreground">没有匹配的任务。</p>
           </div>
           <div v-else class="rounded-md border border-dashed p-3 text-sm">
-            <p class="text-muted-foreground">还没有任务。安排必须挂在已有任务下，不会隐式创建任务。</p>
-            <Button v-if="!inlineCreate" size="sm" variant="outline" type="button" class="mt-2" @click="requestGotoCreate">先创建任务</Button>
+            <p class="text-muted-foreground">暂无可选任务。</p>
           </div>
-          <Button v-if="inlineCreate" size="sm" variant="outline" type="button" class="mt-2" :disabled="saving || saveState === 'verify'" @click="requestGotoCreate">新建任务并继续</Button>
         </template>
 
       </div>
@@ -527,7 +541,7 @@ const taskTitleOf = (id) => {
       </div>
       <div v-if="showFields">
         <div class="text-xs font-medium text-muted-foreground">工作说明（这天准备做什么）</div>
-        <Textarea v-if="props.mode !== 'move'" v-model="dText" rows="2" aria-label="工作说明" placeholder="例如：梳理本周进展并列出周报提纲" />
+        <Textarea v-if="props.mode !== 'move'" v-model="dText" rows="2" aria-label="工作说明" :placeholder="creatingTask ? '可选，留空使用任务名称' : '例如：梳理本周进展并列出周报提纲'" />
         <div v-else class="break-words rounded-md border bg-muted/40 px-3 py-2 text-sm">{{ dText }}</div>
       </div>
 
@@ -548,7 +562,7 @@ const taskTitleOf = (id) => {
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <Button v-if="showFields && saveState !== 'verify'" type="submit" :disabled="saving" :aria-busy="saving">{{ saving ? '保存中…' : SUBMIT_LABELS[props.mode] }}</Button>
+        <Button v-if="showFields && saveState !== 'verify'" type="submit" :disabled="saving" :aria-busy="saving">{{ saving ? '保存中…' : creatingTask ? '创建任务并安排' : SUBMIT_LABELS[props.mode] }}</Button>
         <Button variant="outline" type="button" @click="requestClose">关闭</Button>
       </div>
     </form>
