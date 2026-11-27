@@ -83,9 +83,9 @@ async function seedBusiness(noteFields = [DL_FIELD]) {
 const planDoc = (id, over = {}) => ({ id, kind: 'plan_item', task_id: 't-1', date: START, planned_minutes: 30, action_text: '虚构', state: 'planned', actual_minutes: null, focus_session_id: null, order: 0, task_ref_state: 'active', ...over })
 
 // create 三步闭环到 ready（与 R10 同口径）：初版确认 → 重排 → 当前版确认 → generating → ready。
-async function readyCreateDraft(noteFields) {
+async function readyCreateDraft(noteFields, proposal = createProposal()) {
   await seedBusiness(noteFields)
-  const c = await dsvc.create({ proposal: createProposal() })
+  const c = await dsvc.create({ proposal })
   expect(c.ok, JSON.stringify(c)).toBe(true)
   const c1 = await dsvc.confirm(c.draft.id, { expected: c.draft, confirmation: dlConf(1, 'dl-init') })
   expect(c1.ok, JSON.stringify(c1)).toBe(true)
@@ -112,6 +112,28 @@ async function readyLinkDraft() {
 const newDocs = async () => (await db.allDocs()).records.filter((d) => !['n-1', 't-1', 'a-1'].includes(d.id))
 
 describe('prepare：固定快照冻结，零写入', () => {
+  it('多任务默认共建项目，预览可改名，采用后日程仍引用各自任务', async () => {
+    const proposal = createProposal()
+    proposal.task_proposals[0].title = '完成校园马拉松报名'
+    const taskRef = { kind: 'draft', key: 'race' }
+    proposal.task_proposals.push({ ...proposal.task_proposals[0], key: 'race', title: '参加校园马拉松比赛', deadline_candidates: [] })
+    proposal.action_proposals.push({ ...proposal.action_proposals[0], key: 'run', task_ref: taskRef })
+    proposal.work_items.push({ ...proposal.work_items[0], key: 'race-work', task_ref: taskRef, action_ref: { kind: 'draft', key: 'run' } })
+    const draft = await readyCreateDraft(undefined, proposal)
+    expect((await dsvc.get(draft.id)).adoptionReadiness.projectTitle).toBe('校园马拉松')
+    const { envelope } = await asvc.prepare(draft.id, { expected: draft, projectTitle: '秋季马拉松' })
+    const result = await asvc.apply(draft.id, { expected: draft, envelope })
+    expect(result.ok, JSON.stringify(result)).toBe(true)
+    const docs = await newDocs()
+    const projects = docs.filter(d => d.kind === 'matter')
+    expect(projects).toHaveLength(1)
+    expect(projects[0].title).toBe('秋季马拉松')
+    const tasks = docs.filter(d => d.kind === 'task')
+    expect(tasks).toHaveLength(2)
+    expect(tasks.every(t => t.matter_id === projects[0].id)).toBe(true)
+    expect(new Set(docs.filter(d => d.kind === 'plan_item').map(d => d.task_id))).toEqual(new Set(tasks.map(t => t.id)))
+  })
+
   it('ready 草案 prepare 成功且不写任何库；editing 拒绝 NOT_READY', async () => {
     const d = await readyCreateDraft()
     const before = await db.readAssistantSnapshot()
@@ -127,6 +149,19 @@ describe('prepare：固定快照冻结，零写入', () => {
     const editing = await dsvc.create({ proposal: mkProposal() })
     const nr = await asvc.prepare(editing.draft.id, { expected: editing.draft })
     expect(nr.code).toBe('NOT_READY')
+  })
+
+  it('同名计划默认另建项目，可改名，冻结后改名须重新准备', async () => {
+    const draft = await readyCreateDraft()
+    await db.putDoc({ kind: 'matter', id: 'existing-project', title: '虚构新目标', note_ids: [], created_at: TS })
+    const preview = await dsvc.get(draft.id)
+    expect(preview.adoptionReadiness.projectTitle).toBe('虚构新目标（2）')
+    const { envelope } = await asvc.prepare(draft.id, { expected: draft })
+    expect(envelope.write_set.project_title).toBe(preview.adoptionReadiness.projectTitle)
+    expect((await asvc.prepare(draft.id, { expected: draft, projectTitle: '虚构新目标' })).code).toBe('PROJECT_NAME_TAKEN')
+    envelope.write_set.project_title = '其它名字'
+    expect((await asvc.apply(draft.id, { expected: draft, envelope })).code).toBe('SIGNATURE_MISMATCH')
+    expect((await newDocs()).map(d => d.id)).toEqual(['existing-project'])
   })
 
   it('就绪后新增窗口占用 / 删除证据资料 → prepare READY_BLOCKED，不冻结', async () => {
@@ -206,7 +241,10 @@ describe('apply：单事务整体提交与去重', () => {
     const prep2 = await asvc.prepare(d.id, { expected: (await dsvc.get(d.id)).baseline.draft })
     expect(prep2.outcome).toBe('already_committed')
     expect(prep2.envelope.application_id).toBe(prep.envelope.application_id)
-    expect((await newDocs()).filter((x) => x.kind === 'task')).toHaveLength(1)
+    const docs = await newDocs()
+    const projects = docs.filter(x => x.kind === 'matter')
+    expect(projects).toHaveLength(1)
+    expect(docs.filter(x => x.kind === 'task')).toEqual([expect.objectContaining({ matter_id: projects[0].id })])
   })
 
   it('link/reuse：只新增安排，不改既有任务/行动；截止沿用正式值', async () => {

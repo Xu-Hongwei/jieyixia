@@ -25,6 +25,11 @@ const requestService = createAssistantRequestService({ getWorkspaceId: () => use
 export const DEFAULT_USER_MESSAGE = '请根据所选资料拆解任务，并按我的可用时间安排。'
 export const REPLAN_DEFAULT_USER_MESSAGE = '请助手整理剩余工作，给出建议工作清单。'
 
+const emptyPlanInput = () => ({
+  userText: '', sourceIds: [], taskIds: [], actionIds: [],
+  budgets: {}, unavailable: [], startDate: null, excerpts: {},
+})
+
 // 改排轮的用户要求：进展说明原话（用户实际填写）；未填写时用显式按钮意图的默认文本。
 const replanUserMessage = (d) => (d?.progress_input?.statement ?? '').trim() || REPLAN_DEFAULT_USER_MESSAGE
 
@@ -146,7 +151,7 @@ export const useAssistantStore = defineStore('assistant', () => {
       activeController = null
       gen.value = null
     }
-    input.value = { userText: '', sourceIds: [], taskIds: [], actionIds: [], budgets: {}, unavailable: [], startDate: null, excerpts: {} }
+    input.value = emptyPlanInput()
     inputRestore.value = null
     threads.value = []
     drafts.value = []
@@ -243,6 +248,13 @@ export const useAssistantStore = defineStore('assistant', () => {
     replanForm.value = null
     clearPrepared()
     stale.value = false
+  }
+
+  function startNewPlan() {
+    close()
+    input.value = emptyPlanInput()
+    inputRestore.value = null
+    scheduleClarifications.value = []
   }
 
   function revisePlanRequest() {
@@ -503,9 +515,9 @@ export const useAssistantStore = defineStore('assistant', () => {
   }
 
   // ---- 采用：prepare 冻结 → 用户确认面板（页面）→ apply。成功后刷新业务列表。 ----
-  async function prepare() {
+  async function prepare(projectTitle = undefined) {
     if (!active.value) return { ok: false }
-    const r = await applicationService.prepare(active.value.draft.id, { expected: active.value.baseline.draft })
+    const r = await applicationService.prepare(active.value.draft.id, { expected: active.value.baseline.draft, projectTitle })
     if (!here(r)) return r
     if (!r.ok) { say('warning', r.message || '采用准备失败'); await refreshActive(); return r }
     prepared.value = { envelope: r.envelope, counts: r.counts ?? previewCounts(r.envelope.write_set) }
@@ -562,6 +574,7 @@ export const useAssistantStore = defineStore('assistant', () => {
       await refreshActive()
       if (r.outcome === 'applied') {
         try { await app.reloadDocs() } catch { say('warning', '已保存，列表刷新失败') }
+        await init()
       }
     } else {
       say('warning', r.message || '核实失败')
@@ -601,10 +614,7 @@ export const useAssistantStore = defineStore('assistant', () => {
 
   // ---- M2 真实生成生命周期（开工单 §3/§6）----
   // 输入表单归 store 所有：接收时按当前表单重算输入指纹，生成期间改输入 → 拒收本轮结果。
-  const input = ref({
-    userText: '', sourceIds: [], taskIds: [], actionIds: [],
-    budgets: {}, unavailable: [], startDate: null, excerpts: {},
-  })
+  const input = ref(emptyPlanInput())
   // R2：打开草案时输入来源标记。restored=读回已保存输入；planning=沿用已排程计算输入；
   // missing=无已保存输入且未排程（页面提示补填，默认值不冒充已恢复的用户设置）；null=终态只读。
   const inputRestore = ref(null)
@@ -1054,7 +1064,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     threads, drafts, active, prepared, adoptResult, busy, notice, formDefaults, stale, scheduleClarifications,
     activeDraft, readiness, canAdopt, replanPanelDirty, setReplanForm, clearPrepared,
     input, inputRestore, gen, generating,
-    init, reset, open, close, revisePlanRequest, loadDemo,
+    init, reset, open, close, startNewPlan, revisePlanRequest, loadDemo,
     editContent, confirm, confirmDeadline, confirmGap, scheduleGap, confirmOverbook, confirmExtraWork, setManualDeadline,
     startReplan, confirmReplanScope, saveReplanContent, setReplanStart,
     appendUserText, reschedule, prepare, adopt, resolveResult, forkDraft, discardDraft,

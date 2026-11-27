@@ -6,6 +6,7 @@ import Alert from '@/components/ui/Alert.vue'
 import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
+import WorkspaceSwitcher from '@/components/domain/WorkspaceSwitcher.vue'
 import Input from '@/components/ui/Input.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import { useAppStore } from '@/stores/app'
@@ -189,10 +190,8 @@ onBeforeRouteLeave(() => {
 
     <Card>
       <div class="flex flex-wrap items-center gap-2">
-        <span class="text-sm font-medium">{{ store.currentWorkspace.name }}</span>
-        <Badge v-if="store.workspaceKind === 'demo'" variant="warning">演示空间</Badge>
-        <Badge v-else-if="store.workspaceKind === 'restore'" variant="success">恢复空间</Badge>
-        <Badge v-else variant="secondary">个人空间</Badge>
+        <WorkspaceSwitcher v-if="store.workspaces.some(w => w.restore_receipt)" compact />
+        <Badge v-if="store.isRestore" variant="success">恢复空间</Badge>
         <span class="text-xs text-muted-foreground">数据仅存本浏览器 · 本地存储</span>
       </div>
       <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3">

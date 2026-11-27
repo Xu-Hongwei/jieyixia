@@ -19,7 +19,7 @@ function shortTime(iso) {
 
 // 目录排序：个人/演示固定在前，恢复空间按恢复时间倒序；当前空间若尚未入目录也兜底列出。
 const ordered = computed(() => {
-  const list = [...store.workspaces]
+  const list = store.workspaces.filter(w => w.id !== 'demo')
   if (!list.some((w) => w.id === store.workspaceId)) list.push(store.currentWorkspace)
   const rank = (w) => (w.id === 'personal' ? 0 : w.id === 'demo' ? 1 : 2)
   return list.sort((a, b) => {
@@ -36,8 +36,7 @@ const ordered = computed(() => {
 
 // 重名消歧：同名恢复空间附恢复时间（北京），按 ID 切换，名称不是唯一键。
 function labelOf(w) {
-  if (w.id === 'personal') return '个人空间'
-  if (w.id === 'demo') return '演示空间'
+  if (w.id === 'personal') return '我的数据'
   const base = w.name || '恢复空间'
   const sameName = store.workspaces.filter((x) => x.restore_receipt && (x.name || '恢复空间') === base)
   if (sameName.length > 1 && w.restore_receipt && w.restore_receipt.committed_at) {

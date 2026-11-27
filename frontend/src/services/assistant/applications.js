@@ -19,7 +19,7 @@ import {
 
 const fail = (code, message, extra) => Object.assign(new Error(message), { code }, extra || {})
 
-const DOC_DEF = { task: 'Task', action: 'Action', plan_item: 'PlanItem' }
+const DOC_DEF = { matter: 'Matter', task: 'Task', action: 'Action', plan_item: 'PlanItem' }
 
 export function createAssistantApplicationService(deps = {}) {
   const {
@@ -52,7 +52,9 @@ export function createAssistantApplicationService(deps = {}) {
     ...(err && err.errors !== undefined ? { errors: err.errors } : {}),
   })
   const currentConfs = (draft) => (draft.user_confirmations ?? []).filter((c) => c.draft_revision === draft.revision)
-  const signatureOf = (draft) => sha256Hex(utf8Bytes(canonicalJson(buildIntentContent(draft))))
+  const signatureOf = (draft, projectTitle) => sha256Hex(utf8Bytes(canonicalJson({
+    ...buildIntentContent(draft), ...(projectTitle ? { project_title: projectTitle } : {}),
+  })))
   const sourceIdsOf = (baseline) => new Set((baseline?.source_fingerprints ?? []).map((f) => f.source_id))
 
   const assertEnvelopeScope = (envelope, draftId, wsAtCall) => {
@@ -67,8 +69,8 @@ export function createAssistantApplicationService(deps = {}) {
   }
 
   // ---- prepare：固定快照上核对就绪 → 冻结 ID 映射/写集/信封。零写入，不置 applying。 ----
-  /** @param {string} draftId @param {{ expected?: any }} [options] */
-  async function prepare(draftId, { expected } = {}) {
+  /** @param {string} draftId @param {{ expected?: any, projectTitle?: string }} [options] */
+  async function prepare(draftId, { expected, projectTitle } = {}) {
     const wsAtCall = getWorkspaceId()
     try {
       const snap = await readAssistantSnapshot()
@@ -77,11 +79,17 @@ export function createAssistantApplicationService(deps = {}) {
       if (expected != null && canonicalJson(rec) !== canonicalJson(snapshot(expected))) {
         return { ok: false, code: 'CONFLICT', message: '草案已被其它页面修改，请基于最新内容重新核对', current: rec, workspace_id: wsAtCall }
       }
-      const signature = await signatureOf(rec)
       // 同一意图已有台账：committed 直接返回回执（含已采用草案的幂等复查）；pending 复用冻结信封。
-      const prior = snap.ops.find((o) => o.envelope
-        && o.envelope.draft_id === draftId && o.envelope.draft_revision === rec.revision
-        && o.envelope.input_signature === signature)
+      let prior
+      for (const op of snap.ops) {
+        const env = op.envelope
+        if (env?.draft_id !== draftId || env.draft_revision !== rec.revision) continue
+        if (op.state === 'pending' && projectTitle !== undefined && projectTitle.trim() !== env.write_set.project_title) continue
+        if (env.input_signature === await signatureOf(rec, env.write_set.project_title)) {
+          prior = op
+          if (op.state === 'committed') break
+        }
+      }
       if (prior && prior.state === 'committed' && verifyReceiptForEnvelope(prior.receipt, prior.envelope)) {
         return { ok: true, workspace_id: wsAtCall, envelope: prior.envelope, receipt: prior.receipt, outcome: 'already_committed', reused: true }
       }
@@ -106,20 +114,26 @@ export function createAssistantApplicationService(deps = {}) {
         if (d.kind === 'plan_item') orderBase[d.date] = Math.max(orderBase[d.date] ?? 0, d.order ?? 0)
       }
       const now = wallNow()
+      const applicationId = newId()
       const plan = buildAdoptionPlan(rec, {
-        workspaceId: wsAtCall, now, newId, orderBase,
+        workspaceId: wsAtCall, now, newId, orderBase, projectId: applicationId, projectTitle,
+        existingProjectNames: snap.docs.filter(d => d.kind === 'matter').map(d => d.title),
         notes: snap.docs.filter((d) => d.kind === 'note'),
         userMessages: (thread?.messages ?? []).filter((m) => m.role === 'user'),
       })
+      const groupName = plan.writeSet.project_title
+      if (groupName && snap.docs.some(d => d.kind === 'matter' && d.title === groupName)) {
+        throw fail('PROJECT_NAME_TAKEN', '已有同名项目，请为本次新项目换个名称')
+      }
       const confs = currentConfs(rec)
       const gapKeys = new Set(confs.filter((c) => c.object_type === 'gap').map((c) => c.object_id_or_key))
       const overDates = new Set(confs.filter((c) => c.object_type === 'overbook').map((c) => c.object_id_or_key))
       const envelope = {
-        application_id: newId(),
+        application_id: applicationId,
         workspace_id: wsAtCall,
         draft_id: draftId,
         draft_revision: rec.revision,
-        input_signature: signature,
+        input_signature: await signatureOf(rec, groupName),
         mode: rec.mode ?? 'create',
         replan_scope: rec.replan_scope ?? null,
         replacement_baseline: rec.replacement_baseline ?? null,
@@ -154,7 +168,7 @@ export function createAssistantApplicationService(deps = {}) {
       if (expectedF.id !== draftId) throw fail('INVALID_ENVELOPE', 'expected 基线与采用草案不一致')
       const expectedDigest = canonicalJson(expectedF)
       const intentDigest = canonicalJson(buildIntentContent(expectedF))
-      const expectedSignature = await signatureOf(expectedF)
+      const expectedSignature = await signatureOf(expectedF, envelope.write_set.project_title)
       if (envelope.input_signature !== expectedSignature) {
         throw fail('SIGNATURE_MISMATCH', '采用信封签名与草案意图不一致，拒绝提交；请重新准备并核对')
       }
@@ -255,6 +269,14 @@ export function createAssistantApplicationService(deps = {}) {
             docCancels.push(...rebuilt)
           }
           const docAdds = []
+          if (frozen.write_set.project_title) {
+            const title = frozen.write_set.project_title
+            if (latest.docs.some(d => d.kind === 'matter' && d.title === title)) {
+              throw fail('PROJECT_NAME_TAKEN', '已有同名项目，请为本次新项目换个名称')
+            }
+            docAdds.push({ kind: 'matter', id: frozen.application_id, workspace_id: ws, title,
+              note_ids: [], created_at: frozen.issued_at, is_demo: ws === 'demo' })
+          }
           for (const t of frozen.write_set.tasks_create ?? []) {
             docAdds.push({
               kind: 'task', id: t.formal_id, workspace_id: ws, title: t.title, description: t.description,

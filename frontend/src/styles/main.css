@@ -169,8 +169,37 @@
 .week-band { display: flex; gap: .6rem; align-items: baseline; padding: .5rem .85rem; background: var(--secondary); color: var(--secondary-foreground); font-weight: 600; }
 .week-band span { font-weight: 400; font-size: .75rem; }
 .deadline-band { background: #f4eadf; color: #794a2a; }
+.week-deadline-cell { min-height: 7.5rem; }
 .dark .deadline-band { background: #403429; color: #efcbab; }
-.week-work-cell { min-height: 7.6rem; }
+.week-sheet {
+  --week-work-min: clamp(14rem, 27dvh, 19rem);
+  --week-work-max: clamp(20rem, 50dvh, 32rem);
+}
+.week-work-cell, .selected-day-work {
+  min-height: var(--week-work-min);
+  max-height: var(--week-work-max);
+  overflow-y: auto;
+}
+.week-work-cell { min-width: 0; }
+.work-column { max-height: calc(var(--week-work-max) - 2 * var(--spacing) * 1.5); display: flex; flex-direction: column; }
+.work-column > :first-child { flex: 0 1 auto; min-height: 0; scrollbar-width: thin; }
+.work-column > :not(:first-child) { flex: none; }
+[data-project-tone="blue"] { --project-ink: #507399; --project-fill: #e7eff7; }
+[data-project-tone="sage"] { --project-ink: #52764c; --project-fill: #e9f1e7; }
+[data-project-tone="lilac"] { --project-ink: #766194; --project-fill: #efeaf6; }
+[data-project-tone="peach"] { --project-ink: #936344; --project-fill: #f8ebdf; }
+[data-project-tone="oat"] { --project-ink: #82713b; --project-fill: #f6f0d9; }
+[data-project-tone="rose"] { --project-ink: #926478; --project-fill: #f6e9ee; }
+[data-project-tone="neutral"] { --project-ink: #78736b; --project-fill: #f2efe9; }
+.project-dot { background-color: var(--project-ink); }
+.calendar-project-card {
+  display: block;
+  background-color: var(--project-fill);
+  border: 1px solid color-mix(in srgb, var(--project-ink) 24%, var(--project-fill));
+  border-inline-start: 3px solid var(--project-ink);
+}
+.calendar-project-card:hover { border-color: var(--project-ink); }
+.dark .calendar-project-card { --project-fill: color-mix(in srgb, var(--project-ink) 25%, var(--card)); }
 .week-work-cell .work-empty { display: none; }
 .week-work-cell .add-day-work { text-align: start; }
 .add-day-work { color: var(--muted-foreground); }

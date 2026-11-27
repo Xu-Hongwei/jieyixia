@@ -152,6 +152,18 @@ export function deadlineProvenanceFieldRefs(proposal, notes = []) {
   return [...refs.values()]
 }
 
+function suggestProjectTitle(titles) {
+  const first = (titles[0] || '').trim().slice(0, 80)
+  // 一组任务常共享活动名，例如「完成校园马拉松报名」「参加校园马拉松比赛」。
+  for (let length = first.length; length >= 4; length--) {
+    for (let start = 0; start + length <= first.length; start++) {
+      const subject = first.slice(start, start + length).trim()
+      if (subject.length >= 4 && titles.every(title => title.includes(subject))) return subject
+    }
+  }
+  return first || '新项目'
+}
+
 /**
  * 冻结采用计划：ID 映射 + 完整写集 + 预览计数 + 缺口/过载事实。
  * draft 须已通过就绪推导（调用层负责）；这里再做引用闭合与范围核对，任何缺口显式报错。
@@ -160,7 +172,7 @@ export function deadlineProvenanceFieldRefs(proposal, notes = []) {
  * fixedIds（核验用）：以已冻结 id_map 提供 create 的正式 ID，代替 newId()，保证同输入重建同写集。
  * 排除项（M1 审查 R4）：写集只覆盖被纳入工作项的引用闭包；仅被排除项引用的 create 不落库。
  */
-export function buildAdoptionPlan(draft, { workspaceId, now, newId, orderBase = {}, notes = [], userMessages = [], fixedIds = null }) {
+export function buildAdoptionPlan(draft, { workspaceId, now, newId, orderBase = {}, notes = [], userMessages = [], fixedIds = null, projectId = null, projectTitle = undefined, existingProjectNames = [] }) {
   checkAdoptionSupported(draft)
   const proposal = draft.proposal
   const input = draft.planning_input
@@ -254,6 +266,20 @@ export function buildAdoptionPlan(draft, { workspaceId, now, newId, orderBase = 
         updated_at: now,
       }
     })
+  let groupTitle = null
+  if (projectId && draft.mode !== 'replan' && tasksCreate.length > 0) {
+    groupTitle = projectTitle === undefined ? suggestProjectTitle(tasksCreate.map(task => task.title)) : projectTitle.trim()
+    if (projectTitle === undefined && existingProjectNames.includes(groupTitle)) {
+      const base = groupTitle
+      let number = 2
+      do {
+        const suffix = `（${number++}）`
+        groupTitle = base.slice(0, 80 - suffix.length) + suffix
+      } while (existingProjectNames.includes(groupTitle))
+    }
+    if (!groupTitle || groupTitle.length > 80) fail('PROJECT_NAME_INVALID', '请输入 1 至 80 个字符的项目名称')
+    for (const task of tasksCreate) task.matter_id = projectId
+  }
   const actionsCreate = (proposal.action_proposals ?? [])
     .filter((a) => a.op === 'create' && refActionKeys.has(a.key))
     .map((ap) => ({
@@ -296,6 +322,7 @@ export function buildAdoptionPlan(draft, { workspaceId, now, newId, orderBase = 
     ? draft.replacement_baseline.items.map((it) => ({ plan_item_id: it.plan_item_id, expected: it, new_state: 'cancelled' }))
     : []
   const writeSet = {
+    ...(groupTitle ? { project_title: groupTitle } : {}),
     source_field_confirmations: [],
     tasks_create: tasksCreate,
     tasks_update: [],
@@ -332,6 +359,8 @@ export function verifyEnvelopeAgainstDraft(draft, envelope, { docs = [], notes =
     notes,
     userMessages,
     fixedIds: envelope.id_map ?? [],
+    projectId: envelope.write_set.project_title ? envelope.application_id : null,
+    projectTitle: envelope.write_set.project_title,
   })
   if (canonicalJson(plan.idMap) !== canonicalJson(envelope.id_map ?? [])) {
     fail('ID_MAP_MISMATCH', '采用 ID 映射与草案内容重建结果不一致，拒绝提交')

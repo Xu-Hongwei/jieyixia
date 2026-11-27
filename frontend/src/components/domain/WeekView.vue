@@ -8,7 +8,6 @@ import DayWorkZone from '@/components/domain/DayWorkZone.vue'
 import DayDeadlineZone from '@/components/domain/DayDeadlineZone.vue'
 import DayTwoZones from '@/components/domain/DayTwoZones.vue'
 import { useAppStore } from '@/stores/app'
-import { usePlanStore } from '@/stores/plan'
 import { beijingAddDays, beijingDateStr, isValidDate } from '@/domains/time'
 import { weekRangeLabel, weekStartOf } from '@/domains/week'
 
@@ -16,12 +15,12 @@ import { weekRangeLabel, weekStartOf } from '@/domains/week'
 // 桌面周表用同一个 CSS grid 的三行带（表头/工作/截止），行边界跨列统一，截止带不随任务数漂移。
 // 容器（而非屏幕）过窄时切换为「七日日期条 → 选中日两区顺序展示」；列表视图按天呈现同一两区内容。
 const props = defineProps({
+  schedule: { type: Object, required: true },
   recordedPlanId: { type: String, default: '' },
   mode: { type: String, default: 'week' }, // week | list
 })
 const emit = defineEmits(['add-plan'])
 const store = useAppStore()
-const planStore = usePlanStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -39,8 +38,7 @@ function jumpToDate(event) {
   if (isValidDate(date)) goDate(date)
 }
 
-const schedule = computed(() => planStore.schedule(start.value, new Date(store.nowTick)))
-const days = computed(() => schedule.value.days)
+const days = computed(() => props.schedule.days)
 const selectedDay = computed(() => days.value.find((d) => d.date === targetDate.value) || days.value[0])
 // 待定位安排（URL plan 参数）：传给各日区，命中日自动展开历史/折叠清单（R4）。
 const locatePlanId = computed(() => (typeof route.query.plan === 'string' ? route.query.plan : props.recordedPlanId))
@@ -154,24 +152,21 @@ const headerClass = (d) =>
             :class="colBg(d)"
             :data-date="d.date"
           >
-            <DayWorkZone :day="d" :locate-plan-id="locatePlanId" @open-plan="openPlan" @add="emit('add-plan', d.date)" />
+            <DayWorkZone fitted :day="d" :locate-plan-id="locatePlanId" @open-plan="openPlan" @add="emit('add-plan', d.date)" />
           </div>
 
           <div class="week-band deadline-band col-span-7">
             每日截止 <span>{{ schedule.deadlineCount }} 项</span>
           </div>
-          <p v-if="!schedule.deadlineCount" class="col-span-7 px-3 py-3 text-sm text-muted-foreground">本周无截止</p>
-          <template v-else>
           <div
             v-for="d in days"
             :key="'d-' + d.date"
-            class="border-l border-border p-1.5 first:border-l-0"
+            class="week-deadline-cell border-l border-border p-1.5 first:border-l-0"
             :class="colBg(d)"
             :data-date="d.date"
           >
             <DayDeadlineZone :day="d" @open-task="openTask" />
           </div>
-          </template>
         </div>
       </div>
 
@@ -199,7 +194,7 @@ const headerClass = (d) =>
             <span class="text-xs text-muted-foreground">{{ selectedDay.weekday }}</span>
             <span v-if="selectedDay.isToday" class="text-xs font-medium text-primary">今天</span>
           </div>
-          <DayTwoZones :day="selectedDay" :locate-plan-id="locatePlanId" @open-plan="openPlan" @open-task="openTask" @add="emit('add-plan', selectedDay.date)" />
+          <DayTwoZones fitted :day="selectedDay" :key="selectedDay.date" :locate-plan-id="locatePlanId" @open-plan="openPlan" @open-task="openTask" @add="emit('add-plan', selectedDay.date)" />
         </div>
       </div>
 
@@ -229,14 +224,10 @@ const headerClass = (d) =>
         </div>
       </div>
 
-      <div v-if="narrow || props.mode === 'list' || schedule.outsideWeek.length" class="flex flex-wrap items-center gap-x-2 gap-y-1 px-5 py-2.5 text-xs text-muted-foreground">
+      <div v-if="narrow || props.mode === 'list'" class="flex flex-wrap items-center gap-x-2 gap-y-1 px-5 py-2.5 text-xs text-muted-foreground">
         <span>本周工作 {{ schedule.planCount }} 项</span>
         <span>·</span>
         <span>截止 {{ schedule.deadlineCount }} 项</span>
-        <template v-if="schedule.outsideWeek.length">
-          <span>·</span>
-          <span>周外另有 {{ schedule.outsideWeek.length }} 项安排</span>
-        </template>
       </div>
     </Card>
   </div>

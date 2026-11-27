@@ -1,10 +1,10 @@
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onBeforeUnmount, onUpdated, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import PlanCard from '@/components/domain/PlanCard.vue'
 import { PLAN_STATE_LABELS, label, planHistoryReasonLabel } from '@/domains/labels'
 
-// 单日「每日工作」区：默认 ≤3 项，展开后限高滚动（周表不被无限拉长）；
+// 周表按可用高度折叠；逐日列表默认展示三项。
 // 终态/断引用/任务已完成的旧安排收进「安排历史」，带状态与只读原因，可点开只读详情。
 // 定位（5A-2B R4）：待定位安排落在本区时自动展开所在清单并滚入视野。
 // 定位标识 = 目标 ID + 所属清单：同区换新目标（true→true 的布尔 watch 会漏）也触发一次；
@@ -12,6 +12,7 @@ import { PLAN_STATE_LABELS, label, planHistoryReasonLabel } from '@/domains/labe
 const props = defineProps({
   day: { type: Object, required: true },
   locatePlanId: { type: String, default: '' },
+  fitted: Boolean,
 })
 const emit = defineEmits(['open-plan', 'add'])
 
@@ -19,7 +20,25 @@ const route = useRoute()
 const root = ref(null)
 const expanded = ref(false)
 const historyOpen = ref(false)
-const visible = computed(() => (expanded.value ? props.day.plans : props.day.plans.slice(0, 3)))
+const list = ref(null)
+const capacity = ref(3)
+const limit = computed(() => props.fitted ? capacity.value : 3)
+const visible = computed(() => (props.fitted || expanded.value ? props.day.plans : props.day.plans.slice(0, limit.value)))
+function measure() {
+  if (!props.fitted || !list.value?.clientHeight) return
+  const cards = [...list.value.querySelectorAll('[data-plan-id]')]
+  capacity.value = Math.max(1, cards.filter(el => el.offsetTop + el.offsetHeight <= list.value.clientHeight + 1).length)
+}
+let observer
+onMounted(() => {
+  if (props.fitted && typeof ResizeObserver !== 'undefined') {
+    observer = new ResizeObserver(measure)
+    observer.observe(list.value)
+  }
+  measure()
+})
+onUpdated(measure)
+onBeforeUnmount(() => observer?.disconnect())
 
 const locateKey = computed(() => {
   const id = props.locatePlanId
@@ -52,28 +71,36 @@ watch(locateKey, (key) => {
   if (!key) return
   if (key.startsWith('plans:')) {
     const idx = props.day.plans.findIndex((e) => e.plan.id === props.locatePlanId)
-    if (idx >= 3) expanded.value = true
+    if (idx >= limit.value) expanded.value = true
   } else {
     historyOpen.value = true
   }
   reveal()
 }, { immediate: true })
+watch(limit, (count, previous) => {
+  if (!locateKey.value.startsWith('plans:') || count >= previous) return
+  const index = props.day.plans.findIndex(e => e.plan.id === props.locatePlanId)
+  if (index >= count && index < previous) {
+    expanded.value = true
+    reveal()
+  }
+})
 </script>
 
 <template>
-  <div ref="root">
-    <div class="space-y-1.5" :class="expanded && 'max-h-[22rem] overflow-y-auto scroll-slim'">
-      <PlanCard v-for="e in visible" :key="e.plan.id" :plan="e.plan" :task="e.task" :data-plan-id="e.plan.id" @open="emit('open-plan', $event)" />
+  <div ref="root" :class="fitted && 'work-column'">
+    <div ref="list" class="relative space-y-1.5" :class="fitted ? (expanded ? 'overflow-y-auto' : 'overflow-clip') : expanded && 'max-h-[22rem] overflow-y-auto scroll-slim'">
+      <PlanCard v-for="(e, index) in visible" :key="e.plan.id" calendar :plan="e.plan" :task="e.task" :class="fitted && !expanded && Number(index) >= limit && 'invisible'" :data-plan-id="e.plan.id" @open="emit('open-plan', $event)" />
       <p v-if="!day.plans.length" class="work-empty px-1 pt-2 text-center text-xs text-muted-foreground">未安排工作</p>
     </div>
     <button
-      v-if="day.plans.length > 3"
+      v-if="day.plans.length > limit"
       type="button"
       class="mt-1 w-full rounded-md px-2 py-1 text-xs font-medium text-primary hover:bg-accent"
       :aria-expanded="expanded"
       @click="expanded = !expanded"
     >
-      {{ expanded ? '收起' : `还有 ${day.plans.length - 3} 项 · 展开` }}
+      {{ expanded ? '收起' : `还有 ${day.plans.length - limit} 项 · 展开` }}
     </button>
 
     <div v-if="day.planHistory.length" class="border-t border-dashed border-border pt-1">
@@ -85,7 +112,7 @@ watch(locateKey, (key) => {
       >
         安排历史 {{ day.planHistory.length }} 项 · {{ historyOpen ? '收起' : '展开' }}
       </button>
-      <div v-if="historyOpen" class="mt-1 space-y-1">
+      <div v-if="historyOpen" class="mt-1 max-h-28 space-y-1 overflow-y-auto">
         <button
           v-for="e in day.planHistory"
           :key="e.plan.id"

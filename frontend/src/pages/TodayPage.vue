@@ -12,6 +12,7 @@ import { usePlanStore } from '@/stores/plan'
 import { taskListPath } from '@/domains/taskList'
 import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
 import WeekView from '@/components/domain/WeekView.vue'
+import ProjectLabel from '@/components/domain/ProjectLabel.vue'
 import { useAppStore } from '@/stores/app'
 import { useFocusStore } from '@/stores/focus'
 import { isLiveRef } from '@/domains/plan'
@@ -46,9 +47,10 @@ function closePlan() {
   delete q.plan
   router.replace({ query: q })
 }
-watch([() => store.ready, planParam, () => store.docs], () => {
+watch([() => store.ready, planParam, () => store.docs], (_, previous) => {
   if (!store.ready || !planParam.value || activePlan.value) return
-  store.say('warning', '安排已不存在或不属于当前空间，已从地址移除')
+  const justDeleted = previous?.[1] === planParam.value && store.lastDeleted?.planRemoved?.some(p => p.id === planParam.value)
+  if (!justDeleted) store.say('warning', '安排已不存在或不属于当前空间，已从地址移除')
   closePlan()
 }, { immediate: true })
 // 显式换周/换日后，详情参数若不在展示的七日内则移除（不适用）；周内选日不影响详情。
@@ -131,6 +133,17 @@ watch(() => store.workspaceId, () => { editor.value = null; resetWorkLeaveApprov
 watch(() => route.query.create, (v) => { if (v === '1') router.replace('/tasks?create=1') }, { immediate: true })
 watch(() => route.query.undated, (v) => { if (v === '1' && !route.query.plan && !route.query.task) router.replace('/tasks?undated=1') }, { immediate: true })
 const plans = usePlanStore()
+const schedule = computed(() => plans.schedule(currentStart.value, new Date(store.nowTick)))
+const upcoming = computed(() => {
+  const lastDay = schedule.value.days[6].date
+  return schedule.value.outsideWeek
+    .filter(e => !e.reason && e.plan.date > lastDay && e.plan.date >= todayStr.value)
+    .sort((a, b) => a.plan.date.localeCompare(b.plan.date) || (a.plan.order ?? 0) - (b.plan.order ?? 0) || a.plan.id.localeCompare(b.plan.id))
+})
+const showAllUpcoming = ref(false)
+watch([currentStart, () => store.workspaceId], () => { showAllUpcoming.value = false })
+const emptyWork = computed(() => store.ready && view.value === 'week' && !schedule.value.planCount
+  && schedule.value.days.every(day => !day.planHistory.length))
 const classification = computed(() => plans.classify(new Date(store.nowTick)))
 const followupQueues = computed(() => {
   const tasks = new Map(store.tasks.map(task => [task.id, task]))
@@ -142,7 +155,8 @@ const followupQueues = computed(() => {
   }))
 })
 const recentWork = computed(() => focus.ready ? endedSessionsSorted(focus.sessions).slice(0, 3) : [])
-const hasQueue = computed(() => followupQueues.value.some(queue => queue.count > 0))
+const visibleQueues = computed(() => followupQueues.value.filter(q => q.count && !(emptyWork.value && q.list === 'unscheduled')))
+const hasQueue = computed(() => visibleQueues.value.length > 0)
 const pendingNoteCount = computed(() => store.noteBuckets.pending.length)
 const recoverCount = computed(() =>
   (store.lastDeleted ? 1 : 0) + (store.pendingSave ? 1 : 0) + store.failedNotes.length,
@@ -168,7 +182,7 @@ async function openRecover() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-6xl space-y-5">
+  <div class="mx-auto w-full max-w-6xl space-y-5">
     <!-- 继续条：当前空间有未结束工作时出现，单一「回到工作」入口 -->
     <ContinueBar />
 
@@ -184,7 +198,7 @@ async function openRecover() {
       @another="id => openEditor({ mode: 'another', planId: id })" @op-done="locatePlan" />
 
     <div class="min-w-0">
-      <WeekView :mode="view" :recorded-plan-id="recordedPlan?.id || ''" @add-plan="(date) => openEditor({ mode: 'create', date })">
+      <WeekView :schedule="schedule" :mode="view" :recorded-plan-id="recordedPlan?.id || ''" @add-plan="(date) => openEditor({ mode: 'create', date })">
         <template #tools>
           <RouterLink to="/work-records" class="flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent" title="回看已结束的工作记录">
             <ClipboardList class="size-3.5" />工作记录
@@ -209,25 +223,35 @@ async function openRecover() {
         </template>
       </WeekView>
 
-      <section v-if="store.ready && (hasQueue || recentWork.length || !store.tasks.length)" class="schedule-followup" aria-label="任务概览">
-        <header v-if="hasQueue || !store.tasks.length" class="flex items-baseline justify-between gap-3">
+      <section v-if="upcoming.length" class="schedule-followup" aria-label="接下来的安排">
+        <header class="flex items-baseline gap-3"><h2 class="section-heading">接下来的安排</h2><span class="text-xs text-muted-foreground">{{ upcoming.length }} 项</span></header>
+        <ul class="divide-y">
+          <li v-for="{ plan, task } in (showAllUpcoming ? upcoming : upcoming.slice(0, 3))" :key="plan.id">
+            <RouterLink class="flex items-baseline gap-3 rounded px-1 py-3 hover:bg-accent sm:gap-6" :to="schedulePath({ date: plan.date, plan: plan.id, view }, todayStr)">
+              <time class="shrink-0 text-sm tabular-nums" :datetime="plan.date">{{ (plan.date.slice(0, 4) === todayStr.slice(0, 4) ? plan.date.slice(5) : plan.date).replaceAll('-', '/') }}</time>
+              <span class="grid min-w-0 flex-1 gap-1"><ProjectLabel :task="task" with-task /><span v-if="plan.action_text !== task.title" class="text-sm text-muted-foreground">{{ plan.action_text }}</span></span>
+              <span class="shrink-0 text-xs text-muted-foreground">{{ plan.planned_minutes }} 分</span>
+            </RouterLink>
+          </li>
+        </ul>
+        <Button v-if="upcoming.length > 3" size="sm" variant="ghost" :aria-expanded="showAllUpcoming" @click="showAllUpcoming = !showAllUpcoming">{{ showAllUpcoming ? '收起' : '展开其余 ' + (upcoming.length - 3) + ' 项' }}</Button>
+      </section>
+
+      <section v-if="store.ready && (hasQueue || recentWork.length)" class="schedule-followup" aria-label="任务概览">
+        <header v-if="hasQueue" class="flex items-baseline justify-between gap-3">
           <h2 class="section-heading">待跟进</h2>
           <RouterLink to="/tasks" class="quiet-link">全部任务 →</RouterLink>
         </header>
         <div v-if="hasQueue" class="followup-columns">
-          <section v-for="queue in followupQueues" :key="queue.list" class="followup-queue">
+          <section v-for="queue in visibleQueues" :key="queue.list" class="followup-queue">
             <RouterLink :to="taskListPath({ list: queue.list })" class="queue-label">{{ queue.label }} <span>{{ queue.count }}</span></RouterLink>
             <ul v-if="queue.tasks.length" class="divide-y">
               <li v-for="task in queue.tasks" :key="task.id" class="flex items-center gap-1">
-                <RouterLink class="queue-row min-w-0 flex-1" :to="taskPath(task.id, { return: schedulePath(route.query, todayStr) })">{{ task.title }} <ChevronRight v-if="queue.list !== 'unscheduled'" class="size-4 shrink-0" /></RouterLink>
+                <RouterLink class="queue-row min-w-0 flex-1" :to="taskPath(task.id, { return: schedulePath(route.query, todayStr) })"><span class="grid min-w-0"><ProjectLabel :task="task" />{{ task.title }}</span><ChevronRight v-if="queue.list !== 'unscheduled'" class="size-4 shrink-0" /></RouterLink>
                 <Button v-if="queue.list === 'unscheduled'" size="sm" variant="ghost" :aria-label="'安排' + task.title" @click="openEditor({ mode: 'create', taskId: task.id, date: typeof route.query.date === 'string' && isValidDate(route.query.date) ? route.query.date : todayStr })"><Plus />安排</Button>
               </li>
             </ul>
           </section>
-        </div>
-        <div v-else-if="!store.tasks.length" class="schedule-start">
-          <div><h3 class="font-medium">还没有任务</h3><p class="mt-1 text-sm text-muted-foreground">选一天手动安排，或用通知和截图生成计划。</p></div>
-          <RouterLink to="/assistant" class="quiet-link">用资料制定计划 →</RouterLink>
         </div>
         <section v-if="recentWork.length" :class="hasQueue && 'mt-6'" aria-label="最近工作">
           <header class="flex items-baseline justify-between gap-3">

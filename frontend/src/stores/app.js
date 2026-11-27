@@ -50,7 +50,9 @@ export const useAppStore = defineStore('app', () => {
   const clearRevision = ref(0)
 
   // 当前工作区（personal/demo）。UI 持久化键按空间隔离，切换不残留上一空间状态。
-  const workspaceId = ref(readLocal(WORKSPACE_KEY) || 'personal')
+  const savedWorkspace = readLocal(WORKSPACE_KEY)
+  const workspaceId = ref(savedWorkspace === 'demo' ? 'personal' : savedWorkspace || 'personal')
+  const firstVisit = ref(false)
   const workspaces = ref([])
   const wsKey = (base) => `${base}:${workspaceId.value}`
   const selectedNoteId = ref(readLocal(wsKey(UI_NOTE_KEY)))
@@ -249,8 +251,9 @@ export const useAppStore = defineStore('app', () => {
   }
 
   async function init() {
+    firstVisit.value = (await allWorkspaces()).length === 0
+    if (savedWorkspace === 'demo') writeLocal(WORKSPACE_KEY, 'personal')
     await ensureWorkspace('personal')
-    await ensureWorkspace('demo')
     // 持久化的当前空间若已不在目录（如恢复空间被移除）→ 解释并回到个人空间，不静默建壳/覆盖。
     if (workspaceId.value !== 'personal' && workspaceId.value !== 'demo') {
       const dir = await allWorkspaces()
@@ -1134,6 +1137,29 @@ export const useAppStore = defineStore('app', () => {
   }
 
   // 手动归组/换组/移出（非 AI）：便签同时维护 Matter.note_ids 与资料角色，任务只持 matter_id。
+  async function addIndependentTasks(projectId, ids) {
+    try {
+      const result = await transformDocsAtomic(latest => {
+        const projects = new Set(latest.filter(d => d.kind === 'matter').map(d => d.id))
+        if (!projects.has(projectId)) throw new Error('项目已不存在')
+        const tasks = new Map(latest.filter(d => d.kind === 'task').map(d => [d.id, d]))
+        const puts = []
+        const stamp = now()
+        for (const id of new Set(ids)) {
+          const task = tasks.get(id)
+          if (!task || (task.matter_id !== projectId && projects.has(task.matter_id))) {
+            throw new Error('所选任务已删除或已加入其他项目，请重新选择。')
+          }
+          if (task.matter_id !== projectId) puts.push({ ...task, matter_id: projectId, updated_at: stamp })
+        }
+        return { puts }
+      })
+      return { ok: applyChanges(result) }
+    } catch (error) {
+      return { ok: false, message: error.message || '加入失败，请重试。' }
+    }
+  }
+
   async function setMatter(doc, matterId, role) {
     try {
       const result = await transformDocsAtomic((latest) => setMatterPlan(latest, doc.id, matterId || null, role, now()))
@@ -1160,13 +1186,13 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     sources, docs, health, aiDown, busy, banner, pendingId, selectedNoteId, evidenceOpen, imageUrl, pendingSave, lastDeleted, workBlock, ready,
-    workspaceId, workspaces, currentWorkspace, isDemo, isRestore, workspaceKind, clearRevision, finishWorkspaceClear,
+    workspaceId, workspaces, currentWorkspace, firstVisit, isDemo, isRestore, workspaceKind, clearRevision, finishWorkspaceClear,
     notes, tasks, matters, actions, selectedNote, pendingSource, unconfirmedCount,
     nowTick, todayLabel, taskBuckets, noteBuckets, failedNotes,
     say, clearWorkBlock, init, refreshHealth, reload, reloadDocs, selectNote, switchWorkspace, refreshWorkspaces, collectFiles, collectText, runAnalysis, retrySave,
     saveImageFiles, saveText, analyzeForAssistant, saveAnalysisNote,
     confirmField, saveEdit, saveNodeEdit, reviewNote, createTask, createTaskManual, finishTask, deleteNote,
-    undoDelete, deleteTask, renameTask, createStandaloneTask, saveProject, createMatter, renameMatter, deleteMatter, setMatter, setNoteRole,
+    undoDelete, deleteTask, renameTask, createStandaloneTask, saveProject, createMatter, renameMatter, deleteMatter, setMatter, addIndependentTasks, setNoteRole,
     actionsOf, currentActionOf, unfinishedCountOf, addAction, editAction, setActionDone, deleteAction, setCurrentAction,
     reopenTask, editTask, setTaskDeadline,
     startClock, stopClock,

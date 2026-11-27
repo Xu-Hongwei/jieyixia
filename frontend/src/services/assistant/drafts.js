@@ -169,11 +169,12 @@ export function createAssistantDraftService(deps = {}) {
     try {
       let serial = 0
       const plan = buildAdoptionPlan(draft, {
-        workspaceId: draft.workspace_id, now: draft.updated_at, newId: () => 'preview-' + (++serial),
+        workspaceId: draft.workspace_id, now: draft.updated_at, newId: () => 'preview-' + (++serial), projectId: 'preview-project',
+        existingProjectNames: docs.filter(d => d.kind === 'matter').map(d => d.title),
         notes: docs.filter(item => item.kind === 'note'),
         userMessages: (thread?.messages ?? []).filter(item => item.role === 'user'),
       })
-      return { ...base, counts: plan.counts }
+      return { ...base, counts: plan.counts, projectTitle: plan.writeSet.project_title }
     } catch (error) {
       return { ready: false, blockers: [{ code: error.code || 'PREVIEW_INVALID', message: error.message }] }
     }

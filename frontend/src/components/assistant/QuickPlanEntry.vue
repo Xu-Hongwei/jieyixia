@@ -70,6 +70,7 @@ function paste(event) {
   append(files, text)
 }
 onMounted(() => window.addEventListener('paste', paste))
+defineExpose({ open })
 onBeforeUnmount(() => { window.removeEventListener('paste', paste); close(false) })
 watch(() => app.workspaceId, () => close(false), { flush: 'sync' })
 watch(() => route.fullPath, () => { if (!session.value?.navigating) close(false) })

@@ -914,6 +914,7 @@ export interface PreparedPlanItemCreate {
 
 /** 完整准备写集。M3 增加受限取消分支；tasks_update/字段确认写入仍由前端领域层拒绝。 */
 export interface PreparedWriteSet {
+  project_title?: string | null;
   source_field_confirmations?: Array<SourceFieldConfirmation>;
   tasks_create?: Array<PreparedTaskCreate>;
   tasks_update?: Array<PreparedTaskUpdate>;

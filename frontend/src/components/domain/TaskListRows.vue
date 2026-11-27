@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button.vue'
 import { formatWhen, isOverdue } from '@/domains/time'
 import { PLAN_STATE_LABELS, STATUS_LABELS, label } from '@/domains/labels'
 import { taskPath } from '@/domains/workNavigation'
+import { useTaskColors } from '@/composables/useTaskProject'
 
 defineProps({
   inProject: Boolean,
@@ -14,13 +15,14 @@ defineProps({
   pastPlans: { type: Object, default: () => ({}) },
 })
 defineEmits(['arrange', 'open-plan'])
+const colors = useTaskColors()
 </script>
 
 <template>
   <div class="divide-y divide-border">
     <div v-for="task in tasks" :key="task.id" class="py-4" data-task-row>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <RouterLink :to="taskPath(task.id, { return: returnTo })" class="min-w-0 flex-1 break-words text-base font-medium underline-offset-2 hover:underline" :aria-label="'任务详情：' + task.title">{{ task.title }}</RouterLink>
+        <RouterLink :to="taskPath(task.id, { return: returnTo })" class="flex min-w-0 flex-1 items-baseline gap-2 break-words text-base font-medium underline-offset-2 hover:underline" :aria-label="'任务详情：' + task.title"><span aria-hidden="true" class="project-dot size-2 shrink-0 rounded-full" :data-project-tone="colors.toneFor(task)" /><span class="min-w-0">{{ task.title }}</span></RouterLink>
         <div class="flex flex-wrap items-center gap-2">
         <Badge v-if="isOverdue(task, new Date(now))" variant="destructive">已逾期</Badge>
         <Badge :variant="task.status === 'done' ? 'success' : 'secondary'">{{ label(STATUS_LABELS, task.status) }}</Badge>

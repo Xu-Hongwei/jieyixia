@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button.vue'
 import Card from '@/components/ui/Card.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import StartPlanWorkDialog from '@/components/domain/StartPlanWorkDialog.vue'
+import TaskDeleteDialog from './TaskDeleteDialog.vue'
 import { useAppStore } from '@/stores/app'
 import { useFocusStore } from '@/stores/focus'
 import { usePlanStore } from '@/stores/plan'
@@ -37,6 +38,8 @@ const router = useRouter()
 
 const plan = computed(() => store.docs.find((d) => d.kind === 'plan_item' && d.id === props.planId) || null)
 const task = computed(() => (plan.value ? store.tasks.find((t) => t.id === plan.value.task_id) || null : null))
+const deleteDialog = ref(null)
+const canRequestTaskDelete = computed(() => task.value && plan.value && isLiveRef(plan.value) && LIVE_PLAN_STATES.includes(plan.value.state) && task.value.status !== 'done')
 const summary = computed(() => (plan.value ? planStore.summary(plan.value.id) : null))
 const endedSessions = computed(() => (plan.value ? endedSessionsSorted(endedSessionsForPlan(store.docs, plan.value)) : []))
 const unfinishedSessions = computed(() => (plan.value ? unfinishedSessionsForPlan(store.docs, plan.value) : []))
@@ -377,7 +380,7 @@ const historyView = computed(() => {
       </div>
 
       <!-- 操作区：资格由 live 事实派生；无资格时不渲染按钮，只读原因/引导块在上方解释 -->
-      <details v-if="opsDisplay.length" class="border-t pt-3">
+      <details v-if="opsDisplay.length || canRequestTaskDelete" class="border-t pt-3">
         <summary class="cursor-pointer text-sm text-muted-foreground">更多操作</summary>
         <div class="mt-2 flex flex-wrap items-center gap-2">
         <Button
@@ -388,6 +391,7 @@ const historyView = computed(() => {
           :disabled="opBusy"
           @click="requestOp(op)"
         >{{ OP_LABELS[op] }}</Button>
+        <Button v-if="canRequestTaskDelete" size="sm" variant="outline" class="text-destructive" :disabled="opBusy" @click="deleteDialog.show()">删除任务</Button>
         </div>
       </details>
     </div>
@@ -434,4 +438,7 @@ const historyView = computed(() => {
   </Card>
 
   <StartPlanWorkDialog :ctrl="startCtrl" />
+  <TaskDeleteDialog ref="deleteDialog" :task="task" @deleted="emit('close')"
+    @goto-plan="row => router.push({ path: '/today', query: { date: row.date, plan: row.id } })"
+    @goto-work="row => router.push(workPath(row.unfinishedSessionId, scheduleReturn))" />
 </template>

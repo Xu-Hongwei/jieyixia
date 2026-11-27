@@ -12,9 +12,8 @@ import Card from '@/components/ui/Card.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import DateInput from '@/components/ui/DateInput.vue'
 import Input from '@/components/ui/Input.vue'
-import NodeSelect from '@/components/domain/NodeSelect.vue'
 import ContinueBar from '@/components/domain/ContinueBar.vue'
-import DeleteImpact from '@/components/domain/DeleteImpact.vue'
+import TaskDeleteDialog from '@/components/domain/TaskDeleteDialog.vue'
 import PlanCard from '@/components/domain/PlanCard.vue'
 import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
 import { registerWorkLeave, requestWorkLeave, resetWorkLeaveApproval } from '@/composables/workLeave'
@@ -25,7 +24,6 @@ import { useFocusStore } from '@/stores/focus'
 import { usePlanWorkStart, planStartEntry } from '@/composables/usePlanWorkStart'
 import { useScheduledAction } from '@/composables/useScheduledAction'
 import { ACTION_DEFAULT_MINUTES } from '@/domains/action'
-import { deleteImpactSnapshot } from '@/domains/matter'
 import { endedSessionsSorted, formatDurationMs, sessionActionText, sessionTitle } from '@/domains/work'
 import { beijingDateStr, beijingInstantLabel, formatWhen } from '@/domains/time'
 import { resolveTaskReturn, resolveReplanReturn, taskReturnLabel, planContextForTask, planScheduleReturn, schedulePath, taskPath, workPath, recordPath } from '@/domains/workNavigation'
@@ -484,7 +482,7 @@ const detailPlan = computed(() =>
   (detailPlanId.value ? store.docs.find((d) => d.kind === 'plan_item' && d.id === detailPlanId.value) || null : null))
 watch([() => store.ready, detailPlanId, () => store.docs], () => {
   if (!store.ready || !detailPlanId.value || detailPlan.value) return
-  store.say('warning', '安排已不存在或不属于当前空间')
+  if (!store.lastDeleted?.planRemoved?.some(p => p.id === detailPlanId.value)) store.say('warning', '安排已不存在或不属于当前空间')
   detailPlanId.value = ''
 }, { immediate: true })
 const editor = ref(null)
@@ -544,47 +542,15 @@ async function reopen() {
   await runSave(() => store.reopenTask(task.value))
 }
 
-const deleteTaskOpen = ref(false)
-const taskScopeNotice = ref(false)
-// §10：打开确认框时冻结影响事实（任务/行动/安排处置），提交原快照；
-// 范围或处置变化 → 不删除，刷新后重新冻结、重新确认。
-const deleteFacts = ref(null)
-const deleteBlocked = computed(() => !!deleteFacts.value && deleteFacts.value.rows.some((r) => r.disposition.startsWith('blocked')))
-function freezeDeleteFacts() {
-  const t = task.value
-  if (!t) return
-  const snap = deleteImpactSnapshot(store.docs, [t.id], store.docs.filter((d) => d.kind === 'focus_session'))
-  deleteFacts.value = { taskIds: [t.id], actionIds: taskActions.value.map((a) => a.id), ...snap }
-}
-function openDeleteTask() {
-  taskScopeNotice.value = false
-  freezeDeleteFacts()
-  deleteTaskOpen.value = true
-}
-async function confirmDeleteTask() {
-  const t = task.value
-  const frozen = deleteFacts.value
-  if (!t || !frozen) { deleteTaskOpen.value = false; return }
-  deleteTaskOpen.value = false
-  const r = await runSave(() => store.deleteTask(t, {
-    taskIds: frozen.taskIds, actionIds: frozen.actionIds, planItemIds: frozen.planItemIds, planFacts: frozen.planFacts,
-  }))
-  if (r && r.ok) {
-    bypassGuard = true
-    router.replace(returnPath.value)
-  } else if (r && (r.scopeChanged || r.planProgressRequired || r.unfinishedFocus)) {
-    await store.reloadDocs()
-    taskScopeNotice.value = true
-    freezeDeleteFacts()
-    deleteTaskOpen.value = true
-  }
+const deleteDialog = ref(null)
+function afterTaskDeleted() {
+  bypassGuard = true
+  router.replace(returnPath.value)
 }
 function deleteGotoPlan(r) {
-  deleteTaskOpen.value = false
   detailPlanId.value = r.id
 }
 function deleteGotoWork(r) {
-  deleteTaskOpen.value = false
   const s = focus.sessions.find((x) => x.id === r.unfinishedSessionId) || null
   router.push(workPath(r.unfinishedSessionId, workReturnFor(s)))
 }
@@ -635,7 +601,7 @@ function deleteGotoWork(r) {
           <Badge :variant="task.status === 'done' ? 'success' : 'secondary'" :title="task.status">{{ label(STATUS_LABELS, task.status) }}</Badge>
           <Button v-if="task.status !== 'done'" size="sm" variant="outline" @click="requestFinish"><Check />完成任务</Button>
           <Button v-else size="sm" variant="outline" @click="reopen">重新打开</Button>
-          <Button size="sm" variant="destructive" aria-label="删除任务" title="删除任务" @click="openDeleteTask"><Trash2 /></Button>
+          <Button size="sm" variant="destructive" aria-label="删除任务" title="删除任务" @click="deleteDialog.show()"><Trash2 /></Button>
         </div>
         <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
           <template v-if="deadlineEditing">
@@ -649,8 +615,11 @@ function deleteGotoWork(r) {
             <span v-if="deadlineSource" class="text-xs text-muted-foreground">{{ deadlineSource }}</span>
             <Button size="sm" variant="ghost" aria-label="编辑截止" title="编辑截止" @click="startDeadlineEdit"><Pencil /></Button>
           </template>
-          <span class="text-xs text-muted-foreground">所属项目</span>
-          <div class="w-32"><NodeSelect v-model="matterModel" :items="matterItems" placeholder="独立任务" /></div>
+          <label class="flex max-w-full items-center gap-2 text-xs text-muted-foreground">所属项目
+            <select v-model="matterModel" aria-label="所属项目" class="h-8 min-w-32 max-w-56 rounded-md border bg-card px-2 text-sm text-foreground">
+              <option v-for="item in matterItems" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
+          </label>
           <RouterLink v-if="project?.deadline?.value" :to="{ path: '/tasks', query: { matter: project.id } }" class="rounded bg-accent px-2 py-1 text-xs font-semibold">项目总截止 · {{ formatWhen(project.deadline.value, project.deadline.precision) }}</RouterLink>
         </div>
         <p v-if="task.status !== 'done' && unfinishedCount > 0" class="mt-2 text-xs text-muted-foreground">
@@ -875,16 +844,8 @@ function deleteGotoWork(r) {
     <ConfirmDialog v-model="deleteActionOpen" title="删除行动" confirm-label="删除行动" @confirm="confirmDeleteAction">
       将删除行动「{{ deleteActionTarget ? deleteActionTarget.text : '' }}」。<template v-if="deleteActionTarget && currentAction && currentAction.id === deleteActionTarget.id">它是当前行动，删除后当前选择一并清空。</template>删除后可在「日程 · 恢复」撤销。
     </ConfirmDialog>
-    <ConfirmDialog v-model="deleteTaskOpen" title="删除任务" confirm-label="删除任务" :confirm-disabled="deleteBlocked" @confirm="confirmDeleteTask">
-      <p v-if="taskScopeNotice" class="mb-2 rounded bg-warning px-2 py-1 text-xs text-warning-foreground">删除范围或安排事实已变化（其它页面新增/移除了对象，或安排已执行）。请核对下方最新影响后重新确认。</p>
-      将删除任务「{{ task.title }}」<template v-if="taskActions.length">及其 {{ taskActions.length }} 个行动</template>。删除后可在「日程 · 恢复」撤销；不影响便签事实与原始资料。
-      <DeleteImpact
-        :rows="deleteFacts ? deleteFacts.rows : []"
-        empty-text="该任务没有安排，删除不影响任何安排。"
-        @goto-plan="deleteGotoPlan"
-        @goto-work="deleteGotoWork"
-      />
-    </ConfirmDialog>
+    <TaskDeleteDialog ref="deleteDialog" :task="task" :save="runSave" @deleted="afterTaskDeleted"
+      @goto-plan="deleteGotoPlan" @goto-work="deleteGotoWork" />
 
     <ConfirmDialog v-model="blockedConfirmOpen" title="任务处于受阻状态" confirm-label="确认并开始执行" @confirm="confirmBlockedBegin">
       该任务当前标记为受阻。确认要继续推进「{{ currentAction ? currentAction.text : '' }}」吗？开始不会自动改变任务的受阻标记。

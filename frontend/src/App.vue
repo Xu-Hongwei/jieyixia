@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { NotebookPen, PanelsTopLeft, CalendarDays, Database, Library, ListChecks } from 'lucide-vue-next'
 import Alert from '@/components/ui/Alert.vue'
@@ -7,7 +7,7 @@ import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
 import { routeLoadError, routePending, warmOptionalPages } from '@/app/router'
 import { requestWorkLeave } from '@/composables/workLeave'
-import WorkspaceSwitcher from '@/components/domain/WorkspaceSwitcher.vue'
+import DemoWalkthrough from '@/components/assistant/DemoWalkthrough.vue'
 import QwenConnection from '@/components/domain/QwenConnection.vue'
 import QuickPlanEntry from '@/components/assistant/QuickPlanEntry.vue'
 import { disconnectQwen, qwenConnected } from '@/services/api/qwenConnection'
@@ -23,6 +23,39 @@ const navigation = [
   { to: '/collect', section: 'library', label: '资料', icon: Library },
   { to: '/assistant', section: 'assistant', label: '助手', icon: NotebookPen },
 ]
+const tutorialKey = 'jxl-competition-tutorial-v1'
+const tutorialStep = ref(null)
+const quickEntry = ref(null)
+provide('openQuickPlan', () => quickEntry.value?.open())
+let rememberProgress = false
+function saveTutorial(value) {
+  try { localStorage.setItem(tutorialKey, value) } catch { /* session only */ }
+}
+function setStep(step) {
+  tutorialStep.value = step
+  if (rememberProgress) saveTutorial(String(step))
+}
+function endTutorial() {
+  tutorialStep.value = null
+  saveTutorial('done')
+  rememberProgress = false
+}
+async function startPlanning() {
+  endTutorial()
+  if (route.path !== '/today' && await router.push('/today')) return
+  await nextTick()
+  quickEntry.value?.open()
+}
+watch(() => store.ready, ready => {
+  if (!ready) return
+  let saved = null
+  try { saved = localStorage.getItem(tutorialKey) } catch { /* session only */ }
+  const resume = ['0', '1', '2'].includes(saved)
+  if (resume || (!saved && store.firstVisit)) {
+    rememberProgress = true
+    setStep(resume ? Number(saved) : 0)
+  }
+}, { once: true })
 onMounted(() => store.init())
 watch(qwenConnected, connected => { if (connected && store.aiDown) void store.refreshHealth() })
 let warmTimer
@@ -84,9 +117,6 @@ watch(() => store.workspaceId, () => {
         <span class="brand-mark"><PanelsTopLeft aria-hidden="true" /></span>
         <strong class="brand-name">截下来</strong>
       </div>
-      <div class="rail-switcher">
-        <WorkspaceSwitcher />
-      </div>
       <nav class="rail-links flex-1 space-y-1.5 px-3" aria-label="主导航">
         <template v-for="item in navigation" :key="item.to">
           <RouterLink :to="item.to" custom v-slot="{ href, navigate }">
@@ -105,13 +135,12 @@ watch(() => store.workspaceId, () => {
     <div class="min-w-0 flex-1">
       <header class="app-topbar flex min-h-14 flex-wrap items-center gap-2 border-b bg-card/70 px-4 py-3 sm:px-6 lg:px-8">
         <span class="text-sm font-medium">{{ route.meta.title }}</span>
-        <QuickPlanEntry :key="store.clearRevision" />
-        <WorkspaceSwitcher compact class="md:hidden" />
+        <QuickPlanEntry ref="quickEntry" :key="store.clearRevision" />
         <RouterLink to="/data" class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent md:hidden" active-class="bg-accent font-medium text-foreground" title="数据管理">
           <Database class="size-3.5" />数据
         </RouterLink>
         <span class="flex-1" />
-        <Badge v-if="store.isDemo" variant="warning" title="当前为演示空间，数据与个人空间隔离">演示空间</Badge>
+        <Button size="sm" variant="ghost" :disabled="!store.ready" @click="setStep(0)">使用教学</Button>
         <Badge v-if="store.aiDown && !store.health" variant="destructive" title="后端不可达时本地收集、核对与任务仍可离线使用">后端不可达 · 离线可用</Badge>
         <QwenConnection v-if="!store.isDemo" />
       </header>
@@ -137,4 +166,5 @@ watch(() => store.workspaceId, () => {
     </nav>
     <WorkProtectionDialog />
   </div>
+  <DemoWalkthrough v-if="tutorialStep !== null" :step="tutorialStep" @step="setStep" @close="endTutorial" @finish="startPlanning" />
 </template>

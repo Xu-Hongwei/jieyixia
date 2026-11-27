@@ -1308,6 +1308,7 @@ class PlannedCancellation(ContractModel):
 class PreparedWriteSet(ContractModel):
     """完整准备写集。M3 增加受限取消分支；tasks_update/字段确认写入仍由前端领域层拒绝。"""
 
+    project_title: str | None = PydField(default=None, min_length=1, max_length=80)
     source_field_confirmations: list[SourceFieldConfirmation] = PydField(default_factory=list, max_length=200)
     tasks_create: list[PreparedTaskCreate] = PydField(default_factory=list, max_length=20)
     tasks_update: list[PreparedTaskUpdate] = PydField(default_factory=list, max_length=20)
@@ -1361,6 +1362,12 @@ class ApplicationEnvelope(ContractModel):
         formal = [e.formal_id for e in self.id_map]
         if len(set(formal)) != len(formal):
             raise ValueError("id_map formal_id 重复")
+        if self.write_set.project_title is not None:
+            tasks = self.write_set.tasks_create
+            if self.mode != "create" or not tasks or any(t.matter_id != self.application_id for t in tasks):
+                raise ValueError("新项目须包含本次新建的任务，且使用同一项目归属")
+            if self.application_id in formal or not self.write_set.project_title.strip():
+                raise ValueError("新项目标识或名称无效")
         if self.mode == "create":
             if self.replan_scope is not None or self.replacement_baseline is not None:
                 raise ValueError("create 信封不得携带改排范围/替换基线")

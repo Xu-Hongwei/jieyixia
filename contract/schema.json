@@ -5769,6 +5769,20 @@
       "additionalProperties": false,
       "description": "完整准备写集。M3 增加受限取消分支；tasks_update/字段确认写入仍由前端领域层拒绝。",
       "properties": {
+        "project_title": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Project Title"
+        },
         "source_field_confirmations": {
           "items": {
             "$ref": "#/$defs/SourceFieldConfirmation"

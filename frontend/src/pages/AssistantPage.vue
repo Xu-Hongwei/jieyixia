@@ -14,7 +14,6 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import Alert from '@/components/ui/Alert.vue'
 import Badge from '@/components/ui/Badge.vue'
 import PlanInput from '@/components/assistant/PlanInput.vue'
-import DemoWalkthrough from '@/components/assistant/DemoWalkthrough.vue'
 import GenerationPanel from '@/components/assistant/GenerationPanel.vue'
 import SourceReview from '@/components/assistant/SourceReview.vue'
 import ReplanPanel from '@/components/assistant/ReplanPanel.vue'
@@ -589,7 +588,7 @@ async function openAdopt() {
   if (!canAdopt.value) return
   preparing.value = true
   try {
-    const r = await store.prepare()
+    const r = await store.prepare(suggestedProject.value ? projectName.value.trim() : undefined)
     if (r.ok && store.prepared && canAdopt.value && r.envelope.draft_id === draft.value?.id && r.envelope.draft_revision === draft.value?.revision) {
       if (isReplan.value) adoptOpen.value = true
       else await doAdopt()
@@ -604,7 +603,39 @@ async function doAdopt() {
       : requiredMissing.value.length ? '必填项为空，采用已禁用；请填写或改回原值' : '有未保存修改或预算窗口未重排，采用已禁用')
     return
   }
-  await store.adopt()
+  const id = draft.value.id
+  await finishAdoption(id, await store.adopt())
+}
+async function verifyAdoption() {
+  const id = draft.value.id
+  await finishAdoption(id, await store.resolveResult())
+}
+async function finishAdoption(id, result) {
+  if (!result?.ok || !['committed', 'already_committed', 'applied'].includes(result.outcome)
+      || result.workspace_id !== app.workspaceId || draft.value?.id !== id || !applied.value) return
+  const counts = draft.value.applied_summary?.counts
+  const project = app.matters.find(item => item.id === result.receipt?.application_id)
+  app.say('success', isReplan.value ? '后续日程已更新。' :
+    counts ? `${project ? '已创建项目「' + project.title + '」。' : '已加入日程。'}新增 ${counts.tasks_created} 个任务、${counts.plan_items_created} 条安排。` : '已加入日程。')
+  await returnToInput()
+}
+async function returnToInput() {
+  store.startNewPlan()
+  replanEntry.value = null
+  replanPick.value = ''
+  entryMode.value = 'create'
+  extraText.value = ''
+  showExtra.value = false
+  tab.value = 'edit'
+  if (route.query.return || route.query.replanTask) {
+    const query = { ...route.query }
+    delete query.return
+    delete query.replanTask
+    await router.replace({ query })
+  }
+  await nextTick()
+  workflowHeader.value?.scrollIntoView({ block: 'start' })
+  workflowHeader.value?.querySelector('h1')?.focus({ preventScroll: true })
 }
 async function saveExtra() {
   const text = extraText.value.trim()
@@ -634,6 +665,13 @@ const steps = computed(() => isReplan.value ? replanSteps : [
   { key: tab.value === 'edit' ? 'edit' : tab.value, label: applied.value ? '已加入日程' : '核对与安排' },
 ])
 const adoptionCounts = computed(() => store.active?.adoptionReadiness?.counts)
+const suggestedProject = computed(() => store.active?.adoptionReadiness?.projectTitle || '')
+const customProjectName = ref(null)
+watch(() => draft.value?.id, () => { customProjectName.value = null })
+const projectName = computed({
+  get: () => customProjectName.value ?? suggestedProject.value,
+  set: name => { customProjectName.value = name },
+})
 const stepEnabled = (key) => key === 'input' ? !draft.value : !!draft.value && (key === 'edit' || (key === 'preview' ? !!result.value : canAdopt.value || applied.value))
 watch(() => draft.value?.id, () => { tab.value = applied.value ? 'adopt' : slots.value.size ? 'preview' : 'edit' })
 watch(canAdopt, (ok) => {
@@ -661,7 +699,7 @@ async function replanFromToday() {
   await saveAndPreview()
 }
 const { discardOpen: leaveOpen, guardLeave, settle: settleLeave } = useUnsavedGuard(
-  () => !!editingGap.value || contentDirty.value || windowDirty.value || (!!draft.value && !planningInput.value && JSON.stringify(form) !== windowBaseline.value) || !!extraText.value.trim() || !!inputRef.value?.hasUnsaved || !!replanRef.value?.hasUnsaved || !!generationRef.value?.hasUnsaved,
+  () => !applied.value && (!!editingGap.value || contentDirty.value || windowDirty.value || (!!draft.value && !planningInput.value && JSON.stringify(form) !== windowBaseline.value) || !!extraText.value.trim() || !!inputRef.value?.hasUnsaved || !!replanRef.value?.hasUnsaved || !!generationRef.value?.hasUnsaved),
   () => workflowBusy.value || store.gen?.phase === 'save_failed' || draft.value?.status === 'applying',
   () => { editingGap.value = null; initContent(); initWindow(); extraText.value = ''; inputRef.value?.discard(); replanRef.value?.discard(); generationRef.value?.discard() },
 )
@@ -676,7 +714,6 @@ onBeforeRouteUpdate(async (to, from) => {
 async function closeDraft() { if (await guardLeave()) store.close() }
 async function chooseMode(mode) { if (entryMode.value !== mode && await guardLeave()) entryMode.value = mode }
 async function openSaved(id) { if (await guardLeave()) await store.open(id) }
-async function openWalkthrough() { if (await guardLeave()) await app.switchWorkspace('demo') }
 
 // 仅对本次成功生成的新建议自动预览；恢复旧草案沿用它原有的核对状态。
 let attemptedGeneration = null
@@ -726,8 +763,6 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
 </script>
 
 <template>
-  <DemoWalkthrough v-if="app.isDemo" />
-  <template v-else>
   <section v-if="materialHandoff" class="mb-4 space-y-3 rounded-lg border bg-card p-4" aria-label="接收所选资料">
     <template v-if="materialHandoff.ok">
       <h2 class="font-semibold">从资料库选择的 {{ materialHandoff.ids.length }} 份资料</h2>
@@ -743,7 +778,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
     <header ref="workflowHeader" class="scroll-mt-20 space-y-4">
       <p v-if="draft && tab === 'preview' && !isReplan" class="flex items-center gap-2 text-sm font-medium text-primary"><span aria-hidden="true" class="w-7 border-t-2"></span>安排预览</p>
       <h1 class="workspace-title" :data-preview-heading="draft && tab === 'preview' && !isReplan ? '' : undefined" tabindex="-1">{{ draft && tab === 'preview' ? previewTitle : '规划助手' }}</h1>
-      <nav v-if="!draft || tab !== 'preview' || isReplan" aria-label="规划步骤" class="assistant-steps grid auto-cols-fr grid-flow-col border-b">
+      <nav v-if="!applied && (!draft || tab !== 'preview' || isReplan)" aria-label="规划步骤" class="assistant-steps grid auto-cols-fr grid-flow-col border-b">
         <button v-for="(step, i) in steps" :key="step.key" type="button" :disabled="!stepEnabled(step.key) || workflowBusy" :aria-current="(!draft ? step.key === 'input' : tab === step.key) ? 'step' : undefined" class="min-w-0 border-b-2 px-1 py-3 text-sm transition-colors disabled:cursor-default" :class="(!draft ? step.key === 'input' : tab === step.key) ? 'border-primary font-semibold text-primary' : 'border-transparent text-muted-foreground enabled:hover:text-foreground disabled:opacity-45'" @click="tab = step.key"><span class="block text-xs sm:inline">{{ i + 1 }}</span> {{ step.label }}</button>
       </nav>
     </header>
@@ -775,7 +810,6 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           </div>
           <p v-if="!openTasks.length" class="mt-2 text-xs text-muted-foreground">当前空间没有未完成的任务。</p>
         </div>
-        <Button variant="ghost" size="sm" @click="openWalkthrough">去演示空间看操作示例</Button>
         <details class="border-t pt-4">
           <summary class="cursor-pointer text-sm font-medium">继续已有草案（{{ store.drafts.length }}）</summary>
           <p v-if="!store.drafts.length" class="mt-2 text-sm text-muted-foreground">当前空间还没有草案。</p>
@@ -795,7 +829,8 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
 
     <template v-else>
       <div class="flex flex-wrap items-center gap-2">
-        <Button variant="ghost" size="sm" @click="closeDraft">← 返回列表</Button>
+        <Button v-if="applied" variant="ghost" size="sm" @click="returnToInput">← 提供新资料</Button>
+        <Button v-else variant="ghost" size="sm" @click="closeDraft">← 返回列表</Button>
         <h2 class="text-sm font-medium"><template v-if="tab !== 'preview'">{{ threadTitle(draft) }} · </template>第 {{ draft.revision }} 版</h2>
         <Badge v-if="isReplan" variant="outline">改排</Badge>
         <Badge :variant="statusVariant(draft.status)">{{ draft.status === 'ready' && !canAdopt ? '待核对' : STATUS_LABELS[draft.status] ?? draft.status }}</Badge>
@@ -816,9 +851,10 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           <Button size="sm" variant="secondary" @click="router.push(adoptedLinks.task)">查看任务</Button>
         </div>
       </Alert>
+      <template v-if="!applied">
       <Alert v-if="draft.status === 'result_unknown'" variant="warning">
         上次采用结果待核实（可能刷新/中断导致）。只查原意图台账，不会重复写入。
-        <Button size="sm" class="ml-2" @click="store.resolveResult()">核实结果</Button>
+        <Button size="sm" class="ml-2" @click="verifyAdoption">核实结果</Button>
       </Alert>
       <Alert v-if="draft.status === 'applying'" variant="warning">采用正在进行；编辑/确认/放弃已锁定。刷新页面将自动结算结果。</Alert>
       <Alert v-if="unsupported.length" variant="destructive">
@@ -1071,7 +1107,13 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
             </div>
           </aside>
           </div>
-          <p v-if="!isReplan && canAdopt && adoptionCounts" class="text-sm text-muted-foreground">将新增 {{ adoptionCounts.tasks_created }} 个任务、{{ adoptionCounts.plan_items_created }} 条日程安排。</p>
+          <label v-if="canAdopt && suggestedProject" class="grid max-w-md gap-1 text-sm">
+            新项目名称
+            <Input v-model="projectName" maxlength="80" required :disabled="workflowBusy" />
+          </label>
+          <p v-if="!isReplan && canAdopt && adoptionCounts" class="text-sm text-muted-foreground">
+            {{ suggestedProject ? '项目内将新增' : '将新增' }} {{ adoptionCounts.tasks_created }} 个任务、{{ adoptionCounts.plan_items_created }} 条日程安排。
+          </p>
           <div class="preview-actions flex flex-wrap justify-between gap-2 border-t py-3"><Button variant="ghost" @click="tab = 'edit'">修改任务与时间</Button><Button v-if="editable && !canAdopt" :disabled="workflowBusy" @click="goToDecision">处理待核对项</Button><Button v-else-if="isReplan" :disabled="!canAdopt" @click="tab = 'adopt'">下一步：确认加入</Button><Button v-else-if="!applied" :disabled="!canAdopt || workflowBusy" @click="openAdopt">将计划加入日程（{{ adoptionCounts?.plan_items_created ?? result?.segments?.length ?? 0 }} 项安排）</Button></div>
 
           </template>
@@ -1103,6 +1145,7 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           </div>
         </section>
       </div>
+      </template>
     </template>
 
     <ConfirmDialog v-model="adoptOpen" tone="primary" title="确认采用计划" :confirm-label="isReplan ? `确认替换 ${adoptCounts?.plan_items_cancelled ?? 0} 条旧安排，新增 ${adoptCounts?.plan_items_created ?? 0} 条安排` : '采用'" @confirm="doAdopt">
@@ -1123,7 +1166,6 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
       放弃后草案只读，可「新建草案」复制内容重来。不会删除任何已采用的正式对象。
     </ConfirmDialog>
   </div>
-  </template>
 </template>
 
 <style scoped>

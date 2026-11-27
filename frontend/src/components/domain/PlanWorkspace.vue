@@ -43,7 +43,7 @@ defineExpose({ guardLeave })
           <DialogTitle :class="editor ? 'sr-only' : 'mr-auto text-sm font-medium text-muted-foreground'">{{ editor ? '编辑工作安排' : '工作安排详情' }}</DialogTitle>
           <Button size="icon" variant="ghost" aria-label="关闭工作面板" @click="close"><X /></Button></div>
         <PlanEditor v-if="editor" :key="editor.key" ref="editorRef" :mode="editor.mode" :plan-id="editor.planId || ''" :task-id="editor.taskId || ''" :date="editor.date || ''" :lock-task="!!(editor.locked || editor.taskId)" :show-close="false" @edit="id => emit('edit', id)" @saved="payload => emit('saved', payload)" @close="emit('close')" />
-        <PlanDetail v-if="!editor && planId" :plan-id="planId" :show-close="false" @close="close" @edit="id => emit('edit', id)" @move="id => emit('move', id)" @another="id => emit('another', id)" @op-done="payload => emit('op-done', payload)" />
+        <PlanDetail v-if="!editor && planId" :key="planId" :plan-id="planId" :show-close="false" @close="close" @edit="id => emit('edit', id)" @move="id => emit('move', id)" @another="id => emit('another', id)" @op-done="payload => emit('op-done', payload)" />
       </DialogContent>
     </DialogPortal>
   </DialogRoot>

@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input.vue'
 import TaskListRows from '@/components/domain/TaskListRows.vue'
 import TaskCreateForm from '@/components/domain/TaskCreateForm.vue'
 import ProjectForm from '@/components/domain/ProjectForm.vue'
+import ProjectTaskPicker from '@/components/domain/ProjectTaskPicker.vue'
 import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
 import { useAppStore } from '@/stores/app'
 import { usePlanStore } from '@/stores/plan'
@@ -120,7 +121,7 @@ watch(() => route.query.create, async (value) => {
         <label class="min-w-40 flex-1 space-y-1 text-xs text-muted-foreground"><span>搜索</span><Input v-model="search" aria-label="搜索任务" placeholder="任务名称" /></label>
         <label class="space-y-1 text-xs text-muted-foreground"><span class="block">状态</span><select v-model="statusFilter" aria-label="状态筛选" class="h-9 rounded-md border bg-transparent px-2 text-sm text-foreground"><option value="all">全部状态</option><option value="open">未完成</option><option value="done">已完成</option></select></label>
         <label class="min-w-0 max-w-full space-y-1 text-xs text-muted-foreground">
-          <span class="block">任务归属</span>
+          <span class="block">按归属筛选</span>
           <select v-model="matterFilter" aria-label="任务归属" class="h-9 max-w-full rounded-md border bg-transparent px-2 text-sm text-foreground">
             <option value="">全部任务</option>
             <option value="ungrouped">未归入项目</option>
@@ -142,7 +143,11 @@ watch(() => route.query.create, async (value) => {
               <span v-if="group.total" class="text-muted-foreground">已完成 {{ group.done }}/{{ group.total }} 项任务</span>
             </div>
           </div>
-          <div v-if="group.project" class="flex flex-wrap gap-1"><Button size="sm" variant="ghost" @click="openProject(group.project)">编辑项目</Button><Button size="sm" variant="outline" @click="openCreate(group.id)">添加任务</Button></div>
+          <div v-if="group.project" class="flex flex-wrap gap-1">
+            <Button size="sm" variant="ghost" @click="openProject(group.project)">编辑项目</Button>
+            <Button size="sm" variant="ghost" @click="openCreate(group.id)">新建任务</Button>
+            <ProjectTaskPicker :key="app.workspaceId + group.id" :project="group.project" />
+          </div>
         </header>
         <TaskListRows :tasks="group.tasks" :now="app.nowTick" :return-to="returnTo" :past-plans="pastPlans" :in-project="!!group.project" @arrange="task => openEditor({ mode: 'create', taskId: task.id, date: beijingDateStr(new Date(app.nowTick)) })" @open-plan="openPlan" />
         <p v-if="!group.total" class="py-3 text-sm text-muted-foreground">项目内还没有任务</p>
