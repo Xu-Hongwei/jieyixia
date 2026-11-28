@@ -36,6 +36,22 @@ class ModelError(Exception):
         self.profile = profile
 
 
+class PlanOutputError(ModelError):
+    """Only server-defined diagnostics may enter the retry prompt or logs."""
+
+    def __init__(self, category: str, hint: str, path: str = "payload") -> None:
+        super().__init__("invalid_output", hint, True)
+        self.category = category
+        self.hint = hint
+        self.path = path
+        self.attempts = 1
+        self.repair_attempted = False
+        # Optional request-local instructions and data for a scoped second call.
+        # Neither is included in the public error or its diagnostic message.
+        self.repair_inputs: tuple[str, str] | None = None
+        self.review_snapshot: str = ""
+
+
 class VisionModel(Protocol):
     name: str
 

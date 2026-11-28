@@ -47,6 +47,23 @@ def test_relative_node_model_computed_marks_derived():
     assert dl.status.value == "unresolved"
 
 
+@pytest.mark.parametrize("raw,value,expected", [
+    ("11月18日 周三 14:30-15:30", "2026-11-18T14:30:00", "2026-11-18T14:30:00"),
+    ("11月18日之前", "2026-11-18T00:00:00", "2026-11-18"),
+    ("11月18日24:00", "2026-11-18T23:59:59", "2026-11-18"),
+    ("11月18日之前", "2026-11-19", None),
+    ("明年11月18日之前", "2026-11-18", None),
+    ("三天后", "2026-11-18", None),
+])
+def test_missing_reference_metadata_with_user_year(raw, value, expected):
+    response = parse(model_json(fields=[nodes_field([dict(label="活动", raw=raw, value=value,
+                             basis="inferred", role="event_start")])]), user_reference_at="2026-11-15")
+    node = synth_node(response)
+    assert node["value"] == expected
+    if expected:
+        assert node["reference_source"] == "user" and node["derived"]
+
+
 def test_same_day_capture_is_not_a_reliable_reference():
     text = model_json(fields=[nodes_field([
         {"label": "提交", "raw": "明天17:00", "value": "2026-11-18T17:00:00", "basis": "relative",

@@ -21,7 +21,7 @@ KEY_HEADER = "X-JXL-Qwen-Key"
 
 def _key(request: Request) -> str:
     value = request.headers.get(KEY_HEADER, "")
-    if not re.fullmatch(r"sk-[A-Za-z0-9_-]{8,200}", value):
+    if not re.fullmatch(r"sk-[A-Za-z0-9_-]+", value):
         raise ApiFault(401, "qwen_key_invalid", "请输入北京地域的百炼 API Key。")
     return value
 

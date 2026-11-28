@@ -600,6 +600,20 @@ class Matter(ContractModel):
         return self
 
 
+class PendingDate(ContractModel):
+    event: str = PydField(min_length=1, max_length=80)
+    offset_days: int | None = PydField(strict=True, ge=-365, le=365)
+    sets_deadline: bool = False
+
+    @model_validator(mode="after")
+    def _check(self) -> PendingDate:
+        if not self.event.strip() or self.event != self.event.strip():
+            raise ValueError("待定事件名称须去除首尾空白")
+        if self.sets_deadline and self.offset_days is None:
+            raise ValueError("只有明确相对天数才能推算截止")
+        return self
+
+
 class Task(ContractModel):
     id: str
     workspace_id: str
@@ -611,6 +625,8 @@ class Task(ContractModel):
     status: TaskStatus = TaskStatus.todo
     completion_criteria: str | None = None
     current_action_id: str | None = None
+    pending_date: PendingDate | None = None
+    pending_date_group: str | None = None
     created_at: str
     updated_at: str
     is_demo: bool = False

@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 from .._contract import AssistantProposeRequest, Intent
+from ..model.base import PlanOutputError
 from contract.assistant_models import looks_like_composed_clarification
 from contract.models import (
     LIMITS,
@@ -115,16 +116,16 @@ def check_proposal_semantics(proposal: AssistantModelProposal, ctx: dict[str, An
             if not isinstance(w.task_ref, ExistingRef) or w.task_ref.id != target:
                 raise ValueError(f"replan_task 工作项 {w.key} 必须归属目标任务 {target}")
 
-    def check_task_ref(ref: Any, label: str) -> None:
+    def check_task_ref(ref: Any, path: str) -> None:
         if isinstance(ref, DraftRef):
             if ref.key not in task_keys:
-                raise ValueError(f"{label} 引用未知 draft task key：{ref.key}")
+                raise PlanOutputError("reference", "草案任务引用必须匹配本版 task_proposals 中已声明的 key。", path)
         else:
             t = tasks.get(ref.id)
             if t is None:
-                raise ValueError(f"{label} 引用未选定既有 Task：{ref.id}")
+                raise PlanOutputError("reference", "既有任务引用必须来自本次选定任务。", path)
             if t["workspace_id"] != ws:
-                raise ValueError(f"{label} 跨空间引用 Task：{ref.id}")
+                raise PlanOutputError("reference", "任务引用必须属于当前空间。", path)
 
     def check_evidence(ev: Any, label: str) -> None:
         if isinstance(ev, SourceExcerptEvidence):
@@ -176,7 +177,7 @@ def check_proposal_semantics(proposal: AssistantModelProposal, ctx: dict[str, An
         for ev in t.evidence_refs:
             check_evidence(ev, f"task {t.key}")
 
-    for a in proposal.action_proposals:
+    for index, a in enumerate(proposal.action_proposals):
         if isinstance(a, ActionProposalReuse):
             obj = actions.get(a.target_id)
             if obj is None:
@@ -187,22 +188,23 @@ def check_proposal_semantics(proposal: AssistantModelProposal, ctx: dict[str, An
                 raise ValueError(f"action reuse 跨任务：{a.target_id} 不属于 {a.task_ref.id}")
             if obj.get("done"):
                 raise ValueError("已完成 Action 不能重新排为未完成步骤")
-        check_task_ref(a.task_ref, f"action {a.key}")
+        check_task_ref(a.task_ref, f"action_proposals.{index}.task_ref")
         for ev in a.evidence_refs:
             check_evidence(ev, f"action {a.key}")
 
     action_by_key = {a.key: a for a in proposal.action_proposals}
-    for w in proposal.work_items:
+    for index, w in enumerate(proposal.work_items):
         # 模型只建议：工作项估时一律 model 来源。标 user 等于把模型估计伪装成用户已确认值，
         # 会绕过前端「核对并保存为本次清单」的门槛，必须在输出边界拒绝。
         if w.estimate_origin is not FieldOrigin.model:
             raise ValueError(f"work item {w.key} 估时只能标 estimate_origin=model（模型不得冒用用户来源）")
-        check_task_ref(w.task_ref, f"work item {w.key}")
+        check_task_ref(w.task_ref, f"work_items.{index}.task_ref")
         ar = w.action_ref
         if isinstance(ar, DraftRef):
             a = action_by_key.get(ar.key)
             if a is None:
-                raise ValueError(f"work item {w.key} 引用未知 draft action key：{ar.key}")
+                raise PlanOutputError("reference", "行动引用必须对应本版 action_proposals 中已声明的 key。",
+                                      f"work_items.{index}.action_ref")
             if _ref_token(a.task_ref) != _ref_token(w.task_ref):
                 raise ValueError(f"work item {w.key} 与建议行动 {ar.key} 不属于同一目标")
         else:
@@ -219,14 +221,16 @@ def check_proposal_semantics(proposal: AssistantModelProposal, ctx: dict[str, An
                 raise ValueError("已完成 Action 不能重新排为未完成步骤")
         for dep in w.depends_on:
             if dep not in work_keys:
-                raise ValueError(f"work item {w.key} 依赖未知工作项：{dep}")
+                raise PlanOutputError("reference", "依赖只能填写本版 work_items 中已声明的 key。",
+                                      f"work_items.{index}.depends_on")
 
     graph = {w.key: list(w.depends_on) for w in proposal.work_items}
     state: dict[str, int] = {}
 
     def visit(k: str) -> None:
         if state.get(k) == 1:
-            raise ValueError(f"依赖环：{k}")
+            raise PlanOutputError("reference", "工作项之间存在循环依赖，请根据工作先后重新检查依赖方向。",
+                                  "work_items.depends_on")
         if state.get(k) == 2:
             return
         state[k] = 1
@@ -239,10 +243,11 @@ def check_proposal_semantics(proposal: AssistantModelProposal, ctx: dict[str, An
 
     # assumptions.related_keys 只能引用本版 work_items[].key（如 w1）；行动 key/任务 key/正式 ID/未知键
     # 在模型输出边界即拒绝（invalid_output → 预算内重试/降级），不留到前端才报 REF_MISSING。
-    for a in proposal.assumptions:
+    for index, a in enumerate(proposal.assumptions):
         for k in a.related_keys:
             if k not in work_keys:
-                raise ValueError(f"assumption {a.id} 的 related_keys 只能引用本版 work_items[].key，未知工作项：{k}")
+                raise PlanOutputError("reference", "related_keys 只能引用本版 work_items 的 key，不能填行动或任务 key。",
+                                      f"assumptions.{index}.related_keys")
 
     covered_existing = {t.target_id for t in proposal.task_proposals if isinstance(t, TaskProposalLink)}
     extra_targets = {w.task_ref.id for w in proposal.work_items if isinstance(w.task_ref, ExistingRef)} - covered_existing
@@ -250,9 +255,9 @@ def check_proposal_semantics(proposal: AssistantModelProposal, ctx: dict[str, An
     if total > LIMITS["max_targets"]["value"]:
         raise ValueError(f"本次目标合计 {total} 超过 {LIMITS['max_targets']['value']}")
 
-    for r in proposal.requirement_candidates:
+    for index, r in enumerate(proposal.requirement_candidates):
         if r.type == "task_priority":
-            check_task_ref(PriorityRequirementValue.model_validate(r.value).task_ref, f"requirement {r.key}")
+            check_task_ref(PriorityRequirementValue.model_validate(r.value).task_ref, f"requirement_candidates.{index}.value.task_ref")
         elif r.type == "splittable":
             k = SplittableRequirementValue.model_validate(r.value).work_item_key
             if k not in work_keys:

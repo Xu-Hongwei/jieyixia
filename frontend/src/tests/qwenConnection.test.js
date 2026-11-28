@@ -10,6 +10,19 @@ beforeEach(() => {
 })
 afterEach(() => { disconnectQwen(); vi.unstubAllGlobals() })
 
+it.each(['sk-a', 'sk-' + 'a'.repeat(256)])('sends the complete key for verification regardless of length', async key => {
+  vi.mocked(fetch).mockResolvedValueOnce(ok({ connected: true }))
+  expect((await connectQwen(key, new AbortController().signal)).ok).toBe(true)
+  expect(fetch).toHaveBeenCalledWith('/api/qwen/verify', expect.objectContaining({
+    headers: expect.objectContaining({ 'X-JXL-Qwen-Key': key }),
+  }))
+})
+
+it.each(['sk-', 'sk-a b', 'wrong-prefix'])('rejects malformed input before contacting the service', async key => {
+  expect((await connectQwen(key, new AbortController().signal)).ok).toBe(false)
+  expect(fetch).not.toHaveBeenCalled()
+})
+
 it('validates before enabling both model paths and stops sending on disconnect', async () => {
   expect((await requestQwen('analyze', {}, undefined)).ok).toBe(false)
   expect(fetch).not.toHaveBeenCalled()

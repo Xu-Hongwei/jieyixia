@@ -6,6 +6,7 @@ import { formatWhen, isOverdue } from '@/domains/time'
 import { PLAN_STATE_LABELS, STATUS_LABELS, label } from '@/domains/labels'
 import { taskPath } from '@/domains/workNavigation'
 import { useTaskColors } from '@/composables/useTaskProject'
+import { relativeDateLabel } from '@/domains/pendingDate'
 
 defineProps({
   inProject: Boolean,
@@ -26,7 +27,8 @@ const colors = useTaskColors()
         <div class="flex flex-wrap items-center gap-2">
         <Badge v-if="isOverdue(task, new Date(now))" variant="destructive">已逾期</Badge>
         <Badge :variant="task.status === 'done' ? 'success' : 'secondary'">{{ label(STATUS_LABELS, task.status) }}</Badge>
-        <span v-if="task.deadline?.value || !inProject" class="text-xs text-muted-foreground">{{ task.deadline?.value ? formatWhen(task.deadline.value, task.deadline.precision) : '无截止' }}</span>
+        <span v-if="task.pending_date" class="text-xs text-muted-foreground">{{ relativeDateLabel(task.pending_date) }} · 日期待定</span>
+        <span v-else-if="task.deadline?.value || !inProject" class="text-xs text-muted-foreground">{{ task.deadline?.value ? formatWhen(task.deadline.value, task.deadline.precision) : '无截止' }}</span>
         <Button v-if="task.status !== 'done'" size="sm" variant="outline" :aria-label="'安排工作：' + task.title" @click="$emit('arrange', task)">安排</Button>
         </div>
       </div>

@@ -8,6 +8,8 @@ import TaskListRows from '@/components/domain/TaskListRows.vue'
 import TaskCreateForm from '@/components/domain/TaskCreateForm.vue'
 import ProjectForm from '@/components/domain/ProjectForm.vue'
 import ProjectTaskPicker from '@/components/domain/ProjectTaskPicker.vue'
+import PendingEventDate from '@/components/domain/PendingEventDate.vue'
+import { pendingGroups } from '@/domains/pendingDate'
 import PlanWorkspace from '@/components/domain/PlanWorkspace.vue'
 import { useAppStore } from '@/stores/app'
 import { usePlanStore } from '@/stores/plan'
@@ -26,6 +28,7 @@ const returnTo = computed(() => taskListPath(filters.value))
 const classification = computed(() => plans.classify(new Date(app.nowTick)))
 const rows = computed(() => filterTaskList(app.tasks, classification.value, filters.value))
 const groups = computed(() => projectTaskGroups(app.matters, app.tasks, rows.value, app.notes, filters.value))
+const pending = computed(() => pendingGroups(app.tasks))
 const counts = computed(() => ({ all: app.tasks.length, unscheduled: classification.value.unscheduled.length, past: classification.value.pastUnfinished.length }))
 const pastPlans = computed(() => filters.value.list === 'past' ? Object.fromEntries(classification.value.pastUnfinished.map((entry) => [entry.taskId, entry.planIds.map((id) => app.docs.find((d) => d.kind === 'plan_item' && d.id === id)).filter(Boolean)])) : {})
 function setFilter(key, value) {
@@ -150,6 +153,7 @@ watch(() => route.query.create, async (value) => {
           </div>
         </header>
         <TaskListRows :tasks="group.tasks" :now="app.nowTick" :return-to="returnTo" :past-plans="pastPlans" :in-project="!!group.project" @arrange="task => openEditor({ mode: 'create', taskId: task.id, date: beijingDateStr(new Date(app.nowTick)) })" @open-plan="openPlan" />
+        <PendingEventDate v-for="event in pending.filter(e => e.tasks.some(t => group.tasks.some(visible => visible.id === t.id)))" :key="event.key" :group="event" />
         <p v-if="!group.total" class="py-3 text-sm text-muted-foreground">项目内还没有任务</p>
         <details v-if="group.notes.length" class="border-t pt-2 text-sm"><summary class="cursor-pointer">关联资料 · {{ group.notes.length }}</summary><div v-for="note in group.notes" :key="note.id" class="flex flex-wrap items-center gap-2 py-1"><RouterLink :to="'/notes/' + note.id" class="break-words underline">{{ note.title }}</RouterLink><span v-if="note.matter_role" class="text-xs text-muted-foreground">{{ label(MATTER_ROLE_LABELS, note.matter_role) }}</span></div></details>
       </article>

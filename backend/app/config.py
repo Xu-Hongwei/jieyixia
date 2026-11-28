@@ -101,6 +101,6 @@ def get_settings() -> Settings:
         max_concurrent_analyze=_nonneg_int_env("JXL_MAX_CONCURRENT_ANALYZE", 4, maximum=1024),
         max_model_calls_per_day=_nonneg_int_env("JXL_MAX_MODEL_CALLS_PER_DAY", 1000, maximum=1_000_000),
         propose_budget_s=_float_env("JXL_PROPOSE_BUDGET_S", 120.0, maximum=600.0),
-        propose_max_attempts=_positive_int_env("JXL_PROPOSE_MAX_ATTEMPTS", 2, maximum=2),
+        propose_max_attempts=_positive_int_env("JXL_PROPOSE_MAX_ATTEMPTS", 3, maximum=3),
         propose_max_body_bytes=_positive_int_env("JXL_PROPOSE_MAX_BODY_BYTES", 512 * 1024, maximum=8 * 1024 * 1024),
     )

@@ -56,6 +56,28 @@ def _fold_end_of_day(value: str) -> str:
     return match.group(1) if match else value
 
 
+def _match_reference_year(raw: str, value: str, reference: str) -> str | None:
+    """Check a missing year against a user-specified date and an unambiguous written month/day."""
+    day = value[:10]
+    if (not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) or day[:4] != reference[:4]
+            or re.search(r"\d{4}\s*(?:年|[-/]\d{1,2})|次年|明年|去年|翌年", raw)):
+        return None
+    dates = {(int(m), int(d)) for m, d in re.findall(r"(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]", raw)}
+    if dates != {(int(day[5:7]), int(day[8:10]))}:
+        return None
+    if value == day:
+        return day
+    clock = _DATETIME_SHAPE.fullmatch(value)
+    if not clock:
+        return None
+    clocks = {(int(h), int(m)) for h, m in re.findall(r"(\d{1,2})[:：](\d{2})", raw)}
+    if clocks == {(24, 0)} and value[11:19] in ("23:59:59", "24:00:00"):
+        return day
+    if (int(clock[2]), int(clock[3])) in clocks and clock[4] in (None, "00"):
+        return value
+    return day  # The date is supported, the guessed clock is not.
+
+
 def _check_calendar(value: str, key: str) -> None:
     """正则只查形状；日历/时钟/时区偏移合法性必须真解析验证。
 
@@ -152,6 +174,13 @@ def _normalize_node(node: Any, user_reference_at: str | None = None) -> dict:
     year_in_value = re.match(r"^(\d{4})-\d{2}-\d{2}", value) if isinstance(value, str) else None
     needs_ref = basis in ("relative", "inferred") or bool(year_in_value and year_in_value.group(1) not in raw)
     derived = needs_ref
+    if (needs_ref and not reliable and user_reference_at and isinstance(value, str)
+            and not any(node.get(k) for k in ("reference_at", "reference_source", "message_date"))):
+        matched = _match_reference_year(raw, value, user_reference_at)
+        if matched is not None:
+            value = matched
+            n.update(reference_at=user_reference_at, reference_source="user")
+            reliable = True
     if needs_ref and not reliable:
         value = None
     # 跨年合法（12-31 的「明天」→次年 01-01）：有可靠参照即保留，不按年份相等置空；

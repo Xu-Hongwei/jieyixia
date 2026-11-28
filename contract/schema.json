@@ -1449,6 +1449,41 @@
       "title": "Matter",
       "type": "object"
     },
+    "PendingDate": {
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Event",
+          "type": "string"
+        },
+        "offset_days": {
+          "anyOf": [
+            {
+              "maximum": 365,
+              "minimum": -365,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Offset Days"
+        },
+        "sets_deadline": {
+          "default": false,
+          "title": "Sets Deadline",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "event",
+        "offset_days"
+      ],
+      "title": "PendingDate",
+      "type": "object"
+    },
     "TaskStatus": {
       "enum": [
         "todo",
@@ -1536,6 +1571,29 @@
           ],
           "default": null,
           "title": "Current Action Id"
+        },
+        "pending_date": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PendingDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pending_date_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pending Date Group"
         },
         "created_at": {
           "title": "Created At",
@@ -2613,6 +2671,17 @@
     "TaskProposalCreate": {
       "additionalProperties": false,
       "properties": {
+        "pending_date": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PendingDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "op": {
           "const": "create",
           "default": "create",
@@ -5511,6 +5580,17 @@
     "PreparedTaskCreate": {
       "additionalProperties": false,
       "properties": {
+        "pending_date": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PendingDate"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "formal_id": {
           "maxLength": 64,
           "minLength": 1,

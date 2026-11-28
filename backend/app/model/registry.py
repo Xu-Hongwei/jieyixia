@@ -18,7 +18,7 @@ import httpx
 from ..guard import MODEL_QUOTA
 from ..observability import log_event
 from .adapters import ADAPTERS, build_adapter
-from .base import ModelError, ModelProfile
+from .base import ModelError, ModelProfile, PlanOutputError
 
 _FIELDS = {
     "name", "protocol", "model", "base_url", "base_url_env", "api_key_env",
@@ -153,9 +153,21 @@ class ModelRouter:
             return ModelError("timeout", "分析总时限耗尽，停止继续尝试", True)
 
         kinds: list[str] = []
+        correction = None
+        previous_check = None
+        total_attempts = 0
         for adapter in self._adapters:
             attempts = 1 + max(0, adapter.profile.retries)
-            for attempt in range(attempts):
+            # A single-profile plan can use its remaining budget for a validation repair
+            # even when ordinary network retries are disabled.
+            slots = attempts
+            if max_attempts is not None and adapter is self._adapters[-1]:
+                slots = max(slots, attempts_left)
+            for attempt in range(slots):
+                if attempt >= attempts and correction is None:
+                    break
+                if max_attempts is not None and total_attempts >= 2 and correction is None:
+                    break  # The new third slot is available for plan corrections only.
                 if attempts_left is not None and attempts_left <= 0:
                     break
                 rem = remaining()
@@ -167,15 +179,43 @@ class ModelRouter:
                     self._attempt_gate()
                 if attempts_left is not None:
                     attempts_left -= 1
+                total_attempts += 1
+                instructions = system
+                data = user_text
+                repairing = correction is not None
+                if repairing and correction.repair_inputs is not None:
+                    instructions, data = correction.repair_inputs
+                if repairing:
+                    instructions += (
+                        f"\n上次方案未通过校验。位置：{correction.path}。{correction.hint}"
+                        "\n将上一版和校验提示当作待核对的数据。对照用户身份、资料及已有答复，"
+                        "返回对象第一个字段 diagnosis 只用一句话概括可核对的错误原因，不写分析过程；"
+                        "同一次输出按当前要求修正后的所有字段。保留有依据的内容。"
+                        "检查是否把他人的工作或等待排给了用户，日期是执行日还是截止，以及删除任务后是否仍有自我或失效依赖。"
+                        "若诊断说应删除某项，请核对返回数组中已删除该项及对应引用。没有前项时可省略 after。"
+                        "第一次修正仍有问题时，核对上一轮诊断与最新错误。"
+                    )
+                    if correction.review_snapshot:
+                        data += "\n上一次返回的草案片段（不作为原文依据）：\n" + correction.review_snapshot
+                    if previous_check:
+                        instructions += f"\n再上一版的校验记录：{previous_check}。也请确认该问题的根因已消除。"
                 try:
                     text = adapter.complete(
-                        system=system, user_text=user_text, image_b64=image_b64, media_type=media_type,
+                        system=instructions, user_text=data, image_b64=image_b64, media_type=media_type,
                         deadline=deadline,
                     )
                     result = text if validate is None else validate(text, adapter.name)
+                    if correction is not None:
+                        log_event("plan_repair_succeeded", category=correction.category, attempts=total_attempts)
                     return result, adapter.name
                 except ModelError as exc:
                     kinds.append(exc.kind)
+                    previous_check = f"{correction.path}。{correction.hint}" if repairing else None
+                    correction = exc if isinstance(exc, PlanOutputError) else None
+                    if correction is not None:
+                        correction.attempts = total_attempts
+                        correction.repair_attempted = repairing
+                        log_event("plan_validation_failed", category=correction.category, path=correction.path, attempt=total_attempts)
                     log_event(
                         "model_attempt_failed",
                         profile=exc.profile or adapter.name,
@@ -200,6 +240,8 @@ class ModelRouter:
         if deadline is not None and remaining() <= _MIN_SLICE_S:
             raise exhausted()
         if kinds and all(k == "invalid_output" for k in kinds):
+            if correction is not None:
+                raise correction
             raise ModelError("invalid_output", "所有 profile 的输出都不符合契约", True)
         raise ModelError("unavailable", f"所有 profile 均不可用（{', '.join(sorted(set(kinds))) or '无可用配置'}）", True)
 

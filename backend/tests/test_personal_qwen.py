@@ -8,10 +8,11 @@ from app import qwen
 from app.errors import ApiFault
 
 
-def test_verify_requires_valid_key_and_uses_fixed_catalog(client):
-    key = "sk-unit-test-one"
+@pytest.mark.parametrize("key", ["sk-a", "sk-unit-test-one", "sk-" + "a" * 256])
+def test_verify_requires_valid_key_and_uses_fixed_catalog(client, key):
     with patch("app.qwen.httpx.Client") as factory:
         assert client.post("/api/qwen/verify").status_code == 401
+        assert client.post("/api/qwen/verify", headers={qwen.KEY_HEADER: "sk-"}).status_code == 401
         factory.assert_not_called()
         get = factory.return_value.__enter__.return_value.get
         get.return_value = httpx.Response(200, json={"success": True}, request=httpx.Request("GET", qwen.HOST))

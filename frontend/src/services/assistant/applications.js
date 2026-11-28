@@ -282,6 +282,7 @@ export function createAssistantApplicationService(deps = {}) {
               kind: 'task', id: t.formal_id, workspace_id: ws, title: t.title, description: t.description,
               matter_id: t.matter_id, note_ids: t.note_ids, deadline: t.deadline, status: t.status,
               completion_criteria: t.completion_criteria, current_action_id: null,
+              ...(t.pending_date ? { pending_date: t.pending_date, pending_date_group: frozen.application_id } : {}),
               created_at: t.created_at, updated_at: t.updated_at,
             })
           }

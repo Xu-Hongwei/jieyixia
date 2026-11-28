@@ -40,12 +40,14 @@ from ._contract import (
     Fixture,
     LIMITS,
 )
-from .assistant.core import build_propose_user_text, parse_propose_output
-from .assistant.prompt import render_propose_system_prompt
+from .assistant.core import build_propose_user_text, parse_propose_output, propose_response, review_snapshot
+from .assistant.new_plan import ExternalStepSplitNeeded, source_time_nodes, uses_task_list
+from .assistant.review_actions import apply_external_step_repair, external_step_repair_inputs, role_question
+from .assistant.prompt import render_propose_system_prompt, render_task_list_prompt
 from .config import get_settings
 from .errors import ApiFault
-from .model.base import ModelError
-from .model.core import SYSTEM_PROMPT, build_user_text, parse_model_output
+from .model.base import ModelError, PlanOutputError
+from .model.core import SYSTEM_PROMPT, _extract_json, build_user_text, parse_model_output
 from .model.registry import ModelRouter, build_router
 from .observability import log_event
 from .validation import inspect_image, strip_data_url
@@ -94,7 +96,7 @@ def _to_fault(exc: ModelError) -> ApiFault:
     # 只把 kind 落日志，厂家返回的详情一律不外泄、也不进日志（可能含用户内容）
     log_event("model_error", kind=exc.kind, profile=exc.profile, retryable=exc.retryable)
     if exc.kind == "invalid_output":
-        return ApiFault(422, "model_output_invalid", "模型输出不符合契约，原图已在本地保留，可重试或手动整理", True)
+        return ApiFault(422, "model_output_invalid", "未能从资料中提取有效字段，原资料已保留，可以重试或手动整理", True)
     return ApiFault(503, "model_unavailable", "模型暂不可用，请改用仅保存；原图已在本地保留", True)
 
 
@@ -197,8 +199,19 @@ class ProposeProvider(Protocol):
 
 def _propose_to_fault(exc: ModelError) -> ApiFault:
     log_event("propose_model_error", kind=exc.kind, profile=exc.profile, retryable=exc.retryable)
+    if isinstance(exc, PlanOutputError):
+        reason = {
+            "json": "未能读出完整的方案",
+            "size": "生成的方案过长",
+            "shape": "方案字段未通过检查",
+            "reference": "方案中的任务或工作项关联有误",
+            "semantics": "方案的归属或依据未通过核对",
+        }[exc.category]
+        retry = "，自动修正后仍未通过" if exc.repair_attempted else ""
+        return ApiFault(502, "model_output_invalid", f"{reason}{retry}。输入已保留，可以重新生成。",
+                        True, {"stage": "propose", "category": exc.category, "path": exc.path, "attempts": exc.attempts})
     if exc.kind == "invalid_output":
-        return ApiFault(502, "model_output_invalid", "模型输出不符合契约（已按预算重试），输入已保留，可重新生成", True)
+        return ApiFault(502, "model_output_invalid", "未能读取规划服务的响应，输入已保留，可以重新生成。", True)
     if exc.kind == "timeout":
         return ApiFault(504, "propose_timeout", "生成总时限耗尽，输入已保留，可重新生成", True)
     if exc.kind == "quota_exhausted":
@@ -353,13 +366,47 @@ class ModelProposeProvider:
         except ModelError as exc:
             raise _propose_to_fault(exc) from exc
         settings = get_settings()
+        compact = uses_task_list(request)
+        if compact and (question := role_question(request)):
+            log_event("plan_review", action="ask_user", reason="role_specific_plan")
+            return propose_response(request, question)
+        scoped_issue = None
+        reviewing = False
+        max_bytes = LIMITS["max_model_output_bytes"]["value"]
 
         def validate(text: str, profile_name: str) -> AssistantProposeResponse:
-            return parse_propose_output(text, request, max_output_bytes=LIMITS["max_model_output_bytes"]["value"])
+            nonlocal scoped_issue, reviewing
+            raw = {}
+            if isinstance(text, str) and len(text.encode("utf8")) <= max_bytes:
+                try:
+                    raw = _extract_json(text)
+                except ModelError:
+                    pass  # The normal validator supplies the public diagnostic.
+            plan_text = text
+            if reviewing and isinstance(raw.get("diagnosis"), str):
+                plan_text = json.dumps({k: v for k, v in raw.items() if k != "diagnosis"}, ensure_ascii=False)
+            try:
+                if scoped_issue is not None:
+                    return apply_external_step_repair(plan_text, scoped_issue, request, max_bytes)
+                return parse_propose_output(plan_text, request, max_output_bytes=max_bytes)
+            except PlanOutputError as issue:
+                reviewing = True
+                if scoped_issue is not None:
+                    issue.repair_inputs = scoped_issue.repair_inputs
+                elif isinstance(issue, ExternalStepSplitNeeded):
+                    issue.repair_inputs = external_step_repair_inputs(request, issue)
+                    if issue.repair_inputs:
+                        scoped_issue = issue
+                        log_event("plan_review", action="source_lookup", reason="external_step_split")
+                issue.review_snapshot = review_snapshot(raw, scoped=scoped_issue is not None)
+                raise
 
         try:
             response, profile_name = router.complete(
-                system=render_propose_system_prompt(request.intent.value),
+                system=(render_task_list_prompt(with_time_nodes=bool(source_time_nodes(request.selected_sources)),
+                                                text_only=bool(request.selected_sources) and all(
+                                                    s.kind == "text" and not s.note_candidates for s in request.selected_sources))
+                        if compact else render_propose_system_prompt(request.intent.value)),
                 user_text=build_propose_user_text(request),
                 image_b64=None,
                 media_type="image/png",

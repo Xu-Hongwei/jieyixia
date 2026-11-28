@@ -45,7 +45,7 @@ async function submit() {
         <Button v-if="qwenConnected" variant="outline" class="mt-5" @click="disconnectQwen">断开连接</Button>
         <form v-else class="mt-4 space-y-3" @submit.prevent="submit">
           <label class="block text-sm font-medium">百炼 API Key · 北京地域
-            <input v-model="input" type="password" required maxlength="203" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="sk-…" class="mt-1 block w-full rounded-md border bg-background px-3 py-2" />
+            <input v-model="input" type="password" required autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="sk-…" class="mt-1 block w-full rounded-md border bg-background px-3 py-2" />
           </label>
           <p v-if="error" role="alert" class="text-sm text-destructive">{{ error }}</p>
           <div class="flex items-center justify-between gap-3">

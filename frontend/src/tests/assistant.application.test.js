@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest'
 import { mkWork, mkInput, mkDays, EV_SRC, START } from './planning.helpers.js'
 import {
-  checkAdoptionSupported, buildIntentContent, buildAdoptionPlan, previewCounts,
+  checkAdoptionSupported, buildIntentContent, buildAdoptionPlan, deadlineSource, previewCounts,
   verifyReceiptForEnvelope, appliedSummaryFromReceipt, verifyEnvelopeAgainstDraft,
 } from '../domains/assistant/application.js'
 import { composeClarificationMessage } from '../services/assistant/requests.js'
@@ -245,6 +245,17 @@ describe('排除范围（R4）：被排除工作不产生写入', () => {
 })
 
 describe('截止出处（R6 / 复验 F1）：确认≠改值，模型建议须定位已确认且匹配的具体字段', () => {
+  it('只引用已确认节点列表中的有效提交截止', () => {
+    const task = { deadline_candidates: [{ ...candidate, evidence_refs: [{ kind: 'note_field', note_id: 'n-1', field_key: 'time_nodes' }] }] }
+    const node = { role: 'submission_deadline', basis: 'explicit', ...DL }
+    const field = { key: 'time_nodes', status: 'confirmed', value: [node] }
+    const source = f => deadlineSource(task, DL.value, DL.precision, [{ id: 'n-1', fields: [f] }], [])
+    expect(source(field).from_note_id).toBe('n-1')
+    for (const invalid of [{ ...field, status: 'candidate' }, { ...field, value: [{ ...node, role: 'event_start' }] },
+      { ...field, value: [{ ...node, basis: 'superseded' }] }]) {
+      expect(() => source(invalid)).toThrowError(expect.objectContaining({ code: 'DEADLINE_PROVENANCE_REQUIRED' }))
+    }
+  })
   it('模型候选无便签可追溯 → DEADLINE_PROVENANCE_REQUIRED，不自动转 manual', () => {
     expect(() => buildAdoptionPlan(adoptDraft(), { ...deps(), notes: [] }))
       .toThrowError(expect.objectContaining({ code: 'DEADLINE_PROVENANCE_REQUIRED' }))

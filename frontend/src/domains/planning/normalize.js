@@ -194,7 +194,15 @@ function checkProposalStructure(p) {
     checkKey(t.key, 'task')
     checkEnum(t.op, ['create', 'link', 'update'], 'task op')
     if (t.op === 'create') {
-      allowKeys(t, ['op', 'key', 'title', 'description', 'completion_criteria', 'deadline_candidates', 'evidence_refs'], 'TaskProposalCreate')
+      allowKeys(t, ['op', 'key', 'title', 'description', 'completion_criteria', 'deadline_candidates', 'evidence_refs', 'pending_date'], 'TaskProposalCreate')
+      if (t.pending_date != null) {
+        const timing = t.pending_date
+        allowKeys(timing, ['event', 'offset_days', 'sets_deadline'], 'pending_date')
+        checkText(timing.event, 1, 80, '待公布的活动名称')
+        if (timing.offset_days !== null) checkInt(timing.offset_days, -365, 365, '相对活动的天数')
+        if (timing.offset_days === null && timing.sets_deadline) fail('缺少相对天数，无法确定截止')
+        if (!timing.event.trim() || (timing.sets_deadline !== undefined && typeof timing.sets_deadline !== 'boolean')) fail('待公布日期格式无效')
+      }
       checkText(t.title, 1, 200, 'task.title')
     } else if (t.op === 'link') {
       allowKeys(t, ['op', 'key', 'target_id', 'evidence_refs'], 'TaskProposalLink')
@@ -597,11 +605,13 @@ export function normalizePlanningContext(snapshot, proposal, requirements = [], 
     })
   }
 
-  const workItems = p.work_items.map((w) => {
+  const pendingWork = new Set(p.work_items.filter(w => w.task_ref.kind === 'draft' && taskByKey.get(w.task_ref.key)?.pending_date).map(w => w.key))
+  const workItems = p.work_items.filter(w => !pendingWork.has(w.key)).map((w) => {
     const deps = [...(w.depends_on ?? [])]
     for (const o of overrides.ordering) {
       if (o.after_key === w.key && !deps.includes(o.before_key)) deps.push(o.before_key)
     }
+    if (deps.some(key => pendingWork.has(key))) fail('这项工作依赖日期待公布的任务，请先核对它的日期关系')
     return {
       key: w.key,
       task_ref: w.task_ref,

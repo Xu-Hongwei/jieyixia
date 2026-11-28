@@ -1,4 +1,5 @@
 <script setup>
+import { relativeDateLabel } from '@/domains/pendingDate'
 import { deadlineSource } from '@/domains/assistant/application'
 import PlanAgenda from '@/components/assistant/PlanAgenda.vue'
 import ManualGapRow from '@/components/assistant/ManualGapRow.vue'
@@ -103,6 +104,7 @@ function cancelReplanEntry() {
 const today = computed(() => beijingToday(new Date(app.nowTick)))
 const draft = computed(() => store.activeDraft)
 const proposal = computed(() => draft.value?.proposal ?? null)
+const pendingDates = computed(() => (proposal.value?.task_proposals ?? []).filter(t => t.pending_date))
 const gapRows = computed(() => draft.value?.planning_result?.unscheduled ?? [])
 const slots = computed(() => manualSlots(draft.value))
 const editingGap = ref(null)
@@ -1030,6 +1032,11 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
                   <span v-else-if="hasConf('overbook', day.date)" class="text-xs text-muted-foreground">已核对</span>
                 </template>
               </PlanAgenda>
+              <section v-if="pendingDates.length" class="space-y-1 border-t py-3 text-sm">
+                <h4 class="font-semibold">日期待公布</h4>
+                <p v-for="task in pendingDates" :key="task.key">{{ task.title }} · {{ relativeDateLabel(task.pending_date) }}</p>
+                <p class="text-xs text-muted-foreground">采用后，在任务页填写活动日期即可安排。</p>
+              </section>
               <div v-for="group in gapGroups" :key="group.label" class="border-t py-3">
                 <h4 class="text-base font-semibold">{{ group.label }} <span class="text-sm text-muted-foreground">{{ group.rows.length }} 项</span></h4>
                 <ManualGapRow v-for="u in group.rows" :key="u.work_item_key" :save-choice="saveGapChoice" :gap="u" :data-pending-gap="!hasConf('gap', u.work_item_key)" :title="workTitle(u.work_item_key)"
@@ -1114,7 +1121,15 @@ const outcome = computed(() => store.adoptResult?.outcome ?? null)
           <p v-if="!isReplan && canAdopt && adoptionCounts" class="text-sm text-muted-foreground">
             {{ suggestedProject ? '项目内将新增' : '将新增' }} {{ adoptionCounts.tasks_created }} 个任务、{{ adoptionCounts.plan_items_created }} 条日程安排。
           </p>
-          <div class="preview-actions flex flex-wrap justify-between gap-2 border-t py-3"><Button variant="ghost" @click="tab = 'edit'">修改任务与时间</Button><Button v-if="editable && !canAdopt" :disabled="workflowBusy" @click="goToDecision">处理待核对项</Button><Button v-else-if="isReplan" :disabled="!canAdopt" @click="tab = 'adopt'">下一步：确认加入</Button><Button v-else-if="!applied" :disabled="!canAdopt || workflowBusy" @click="openAdopt">将计划加入日程（{{ adoptionCounts?.plan_items_created ?? result?.segments?.length ?? 0 }} 项安排）</Button></div>
+          <div class="preview-actions flex flex-wrap justify-between gap-2 border-t py-3">
+            <Button variant="ghost" @click="tab = 'edit'">修改任务与时间</Button>
+            <Button v-if="editable && !canAdopt" :disabled="workflowBusy" @click="goToDecision">处理待核对项</Button>
+            <Button v-else-if="isReplan" :disabled="!canAdopt" @click="tab = 'adopt'">下一步：确认加入</Button>
+            <Button v-else-if="!applied" :disabled="!canAdopt || workflowBusy" @click="openAdopt">
+              <template v-if="pendingDates.length && !result?.segments?.length">采用计划并保留待定任务</template>
+              <template v-else>将计划加入日程（{{ adoptionCounts?.plan_items_created ?? result?.segments?.length ?? 0 }} 项安排）</template>
+            </Button>
+          </div>
 
           </template>
         </section>

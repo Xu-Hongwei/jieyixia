@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
+import { resolveEventPlan } from '@/domains/pendingDate'
 import { allDocs, allSources, allWorkspaces, configureWorkspace, getSource, getWorkspace, putDoc, putSource, putWorkspace, snapshot, transformDocsAtomic, transformFocusAtomic } from '@/services/storage/db'
 import { analyze, blobToBase64, healthz } from '@/services/api/client'
 import { canConfirm, failedNote, manualTask, standaloneTask, mergeReanalysis, taskFromNote } from '@/domains/note'
@@ -1160,6 +1161,11 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
+  async function resolvePendingDate(groupKey, date, preview) {
+    const result = await transformDocsAtomic(latest => resolveEventPlan(latest, groupKey, date, preview, now(), () => crypto.randomUUID()))
+    if (applyChanges(result)) say('success', '已更新关联任务和日程')
+  }
+
   async function setMatter(doc, matterId, role) {
     try {
       const result = await transformDocsAtomic((latest) => setMatterPlan(latest, doc.id, matterId || null, role, now()))
@@ -1194,7 +1200,7 @@ export const useAppStore = defineStore('app', () => {
     confirmField, saveEdit, saveNodeEdit, reviewNote, createTask, createTaskManual, finishTask, deleteNote,
     undoDelete, deleteTask, renameTask, createStandaloneTask, saveProject, createMatter, renameMatter, deleteMatter, setMatter, addIndependentTasks, setNoteRole,
     actionsOf, currentActionOf, unfinishedCountOf, addAction, editAction, setActionDone, deleteAction, setCurrentAction,
-    reopenTask, editTask, setTaskDeadline,
+    reopenTask, editTask, setTaskDeadline, resolvePendingDate,
     startClock, stopClock,
   }
 })

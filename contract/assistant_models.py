@@ -21,6 +21,7 @@ from pydantic import Field as PydField, model_validator
 # models.py 在文件末尾导入本文件；彼时共享基类/枚举/正则/时间校验已定义，循环安全。
 if __package__:
     from .models import (
+        PendingDate,
         ContractModel,
         Deadline,
         FieldOrigin,
@@ -34,6 +35,7 @@ if __package__:
     )
 else:
     from models import (
+        PendingDate,
         ContractModel,
         Deadline,
         FieldOrigin,
@@ -258,6 +260,7 @@ class DeadlineCandidate(ContractModel):
 
 
 class TaskProposalCreate(ContractModel):
+    pending_date: PendingDate | None = None
     op: Literal["create"] = "create"
     key: str
     title: str = PydField(min_length=1, max_length=200)
@@ -1216,6 +1219,7 @@ class SourceFieldConfirmation(ContractModel):
 
 
 class PreparedTaskCreate(ContractModel):
+    pending_date: PendingDate | None = None
     formal_id: str = PydField(min_length=1, max_length=64)
     workspace_id: str = PydField(min_length=1, max_length=64)
     title: str = PydField(min_length=1, max_length=200)

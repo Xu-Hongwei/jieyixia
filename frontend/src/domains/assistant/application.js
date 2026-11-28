@@ -69,6 +69,10 @@ export function buildIntentContent(draft) {
 const fieldPrecision = (f) => f.precision || (String(f.value).includes('T') ? 'datetime' : 'date')
 const confirmedMatchingField = (note, fieldKey, value, precision) => {
   const f = note && (note.fields ?? []).find((x) => x.key === fieldKey)
+  if (fieldKey === 'time_nodes' && f?.status === 'confirmed' && Array.isArray(f.value)) {
+    return f.value.some(n => n?.role === 'submission_deadline' && n.basis !== 'superseded'
+      && n.value === value && n.precision === precision) ? f : null
+  }
   return f && f.status === 'confirmed' && f.value === value && fieldPrecision(f) === precision ? f : null
 }
 
@@ -256,6 +260,7 @@ export function buildAdoptionPlan(draft, { workspaceId, now, newId, orderBase = 
         formal_id: formalOf(tp.key, 'task'),
         workspace_id: workspaceId,
         title: tp.title,
+        ...(tp.pending_date ? { pending_date: tp.pending_date } : {}),
         description: tp.description ?? '',
         completion_criteria: tp.completion_criteria ?? null,
         deadline,

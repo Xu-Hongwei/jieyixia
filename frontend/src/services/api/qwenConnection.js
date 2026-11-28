@@ -35,7 +35,7 @@ export async function connectQwen(input, signal) {
   const generation = ++attempt
   const candidate = input.trim()
   if (!globalThis.isSecureContext) return failure('https_required', '请通过 HTTPS 或本机地址连接千问。')
-  if (!/^sk-[A-Za-z0-9_-]{8,200}$/.test(candidate)) return failure('qwen_key_invalid', '请输入完整的百炼 API Key。')
+  if (!/^sk-[A-Za-z0-9_-]+$/.test(candidate)) return failure('qwen_key_invalid', '请输入完整的百炼 API Key。')
   const result = await post('verify', candidate, undefined, signal)
   if (signal.aborted || generation !== attempt) return failure('cancelled', '连接已取消。')
   if (!result.ok) return result

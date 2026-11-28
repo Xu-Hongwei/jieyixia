@@ -199,6 +199,12 @@ export interface Matter {
   is_demo?: boolean;
 }
 
+export interface PendingDate {
+  event: string;
+  offset_days: number | null;
+  sets_deadline?: boolean;
+}
+
 export type TaskStatus = "todo" | "doing" | "blocked" | "done";
 
 export interface Task {
@@ -212,6 +218,8 @@ export interface Task {
   status?: TaskStatus;
   completion_criteria?: string | null;
   current_action_id?: string | null;
+  pending_date?: PendingDate | null;
+  pending_date_group?: string | null;
   created_at: string;
   updated_at: string;
   is_demo?: boolean;
@@ -408,6 +416,7 @@ export interface DeadlineCandidate {
 }
 
 export interface TaskProposalCreate {
+  pending_date?: PendingDate | null;
   op?: "create";
   key: string;
   title: string;
@@ -867,6 +876,7 @@ export interface SourceFieldConfirmation {
 }
 
 export interface PreparedTaskCreate {
+  pending_date?: PendingDate | null;
   formal_id: string;
   workspace_id: string;
   title: string;
